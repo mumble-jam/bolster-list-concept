@@ -10,9 +10,9 @@
 <link rel="apple-touch-icon" href="shared/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=ffa49f16">
-<link rel="stylesheet" href="shared/shell.css?v=ffa49f16">
-<link rel="stylesheet" href="data-list.css?v=ffa49f16">
+<link rel="stylesheet" href="system/bolster.css?v=3afcad8c">
+<link rel="stylesheet" href="shared/shell.css?v=3afcad8c">
+<link rel="stylesheet" href="data-list.css?v=3afcad8c">
 <script>try { document.documentElement.dataset.canvas = localStorage.getItem("bolster-concepts:canvas") === "cool" ? "cool" : "paper"; } catch { document.documentElement.dataset.canvas = "paper"; }</script>
 </head>
 <body>
@@ -101,12 +101,13 @@
         <li><b>Add filter, then chips.</b> Pick a field, then a value; it becomes a chip with ×. A field left without a value disappears again. Status isn't a chip when a card already shows it.</li>
         <li><b>Cards sit flat.</b> No shadow: white cards with warm edges on a warm Paper page, a warm table header and filled chips. A hovered card only darkens its edge. Warm goes through the whole page: row rules match the card edge, the header rule is a step darker, rows hover in the paper tone, and every tint (ghost and secondary button hovers, the search field, skeletons, neutral and draft badges, disabled fills) comes from cement. In dark, cards and dialogs lose their pink cast too. Text, inputs and the dark top bar keep Bolster's own neutral, and selection stays blue.</li>
         <li><b>A grid on the page, lit by the pointer (trying out, on by default).</b> A faint grid, its cells half as tall as the page header and starting from the top-right corner so a line runs along the header's rule, sits on the page between the cards and brightens in a soft area around the pointer, trailing it a little; in dark, a soft blue-violet light sits under it. It's decoration only: behind the content, hidden from screen readers, never on the cards, and still on phones as a faint grid everywhere. Turn it off, or tune it, in Concept controls.</li>
-        <li><b>Columns keep their width.</b> Each column has a set width that fits its longest value; the first column takes the rest. Sorting or loading more never moves a column, and every header keeps room for the sort arrow (it shows faintly on hover). A column never gets narrower than that: when they don't all fit, the table scrolls sideways in its card, with the checkbox and name pinned on the left, a rule at their edge once you've scrolled, and a fade on the right while there's more. The column header still follows the page, under the bars.</li>
+        <li><b>Explanations use the screen’s own words (D27).</b> Info notes name cards, statuses and columns exactly as the screen does, and show each status with its mark, as on its card. A term the screen doesn’t show (won, decided, invoiced) is defined once in the screen’s labels, then used the same way in the card’s own figures.</li>
+        <li><b>Columns keep their width.</b> Each column is measured, not guessed: as wide as the widest value it can ever hold across the whole list (every status, even one no row has yet, and its header); the first column takes the rest and is the only one that truncates. Sorting or loading more never moves a column, and every header keeps room for the sort arrow (it shows faintly on hover). A column never gets narrower than that: when they don't all fit, the table scrolls sideways in its card, with the checkbox and name pinned on the left, a rule at their edge once you've scrolled, and a fade on the right while there's more. The column header still follows the page, under the bars.</li>
         <li><b>Slice cards are the status filter.</b> "All" plus one card per status; the whole card toggles and stays outlined. Amount first, count in the corner. Empty slices stay, dimmed. They count what the other filters let through, so a card's number is what you get when you click it.</li>
         <li><b>One card isn't a filter.</b> The last card holds a rate worked out across the slices (win rate, collected) with its counts, a split bar in the status colours and an ⓘ with the formula, plus one more figure. Below 5 decided jobs the big figure is the count (“2 of 4”), not a rate; with none it reads “None decided yet” over an empty bar. Every state fills the same three lines, so filtering changes the numbers, never the card’s shape.</li>
         <li><b>The count is said once,</b> by the filters ("55 of 132 jobs"). The footer shows the range and loads 25 more; rows also load as you scroll. No totals row in this view.</li>
         <li><b>Selection never moves the rows.</b> A floating bar at the bottom: the count, Select all, three or four actions, the risky one last behind a confirmation that names the number, and ×. It's built to replace the other situational bars later.</li>
-        <li><b>Rows open, "···" acts.</b> One click opens a row; row actions sit in "···", shown on hover and focus. From 1280 wide the record opens beside the list, as in Mercury: the list keeps its name, status and amount columns, the opened row stays marked, and the record sticks under the bars. Below 1280 it is a sheet from the side, full width on phones. The record reads top to bottom: status, the amount, a timeline, two actions and More, the details, then the document. The timeline runs oldest first: a solid line through what happened, then a dashed line to the next step, drawn as a hollow ring. On jobs each event wears the status shape it moved the job to (created: empty, sent: half, approved: full, declined: the slash). Long histories fold to "+ n more events". The sketch drops the view menu and refresh from the page header; saved views come back once we decide where they live.</li>
+        <li><b>Rows open, "···" acts.</b> One click opens a row; row actions sit in "···", shown on hover and focus. From 1280 wide the record opens beside the list, as in Mercury: the list keeps its name, status and amount columns, the opened row stays marked, and the record sticks under the bars. Below 1280 it is a sheet from the side, full width on phones. The record reads top to bottom: status, the amount, a timeline, two actions and More (one action and More when both don't fit on a line; the other moves into More), the details, then the document. The timeline runs oldest first: a solid line through what happened, then a dashed line to the next step, drawn as a hollow ring. On jobs each event wears the status shape it moved the job to: the circle fills a quarter at a time (created: dashed, sent: a quarter, approved: half, work started: three quarters; closed would be full), and declined is the slash. Long histories fold to "+ n more events". The sketch drops the view menu and refresh from the page header; saved views come back once we decide where they live.</li>
         <li><b>Status has a shape, not just a colour.</b> Jobs: an empty circle for draft, a half-filled one for pending, a solid dot for booked, and a circle with a slash for declined (the client said no). One drawing on a 12px grid, 12px in the table badge and 14px on the cards. Draft and pending marks go a step darker than their old dots so each shape reaches 3:1.</li>
         <li><b>Every state is designed:</b> loading, first-use empty, no results, and error. Switch between them in the concept controls.</li>
         <li><b>Live areas keep their shape (I13).</b> What updates while you act elsewhere (filters, search, sort, selection) changes its values, never its layout. Every state fills the same slots at the same size, said by what a slot holds (“2 of 4”, “None decided yet”, an empty bar), not by lines coming and going. Sizes come from the whole list, not the rows on screen; optional parts leave a placeholder; anything that comes and goes appears where you acted or floats; a redraw never moves the page or your focus.</li>
@@ -157,10 +158,10 @@
 </details>
 
 <div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
-<script src="shared/icons.js?v=ffa49f16"></script>
-<script src="shared/shell.js?v=ffa49f16"></script>
-<script src="system/specimens/specimen.js?v=ffa49f16"></script>
-<script src="data.js?v=ffa49f16"></script>
-<script src="data-list.js?v=ffa49f16"></script>
+<script src="shared/icons.js?v=3afcad8c"></script>
+<script src="shared/shell.js?v=3afcad8c"></script>
+<script src="system/specimens/specimen.js?v=3afcad8c"></script>
+<script src="data.js?v=3afcad8c"></script>
+<script src="data-list.js?v=3afcad8c"></script>
 </body>
 </html>

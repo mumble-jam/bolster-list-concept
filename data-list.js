@@ -248,6 +248,53 @@
 
   function cols() { return cfg.columns.filter((c) => c.required || !st.hidden.includes(c.key)); }
 
+  // ---------- explanations in the screen's own words (D27) ----------
+  // {status} draws a status as its card shows it (mark or dot, then its label), looked up in this list's
+  // status map first, then the others' (a customer's lifetime value counts their jobs); [Label] marks any
+  // other on-screen label
+  function terms(text) {
+    const maps = [cfg.statusMap, ...Object.values(configs).map((c) => c.statusMap)].filter(Boolean);
+    return esc(text)
+      .replace(/\{([a-z-]+)\}/g, (m, k) => {
+        const s = maps.find((map) => map[k])?.[k];
+        if (!s) return m;
+        const shape = s.mark ? `<span class="mark" data-mark="${s.mark}" style="--_dot:${s.dot}"></span>` : `<span class="dot" style="--_dot:${s.dot}"></span>`;
+        return `<span class="term">${shape}${esc(s.label)}</span>`;
+      })
+      .replace(/\[([^\]]+)\]/g, '<span class="term">$1</span>');
+  }
+
+  // ---------- column widths come from the data (I13) ----------
+  // Every column but the first is as wide as the widest thing it can ever show: each row's value across the
+  // whole list (not just what's on screen), every status in the list's status map (even one no row has yet),
+  // and its own header with room for the sort arrow. Measured once per list in an offscreen copy of the
+  // table, so the result follows the real fonts, paddings and badges; a hand-set width is only a floor.
+  // Only the first column truncates.
+  const widths = {};
+  function measureColumns() {
+    if (widths[cfg.id]) return widths[cfg.id];
+    const list = cfg.columns.filter((col) => !col.required);
+    const values = (col) => {
+      const rows = [...cfg.rows];
+      if (col.key === cfg.cardKey && cfg.statusMap) Object.keys(cfg.statusMap).forEach((k) => rows.push({ ...cfg.rows[0], [col.key]: k }));
+      return [...new Set(rows.map((x) => col.render(x)))];
+    };
+    const host = document.createElement("div");
+    host.className = "list-panel col-measure";
+    host.setAttribute("aria-hidden", "true");
+    host.innerHTML = `<table class="data-table"><thead><tr>${list.map((col) => `<th${col.numeric ? " data-numeric" : ""}><button type="button" class="data-table-sort">${esc(col.label)}</button></th>`).join("")}</tr></thead>
+      <tbody><tr>${list.map((col) => `<td${col.numeric ? " data-numeric" : ""}>${values(col).map((v) => `<div class="cell">${v}</div>`).join("")}</td>`).join("")}</tr></tbody></table>`;
+    document.body.append(host);
+    const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const toPx = (w) => (!w ? 0 : w.endsWith("rem") ? parseFloat(w) * rem : parseFloat(w));
+    const out = {};
+    $$("th", host).forEach((th, i) => { out[list[i].key] = `${Math.ceil(Math.max(th.getBoundingClientRect().width, toPx(list[i].w)))}px`; });
+    host.remove();
+    return (widths[cfg.id] = out);
+  }
+  // the real fonts can land after the first measure: measure again once they have, and redraw if it changed
+  document.fonts?.ready.then(() => { const before = JSON.stringify(widths[cfg?.id]); delete widths[cfg?.id]; if (cfg && JSON.stringify(measureColumns()) !== before) renderBody(); });
+
   function renderBody() {
     const wrap = $("#table-wrap");
     const foot = $("#list-foot");
@@ -266,9 +313,10 @@
     }
 
     const c = cols();
+    const W = measureColumns();
     const head = `<thead><tr><th class="data-table-select"><input type="checkbox" class="checkbox" id="select-page" aria-label="Select all shown"${st.mode === "loading" ? " disabled" : ""}></th>${c.map((col) => {
       const on = st.sort.key === col.key;
-      return `<th${col.numeric ? " data-numeric" : ""}${col.m ? ` data-m="${col.m}"` : ""}${col.hideBelow ? ` data-hide-below="${col.hideBelow}"` : ""}${col.required ? " data-primary" : ""}${col.w ? ` style="inline-size:${col.w};--_w:${col.w}"` : ""}${on ? ` aria-sort="${st.sort.dir === "asc" ? "ascending" : "descending"}"` : ""}><button type="button" class="data-table-sort" data-sort="${col.key}">${esc(col.label)}</button></th>`;
+      return `<th${col.numeric ? " data-numeric" : ""}${col.m ? ` data-m="${col.m}"` : ""}${col.hideBelow ? ` data-hide-below="${col.hideBelow}"` : ""}${col.required ? " data-primary" : ""}${W[col.key] ? ` style="inline-size:${W[col.key]};--_w:${W[col.key]}"` : ""}${on ? ` aria-sort="${st.sort.dir === "asc" ? "ascending" : "descending"}"` : ""}><button type="button" class="data-table-sort" data-sort="${col.key}">${esc(col.label)}</button></th>`;
     }).join("")}<th class="row-actions"><span class="visually-hidden">Actions</span></th></tr></thead>`;
 
     if (st.mode === "loading") {
@@ -335,7 +383,24 @@
     `<div class="state"><span class="state-icon">${icon}</span><h3>${title}</h3><p>${text}</p><div class="state-actions">${actions}</div></div>`;
 
   // ---------- floating bar: count first, select all, actions, the risky one last, clear ----------
+  // a menu row that opens its own menu (drills in on phones)
+  const sub = (name, label, icon, value, items, cls = "") => `<div class="submenu-row${cls}"><button type="button" class="menu-item submenu-trigger" role="menuitem" data-sub="${name}" data-focus-key="sub-${name}" aria-haspopup="menu" aria-expanded="false" aria-controls="pop-sub-${name}">${mi(icon)}<span class="submenu-label">${label}</span><span class="submenu-value">${esc(value)}</span>${I.chevR}</button><div class="pop submenu" id="pop-sub-${name}" popover role="menu" aria-label="${label}"><button type="button" class="menu-item submenu-back" data-sub-back="${name}">${I.chevL}<span class="submenu-label">${label}</span></button>${items}</div></div>`;
   const risky = (a) => /^(archive|delete)/i.test(a);
+  const selectedRows = () => cfg.rows.filter((r) => st.selected.has(r.id));
+  // a list of actions as menu items: plain ones, then the menus as labelled sections, then the risky ones in
+  // red after a rule. In the bulk menus the risky ones confirm and the rest name what's selected.
+  function actionItems(list, { bulk = false, peek, nested = false } = {}) {
+    const n = st.selected.size, what = n === 1 ? `1 ${cfg.noun[0]}` : `${fmt.count(n)} ${cfg.noun[1]}`;
+    const item = (a) => `<button type="button" class="menu-item" role="menuitem"${risky(a) ? ' data-tone="danger"' : ""} ${a === "Open" ? `data-peek="${peek}"` : risky(a) && bulk ? `data-confirm="${esc(a)}"` : `data-concept-action="${esc(a)}${bulk ? ` ${what}` : ""}"`}>${mi(actionIcons[a])}${esc(a)}</button>`;
+    const sectionItems = (g) => g.items.map((i) => g.current === undefined ? item(i)
+      : `<button type="button" class="menu-item" role="menuitemradio" aria-checked="${i === g.current}" data-concept-action="${esc(g.label)} to ${esc(i.toLowerCase())}${bulk ? ` for ${what}` : ""}"><span class="menu-icon"></span>${esc(i)}${i === g.current ? I.check : ""}</button>`).join("");
+    const plain = list.filter((a) => typeof a === "string" && !risky(a));
+    const groups = list.filter((a) => typeof a !== "string");
+    const danger = list.filter((a) => typeof a === "string" && risky(a));
+    // nested (row menu, More): each menu is a submenu row, as in Bolster, with the current status as its value
+    if (nested) return [plain.map(item).join("") + groups.map((g) => sub(`act-${g.icon}`, esc(g.label), g.icon, g.current || "", sectionItems(g))).join(""), danger.map(item).join("")].filter(Boolean).join("<hr>");
+    return [plain.map(item).join(""), ...groups.map((g) => `<div class="pop-section">${esc(g.label)}</div>${sectionItems(g)}`), danger.map(item).join("")].filter(Boolean).join("<hr>");
+  }
   function renderBulk() {
     const bar = $("#bulk-bar");
     const n = st.selected.size;
@@ -347,9 +412,21 @@
     const matching = rowsWhere().length;
     const what = n === 1 ? `1 ${cfg.noun[0]}` : `${fmt.count(n)} ${cfg.noun[1]}`;
     bar.setAttribute("aria-label", `Bulk actions for ${n} selected`);
-    const acts = cfg.bulk.map((a) => risky(a)
-      ? `<span class="floating-bar-sep" aria-hidden="true"></span><button type="button" class="button" data-variant="ghost" data-size="sm" data-confirm="${esc(a)}">${esc(a)}</button>`
-      : `<button type="button" class="button" data-variant="ghost" data-size="sm" data-concept-action="${esc(a)} ${what}">${esc(a)}</button>`).join("");
+    let acts;
+    if (cfg.actionsFor) {
+      // actions that depend on what's selected; menus (Download, Change status, More) open from the bar
+      const { bar, more } = cfg.actionsFor(selectedRows());
+      const btn = (a) => `<button type="button" class="button" data-variant="ghost" data-size="sm" data-concept-action="${esc(a)} ${what}">${esc(a)}</button>`;
+      const menu = (key, label) => `<button type="button" class="button" data-variant="ghost" data-size="sm" data-bulk-menu="${key}" aria-haspopup="menu" aria-expanded="false">${esc(label)}${I.chev}</button>`;
+      const danger = bar.filter((a) => typeof a === "string" && risky(a));
+      acts = bar.map((a, i) => (typeof a !== "string" ? menu(i, a.label) : risky(a) ? "" : btn(a))).join("")
+        + (more.length ? menu("more", "More") : "")
+        + (danger.length ? `<span class="floating-bar-sep" aria-hidden="true"></span>${danger.map((a) => `<button type="button" class="button" data-variant="ghost" data-size="sm" data-confirm="${esc(a)}">${esc(a)}</button>`).join("")}` : "");
+    } else {
+      acts = cfg.bulk.map((a) => risky(a)
+        ? `<span class="floating-bar-sep" aria-hidden="true"></span><button type="button" class="button" data-variant="ghost" data-size="sm" data-confirm="${esc(a)}">${esc(a)}</button>`
+        : `<button type="button" class="button" data-variant="ghost" data-size="sm" data-concept-action="${esc(a)} ${what}">${esc(a)}</button>`).join("");
+    }
     bar.innerHTML = `<span class="floating-bar-count" aria-live="polite">${fmt.count(n)} selected</span>${n < matching ? `<button type="button" class="floating-bar-link" data-select-matching>Select all ${fmt.count(matching)}</button>` : `<button type="button" class="floating-bar-link" data-clear-selection>Unselect all</button>`}<span class="floating-bar-sep" aria-hidden="true"></span><span class="floating-bar-actions">${acts}</span><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Clear selection" data-clear-selection>${I.xl}</button>`;
   }
   function openConfirm(action) {
@@ -380,6 +457,7 @@
     if (p.kind === "display") return $("#view-options");
     if (p.kind === "info") return $("[data-info]");
     if (p.kind === "row") return p.from || $(`[data-row-menu="${p.key}"]`);
+    if (p.kind === "bulk") return $(`[data-bulk-menu="${p.key}"]`) || p.from;
     return null;
   }
   function openPop(kind, key, from) {
@@ -387,8 +465,8 @@
     if (lastClose.id === id && performance.now() - lastClose.t < 250) return; // same trigger: let it close
     popFor = { kind, key, id, from };
     delete pop.dataset.drill;
-    pop.setAttribute("role", kind === "view" || kind === "row" || kind === "add" || kind === "display" ? "menu" : "dialog");
-    pop.setAttribute("aria-label", kind === "filter" ? `Filter by ${filterDef(key).label.toLowerCase()}` : kind === "view" ? "Views" : kind === "display" ? "Display settings" : kind === "add" ? "Add a filter" : kind === "info" ? cfg.insight.label : "Row actions");
+    pop.setAttribute("role", kind === "view" || kind === "row" || kind === "bulk" || kind === "add" || kind === "display" ? "menu" : "dialog");
+    pop.setAttribute("aria-label", kind === "filter" ? `Filter by ${filterDef(key).label.toLowerCase()}` : kind === "view" ? "Views" : kind === "display" ? "Display settings" : kind === "add" ? "Add a filter" : kind === "info" ? cfg.insight.label : kind === "bulk" ? "Actions for the selection" : "Row actions");
     fillPop();
     pop.showPopover();
     place();
@@ -522,7 +600,7 @@
     } else if (p.kind === "add") {
       pop.innerHTML = `<div class="pop-body" style="padding-block-start:var(--space-2)"><div class="pop-section">Filter by</div>${addable().map((f) => `<button type="button" class="menu-item" role="menuitem" data-add="${f.key}">${mi(attrIcons[f.key])}${esc(f.label)}</button>`).join("")}</div>`;
     } else if (p.kind === "info") {
-      pop.innerHTML = `<div class="pop-note"><h3>${esc(cfg.insight.label)}</h3><p>${esc(cfg.insight.info)}</p></div>`;
+      pop.innerHTML = `<div class="pop-note"><h3>${esc(cfg.insight.label)}</h3><p>${terms(cfg.insight.info)}</p></div>`;
     } else if (p.kind === "view") {
       const dirty = isDirty();
       pop.innerHTML = `<div class="pop-body" style="padding-block-start:var(--space-2)"><div class="pop-section">Views</div>${cfg.views.map((v) => `<button type="button" class="menu-item" role="menuitemradio" aria-checked="${v.id === st.view}" data-view="${v.id}">${mi(v.icon)}${esc(v.label)}</button>`).join("")}<hr><button type="button" class="menu-item" role="menuitem" data-concept-action="Save as a new view">${mi("save")}Save as new view…</button>${dirty ? `<button type="button" class="menu-item" role="menuitem" data-concept-action="Update “${esc(currentView().label)}”">${mi("refresh-cw")}Update “${esc(currentView().label)}”</button><button type="button" class="menu-item" role="menuitem" data-reset-view>${mi("undo")}Discard changes</button>` : ""}</div>`;
@@ -531,7 +609,6 @@
       const opt = cfg.columns.filter((c) => !c.required);
       const shown = opt.filter((c) => !st.hidden.includes(c.key)).length;
       const item = (role, on, attrs, label, icon) => `<button type="button" class="menu-item" role="${role}" aria-checked="${on}" ${attrs}>${mi(icon)}<span class="submenu-label">${esc(label)}</span>${on ? I.check : ""}</button>`;
-      const sub = (name, label, icon, value, items, cls = "") => `<div class="submenu-row${cls}"><button type="button" class="menu-item submenu-trigger" role="menuitem" data-sub="${name}" data-focus-key="sub-${name}" aria-haspopup="menu" aria-expanded="false" aria-controls="pop-sub-${name}">${mi(icon)}<span class="submenu-label">${label}</span><span class="submenu-value">${esc(value)}</span>${I.chevR}</button><div class="pop submenu" id="pop-sub-${name}" popover role="menu" aria-label="${label}"><button type="button" class="menu-item submenu-back" data-sub-back="${name}">${I.chevL}<span class="submenu-label">${label}</span></button>${items}</div></div>`;
       const sortItems = cfg.columns.map((c) => item("menuitemradio", st.sort.key === c.key, `data-sort-pick="${c.key}" data-focus-key="s-${c.key}"`, c.label, attrIcons[c.key])).join("")
         + "<hr>" + [["asc", "Ascending", "sort-asc"], ["desc", "Descending", "sort"]].map(([d, l, i]) => item("menuitemradio", st.sort.dir === d, `data-dir-pick="${d}" data-focus-key="dir-${d}"`, l, i)).join("");
       const groupItems = [["", "None"], ...cfg.groups.map((k) => [k, filterDef(k).label])].map(([v, l]) => item("menuitemradio", (st.group || "") === v, `data-group-pick="${v}" data-focus-key="g-${v || "none"}"`, l, v ? attrIcons[v] : "list")).join("");
@@ -543,12 +620,24 @@
         ${sub("density", "Row height", "line-height", st.density === "compact" ? "Compact" : "Comfortable", densityItems)}
         ${sub("cols", "Columns", "columns-3", shown === opt.length ? "All" : `${shown} of ${opt.length}`, colItems)}
       </div>`;
+    } else if (p.kind === "bulk") {
+      const { bar, more } = cfg.actionsFor(selectedRows());
+      const g = p.key === "more" ? null : bar[+p.key];
+      pop.innerHTML = `<div class="pop-body" style="padding-block-start:var(--space-2)">${g ? actionItems([{ ...g }], { bulk: true }).replace(/^<div class="pop-section">[^<]*<\/div>/, "") : actionItems(more, { bulk: true, nested: true })}</div>`;
+    } else if (p.kind === "row" && cfg.actionsFor) {
+      // the row's menu: everything Bolster offers for this job's status; from the record, minus its own buttons
+      const x = cfg.rows.find((r) => r.id === p.key);
+      const { bar, more } = cfg.actionsFor([x]);
+      const own = p.from?.closest(".detail") ? ["Open", ...$$(".detail-actions [data-concept-action]:not([hidden])", p.from.closest(".detail")).map((b) => b.dataset.conceptAction)] : [];
+      const list = ["Open", ...bar, ...more].filter((a) => !own.includes(a));
+      pop.innerHTML = `<div class="pop-body" style="padding-block-start:var(--space-2)">${actionItems(list, { peek: p.key, nested: true })}</div>`;
     } else if (p.kind === "row") {
       // from the record's More, "Open" (and the catalog's "Edit") would only reopen it
-      const acts = cfg.rowActions.filter((a) => !(p.from?.closest(".detail") && (a === "Open" || a === "Edit")));
+      const folded = p.from?.closest(".detail") ? $$(".detail-actions [data-concept-action][hidden]", p.from.closest(".detail")).map((b) => b.dataset.conceptAction) : [];
+      const acts = [...folded, ...cfg.rowActions.filter((a) => !folded.includes(a) && !(p.from?.closest(".detail") && (a === "Open" || a === "Edit")))];
       pop.innerHTML = `<div class="pop-body" style="padding-block-start:var(--space-2)">${acts.map((a, i) => `${i === acts.length - 1 ? "<hr>" : ""}<button type="button" class="menu-item" role="menuitem"${i === acts.length - 1 ? ' data-tone="danger"' : ""} ${a === "Open" || a === "Edit" ? `data-peek="${p.key}"` : `data-concept-action="${esc(a)}"`}>${mi(actionIcons[a])}${esc(a)}</button>`).join("")}</div>`;
     }
-    pop.style.inlineSize = p.kind === "row" || p.kind === "add" ? "auto" : p.kind === "info" ? "16rem" : "";
+    pop.style.inlineSize = p.kind === "row" || p.kind === "bulk" || p.kind === "add" ? "auto" : p.kind === "info" ? "16rem" : "";
   }
 
   // ---------- updates ----------
@@ -621,6 +710,16 @@
       </div>`;
   }
   const markRow = () => $$("#table-wrap tbody tr[data-id]").forEach((tr) => { const on = tr.dataset.id === openId; tr.toggleAttribute("data-open", on); on ? tr.setAttribute("aria-current", "true") : tr.removeAttribute("aria-current"); });
+  // the record's actions: both plus More if they fit on one line, else the first plus More (the second
+  // then shows in More, which lists whatever isn't on the card)
+  function fitActions(d) {
+    const row = $(".detail-actions", d);
+    if (!row) return;
+    const acts = $$("[data-concept-action]", row);
+    acts.forEach((b) => (b.hidden = false));
+    if (row.scrollWidth > row.clientWidth + 1) acts.slice(1).forEach((b) => (b.hidden = true));
+  }
+  const refit = new ResizeObserver((es) => es.forEach((e) => fitActions(e.target)));
   function openPeek(id) {
     if (!cfg.rows.some((r) => r.id === id)) return;
     if (pop.matches(":popover-open")) pop.hidePopover();
@@ -633,6 +732,8 @@
       d.hidden = false;
       d.scrollTop = 0;
       $("#list-split").toggleAttribute("data-open", true);
+      // measured once the split view is open, so the card has its width
+      fitActions(d); refit.observe(d);
       $("#detail-title", d).focus({ preventScroll: true });
     } else {
       $("#detail").hidden = true;
@@ -641,6 +742,7 @@
       const d = $("#peek");
       d.innerHTML = detailHtml(id);
       if (!d.open) d.showModal();
+      fitActions(d); refit.observe(d);
       $("#detail-title", d).focus();
     }
   }
@@ -738,12 +840,13 @@
       return;
     }
     if ((el = q("[data-row-menu]"))) return openPop("row", el.dataset.rowMenu, el);
+    if ((el = q("[data-bulk-menu]"))) return openPop("bulk", el.dataset.bulkMenu, el);
     if ((el = q("[data-peek]"))) { e.preventDefault(); openPeek(el.dataset.peek); return; }
     if (q("[data-detail-close]")) return closeDetail();
     if ((el = q("[data-tl-more]"))) { const ol = el.closest(".timeline"); $$("[data-fold]", ol).forEach((li) => (li.hidden = false)); const first = $("[data-fold]", ol); el.closest("li").remove(); first?.setAttribute("tabindex", "-1"); first?.focus({ preventScroll: true }); return; }
     if (q("[data-select-matching]")) { rowsWhere().forEach((x) => st.selected.add(x.id)); renderBody(); renderBulk(); $("#bulk-bar .floating-bar-link")?.focus(); return; }
     if (q("[data-clear-selection]")) { st.selected.clear(); renderBody(); renderBulk(); $("#select-page")?.focus({ preventScroll: true }); return; }
-    if ((el = q("[data-confirm]"))) return openConfirm(el.dataset.confirm);
+    if ((el = q("[data-confirm]"))) { if (pop.contains(el)) pop.hidePopover(); return openConfirm(el.dataset.confirm); }
     if (q("#confirm-go")) {
       const what = $("#confirm-go").dataset.action;
       $("#confirm").close();

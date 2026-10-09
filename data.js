@@ -111,15 +111,17 @@
   // Estimates
   // =====================================================================
   const EST_STATUS = {
-    // shape marks: empty, half, full for how far a job has got; a slash for the client saying no
-    draft: { label: "Draft", attr: 'data-status="draft"', dot: "var(--status-draft-mark)", mark: "empty" },
-    pending: { label: "Pending", attr: 'data-status="pending"', dot: "var(--status-pending-mark)", mark: "half" },
-    booked: { label: "Booked", attr: 'data-status="booked"', dot: "var(--color-status-booked-dot)", mark: "full" },
+    // shape marks fill a quarter at a time with how far a job has got; a slash for the client saying no
+    draft: { label: "Draft", attr: 'data-status="draft"', dot: "var(--status-draft-mark)", mark: "dashed" },
+    pending: { label: "Pending", attr: 'data-status="pending"', dot: "var(--status-pending-mark)", mark: "quarter" },
+    booked: { label: "Booked", attr: 'data-status="booked"', dot: "var(--color-status-booked-dot)", mark: "half" },
+    "in-progress": { label: "In progress", attr: 'data-status="in-progress"', dot: "var(--status-in-progress-mark)", mark: "three" },
     declined: { label: "Declined", attr: 'data-tone="danger"', dot: "var(--color-feedback-danger-accent)", mark: "slash" },
   };
+  const WON = new Set(["booked", "in-progress"]);
   const estimates = Array.from({ length: 132 }, (_, i) => {
     const client = pick(CLIENTS);
-    const status = weighted([["draft", 24], ["pending", 34], ["booked", 30], ["declined", 12]]);
+    const status = weighted([["draft", 14], ["pending", 32], ["booked", 20], ["in-progress", 22], ["declined", 12]]);
     const created = daysAgo(int(0, 240));
     const modified = daysFrom(created, Math.floor(r() * Math.min(40, ageDays(created))));
     const total = status === "draft" && r() < 0.15 ? 0 : money(650, 68000);
@@ -134,25 +136,29 @@
     dateKey: "created",
     cardKey: "status",
     metrics: [
-      { value: "draft", label: "Draft", big: (s) => fmt.money0(sum(s, (x) => x.total)), sub: (s) => `${fmt.plural(s.length, "job", "jobs")} not sent yet` },
+      // drafts aren't part of the story the cards tell (what's out, what's won, what's being built, what's lost);
+      // they're still a status to filter by
       { value: "pending", label: "Pending", big: (s) => fmt.money0(sum(s, (x) => x.total)), sub: (s) => `${fmt.count(s.length)} awaiting reply` },
-      { value: "booked", label: "Booked", big: (s) => fmt.money0(sum(s, (x) => x.total)), sub: (s) => `${fmt.plural(s.length, "job", "jobs")} won` },
-      { value: "declined", label: "Declined", big: (s) => fmt.money0(sum(s, (x) => x.total)), sub: (s) => `${fmt.plural(s.length, "job", "jobs")} lost` },
+      { value: "booked", label: "Booked", big: (s) => fmt.money0(sum(s, (x) => x.total)), sub: (s) => `${fmt.plural(s.length, "job", "jobs")} not started` },
+      { value: "in-progress", label: "In progress", big: (s) => fmt.money0(sum(s, (x) => x.total)), sub: (s) => `${fmt.plural(s.length, "job", "jobs")} underway` },
+      { value: "declined", label: "Declined", big: (s) => fmt.money0(sum(s, (x) => x.total)), sub: (s) => `${fmt.plural(s.length, "job", "jobs")}, by the client` },
     ],
     allCard: { big: (s) => fmt.whole(sum(s, (x) => x.total)) },
     // the one card in the row that isn't a filter: a rate worked out across the slices
     insight: {
       label: "Win rate",
-      info: "Booked ÷ (booked + declined), for the jobs your filters let through. Draft and pending jobs aren’t decided yet, so they don’t count.",
+      // explanations use the screen's own words (D27): {status} draws a status with its mark
+      info: "Won ÷ decided, for the jobs your filters let through. Won is {booked} plus {in-progress}; decided adds {declined}. {draft} and {pending} jobs aren’t decided yet, so they don’t count.",
       main: (s) => {
-        const b = s.filter((x) => x.status === "booked").length, d = s.filter((x) => x.status === "declined").length, n = b + d;
+        const bk = s.filter((x) => x.status === "booked").length, ip = s.filter((x) => x.status === "in-progress").length;
+        const b = bk + ip, d = s.filter((x) => x.status === "declined").length, n = b + d;
         // every state fills the same three slots (figure, counts, bar), so filtering never reshapes the card
-        const bar = [[b, EST_STATUS.booked.dot, "booked"], [d, EST_STATUS.declined.dot, "declined"]];
+        const bar = [[bk, EST_STATUS.booked.dot, "Booked"], [ip, EST_STATUS["in-progress"].dot, "In progress"], [d, EST_STATUS.declined.dot, "Declined"]];
         if (!n) return { value: "None", counts: "decided yet", bar: [], empty: true };
         if (n < MIN_SAMPLE) return { value: `${b} of ${n}`, counts: "decided", bar };
         return { value: fmt.pct(b / n), counts: `${b} of ${n} decided`, bar };
       },
-      more: [{ label: "Average booked job", value: (s) => { const b = s.filter((x) => x.status === "booked"); return b.length ? fmt.money0(sum(b, (x) => x.total) / b.length) : "–"; }, sub: (s) => { const n = s.filter((x) => x.status === "booked").length; return n ? `from ${fmt.plural(n, "job", "jobs")}` : "none booked yet"; } }],
+      more: [{ label: "Average won job", value: (s) => { const b = s.filter((x) => WON.has(x.status)); return b.length ? fmt.money0(sum(b, (x) => x.total) / b.length) : "–"; }, sub: (s) => { const n = s.filter((x) => WON.has(x.status)).length; return n ? `from ${fmt.plural(n, "job", "jobs")}` : "none won yet"; } }],
     },
     statusMap: EST_STATUS,
     columns: [
@@ -181,28 +187,47 @@
       { id: "big", label: "Large jobs", icon: "dollar", filters: { total: { min: 20000 } }, sort: { key: "total", dir: "desc" } },
       { id: "by-owner", label: "By owner", icon: "layers", filters: { status: ["draft", "pending"] }, group: "owner" },
     ],
-    bulk: ["Send proposals", "Change owner", "Export", "Archive"],
-    rowActions: ["Open", "Preview and send", "Duplicate", "Archive"],
+    // Actions as Bolster has them (Jobs list, Oct 2026): they depend on the selected job's status. One job:
+    // the bar's buttons, then More. Several jobs: Archive, Delete, Change status. Download and Change status
+    // are menus. Bolster's order puts Archive and Delete mid-bar; here they go last, after a rule (risky last).
+    // Bolster has no declined set we could reach read-only; declined borrows draft's. See audit/patterns.
+    actionsFor: (rows) => {
+      const status = { label: "Change status", icon: "share", items: ["Pending", "Declined", "Booked", "In progress", "Closed"], current: rows.length === 1 ? EST_STATUS[rows[0].status].label : "" };
+      const download = { label: "Download", icon: "download", items: ["Download proposal (PDF)", "Download scope of work (Excel)"] };
+      if (rows.length !== 1) return { bar: ["Archive", "Delete", status], more: [] };
+      return {
+        draft: { bar: ["Edit", "Duplicate", "Archive", "Delete"], more: [status] },
+        pending: { bar: ["Edit", "Send now", "Sign and book now", "Archive"], more: ["Review customer", download, "Duplicate", status, "Delete"] },
+        booked: { bar: ["Edit", "Invoice this project", "Review customer", download], more: ["Duplicate", status, "Delete"] },
+        "in-progress": { bar: ["Edit", "Invoice this project", "Review customer", download], more: ["Duplicate", status, "Delete"] },
+        declined: { bar: ["Edit", "Duplicate", "Archive", "Delete"], more: [status] },
+      }[rows[0].status];
+    },
     // the timeline's dots are the status shapes: each event shows the status it moved the job to
     peek: (x) => {
       const h = hash(x.id), S = EST_STATUS;
       const sent = earliest(daysFrom(x.created, 1 + (h % 4)), x.modified);
       const viewed = earliest(daysFrom(sent, 1), x.modified);
-      const ev = [{ what: "Job created", meta: `${fmt.date(x.created)} · by ${x.owner.name}`, mark: "empty", color: S.draft.dot }];
+      const ev = [{ what: "Job created", meta: `${fmt.date(x.created)} · by ${x.owner.name}`, mark: "dashed", color: S.draft.dot }];
       if (x.status === "draft") {
         if (+x.modified > +x.created) ev.push({ what: "Estimate edited", meta: `${fmt.date(x.modified)} · by ${x.owner.name}` });
         ev.push({ what: "Send the proposal", meta: "Not sent yet", next: true });
       } else {
-        ev.push({ what: `Proposal sent to ${x.client.name}`, meta: `${fmt.date(sent)} · to ${emailOf(x.client)}`, mark: "half", color: S.pending.dot });
+        ev.push({ what: `Proposal sent to ${x.client.name}`, meta: `${fmt.date(sent)} · to ${emailOf(x.client)}`, mark: "quarter", color: S.pending.dot });
         if (h % 3 || x.status !== "pending") ev.push({ what: "Client viewed the proposal", meta: fmt.date(viewed) });
         if (x.status === "pending") {
           const remind = daysFrom(sent, 7);
           if (+remind < +TODAY) ev.push({ what: "Reminder sent", meta: `${fmt.date(remind)} · automatically` });
           ev.push({ what: `Waiting for ${x.client.name}`, meta: `Follow up by ${fmt.date(latest(daysFrom(sent, 14), daysFrom(TODAY, 2)))}`, next: true });
         }
-        if (x.status === "booked") {
-          ev.push({ what: "Client approved the proposal", meta: `${fmt.date(x.modified)} · signed by ${x.client.name}`, mark: "full", color: S.booked.dot });
-          ev.push({ what: "Schedule the work", meta: "Not scheduled yet", next: true });
+        if (WON.has(x.status)) {
+          const signed = x.status === "booked" ? x.modified : earliest(daysFrom(viewed, 2), x.modified);
+          ev.push({ what: "Client approved the proposal", meta: `${fmt.date(signed)} · signed by ${x.client.name}`, mark: "half", color: S.booked.dot });
+          if (x.status === "booked") ev.push({ what: "Schedule the work", meta: "Not scheduled yet", next: true });
+          else {
+            ev.push({ what: "Work started", meta: `${fmt.date(x.modified)} · crew on site`, mark: "three", color: S["in-progress"].dot });
+            ev.push({ what: "Invoice the work", meta: "Nothing invoiced yet", next: true });
+          }
         }
         if (x.status === "declined") ev.push({ what: "Client declined the proposal", meta: `${fmt.date(x.modified)} · no reason given`, mark: "slash", color: S.declined.dot });
       }
@@ -210,7 +235,8 @@
         heading: `${x.job} for ${x.client.name}`, open: "Open job",
         badge: badge(S[x.status]), amount: x.total ? fmt.money(x.total) : null, empty: "No price yet", sub: `${x.number} · ${x.client.address}`,
         timeline: ev,
-        actions: { draft: [["Send", "send"], ["Edit", "pen"]], pending: [["Remind", "bell"], ["Edit", "pen"]], booked: [["Invoice", "file-plus"], ["Schedule", "calendar"]], declined: [["Duplicate", "copy"], ["Edit", "pen"]] }[x.status],
+        // the record's two buttons: Bolster's first actions for the status (the rest are under More)
+        actions: { draft: [["Edit", "pen"], ["Duplicate", "copy"]], pending: [["Send now", "send"], ["Sign and book now", "file-signature"]], booked: [["Invoice this project", "file-invoice"], ["Review customer", "star"]], "in-progress": [["Invoice this project", "file-invoice"], ["Review customer", "star"]], declined: [["Edit", "pen"], ["Duplicate", "copy"]] }[x.status],
         fields: [["Client", person(x.client)], ["Owner", person(x.owner)], ["Created", fmt.date(x.created)], ["Last activity", fmt.ago(x.modified)], ["Source", esc(x.source)]],
         doc: x.status === "draft" ? null : { label: "Proposal", name: `Proposal-${x.number}.pdf`, view: "View proposal" },
       };
@@ -252,11 +278,11 @@
     allCard: { big: (s) => fmt.whole(sum(s, (x) => x.amount)) },
     insight: {
       label: "Collected",
-      info: "Paid ÷ everything invoiced, by amount, for the invoices your filters let through. Drafts aren’t invoiced yet, so they don’t count.",
+      info: "{paid} ÷ invoiced, by amount, for the invoices your filters let through. Invoiced is {paid}, {outstanding} and {overdue}; {draft} invoices aren’t sent yet, so they don’t count.",
       main: (s) => {
         const sent = s.filter((x) => x.status !== "draft"), invoiced = sum(sent, (x) => x.amount), paid = sum(sent.filter((x) => x.status === "paid"), (x) => x.amount);
         if (!invoiced) return { value: "Nothing", counts: "invoiced yet", bar: [], empty: true };
-        return { value: fmt.pct(paid / invoiced), counts: `${fmt.money0(paid)} of ${fmt.money0(invoiced)}`, bar: [[paid, INV_STATUS.paid.dot, "paid"], [invoiced - paid, "var(--color-line-default)", "not paid yet"]] };
+        return { value: fmt.pct(paid / invoiced), counts: `${fmt.money0(paid)} of ${fmt.money0(invoiced)}`, bar: [[paid, INV_STATUS.paid.dot, "Paid"], [invoiced - paid, "var(--color-line-default)", "Outstanding and Overdue"]] };
       },
       more: [{ label: "Average time to pay", value: (s) => { const p = s.filter((x) => x.paidIn); return p.length ? `${Math.round(sum(p, (x) => x.paidIn) / p.length)} days` : "–"; }, sub: (s) => { const n = s.filter((x) => x.paidIn).length; return n ? fmt.plural(n, "paid invoice", "paid invoices") : "none paid yet"; } }],
     },
@@ -346,8 +372,8 @@
     ],
     insight: {
       label: "Lifetime value",
-      info: "The total of booked jobs for the customers your filters let through.",
-      main: (s) => { const n = s.filter((x) => x.lifetime).length; return { value: fmt.money0(sum(s, (x) => x.lifetime)), counts: n ? `across ${fmt.plural(n, "customer", "customers")}` : "no booked jobs yet" }; },
+      info: "The total of each customer’s {booked} and {in-progress} jobs, for the customers your filters let through.",
+      main: (s) => { const n = s.filter((x) => x.lifetime).length; return { value: fmt.money0(sum(s, (x) => x.lifetime)), counts: n ? `across ${fmt.plural(n, "customer", "customers")}` : "no Booked or In progress jobs" }; },
       more: [{ label: "Top source", value: (s) => { const c = {}; s.forEach((x) => (c[x.source] = (c[x.source] || 0) + 1)); return Object.entries(c).sort((a, b) => b[1] - a[1])[0]?.[0] || "–"; }, sub: (s) => { const c = {}; s.forEach((x) => (c[x.source] = (c[x.source] || 0) + 1)); const top = Object.values(c).sort((a, b) => b - a)[0]; return top ? `${top} of ${s.length}` : "no sources yet"; } }],
     },
     statusMap: CL_STATUS,
@@ -465,6 +491,8 @@
   const actionIcons = {
     Open: "sidebar-right", Edit: "pen", "Preview and send": "send", Duplicate: "copy", Archive: "archive",
     "Send reminder": "bell", "Record payment": "credit-card", Void: "ban", Message: "message", "Create job": "file-plus",
+    "Send now": "send", "Sign and book now": "file-signature", "Invoice this project": "file-invoice", "Review customer": "star",
+    Delete: "trash", Download: "download", "Download proposal (PDF)": "file-pdf", "Download scope of work (Excel)": "file-excel", "Change status": "share",
   };
 
   window.BDS_CONCEPT = {
