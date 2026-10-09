@@ -56,13 +56,14 @@
     return false;
   }
   const active = () => cfg.filters.filter((f) => isSet(f.key, st.filters[f.key]));
-  // a single status picked from a slice card: the card shows it, so no chip repeats it
+  // a single status picked from a slice card: the card is pressed, and the status is a chip like any other filter,
+  // so the count row always shows what narrowed the list (× on the chip releases the card)
   function cardValue() {
     if (!cfg.cardKey) return null;
     const v = st.filters[cfg.cardKey];
     return Array.isArray(v) && v.length === 1 && cfg.metrics.some((m) => m.value === v[0]) ? v[0] : null;
   }
-  const chipped = () => cfg.filters.filter((f) => f.key !== cfg.dateKey && ((isSet(f.key, st.filters[f.key]) && !(f.key === cfg.cardKey && cardValue())) || st.added.includes(f.key)));
+  const chipped = () => cfg.filters.filter((f) => f.key !== cfg.dateKey && (isSet(f.key, st.filters[f.key]) || st.added.includes(f.key)));
   function passes(f, row) {
     const val = st.filters[f.key];
     const x = f.get(row);
