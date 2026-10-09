@@ -268,11 +268,11 @@
     const c = cols();
     const head = `<thead><tr><th class="data-table-select"><input type="checkbox" class="checkbox" id="select-page" aria-label="Select all shown"${st.mode === "loading" ? " disabled" : ""}></th>${c.map((col) => {
       const on = st.sort.key === col.key;
-      return `<th${col.numeric ? " data-numeric" : ""}${col.m ? ` data-m="${col.m}"` : ""}${col.hideBelow ? ` data-hide-below="${col.hideBelow}"` : ""}${col.w ? ` style="inline-size:${col.w}"` : ""}${on ? ` aria-sort="${st.sort.dir === "asc" ? "ascending" : "descending"}"` : ""}><button type="button" class="data-table-sort" data-sort="${col.key}">${esc(col.label)}</button></th>`;
+      return `<th${col.numeric ? " data-numeric" : ""}${col.m ? ` data-m="${col.m}"` : ""}${col.hideBelow ? ` data-hide-below="${col.hideBelow}"` : ""}${col.required ? " data-primary" : ""}${col.w ? ` style="inline-size:${col.w};--_w:${col.w}"` : ""}${on ? ` aria-sort="${st.sort.dir === "asc" ? "ascending" : "descending"}"` : ""}><button type="button" class="data-table-sort" data-sort="${col.key}">${esc(col.label)}</button></th>`;
     }).join("")}<th class="row-actions"><span class="visually-hidden">Actions</span></th></tr></thead>`;
 
     if (st.mode === "loading") {
-      const sk = Array.from({ length: 8 }, () => `<tr><td class="data-table-select"><span class="skeleton" style="inline-size:var(--space-4);block-size:var(--space-4)"></span></td>${c.map((col, i) => `<td${col.hideBelow ? ` data-hide-below="${col.hideBelow}"` : ""}${col.m ? ` data-m="${col.m}"` : ""}><span class="skeleton" style="inline-size:${i === 0 ? 70 : 50}%;${col.numeric ? "margin-inline-start:auto" : ""}"></span></td>`).join("")}<td class="row-actions"></td></tr>`).join("");
+      const sk = Array.from({ length: 8 }, () => `<tr><td class="data-table-select"><span class="skeleton" style="inline-size:var(--space-4);block-size:var(--space-4)"></span></td>${c.map((col, i) => `<td${col.required ? " data-primary" : ""}${col.hideBelow ? ` data-hide-below="${col.hideBelow}"` : ""}${col.m ? ` data-m="${col.m}"` : ""}><span class="skeleton" style="inline-size:${i === 0 ? 70 : 50}%;${col.numeric ? "margin-inline-start:auto" : ""}"></span></td>`).join("")}<td class="row-actions"></td></tr>`).join("");
       wrap.innerHTML = `<table class="data-table" data-density="${st.density}" aria-busy="true">${head}<tbody>${sk}</tbody></table>`;
       return;
     }
@@ -288,7 +288,7 @@
 
     const rowHtml = (x) => {
       const name = cfg.search(x).split(" ").slice(0, 4).join(" ");
-      return `<tr data-id="${x.id}"${st.selected.has(x.id) ? " data-selected" : ""}${openId === x.id ? ' data-open aria-current="true"' : ""}><td class="data-table-select"><input type="checkbox" class="checkbox" data-select="${x.id}" aria-label="Select ${esc(name)}"${st.selected.has(x.id) ? " checked" : ""}></td>${c.map((col) => `<td${col.numeric ? " data-numeric" : ""}${col.hideBelow ? ` data-hide-below="${col.hideBelow}"` : ""}${col.m ? ` data-m="${col.m}"` : ""}><div class="cell">${col.render(x)}</div></td>`).join("")}<td class="row-actions"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-row-menu="${x.id}" aria-label="Actions for ${esc(name)}" aria-haspopup="menu" aria-expanded="false">${I.dots}</button></td></tr>`;
+      return `<tr data-id="${x.id}"${st.selected.has(x.id) ? " data-selected" : ""}${openId === x.id ? ' data-open aria-current="true"' : ""}><td class="data-table-select"><input type="checkbox" class="checkbox" data-select="${x.id}" aria-label="Select ${esc(name)}"${st.selected.has(x.id) ? " checked" : ""}></td>${c.map((col) => `<td${col.required ? " data-primary" : ""}${col.numeric ? " data-numeric" : ""}${col.hideBelow ? ` data-hide-below="${col.hideBelow}"` : ""}${col.m ? ` data-m="${col.m}"` : ""}><div class="cell">${col.render(x)}</div></td>`).join("")}<td class="row-actions"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-row-menu="${x.id}" aria-label="Actions for ${esc(name)}" aria-haspopup="menu" aria-expanded="false">${I.dots}</button></td></tr>`;
     };
 
     let body = "";
@@ -304,7 +304,7 @@
         if (!list.length) continue;
         const o = g.options.find((x) => x.value === k);
         const open = !st.collapsed.has(k);
-        body += `<tr class="group-row"><td colspan="${c.length + 2}"><button type="button" class="group-toggle" data-group="${esc(k)}" aria-expanded="${open}">${I.chev}${o?.html || esc(o?.label ?? k)}</button><span class="group-meta">${nouns(list.length)}${money ? ` · ${money.totalFmt(list.reduce((s, x) => s + money.sort(x), 0))}` : ""}</span></td></tr>`;
+        body += `<tr class="group-row"><td colspan="${c.length + 2}"><div class="group-head"><button type="button" class="group-toggle" data-group="${esc(k)}" aria-expanded="${open}">${I.chev}${o?.html || esc(o?.label ?? k)}</button><span class="group-meta">${nouns(list.length)}${money ? ` · ${money.totalFmt(list.reduce((s, x) => s + money.sort(x), 0))}` : ""}</span></div></td></tr>`;
         if (open) { body += list.map(rowHtml).join(""); shownRows.push(...list); }
       }
     } else {
@@ -854,6 +854,44 @@
   new ResizeObserver(stick).observe(topBar);
   new ResizeObserver(stick).observe(toolbar);
   addEventListener("resize", stick);
+
+  // ---------- sideways scroll ----------
+  // Columns never get narrower than their set width; when they don't fit, the table scrolls sideways
+  // in its card, with the checkbox and name pinned on the left. The card's scroller would stop the
+  // header from sticking to the page, so the header is moved down with the page instead (--_table-top,
+  // the table's top on screen; CSS keeps it under the bars). One table, so headers stay tied to cells.
+  const tableWrap = $("#table-wrap");
+  let frame = 0;
+  function follow() {
+    frame = 0;
+    const t = $(".data-table", tableWrap), head = t?.tHead;
+    if (!head) return;
+    const r = t.getBoundingClientRect();
+    head.style.setProperty("--_table-top", `${r.top}px`);
+    head.style.setProperty("--_room", `${Math.max(0, r.height - head.offsetHeight)}px`);
+  }
+  function edges() {
+    const max = tableWrap.scrollWidth - tableWrap.clientWidth;
+    tableWrap.toggleAttribute("data-scrolled", tableWrap.scrollLeft > 1);
+    tableWrap.toggleAttribute("data-more", tableWrap.scrollLeft < max - 1);
+  }
+  function pins() {
+    const sel = $(".data-table thead .data-table-select", tableWrap), name = $(".data-table thead [data-primary]", tableWrap);
+    tableWrap.style.setProperty("--_sel-w", `${sel?.offsetWidth || 0}px`);
+    tableWrap.style.setProperty("--_pin-w", `${(sel?.offsetWidth || 0) + (name?.offsetWidth || 0)}px`);
+  }
+  const relayout = () => { pins(); edges(); follow(); };
+  addEventListener("scroll", () => { if (!frame) frame = requestAnimationFrame(follow); }, { passive: true });
+  addEventListener("resize", relayout);
+  tableWrap.addEventListener("scroll", edges, { passive: true });
+  new ResizeObserver(relayout).observe(tableWrap);
+  new MutationObserver(relayout).observe(tableWrap, { childList: true });
+  // pinned cells sit above the row's link, so a click anywhere on a row still opens it
+  tableWrap.addEventListener("click", (e) => {
+    const tr = e.target.closest("tbody tr[data-id]");
+    if (!tr || e.target.closest("a, button, input, label, select")) return;
+    openPeek(tr.dataset.id);
+  });
 
   const html = document.documentElement;
   const DOWN = 24, UP = 6; // px of travel before the bars go, and before they come back

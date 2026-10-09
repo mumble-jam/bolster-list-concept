@@ -337,8 +337,42 @@
     body[data-selecting] .concept-controls { display: none; }
   }
 
-  /* ---------- table ---------- */
-  .list-panel .data-table th { inset-block-start: var(--list-head-top, 0); }
+  /* ---------- table: sideways scroll ----------
+     A column never gets narrower than its set width (the header's --_w); when they don't all fit,
+     the table scrolls sideways in its card. The checkbox and name stay pinned on the left, a rule
+     marks their edge once you've scrolled, and the right edge fades while there's more. The card is
+     the scroller, so the header can't stick to the page by itself: it's moved down by the distance
+     the table's top has scrolled under the bars (--_table-top from script), up to the table's end.
+     --_stick is where it rests (under the bars, or the very top while they're hidden); registered,
+     so it slides with them. */
+  @property --_stick { syntax: "<length>"; inherits: true; initial-value: 0px; }
+  .data-table th > .data-table-sort { min-inline-size: calc(var(--_w, 0px) - var(--space-6)); }
+  @media (min-width: 768px) {
+    .list-panel .table-wrap { overflow-x: auto; overscroll-behavior-x: contain; scroll-padding-inline-start: var(--_pin-w, 0px); }
+    .list-panel .table-wrap[data-more] { mask-image: linear-gradient(to left, transparent, #000 var(--space-8)); }
+    .list-panel .data-table thead {
+      --_stick: var(--list-head-top, 0px);
+      position: relative; z-index: 3;
+      translate: 0 clamp(0px, calc(var(--_stick) - var(--_table-top, 0px)), var(--_room, 0px));
+      transition: --_stick 300ms var(--ease-out);
+    }
+    :root[data-chrome-hidden] .list-panel .data-table thead { --_stick: 0px; }
+    .list-panel .data-table th { position: relative; inset-block-start: auto; }
+    /* pinned: the checkbox and the name, on the row's own colour */
+    .list-panel .data-table tbody tr { --_row-bg: var(--color-surface-default); }
+    @media (hover: hover) { .list-panel .data-table tbody tr:hover { --_row-bg: var(--color-surface-hover); } }
+    .list-panel .data-table tbody tr:is([data-selected], :has(.data-table-select :checked)) { --_row-bg: var(--color-surface-selected); }
+    .list-panel .data-table tbody tr[data-open] { --_row-bg: var(--_row-open); }
+    .list-panel .data-table tbody tr[data-id] { cursor: pointer; }
+    /* above the cells that scroll under them, and above the controls in those cells (z 1) */
+    .list-panel .data-table :is(th, td):is(.data-table-select, [data-primary]) { position: sticky; z-index: 2; }
+    .list-panel .data-table thead :is(.data-table-select, [data-primary]) { z-index: calc(var(--z-raised) + 1); }
+    .list-panel .data-table :is(th, td).data-table-select { inset-inline-start: 0; }
+    .list-panel .data-table :is(th, td)[data-primary] { inset-inline-start: var(--_sel-w, 0px); }
+    .list-panel .data-table tbody td:is(.data-table-select, [data-primary]) { background: var(--_row-bg); }
+    .list-panel .table-wrap[data-scrolled] .data-table [data-primary] { box-shadow: inset -1px 0 0 var(--color-line-default); }
+    .group-head { position: sticky; inset-inline-start: var(--space-4); display: inline-flex; align-items: center; }
+  }
 
   /* ---------- scrolling: D, back on scroll up ----------
      The page title scrolls away. Scrolling down mid-list hides the top bar and the card header (only the
@@ -346,17 +380,15 @@
      The rail and sidebar take the top bar's place while it's away. Focus is never left under a bar. */
   .page-header { position: relative; inset-block-start: auto; }
   .top-bar, .list-toolbar { transition: translate 300ms var(--ease-out); }
-  .list-panel .data-table th { transition: inset-block-start 300ms var(--ease-out); }
   /* (the rail keeps its own width and shadow animations; the tablet sidebar keeps its slide) */
   .rail { transition: inline-size var(--duration-medium) var(--ease-out), box-shadow var(--duration-medium) var(--ease-out), inset-block-start 300ms var(--ease-out), block-size 300ms var(--ease-out); }
   @media (min-width: 1024px) { .sidebar { transition: inset-block-start 300ms var(--ease-out), block-size 300ms var(--ease-out); } }
   :root[data-chrome-hidden] .top-bar { translate: 0 -100%; }
   :root[data-chrome-hidden] .list-toolbar { translate: 0 calc(-100% - var(--list-toolbar-top, 0px)); }
-  :root[data-chrome-hidden] .list-panel .data-table th { inset-block-start: 0; }
   @media (min-width: 1024px) { :root[data-chrome-hidden] :is(.rail, .sidebar) { inset-block-start: 0; block-size: 100dvh; } }
   @media (min-width: 768px) and (max-width: 1023px) { :root[data-chrome-hidden] .rail { inset-block-start: 0; block-size: 100dvh; } }
   :root { scroll-padding-block-start: calc(var(--list-head-top, 0px) + var(--space-2)); }
-  @media (prefers-reduced-motion: reduce) { .top-bar, .list-toolbar, .list-panel .data-table th, .rail, .sidebar { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .top-bar, .list-toolbar, .list-panel .data-table thead, .rail, .sidebar { transition: none; } }
   .data-table tbody tr[data-selected] td { background: var(--color-surface-selected); }
   @media (hover: hover) and (min-width: 768px) {
     .data-table tbody .row-actions .button { opacity: 0; transition: opacity var(--duration-fast) var(--ease-standard); }

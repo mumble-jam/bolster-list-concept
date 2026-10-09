@@ -3,7 +3,8 @@
 // A list config is the whole contract: which cards, stats, columns, filters, groups,
 // views and bulk actions a list has. data-list.js renders any of them.
 // Column widths (w) fit the widest value in the data, or the label with its sort arrow, so
-// sorting or loading more never resizes a column; the first column takes what's left.
+// sorting or loading more never resizes a column; the first column takes what's left. When
+// they don't all fit, the table scrolls sideways rather than narrowing them.
 
 (() => {
   const TODAY = new Date("2026-10-08T12:00:00");
