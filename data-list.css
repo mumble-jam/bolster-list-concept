@@ -744,8 +744,17 @@
   }
   /* the page header scrolls away now, so it needn't cover the page: the grid shows behind it */
   .page-header { background: transparent; }
-  .app-main { position: relative; isolation: isolate; --_nx: 50%; --_ny: 0px; --_vis: 0; transition: --_vis var(--net-fade) var(--ease-out); }
-  .canvas-net, .canvas-glow { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+  /* Cheap to run: the pointer's position, the fade and the scroll offset are written on the layers alone
+     (two elements, nothing inside them), never on the main area, so the table never restyles; and the
+     layers are one screen tall, stuck to the viewport, so a frame repaints one screen, not the whole page.
+     The grid still scrolls with the page: its pattern is shifted by how far the layers have stuck (--_oy). */
+  .app-main { position: relative; isolation: isolate; }
+  .canvas-layers {
+    position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: clip;
+    display: grid; grid-template: 1fr / 1fr;
+    --_nx: 50%; --_ny: 0px; --_oy: 0px; --_vis: 0; transition: --_vis var(--net-fade) var(--ease-out);
+  }
+  .canvas-net, .canvas-glow { grid-area: 1 / 1; align-self: start; position: sticky; inset-block-start: 0; block-size: 100dvh; }
   .canvas-net {
     /* the light theme's line: cement on the warm page, black on cool, unless the panel picked one */
     --_line-l: var(--net-line-l, var(--color-cement-950));
@@ -753,7 +762,7 @@
     background-image: linear-gradient(to left, var(--_c) var(--net-w), transparent var(--net-w)), linear-gradient(to bottom, var(--_c) var(--net-w), transparent var(--net-w));
     background-size: var(--net-cell) var(--net-cell);
     /* from the top-right corner; the horizontal lines sit on the header's rule (its last pixel row) */
-    background-position: right 0 top calc(var(--net-w) * -1);
+    background-position: right 0 top calc(var(--net-w) * -1 - var(--_oy));
     mask-image:
       radial-gradient(ellipse calc(var(--net-r) * var(--net-ratio)) var(--net-r) at var(--_nx) var(--_ny),
         rgb(0 0 0 / calc(var(--net-peak) * var(--_vis))) var(--net-core),

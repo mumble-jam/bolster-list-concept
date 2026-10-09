@@ -1001,27 +1001,33 @@ ${JSON.stringify(v)}`;
     document.addEventListener("click", (e) => { if (e.target.closest("[data-net-open]")) openPanel(); });
     apply();
 
-    // the light eases toward the pointer, one write per frame
+    // the light eases toward the pointer, one write per frame, on the layers only (see the CSS)
+    const layers = $(".canvas-layers"), net = $(".canvas-net"), lay = layers.style;
     const still = matchMedia("(prefers-reduced-motion: reduce)");
-    let px = 0, py = 0, x = 0, y = 0, raf = 0, placed = false;
+    let px = 0, py = 0, x = 0, y = 0, raf = 0, placed = false, over = false;
     const tick = () => {
-      const r = main.getBoundingClientRect();
-      const tx = px - r.left, ty = py - r.top, k = still.matches ? 0 : v.trail;
+      raf = 0;
+      const n = net.getBoundingClientRect();
+      // how far the layers have stuck below the top of the page, so the pattern stays on the page
+      lay.setProperty("--_oy", `${Math.round(n.top - main.getBoundingClientRect().top)}px`);
+      if (!over) return;
+      const tx = px - n.left, ty = py - n.top, k = still.matches ? 0 : v.trail;
       if (!placed) { x = tx; y = ty; placed = true; }
       x += (tx - x) * (1 - k); y += (ty - y) * (1 - k);
-      main.style.setProperty("--_nx", `${x.toFixed(1)}px`); main.style.setProperty("--_ny", `${y.toFixed(1)}px`);
-      raf = Math.abs(tx - x) + Math.abs(ty - y) > 0.3 ? requestAnimationFrame(tick) : 0;
+      lay.setProperty("--_nx", `${x.toFixed(1)}px`); lay.setProperty("--_ny", `${y.toFixed(1)}px`);
+      if (Math.abs(tx - x) + Math.abs(ty - y) > 0.3) go();
     };
     const go = () => { if (!raf) raf = requestAnimationFrame(tick); };
     main.addEventListener("pointermove", (e) => {
       if (e.pointerType === "touch") return;
-      px = e.clientX; py = e.clientY;
-      main.style.setProperty("--_vis", "1");
+      px = e.clientX; py = e.clientY; over = true;
+      lay.setProperty("--_vis", "1");
       go();
     });
-    main.addEventListener("pointerleave", () => { main.style.setProperty("--_vis", "0"); placed = false; });
-    // the page scrolls under a still pointer: keep the light where the pointer is
-    addEventListener("scroll", () => { if (placed) go(); }, { passive: true });
+    main.addEventListener("pointerleave", () => { lay.setProperty("--_vis", "0"); over = placed = false; });
+    addEventListener("scroll", go, { passive: true });
+    addEventListener("resize", go);
+    go();
   }
 
   $("#cc-canvas").value = document.documentElement.dataset.canvas || "paper";
