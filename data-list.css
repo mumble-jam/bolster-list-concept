@@ -385,10 +385,20 @@
   @media (min-width: 1024px) { .sidebar { transition: inset-block-start 300ms var(--ease-out), block-size 300ms var(--ease-out); } }
   :root[data-chrome-hidden] .top-bar { translate: 0 -100%; }
   :root[data-chrome-hidden] .list-toolbar { translate: 0 calc(-100% - var(--list-toolbar-top, 0px)); }
-  @media (min-width: 1024px) { :root[data-chrome-hidden] :is(.rail, .sidebar) { inset-block-start: 0; block-size: 100dvh; } }
+  @media (min-width: 1024px) {
+    :root[data-chrome-hidden] :is(.app-shell[data-rail-pinned] > .rail, .sidebar) { inset-block-start: 0; block-size: 100dvh; }
+    /* trying out: with the rail collapsed, the logo stays above it while the rest of the top bar
+       slides away, so the left column reads as one dark strip (pinned, the rail still rises) */
+    .bs-logo { background: var(--color-surface-chrome); transition: translate 300ms var(--ease-out), border-color 300ms var(--ease-out); }
+    :root[data-chrome-hidden] .app-shell:not([data-rail-pinned]) .bs-logo {
+      translate: 0 var(--shell-top-bar-height);
+      border-inline-end-color: transparent;
+      box-shadow: 0 1px 0 var(--color-surface-chrome);
+    }
+  }
   @media (min-width: 768px) and (max-width: 1023px) { :root[data-chrome-hidden] .rail { inset-block-start: 0; block-size: 100dvh; } }
   :root { scroll-padding-block-start: calc(var(--list-head-top, 0px) + var(--space-2)); }
-  @media (prefers-reduced-motion: reduce) { .top-bar, .list-toolbar, .list-panel .data-table thead, .rail, .sidebar { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .top-bar, .list-toolbar, .list-panel .data-table thead, .rail, .sidebar, .bs-logo { transition: none; } }
   .data-table tbody tr[data-selected] td { background: var(--color-surface-selected); }
   @media (hover: hover) and (min-width: 768px) {
     .data-table tbody .row-actions .button { opacity: 0; transition: opacity var(--duration-fast) var(--ease-standard); }
@@ -650,4 +660,56 @@
   .notes h3 { font-size: var(--text-base); line-height: var(--leading-base); margin-block-end: var(--space-2); }
   .notes ol, .notes ul { display: grid; gap: var(--space-2); padding-inline-start: var(--space-5); margin: 0; }
   .notes li b { font-weight: var(--font-weight-medium); }
+
+  /* ---------- trying out: tactile CTAs (settings from the button tuner, "Claude-like" edited) ----------
+     Primary (yellow on black; black on yellow in dark) and brand (black on yellow) get a body: an edge, a light
+     line along the top and a darker one along the bottom, a sheen, a contact and an ambient shadow. Hover lifts
+     1px and brightens; press sinks 1px at once and eases back. Numbers that differ by fill are set per fill;
+     yellow is the default (brand everywhere, primary in dark), black is primary in light. Off the system. */
+  /* every button takes 8px corners, so the CTAs don't stand apart from the buttons beside them */
+  .button { border-radius: var(--radius-md); }
+  @property --_sa { syntax: "<number>"; inherits: true; initial-value: 0; }
+  @property --_sk { syntax: "<number>"; inherits: true; initial-value: 1; }
+  @property --_pa { syntax: "<number>"; inherits: true; initial-value: 0; }
+  @property --_da { syntax: "<number>"; inherits: true; initial-value: 0; }
+  .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"]) {
+    /* yellow fill */
+    --_edge: color-mix(in oklab, var(--_bg), black 10%);
+    --_line: 0.21; --_sheen: 0.24; --_lip: 0.08;
+    /* shadows fade on near-black, so dark doubles them and more */
+    --_shadow-k: 1;
+    /* state inputs: sheen, shadow scale, inner (press) shadow, darken, lift */
+    --_sa: var(--_sheen); --_sk: 1; --_pa: 0; --_da: 0; --_lift: 0px;
+    --_border: var(--_edge); --_border-hover: var(--_edge); --_bg-hover: var(--_bg); --_fg-hover: var(--_fg); --_bg-active: var(--_bg);
+    background-image: linear-gradient(rgb(0 0 0 / var(--_da)), rgb(0 0 0 / var(--_da))), linear-gradient(rgb(255 255 255 / var(--_sa)), transparent);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / calc(var(--_line) * (1 - var(--_pa) * 3))),
+      inset 0 -1px 0 rgb(0 0 0 / var(--_lip)),
+      inset 0 1px 3px rgb(0 0 0 / var(--_pa)),
+      0 1px 3px rgb(0 0 0 / calc(0.09 * var(--_shadow-k) * var(--_sk))),
+      0 6px 5px rgb(0 0 0 / calc(0.09 * var(--_shadow-k) * var(--_sk)));
+    translate: 0 var(--_lift);
+    transition-property: --_sa, --_sk, --_pa, --_da, translate, background-color, border-color, color;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-out);
+  }
+  /* black fill (primary in light): black can't get darker, so the edge is lighter and the lines do the work */
+  .button:is(:not([data-variant]), [data-variant="primary"]) {
+    --_edge: light-dark(color-mix(in oklab, var(--_bg), white 25%), color-mix(in oklab, var(--_bg), black 10%));
+    --_line: 0.3; --_sheen: 0.16; --_lip: 0.3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"]) { --_line: 0.21; --_sheen: 0.24; --_lip: 0.08; --_shadow-k: 2.5; }
+  }
+  :root[data-theme="dark"] .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"]) { --_line: 0.21; --_sheen: 0.24; --_lip: 0.08; --_shadow-k: 2.5; }
+  @media (hover: hover) {
+    .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"]):hover:not(:disabled, [aria-disabled="true"], [aria-busy="true"]) { --_sa: calc(var(--_sheen) + 0.06); --_lift: -1px; --_sk: 1.5; }
+  }
+  /* press lands at once (30ms); only the release eases */
+  .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"]):active:not(:disabled, [aria-disabled="true"]) {
+    --_sa: 0; --_da: 0.02; --_pa: 0.12; --_lift: 1px; --_sk: 0.3;
+    transition-duration: 30ms;
+  }
+  .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"]):is(:disabled, [aria-disabled="true"]) { --_border: transparent; background-image: none; box-shadow: none; }
+  @media (prefers-reduced-motion: reduce) { .button { --_lift: 0px !important; } }
 }
