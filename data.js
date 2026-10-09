@@ -363,6 +363,7 @@
     rows: clients,
     search: (x) => `${x.name} ${x.email} ${x.phone} ${x.city}`,
     searchHint: "Search by name, email, phone or city",
+    searchIn: ["contact"],
     dateKey: "lastContact",
     cardKey: "status",
     metrics: [
@@ -441,6 +442,7 @@
     rows: items,
     search: (x) => `${x.name} ${x.category} ${x.vendor}`,
     searchHint: "Search by item, category or vendor",
+    searchIn: ["category", "vendor"],
     dateKey: "updated",
     cardKey: null, metrics: [], insight: null,
     columns: [

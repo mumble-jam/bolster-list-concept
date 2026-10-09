@@ -10,9 +10,9 @@
 <link rel="apple-touch-icon" href="shared/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=3afcad8c">
-<link rel="stylesheet" href="shared/shell.css?v=3afcad8c">
-<link rel="stylesheet" href="data-list.css?v=3afcad8c">
+<link rel="stylesheet" href="system/bolster.css?v=22a13983">
+<link rel="stylesheet" href="shared/shell.css?v=22a13983">
+<link rel="stylesheet" href="data-list.css?v=22a13983">
 <script>try { document.documentElement.dataset.canvas = localStorage.getItem("bolster-concepts:canvas") === "cool" ? "cool" : "paper"; } catch { document.documentElement.dataset.canvas = "paper"; }</script>
 </head>
 <body>
@@ -97,10 +97,11 @@
       <ol>
         <li><b>Four bands, top to bottom:</b> page header, slice cards, the table card (with its own header), and a floating bar while rows are selected. Each control lives in the band of the question it answers.</li>
         <li><b>The table card has a header, as in Shopify.</b> "Add filter" and a bare search field on the left; the date range, a rule and the Display settings icon. Its menu is a short list of settings, each with its current value (Group by: None, Row height: Comfortable, Columns: All) opening a nested menu with a check by the choice. Sorting is in the column headers, and in this menu only on phones, where those are hidden on the right. Its filters still change the cards above. Scrolling follows option D from the "What stays on screen" research board: the page title scrolls away; once you are into the list, scrolling down hides the top bar and the card header (only the column header stays on desktop, only the tab bar on phones), and a few pixels back up brings them back in 300 ms. Menus, a focused field or Tab into either bar keep them in view.</li>
-        <li><b>Search becomes a chip.</b> Typing filters as you go; Enter (or leaving the field) turns the words into a chip, "Search: “basement”". Several chips must all match. Click a chip to edit its words, Backspace in the empty field takes back the last one, press / to jump to the field. A second row shows the count ("23 of 132 jobs"), the chips and Clear all once something narrows the list; at rest the All card already gives the total.</li>
+        <li><b>Search becomes a chip.</b> Typing filters as you go; Enter (or leaving the field) turns the words into a chip, "Search: “basement”". Several chips must all match. Click a chip to edit its words, Backspace in the empty field takes back the last one, press / to jump to the field. The matched letters are marked in the rows, highlighter yellow, in the fields the search reads (the record's name and the line under it, and a customer's contact or an item's category and vendor), never in a column the search doesn't read, such as the owner. A second row shows the count ("23 of 132 jobs"), the chips and Clear all once something narrows the list; at rest the All card already gives the total.</li>
         <li><b>Add filter, then chips.</b> Pick a field, then a value; it becomes a chip with ×. A field left without a value disappears again. Status isn't a chip when a card already shows it.</li>
         <li><b>Cards sit flat.</b> No shadow: white cards with warm edges on a warm Paper page, a warm table header and filled chips. A hovered card only darkens its edge. Warm goes through the whole page: row rules match the card edge, the header rule is a step darker, rows hover in the paper tone, and every tint (ghost and secondary button hovers, the search field, skeletons, neutral and draft badges, disabled fills) comes from cement. In dark, cards and dialogs lose their pink cast too. Text, inputs and the dark top bar keep Bolster's own neutral, and selection stays blue.</li>
         <li><b>A grid on the page, lit by the pointer (trying out, on by default).</b> A faint grid, its cells half as tall as the page header and starting from the top-right corner so a line runs along the header's rule, sits on the page between the cards and brightens in a soft area around the pointer, trailing it a little; in dark, a soft blue-violet light sits under it. It's decoration only: behind the content, hidden from screen readers, never on the cards, and still on phones as a faint grid everywhere. Turn it off, or tune it, in Concept controls.</li>
+        <li><b>Tactile cards (trying out, on by default).</b> The buttons' body, quieter, so cards read as surfaces and buttons stay the things you press: a white line along the top, a darker bottom edge, a faint sheen and shade, and two shadows tinted with the page. The status cards are buttons, so they move: hover lifts them a pixel, a press sinks them, and the selected filter stays pressed in. Turn it off, pick a preset, or tune every value in Concept controls.</li>
         <li><b>Explanations use the screen’s own words (D27).</b> Info notes name cards, statuses and columns exactly as the screen does, and show each status with its mark, as on its card. A term the screen doesn’t show (won, decided, invoiced) is defined once in the screen’s labels, then used the same way in the card’s own figures.</li>
         <li><b>Columns keep their width.</b> Each column is measured, not guessed: as wide as the widest value it can ever hold across the whole list (every status, even one no row has yet, and its header); the first column takes the rest and is the only one that truncates. Sorting or loading more never moves a column, and every header keeps room for the sort arrow (it shows faintly on hover). A column never gets narrower than that: when they don't all fit, the table scrolls sideways in its card, with the checkbox and name pinned on the left, a rule at their edge once you've scrolled, and a fade on the right while there's more. The column header still follows the page, under the bars.</li>
         <li><b>Slice cards are the status filter.</b> "All" plus one card per status; the whole card toggles and stays outlined. Amount first, count in the corner. Empty slices stay, dimmed. They count what the other filters let through, so a card's number is what you get when you click it.</li>
@@ -149,7 +150,10 @@
       <p class="field-helper">Two directions for the client. Both keep text at AA, in light and dark.</p></div>
     <div class="field" data-size="sm">
       <label class="choice"><input type="checkbox" role="switch" class="toggle" id="cc-grid"> Grid on the page</label>
-      <button class="button" data-variant="secondary" data-size="sm" data-net-open hidden>Tune the grid</button></div>
+      <button class="button" data-variant="secondary" data-size="sm" data-tune="net" hidden>Tune the grid</button></div>
+    <div class="field" data-size="sm">
+      <label class="choice"><input type="checkbox" role="switch" class="toggle" id="cc-cards"> Tactile cards</label>
+      <button class="button" data-variant="secondary" data-size="sm" data-tune="cards" hidden>Tune the cards</button></div>
     <button class="button" data-variant="secondary" data-size="sm" data-open-dialog="notes">About this concept</button>
     <div class="cluster" style="justify-content:space-between">
       <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
@@ -158,10 +162,10 @@
 </details>
 
 <div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
-<script src="shared/icons.js?v=3afcad8c"></script>
-<script src="shared/shell.js?v=3afcad8c"></script>
-<script src="system/specimens/specimen.js?v=3afcad8c"></script>
-<script src="data.js?v=3afcad8c"></script>
-<script src="data-list.js?v=3afcad8c"></script>
+<script src="shared/icons.js?v=22a13983"></script>
+<script src="shared/shell.js?v=22a13983"></script>
+<script src="system/specimens/specimen.js?v=22a13983"></script>
+<script src="data.js?v=22a13983"></script>
+<script src="data-list.js?v=22a13983"></script>
 </body>
 </html>

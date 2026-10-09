@@ -300,6 +300,7 @@
     const foot = $("#list-foot");
     $("#banner").innerHTML = "";
     foot.innerHTML = "";
+    CSS.highlights?.delete("search-hit");
 
     if (st.mode === "empty") {
       wrap.innerHTML = state(I.inbox, `No ${cfg.noun[1]} yet`, `${cfg.title} you create or import show up here, with totals and filters.`,
@@ -336,7 +337,7 @@
 
     const rowHtml = (x) => {
       const name = cfg.search(x).split(" ").slice(0, 4).join(" ");
-      return `<tr data-id="${x.id}"${st.selected.has(x.id) ? " data-selected" : ""}${openId === x.id ? ' data-open aria-current="true"' : ""}><td class="data-table-select"><input type="checkbox" class="checkbox" data-select="${x.id}" aria-label="Select ${esc(name)}"${st.selected.has(x.id) ? " checked" : ""}></td>${c.map((col) => `<td${col.required ? " data-primary" : ""}${col.numeric ? " data-numeric" : ""}${col.hideBelow ? ` data-hide-below="${col.hideBelow}"` : ""}${col.m ? ` data-m="${col.m}"` : ""}><div class="cell">${col.render(x)}</div></td>`).join("")}<td class="row-actions"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-row-menu="${x.id}" aria-label="Actions for ${esc(name)}" aria-haspopup="menu" aria-expanded="false">${I.dots}</button></td></tr>`;
+      return `<tr data-id="${x.id}"${st.selected.has(x.id) ? " data-selected" : ""}${openId === x.id ? ' data-open aria-current="true"' : ""}><td class="data-table-select"><input type="checkbox" class="checkbox" data-select="${x.id}" aria-label="Select ${esc(name)}"${st.selected.has(x.id) ? " checked" : ""}></td>${c.map((col) => `<td data-key="${col.key}"${col.required ? " data-primary" : ""}${col.numeric ? " data-numeric" : ""}${col.hideBelow ? ` data-hide-below="${col.hideBelow}"` : ""}${col.m ? ` data-m="${col.m}"` : ""}><div class="cell">${col.render(x)}</div></td>`).join("")}<td class="row-actions"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-row-menu="${x.id}" aria-label="Actions for ${esc(name)}" aria-haspopup="menu" aria-expanded="false">${I.dots}</button></td></tr>`;
     };
 
     let body = "";
@@ -368,6 +369,29 @@
     const caption = `<caption class="visually-hidden">${esc(cfg.title)}, sorted by ${esc((cfg.columns.find((x) => x.key === st.sort.key) || c[0]).label.toLowerCase())}, ${st.sort.dir === "asc" ? "ascending" : "descending"}</caption>`;
     wrap.innerHTML = `<table class="data-table" data-density="${st.density}">${caption}${head}<tbody>${body}</tbody></table>`;
     syncSelectPage(shownRows.map((x) => x.id));
+    markHits();
+  }
+  // search hits: every search chip and the words being typed are marked where they matched, in the cells the
+  // search reads (the record's title and the line under it, plus the columns a config lists in searchIn), not
+  // in the owner or anything else a word might happen to appear in. Custom Highlight API: no markup goes in,
+  // so measured widths, truncation and the row's link stay as they are.
+  function markHits() {
+    if (!window.Highlight || !CSS.highlights) return;
+    const words = [...st.terms, st.search].map((t) => t.trim().toLowerCase()).filter(Boolean);
+    const ranges = [];
+    if (words.length) {
+      const cells = ["td[data-primary]", ...(cfg.searchIn || []).map((k) => `td[data-key="${k}"]`)].join(", ");
+      for (const td of $("#table-wrap").querySelectorAll(`tbody :is(${cells})`)) {
+        const walk = document.createTreeWalker(td, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentElement.closest(".avatar, .visually-hidden") ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT) });
+        for (let n; (n = walk.nextNode()); ) {
+          const text = n.data.toLowerCase();
+          for (const w of words) for (let i = text.indexOf(w); i !== -1; i = text.indexOf(w, i + w.length)) {
+            const r = new Range(); r.setStart(n, i); r.setEnd(n, i + w.length); ranges.push(r);
+          }
+        }
+      }
+    }
+    CSS.highlights.set("search-hit", new Highlight(...ranges));
   }
   function syncSelectPage(ids) {
     const all = $("#select-page");
@@ -889,10 +913,11 @@
     if (t.id === "cc-state") { st.mode = t.value; st.selected.clear(); render(); }
     if (t.id === "cc-grid") {
       document.documentElement.toggleAttribute("data-grid", t.checked);
-      $("[data-net-open]").hidden = !t.checked;
-      if (!t.checked) { const p = $(".net-panel"); if (p) p.hidden = true; }
+      $('[data-tune="net"]').hidden = !t.checked;
+      if (!t.checked) tuners.find((x) => x.id === "net")?.close();
       try { localStorage.setItem("bolster-concepts:grid", t.checked ? "on" : "off"); } catch {}
     }
+    if (t.id === "cc-cards") { tactile(t.checked); try { localStorage.setItem("bolster-concepts:tactile", t.checked ? "on" : "off"); } catch {} }
     if (t.id === "cc-canvas") { document.documentElement.dataset.canvas = t.value; try { localStorage.setItem("bolster-concepts:canvas", t.value); } catch {} }
   });
 
@@ -1034,81 +1059,107 @@
     render();
     stick();
   }
-  // ---------- canvas grid: cells sized from the page header, a light that eases toward the pointer ----------
-  {
-    const main = $(".app-main"), head = $(".page-header"), root = document.documentElement.style;
-    // [key, label, min, max, step, unit] or [key, label, "color"]
-    const NET = [
-      ["Grid", [["div", "Cells per header height", 1, 4, 1, ""], ["w", "Line width", 0.5, 3, 0.5, "px"]]],
-      ["Light around the pointer", [["r", "Radius", 60, 600, 10, "px"], ["ratio", "Width to height", 0.5, 2.5, 0.05, "×"], ["core", "Solid centre", 0, 80, 5, "%"], ["peak", "Strength", 0, 1, 0.05, ""], ["base", "Grid away from the pointer", 0, 0.6, 0.01, ""]]],
-      ["Light theme", [["lineL", "Line colour", "color"], ["lineLa", "Line strength", 0, 0.4, 0.01, ""], ["glowL", "Glow colour", "color"], ["glowLa", "Glow strength", 0, 0.6, 0.01, ""]]],
-      ["Dark theme", [["lineD", "Line colour", "color"], ["lineDa", "Line strength", 0, 0.4, 0.01, ""], ["glowD", "Glow colour", "color"], ["glowDa", "Glow strength", 0, 0.6, 0.01, ""]]],
-      ["Glow and motion", [["gr", "Glow radius", 80, 800, 10, "px"], ["trail", "Trail", 0, 0.95, 0.05, ""], ["fade", "Fade in and out", 0, 800, 20, "ms"]]],
-    ];
-    const DEF = { div: 2, w: 1, r: 260, ratio: 1.3, core: 10, peak: 1, base: 0.25, lineL: "#3b3320", lineLa: 0.09, glowL: "#f7f5ef", glowLa: 0, lineD: "#ffffff", lineDa: 0.07, glowD: "#6b93ff", glowDa: 0.12, gr: 420, trail: 0.8, fade: 800 };
-    const rows = NET.flatMap(([, r]) => r);
-    const KEY = "bolster-concepts:net";
-    let v = { ...DEF };
-    try { v = { ...DEF, ...JSON.parse(localStorage.getItem(KEY)) }; } catch {}
-
-    const cell = () => root.setProperty("--net-cell", `${head.offsetHeight / v.div}px`);
-    new ResizeObserver(cell).observe(head);
-
-    const fmt = (r) => (r[2] === "color" ? v[r[0]] : Number(v[r[0]]).toFixed((String(r[4]).split(".")[1] || "").length) + r[5]);
+  // ---------- tuners: concept tooling, a panel of sliders that writes custom properties, opened from Concept controls ----------
+  // groups are [legend, rows, note?]; a row is [key, label, min, max, step, unit], [key, label, "color"] or [key, label, "check"].
+  // Values live in localStorage; "Copy settings" puts them on the clipboard to paste in the chat.
+  const tuners = [];
+  function tuner({ id, title, groups, def, presets, set }) {
+    const rows = groups.flatMap(([, r]) => r), key = `bolster-concepts:${id}`;
+    let v = { ...def }, panel;
+    try { v = { ...def, ...JSON.parse(localStorage.getItem(key)) }; } catch {}
+    const fmt = (r) => (r[2] === "color" ? v[r[0]] : r[2] === "check" ? (v[r[0]] ? "on" : "off") : Number(v[r[0]]).toFixed((String(r[4]).split(".")[1] || "").length) + r[5]);
+    const preset = () => Object.keys(presets || {}).find((n) => rows.every(([k]) => ({ ...def, ...presets[n] })[k] === v[k])) || "";
     function apply() {
-      const px = (k) => `${v[k]}px`;
-      Object.entries({ "--net-w": px("w"), "--net-r": px("r"), "--net-ratio": v.ratio, "--net-core": `${v.core}%`, "--net-peak": v.peak, "--net-base": v.base,
-        "--net-line-la": v.lineLa, "--net-line-d": v.lineD, "--net-line-da": v.lineDa, "--net-glow-l": v.glowL, "--net-glow-la": v.glowLa,
-        "--net-glow-d": v.glowD, "--net-glow-da": v.glowDa, "--net-gr": px("gr"), "--net-fade": `${v.fade}ms` }).forEach(([k, x]) => root.setProperty(k, x));
-      // the light line follows the canvas (cement on warm, black on cool) until a colour is picked
-      if (v.lineL === DEF.lineL) root.removeProperty("--net-line-l"); else root.setProperty("--net-line-l", v.lineL);
-      cell();
+      set(v, def);
       if (panel) {
-        for (const r of rows) { panel.querySelector(`#net-${r[0]}`).value = v[r[0]]; const o = panel.querySelector(`#net-o-${r[0]}`); if (o) o.textContent = fmt(r); panel.querySelector(`[data-k="${r[0]}"]`).toggleAttribute("data-changed", v[r[0]] !== DEF[r[0]]); }
+        for (const r of rows) {
+          const el = panel.querySelector(`#${id}-${r[0]}`);
+          if (r[2] === "check") el.checked = v[r[0]]; else el.value = v[r[0]];
+          const o = panel.querySelector(`#${id}-o-${r[0]}`); if (o) o.textContent = fmt(r);
+          panel.querySelector(`[data-k="${r[0]}"]`).toggleAttribute("data-changed", v[r[0]] !== def[r[0]]);
+        }
+        const p = panel.querySelector("[data-preset]"); if (p) p.value = preset();
       }
-      try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {}
+      try { localStorage.setItem(key, JSON.stringify(v)); } catch {}
     }
     const settings = () => {
-      const edited = rows.filter(([k]) => v[k] !== DEF[k]).map(([k]) => k);
-      const o = (k) => fmt(rows.find((r) => r[0] === k));
-      return `Grid settings (in the concept)${edited.length ? `, edited: ${edited.join(", ")}` : ", unchanged"}
-grid: ${v.div} cell${v.div > 1 ? "s" : ""} per header height · line ${o("w")}
-light: radius ${o("r")} · width ${o("ratio")} · solid centre ${o("core")} · strength ${o("peak")} · base ${o("base")}
-light theme: line ${o("lineL")} ${o("lineLa")} · glow ${o("glowL")} ${o("glowLa")}
-dark theme: line ${o("lineD")} ${o("lineDa")} · glow ${o("glowD")} ${o("glowDa")}
-glow radius ${o("gr")} · trail ${o("trail")} · fade ${o("fade")}
+      const edited = rows.filter(([k]) => v[k] !== def[k]).map(([, l]) => l.toLowerCase());
+      const from = preset();
+      return `${title} settings (in the concept)${from ? `, preset "${presets[from].name}"` : ""}${edited.length ? `, edited: ${edited.join(", ")}` : ", unchanged"}
+${groups.map(([t, rs]) => `${t}: ${rs.map((r) => `${r[1].toLowerCase()} ${fmt(r)}`).join(" · ")}`).join("\n")}
 ${JSON.stringify(v)}`;
     };
-
-    // the panel, built on first open
-    let panel;
-    function openPanel() {
+    const opener = () => $(`[data-tune="${id}"]`);
+    const close = () => { if (panel && !panel.hidden) { panel.hidden = true; opener()?.focus(); } };
+    function toggle() {
       if (!panel) {
         panel = document.createElement("section");
-        panel.className = "net-panel"; panel.hidden = true; panel.setAttribute("aria-label", "Grid");
-        panel.innerHTML = `<header><span class="concept-tag">Concept</span> Grid<button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close" data-net-close>${I.xl}</button></header>
-          <div class="net-body">${NET.map(([t, rs]) => `<fieldset><legend>${t}</legend>${rs.map((r) => r[2] === "color"
-            ? `<div class="net-row" data-k="${r[0]}"><label for="net-${r[0]}">${r[1]}</label><input type="color" id="net-${r[0]}"></div>`
-            : `<div class="net-row" data-k="${r[0]}"><label for="net-${r[0]}">${r[1]}</label><output id="net-o-${r[0]}"></output><input type="range" id="net-${r[0]}" min="${r[2]}" max="${r[3]}" step="${r[4]}"></div>`).join("")}</fieldset>`).join("")}</div>
-          <div class="net-foot"><button type="button" class="button" data-size="sm" data-net-copy>Copy settings</button><button type="button" class="button" data-variant="ghost" data-size="sm" data-net-reset>Reset</button><span aria-live="polite"></span></div>`;
+        panel.className = "tuner-panel"; panel.hidden = true; panel.setAttribute("aria-label", title);
+        const row = (r) => r[2] === "color"
+          ? `<div class="tuner-row" data-k="${r[0]}"><label for="${id}-${r[0]}">${r[1]}</label><input type="color" id="${id}-${r[0]}"></div>`
+          : r[2] === "check"
+            ? `<div class="tuner-row" data-k="${r[0]}" data-check><label class="choice"><input type="checkbox" id="${id}-${r[0]}"> ${r[1]}</label></div>`
+            : `<div class="tuner-row" data-k="${r[0]}"><label for="${id}-${r[0]}">${r[1]}</label><output id="${id}-o-${r[0]}"></output><input type="range" id="${id}-${r[0]}" min="${r[2]}" max="${r[3]}" step="${r[4]}"></div>`;
+        panel.innerHTML = `<header><span class="concept-tag">Concept</span> ${title}<button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close" data-tune-close>${I.xl}</button></header>
+          <div class="tuner-body">${presets ? `<div class="field" data-size="sm"><label class="field-label" for="${id}-preset">Start from</label><div class="select"><select class="input" id="${id}-preset" data-preset>${Object.entries(presets).map(([k, p]) => `<option value="${k}">${p.name}</option>`).join("")}<option value="" hidden>Custom</option></select></div></div>` : ""}
+          ${groups.map(([t, rs, note]) => `<fieldset><legend>${t}</legend>${note ? `<p class="tuner-note">${note}</p>` : ""}${rs.map(row).join("")}</fieldset>`).join("")}</div>
+          <div class="tuner-foot"><button type="button" class="button" data-size="sm" data-tune-copy>Copy settings</button><button type="button" class="button" data-variant="ghost" data-size="sm" data-tune-reset>Reset</button><span aria-live="polite"></span></div>`;
         document.body.append(panel);
-        panel.addEventListener("input", (e) => { const k = e.target.id.slice(4); if (k in v) { v[k] = e.target.type === "color" ? e.target.value : Number(e.target.value); apply(); } });
+        panel.addEventListener("input", (e) => {
+          const t = e.target;
+          if (t.matches("[data-preset]")) { if (t.value) { const { name, ...p } = presets[t.value]; v = { ...def, ...p }; apply(); } return; }
+          const k = t.id.slice(id.length + 1);
+          if (k in v) { v[k] = t.type === "color" ? t.value : t.type === "checkbox" ? t.checked : Number(t.value); apply(); }
+        });
         panel.addEventListener("click", (e) => {
-          if (e.target.closest("[data-net-close]")) { panel.hidden = true; $("[data-net-open]").focus(); }
-          if (e.target.closest("[data-net-reset]")) { v = { ...DEF }; apply(); }
-          if (e.target.closest("[data-net-copy]")) {
-            const say = (m) => { panel.querySelector(".net-foot span").textContent = m; setTimeout(() => (panel.querySelector(".net-foot span").textContent = ""), 2500); };
+          if (e.target.closest("[data-tune-close]")) close();
+          if (e.target.closest("[data-tune-reset]")) { v = { ...def }; apply(); }
+          if (e.target.closest("[data-tune-copy]")) {
+            const out = panel.querySelector(".tuner-foot span"), say = (m) => { out.textContent = m; setTimeout(() => (out.textContent = ""), 2500); };
             navigator.clipboard?.writeText(settings()).then(() => say("Copied. Paste it in the chat."), () => say("Couldn't copy here."));
           }
         });
-        panel.addEventListener("keydown", (e) => { if (e.key === "Escape") { panel.hidden = true; $("[data-net-open]").focus(); } });
+        panel.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
       }
+      // one panel at a time: they share the corner
+      for (const t of tuners) if (t !== self) t.close();
       panel.hidden = !panel.hidden;
       apply();
-      if (!panel.hidden) panel.querySelector("input").focus();
+      if (!panel.hidden) panel.querySelector("input, select").focus();
     }
-    document.addEventListener("click", (e) => { if (e.target.closest("[data-net-open]")) openPanel(); });
+    const self = { id, toggle, close, get v() { return v; } };
+    tuners.push(self);
     apply();
+    return self;
+  }
+  document.addEventListener("click", (e) => { const b = e.target.closest("[data-tune]"); if (b) tuners.find((t) => t.id === b.dataset.tune)?.toggle(); });
+
+  // ---------- canvas grid: cells sized from the page header, a light that eases toward the pointer ----------
+  {
+    const main = $(".app-main"), head = $(".page-header"), root = document.documentElement.style;
+    let grid;
+    const cell = () => root.setProperty("--net-cell", `${head.offsetHeight / grid.v.div}px`);
+    grid = tuner({
+      id: "net", title: "Grid",
+      groups: [
+        ["Grid", [["div", "Cells per header height", 1, 4, 1, ""], ["w", "Line width", 0.5, 3, 0.5, "px"]]],
+        ["Light around the pointer", [["r", "Radius", 60, 600, 10, "px"], ["ratio", "Width to height", 0.5, 2.5, 0.05, "×"], ["core", "Solid centre", 0, 80, 5, "%"], ["peak", "Strength", 0, 1, 0.05, ""], ["base", "Grid away from the pointer", 0, 0.6, 0.01, ""]]],
+        ["Light theme", [["lineL", "Line colour", "color"], ["lineLa", "Line strength", 0, 0.4, 0.01, ""], ["glowL", "Glow colour", "color"], ["glowLa", "Glow strength", 0, 0.6, 0.01, ""]]],
+        ["Dark theme", [["lineD", "Line colour", "color"], ["lineDa", "Line strength", 0, 0.4, 0.01, ""], ["glowD", "Glow colour", "color"], ["glowDa", "Glow strength", 0, 0.6, 0.01, ""]]],
+        ["Glow and motion", [["gr", "Glow radius", 80, 800, 10, "px"], ["trail", "Trail", 0, 0.95, 0.05, ""], ["fade", "Fade in and out", 0, 800, 20, "ms"]]],
+      ],
+      def: { div: 2, w: 1, r: 260, ratio: 1.3, core: 10, peak: 1, base: 0.25, lineL: "#3b3320", lineLa: 0.09, glowL: "#f7f5ef", glowLa: 0, lineD: "#ffffff", lineDa: 0.07, glowD: "#6b93ff", glowDa: 0.12, gr: 420, trail: 0.8, fade: 800 },
+      set(v, def) {
+        const px = (k) => `${v[k]}px`;
+        Object.entries({ "--net-w": px("w"), "--net-r": px("r"), "--net-ratio": v.ratio, "--net-core": `${v.core}%`, "--net-peak": v.peak, "--net-base": v.base,
+          "--net-line-la": v.lineLa, "--net-line-d": v.lineD, "--net-line-da": v.lineDa, "--net-glow-l": v.glowL, "--net-glow-la": v.glowLa,
+          "--net-glow-d": v.glowD, "--net-glow-da": v.glowDa, "--net-gr": px("gr"), "--net-fade": `${v.fade}ms` }).forEach(([k, x]) => root.setProperty(k, x));
+        // the light line follows the canvas (cement on warm, black on cool) until a colour is picked
+        if (v.lineL === def.lineL) root.removeProperty("--net-line-l"); else root.setProperty("--net-line-l", v.lineL);
+        if (grid) cell();
+      },
+    });
+    new ResizeObserver(cell).observe(head);
 
     // the light eases toward the pointer, one write per frame, on the layers only (see the CSS)
     const layers = $(".canvas-layers"), net = $(".canvas-net"), lay = layers.style;
@@ -1120,7 +1171,7 @@ ${JSON.stringify(v)}`;
       // how far the layers have stuck below the top of the page, so the pattern stays on the page
       lay.setProperty("--_oy", `${Math.round(n.top - main.getBoundingClientRect().top)}px`);
       if (!over) return;
-      const tx = px - n.left, ty = py - n.top, k = still.matches ? 0 : v.trail;
+      const tx = px - n.left, ty = py - n.top, k = still.matches ? 0 : grid.v.trail;
       if (!placed) { x = tx; y = ty; placed = true; }
       x += (tx - x) * (1 - k); y += (ty - y) * (1 - k);
       lay.setProperty("--_nx", `${x.toFixed(1)}px`); lay.setProperty("--_ny", `${y.toFixed(1)}px`);
@@ -1139,6 +1190,47 @@ ${JSON.stringify(v)}`;
     go();
   }
 
+  // ---------- tactile cards: the CTAs' body for cards, quieter (see the CSS) ----------
+  const cards = tuner({
+    id: "cards", title: "Cards",
+    groups: [
+      ["Shape and body", [["radius", "Corner radius", 4, 20, 1, "px"], ["edge", "Bottom edge, darker by", 0, 40, 1, "%"], ["lip", "Bottom inner line", 0, 0.2, 0.01, ""], ["sheen", "Sheen from the top", 0, 0.3, 0.01, ""], ["shade", "Shade toward the bottom", 0, 0.1, 0.005, ""], ["depth", "Sheen and shade depth", 8, 160, 4, "px"]],
+        "Light falls from above: a lighter top, a darker bottom edge, a shadow below. Keep it quieter than the buttons, so cards read as surfaces and buttons as the things you press."],
+      ["Shadow", [["sc", "Colour (light theme)", "color"], ["cy", "Contact, offset", 0, 4, 0.5, "px"], ["cb", "Contact, blur", 0, 8, 0.5, "px"], ["ca", "Contact, strength", 0, 0.3, 0.01, ""], ["ay", "Ambient, offset", 0, 24, 1, "px"], ["ab", "Ambient, blur", 0, 48, 1, "px"], ["aa", "Ambient, strength", 0, 0.2, 0.005, ""]],
+        "Two layers: a tight contact shadow seats the card, a soft ambient one lifts it. Tinted with the page (cement on warm), since grey shadows look dirty on paper. Keep the ambient low, or a row of cards floats."],
+      ["Light and dark", [["lineL", "Top line, light", 0, 1, 0.05, ""], ["lineD", "Top line, dark", 0, 0.2, 0.01, ""], ["darkK", "Dark shadows ×", 1, 4, 0.1, ""]],
+        "A white top line barely shows on a white card but carries the edge in dark, where shadows hardly read; so each theme has its own, and dark scales the shadows up."],
+      ["Cards you can press", [["lift", "Hover lift", 0, 4, 0.5, "px"], ["hoverK", "Hover shadow ×", 1, 3, 0.1, ""], ["sink", "Press sinks", 0, 3, 0.5, "px"], ["pressIn", "Press, inner shadow", 0, 0.3, 0.01, ""], ["onIn", "Selected, inner shadow", 0, 0.3, 0.01, ""], ["onK", "Selected, shadow ×", 0, 1, 0.05, ""], ["ms", "Duration", 0, 400, 10, "ms"]],
+        "Only the status cards move, being buttons. Hover lifts a pixel or two; a press lands at once and eases back; a selected filter stays pressed in, a toggle that's on. Reduced motion keeps them still."],
+      ["Apply to", [["slices", "Status cards and the insight", "check"], ["table", "Table card", "check"], ["record", "Record panel", "check"]]],
+    ],
+    def: { radius: 12, edge: 15, lip: 0.05, sheen: 0.04, shade: 0.015, depth: 64, sc: "#3b3320", cy: 1, cb: 2, ca: 0.07, ay: 4, ab: 10, aa: 0.045, lineL: 0.8, lineD: 0.07, darkK: 2.5,
+      lift: 1, hoverK: 1.6, sink: 1, pressIn: 0.1, onIn: 0.07, onK: 0.3, ms: 150, slices: true, table: true, record: true },
+    presets: {
+      tactile: { name: "Tactile (default)" },
+      paper: { name: "Paper: barely there", edge: 8, lip: 0.03, sheen: 0, shade: 0, ca: 0.05, cb: 1, ay: 2, ab: 4, aa: 0.03, lineL: 0.6, lineD: 0.05, lift: 0.5, hoverK: 1.4, sink: 0.5, pressIn: 0.06, onIn: 0.05, onK: 0.4 },
+      pillow: { name: "Pillow: deep", radius: 16, edge: 25, lip: 0.08, sheen: 0.08, shade: 0.03, depth: 96, cb: 3, ca: 0.1, ay: 8, ab: 20, aa: 0.07, lineL: 1, lineD: 0.1, lift: 2, hoverK: 1.5, sink: 1.5, pressIn: 0.14, onIn: 0.1, onK: 0.2, ms: 180 },
+      flat: { name: "Flat: as before", edge: 0, lip: 0, sheen: 0, shade: 0, ca: 0, aa: 0, lineL: 0, lineD: 0, lift: 0, hoverK: 1, sink: 0, pressIn: 0, onIn: 0, onK: 1 },
+    },
+    set(v, def) {
+      const html = document.documentElement, root = html.style, px = (k) => `${v[k]}px`;
+      Object.entries({ "--card-radius": px("radius"), "--card-edge": `${v.edge}%`, "--card-lip": v.lip, "--card-sheen": v.sheen, "--card-shade": v.shade, "--card-depth": px("depth"),
+        "--card-cy": px("cy"), "--card-cb": px("cb"), "--card-ca": v.ca, "--card-ay": px("ay"), "--card-ab": px("ab"), "--card-aa": v.aa,
+        "--card-line-l": v.lineL, "--card-line-d": v.lineD, "--card-dark-k": v.darkK,
+        "--card-lift": px("lift"), "--card-hover-k": v.hoverK, "--card-sink": px("sink"), "--card-press-in": v.pressIn, "--card-on-in": v.onIn, "--card-on-k": v.onK, "--card-ms": `${v.ms}ms` }).forEach(([k, x]) => root.setProperty(k, x));
+      // the shadow follows the canvas (cement on warm, black on cool) until a colour is picked
+      if (v.sc === def.sc) root.removeProperty("--card-shadow-l"); else root.setProperty("--card-shadow-l", v.sc);
+      if (html.hasAttribute("data-tactile")) html.dataset.tactile = ["slices", "table", "record"].filter((k) => v[k]).join(" ");
+    },
+  });
+  const tactile = (on) => {
+    const html = document.documentElement;
+    if (on) html.dataset.tactile = ["slices", "table", "record"].filter((k) => cards.v[k]).join(" "); else html.removeAttribute("data-tactile");
+    $("#cc-cards").checked = on;
+    $('[data-tune="cards"]').hidden = !on;
+    if (!on) cards.close();
+  };
+
   $("#cc-canvas").value = document.documentElement.dataset.canvas || "paper";
   // the page grid: on unless it was turned off in this browser
   {
@@ -1146,7 +1238,13 @@ ${JSON.stringify(v)}`;
     try { on = localStorage.getItem("bolster-concepts:grid") !== "off"; } catch {}
     document.documentElement.toggleAttribute("data-grid", on);
     $("#cc-grid").checked = on;
-    $("[data-net-open]").hidden = !on;
+    $('[data-tune="net"]').hidden = !on;
+  }
+  // tactile cards: on unless turned off in this browser
+  {
+    let on = true;
+    try { on = localStorage.getItem("bolster-concepts:tactile") !== "off"; } catch {}
+    tactile(on);
   }
   addEventListener("hashchange", load);
   load();
