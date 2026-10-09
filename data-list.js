@@ -1037,10 +1037,10 @@ ${JSON.stringify(v)}`;
   }
 
   $("#cc-canvas").value = document.documentElement.dataset.canvas || "paper";
-  // the page grid: off unless it was turned on in this browser
+  // the page grid: on unless it was turned off in this browser
   {
-    let on = false;
-    try { on = localStorage.getItem("bolster-concepts:grid") === "on"; } catch {}
+    let on = true;
+    try { on = localStorage.getItem("bolster-concepts:grid") !== "off"; } catch {}
     document.documentElement.toggleAttribute("data-grid", on);
     $("#cc-grid").checked = on;
     $("[data-net-open]").hidden = !on;
