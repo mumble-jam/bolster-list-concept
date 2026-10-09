@@ -925,6 +925,105 @@
     render();
     stick();
   }
+  // ---------- canvas grid: cells sized from the page header, a light that eases toward the pointer ----------
+  {
+    const main = $(".app-main"), head = $(".page-header"), root = document.documentElement.style;
+    // [key, label, min, max, step, unit] or [key, label, "color"]
+    const NET = [
+      ["Grid", [["div", "Cells per header height", 1, 4, 1, ""], ["w", "Line width", 0.5, 3, 0.5, "px"]]],
+      ["Light around the pointer", [["r", "Radius", 60, 600, 10, "px"], ["ratio", "Width to height", 0.5, 2.5, 0.05, "×"], ["core", "Solid centre", 0, 80, 5, "%"], ["peak", "Strength", 0, 1, 0.05, ""], ["base", "Grid away from the pointer", 0, 0.6, 0.01, ""]]],
+      ["Light theme", [["lineL", "Line colour", "color"], ["lineLa", "Line strength", 0, 0.4, 0.01, ""], ["glowL", "Glow colour", "color"], ["glowLa", "Glow strength", 0, 0.6, 0.01, ""]]],
+      ["Dark theme", [["lineD", "Line colour", "color"], ["lineDa", "Line strength", 0, 0.4, 0.01, ""], ["glowD", "Glow colour", "color"], ["glowDa", "Glow strength", 0, 0.6, 0.01, ""]]],
+      ["Glow and motion", [["gr", "Glow radius", 80, 800, 10, "px"], ["trail", "Trail", 0, 0.95, 0.05, ""], ["fade", "Fade in and out", 0, 800, 20, "ms"]]],
+    ];
+    const DEF = { div: 2, w: 1, r: 260, ratio: 1.3, core: 10, peak: 1, base: 0.25, lineL: "#3b3320", lineLa: 0.09, glowL: "#f7f5ef", glowLa: 0, lineD: "#ffffff", lineDa: 0.07, glowD: "#6b93ff", glowDa: 0.12, gr: 420, trail: 0.8, fade: 800 };
+    const rows = NET.flatMap(([, r]) => r);
+    const KEY = "bolster-concepts:net";
+    let v = { ...DEF };
+    try { v = { ...DEF, ...JSON.parse(localStorage.getItem(KEY)) }; } catch {}
+
+    const cell = () => root.setProperty("--net-cell", `${head.offsetHeight / v.div}px`);
+    new ResizeObserver(cell).observe(head);
+
+    const fmt = (r) => (r[2] === "color" ? v[r[0]] : Number(v[r[0]]).toFixed((String(r[4]).split(".")[1] || "").length) + r[5]);
+    function apply() {
+      const px = (k) => `${v[k]}px`;
+      Object.entries({ "--net-w": px("w"), "--net-r": px("r"), "--net-ratio": v.ratio, "--net-core": `${v.core}%`, "--net-peak": v.peak, "--net-base": v.base,
+        "--net-line-la": v.lineLa, "--net-line-d": v.lineD, "--net-line-da": v.lineDa, "--net-glow-l": v.glowL, "--net-glow-la": v.glowLa,
+        "--net-glow-d": v.glowD, "--net-glow-da": v.glowDa, "--net-gr": px("gr"), "--net-fade": `${v.fade}ms` }).forEach(([k, x]) => root.setProperty(k, x));
+      // the light line follows the canvas (cement on warm, black on cool) until a colour is picked
+      if (v.lineL === DEF.lineL) root.removeProperty("--net-line-l"); else root.setProperty("--net-line-l", v.lineL);
+      cell();
+      if (panel) {
+        for (const r of rows) { panel.querySelector(`#net-${r[0]}`).value = v[r[0]]; const o = panel.querySelector(`#net-o-${r[0]}`); if (o) o.textContent = fmt(r); panel.querySelector(`[data-k="${r[0]}"]`).toggleAttribute("data-changed", v[r[0]] !== DEF[r[0]]); }
+      }
+      try { localStorage.setItem(KEY, JSON.stringify(v)); } catch {}
+    }
+    const settings = () => {
+      const edited = rows.filter(([k]) => v[k] !== DEF[k]).map(([k]) => k);
+      const o = (k) => fmt(rows.find((r) => r[0] === k));
+      return `Grid settings (in the concept)${edited.length ? `, edited: ${edited.join(", ")}` : ", unchanged"}
+grid: ${v.div} cell${v.div > 1 ? "s" : ""} per header height · line ${o("w")}
+light: radius ${o("r")} · width ${o("ratio")} · solid centre ${o("core")} · strength ${o("peak")} · base ${o("base")}
+light theme: line ${o("lineL")} ${o("lineLa")} · glow ${o("glowL")} ${o("glowLa")}
+dark theme: line ${o("lineD")} ${o("lineDa")} · glow ${o("glowD")} ${o("glowDa")}
+glow radius ${o("gr")} · trail ${o("trail")} · fade ${o("fade")}
+${JSON.stringify(v)}`;
+    };
+
+    // the panel, built on first open
+    let panel;
+    function openPanel() {
+      if (!panel) {
+        panel = document.createElement("section");
+        panel.className = "net-panel"; panel.hidden = true; panel.setAttribute("aria-label", "Grid");
+        panel.innerHTML = `<header><span class="concept-tag">Concept</span> Grid<button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close" data-net-close>${I.xl}</button></header>
+          <div class="net-body">${NET.map(([t, rs]) => `<fieldset><legend>${t}</legend>${rs.map((r) => r[2] === "color"
+            ? `<div class="net-row" data-k="${r[0]}"><label for="net-${r[0]}">${r[1]}</label><input type="color" id="net-${r[0]}"></div>`
+            : `<div class="net-row" data-k="${r[0]}"><label for="net-${r[0]}">${r[1]}</label><output id="net-o-${r[0]}"></output><input type="range" id="net-${r[0]}" min="${r[2]}" max="${r[3]}" step="${r[4]}"></div>`).join("")}</fieldset>`).join("")}</div>
+          <div class="net-foot"><button type="button" class="button" data-size="sm" data-net-copy>Copy settings</button><button type="button" class="button" data-variant="ghost" data-size="sm" data-net-reset>Reset</button><span aria-live="polite"></span></div>`;
+        document.body.append(panel);
+        panel.addEventListener("input", (e) => { const k = e.target.id.slice(4); if (k in v) { v[k] = e.target.type === "color" ? e.target.value : Number(e.target.value); apply(); } });
+        panel.addEventListener("click", (e) => {
+          if (e.target.closest("[data-net-close]")) { panel.hidden = true; $("[data-net-open]").focus(); }
+          if (e.target.closest("[data-net-reset]")) { v = { ...DEF }; apply(); }
+          if (e.target.closest("[data-net-copy]")) {
+            const say = (m) => { panel.querySelector(".net-foot span").textContent = m; setTimeout(() => (panel.querySelector(".net-foot span").textContent = ""), 2500); };
+            navigator.clipboard?.writeText(settings()).then(() => say("Copied. Paste it in the chat."), () => say("Couldn't copy here."));
+          }
+        });
+        panel.addEventListener("keydown", (e) => { if (e.key === "Escape") { panel.hidden = true; $("[data-net-open]").focus(); } });
+      }
+      panel.hidden = !panel.hidden;
+      apply();
+      if (!panel.hidden) panel.querySelector("input").focus();
+    }
+    document.addEventListener("click", (e) => { if (e.target.closest("[data-net-open]")) openPanel(); });
+    apply();
+
+    // the light eases toward the pointer, one write per frame
+    const still = matchMedia("(prefers-reduced-motion: reduce)");
+    let px = 0, py = 0, x = 0, y = 0, raf = 0, placed = false;
+    const tick = () => {
+      const r = main.getBoundingClientRect();
+      const tx = px - r.left, ty = py - r.top, k = still.matches ? 0 : v.trail;
+      if (!placed) { x = tx; y = ty; placed = true; }
+      x += (tx - x) * (1 - k); y += (ty - y) * (1 - k);
+      main.style.setProperty("--_nx", `${x.toFixed(1)}px`); main.style.setProperty("--_ny", `${y.toFixed(1)}px`);
+      raf = Math.abs(tx - x) + Math.abs(ty - y) > 0.3 ? requestAnimationFrame(tick) : 0;
+    };
+    const go = () => { if (!raf) raf = requestAnimationFrame(tick); };
+    main.addEventListener("pointermove", (e) => {
+      if (e.pointerType === "touch") return;
+      px = e.clientX; py = e.clientY;
+      main.style.setProperty("--_vis", "1");
+      go();
+    });
+    main.addEventListener("pointerleave", () => { main.style.setProperty("--_vis", "0"); placed = false; });
+    // the page scrolls under a still pointer: keep the light where the pointer is
+    addEventListener("scroll", () => { if (placed) go(); }, { passive: true });
+  }
+
   $("#cc-canvas").value = document.documentElement.dataset.canvas || "paper";
   addEventListener("hashchange", load);
   load();
