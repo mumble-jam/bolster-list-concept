@@ -1,0 +1,90 @@
+/* Bolster design system: base
+   Element defaults. Low specificity on purpose: everything here
+   is an element or :where() selector, so components and utilities
+   override it without fighting. */
+
+@layer tokens, base, components, utilities;
+
+/* Cera Pro is licensed, so this repo doesn't ship the files. It
+   renders when installed locally or when the consuming app declares
+   its own @font-face for "Cera Pro" (the React prototype does). */
+@font-face { font-family: "Cera Pro"; src: local("Cera Pro"), local("CeraPro-Regular"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Cera Pro"; src: local("Cera Pro Medium"), local("CeraPro-Medium"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Cera Pro"; src: local("Cera Pro Bold"), local("CeraPro-Bold"); font-weight: 700; font-display: swap; }
+
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html {
+    font-family: var(--font-sans);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-surface-canvas);
+    color: var(--color-content-primary);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+    font-weight: var(--font-weight-regular);
+  }
+
+  :where(h1, h2, h3, h4) {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-content-primary);
+  }
+  :where(h1) { font-size: var(--text-2xl); line-height: var(--leading-xl); font-weight: var(--font-weight-bold); }
+  :where(h2) { font-size: var(--text-xl); line-height: var(--leading-lg); }
+  :where(h3) { font-size: var(--text-lg); line-height: var(--leading-lg); }
+  :where(h4) { font-size: var(--text-base); line-height: var(--leading-base); }
+
+  :where(p, ul, ol, dl, figure) { margin: 0; }
+  :where(ul[role="list"], ol[role="list"]) { list-style: none; padding: 0; }
+
+  :where(a) { color: var(--color-content-link); text-underline-offset: 2px; }
+  :where(a:hover) { text-decoration-thickness: 2px; }
+
+  :where(img, svg, video) { display: block; max-width: 100%; }
+  :where(svg) { flex-shrink: 0; }
+
+  :where(button, input, select, textarea) { font: inherit; color: inherit; letter-spacing: inherit; }
+  :where(button) { cursor: pointer; }
+  :where(button:disabled, [aria-disabled="true"]) { cursor: not-allowed; }
+
+  :where(table) { border-collapse: collapse; }
+  :where(hr) { border: 0; border-top: var(--border-width-default) solid var(--color-line-default); margin: 0; }
+
+  /* One visible keyboard focus style for everything (D8). */
+  :focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+  :focus:not(:focus-visible) { outline: none; }
+
+  ::selection { background: var(--color-action-accent-subtle); color: var(--color-content-primary); }
+
+  [hidden] { display: none !important; }
+
+  /* Numbers line up in tables and totals. */
+  :where(td, th, [data-numeric]) { font-variant-numeric: tabular-nums; }
+
+  /* iOS zooms into any focused control under 16px; floor them on phones. */
+  @media (max-width: 767px) {
+    input, select, textarea { font-size: max(16px, 1em) !important; }
+  }
+
+  /* Respect reduced motion everywhere (D10). */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}

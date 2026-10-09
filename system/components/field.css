@@ -1,0 +1,116 @@
+/* Field: label + control + helper, for text inputs, text areas and native selects.
+   <div class="field" [data-size="sm|md|lg"]>
+     <label class="field-label" for="x">Company name</label>
+     <input class="input" id="x" aria-describedby="x-help">
+     <p class="field-helper" id="x-help">Shown on proposals</p>
+   </div>
+   Error: aria-invalid="true" on the control; the helper turns red (class stays the same).
+   Adornments: wrap the control in <div class="input-group"> with <span class="input-adornment">.
+   Select: <div class="select"><select class="input">…</select></div>.
+   Money: data-numeric on the input (right-aligned, tabular). See D7. */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  :where(.field) {
+    --_h: var(--control-height-md);
+    --_px: var(--space-3);
+    --_font: var(--text-sm);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-inline-size: 0;
+  }
+  :where(.field[data-size="sm"]) { --_h: var(--control-height-sm); --_px: var(--space-2); }
+  :where(.field[data-size="lg"]) { --_h: var(--control-height-lg); --_px: var(--space-4); --_font: var(--text-base); }
+
+  :where(.field-label) {
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-content-secondary);
+  }
+  :where(.field-label) :where(.field-optional) { font-weight: var(--font-weight-regular); color: var(--color-content-tertiary); }
+
+  :where(.field-helper) { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  :where(.field:has([aria-invalid="true"]) .field-helper) { color: var(--color-feedback-danger-content); }
+
+  /* the control itself, also usable on its own */
+  :where(.input) {
+    --_border: var(--color-line-input);
+    inline-size: 100%;
+    min-inline-size: 0;
+    block-size: var(--_h, var(--control-height-md));
+    padding: 0 var(--_px, var(--space-3));
+    border: var(--border-width-default) solid var(--_border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-default);
+    color: var(--color-content-primary);
+    font-size: var(--_font, var(--text-sm));
+    line-height: var(--leading-sm);
+    transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+  }
+  :where(textarea.input) { block-size: auto; min-block-size: calc(var(--_h, var(--control-height-md)) * 2); padding-block: var(--space-2); resize: vertical; }
+  :where(.input)::placeholder { color: var(--color-content-tertiary); opacity: 1; }
+  :where(.input[data-numeric]) { text-align: end; font-variant-numeric: tabular-nums; }
+
+  @media (hover: hover) {
+    :where(.input:hover:not(:disabled, :read-only, :focus)) { --_border: var(--color-line-input-hover); }
+    :where(select.input:hover:not(:disabled, :focus)) { --_border: var(--color-line-input-hover); }
+  }
+  /* focus: border turns blue with a 1px inner ring (2px total), no outer outline */
+  :where(.input:focus-visible, .input:focus) {
+    outline: none;
+    --_border: var(--color-line-focus);
+    box-shadow: 0 0 0 1px var(--color-line-focus);
+  }
+  :where(.input[aria-invalid="true"]) { --_border: var(--color-feedback-danger-content); }
+  :where(.input[aria-invalid="true"]:focus) { box-shadow: 0 0 0 1px var(--color-feedback-danger-content); }
+
+  :where(.input:disabled) {
+    background: var(--color-surface-disabled);
+    color: var(--color-content-disabled);
+    --_border: transparent;
+    cursor: not-allowed;
+  }
+  :where(.input:read-only:not(select)) {
+    background: var(--color-surface-tint);
+    --_border: transparent;
+    color: var(--color-content-secondary);
+  }
+
+  /* native select with a chevron */
+  :where(.select) { position: relative; display: block; }
+  :where(.select) > :where(select.input) { appearance: none; padding-inline-end: calc(var(--_px, var(--space-3)) + 1.25rem); cursor: pointer; }
+  :where(.select)::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: var(--_px, var(--space-3));
+    inline-size: 0.75rem;
+    margin-block: auto;
+    block-size: 0.75rem;
+    background: var(--color-content-secondary);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    pointer-events: none;
+  }
+
+  /* adornments ($ prefix, unit suffix, search icon) */
+  :where(.input-group) {
+    --_border: var(--color-line-input);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    block-size: var(--_h, var(--control-height-md));
+    padding: 0 var(--_px, var(--space-3));
+    border: var(--border-width-default) solid var(--_border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-default);
+    transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+  }
+  :where(.input-group) > :where(.input) { block-size: 100%; padding: 0; border: 0; background: transparent; box-shadow: none; }
+  :where(.input-group:has(.input:focus)) { --_border: var(--color-line-focus); box-shadow: 0 0 0 1px var(--color-line-focus); }
+  :where(.input-group:has([aria-invalid="true"])) { --_border: var(--color-feedback-danger-content); }
+  :where(.input-adornment) { flex-shrink: 0; color: var(--color-content-secondary); font-size: var(--_font, var(--text-sm)); white-space: nowrap; }
+  :where(.input-adornment) > svg { inline-size: 1rem; block-size: 1rem; }
+}

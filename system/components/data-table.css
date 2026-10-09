@@ -1,0 +1,87 @@
+/* Data table: Bolster's lists (estimates, jobs, customers…), as a real <table>.
+   Each row's primary cell holds a link that stretches over the whole row, so a row
+   opens with one click, Enter, or a screen reader's link list (fixes rows that only
+   opened on double click). Selection is a checkbox in the first cell.
+   <table class="data-table">
+     <thead><tr><th class="data-table-select"><input type="checkbox" class="checkbox" aria-label="Select all"></th>
+       <th aria-sort="descending"><button class="data-table-sort">Last modified</button></th>…</tr></thead>
+     <tbody><tr>
+       <td class="data-table-select"><input type="checkbox" class="checkbox" aria-label="Select Mykola • Job"></td>
+       <td><a class="data-table-link" href="/job/1">Mykola • Job</a><span class="text-caption">$28,729</span></td>
+       <td data-hide-below="md"><span class="badge" data-status="booked">Booked</span></td>
+       <td data-numeric>$28,729.22</td>
+     </tr></tbody>
+   </table>
+   Bulk actions: <div class="bulk-bar" role="toolbar" aria-label="1 selected">…</div> shown above the table when any row is selected. */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  :where(.data-table) {
+    inline-size: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+    color: var(--color-content-primary);
+  }
+  :where(.data-table) :where(th) {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: var(--z-raised);
+    block-size: var(--control-height-md);
+    padding: 0 var(--space-3);
+    border-block-end: var(--border-width-default) solid var(--color-line-default);
+    background: var(--color-surface-header);
+    color: var(--color-content-secondary);
+    font-size: var(--text-xs);
+    font-weight: var(--font-weight-medium);
+    text-align: start;
+    white-space: nowrap;
+  }
+  :where(.data-table) :where(td) {
+    block-size: var(--space-16);
+    padding: var(--space-2) var(--space-3);
+    border-block-end: var(--border-width-default) solid var(--color-line-subtle);
+    vertical-align: middle;
+  }
+  :where(.data-table) :where(td[data-numeric], th[data-numeric]) { text-align: end; font-variant-numeric: tabular-nums; }
+  :where(.data-table-select) { inline-size: var(--space-10); padding-inline-end: 0; }
+
+  :where(.data-table) :where(tbody tr) { position: relative; transition: background-color var(--duration-fast) var(--ease-standard); }
+  @media (hover: hover) { :where(.data-table) :where(tbody tr:hover) { background: var(--color-surface-hover); } }
+  :where(.data-table) :where(tbody tr:has(.data-table-select :checked)) { background: var(--color-surface-selected); }
+
+  /* the row link covers the row; other controls sit above it */
+  :where(.data-table-link) { color: inherit; font-weight: var(--font-weight-medium); text-decoration: none; }
+  :where(.data-table-link)::after { content: ""; position: absolute; inset: 0; }
+  :where(.data-table-link:focus-visible) { outline: none; }
+  :where(.data-table) :where(tbody tr:has(.data-table-link:focus-visible)) { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
+  :where(.data-table) :where(td) :where(input, button, a:not(.data-table-link), select) { position: relative; z-index: 1; }
+
+  :where(.data-table-sort) {
+    display: inline-flex; align-items: center; gap: var(--space-1);
+    padding: 0; border: 0; background: none; color: inherit; font: inherit; cursor: pointer;
+  }
+  :where(th[aria-sort="ascending"] .data-table-sort)::after { content: "↑"; }
+  :where(th[aria-sort="descending"] .data-table-sort)::after { content: "↓"; }
+
+  /* responsive columns */
+  @media (max-width: 767px) { :where(.data-table) :where([data-hide-below="md"]) { display: none; } }
+  @media (max-width: 1023px) { :where(.data-table) :where([data-hide-below="lg"]) { display: none; } }
+
+  /* bulk action bar */
+  :where(.bulk-bar) {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-block-size: var(--control-height-lg);
+    padding: var(--space-1) var(--space-2) var(--space-1) var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-inverse);
+    color: var(--color-content-inverse);
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-medium);
+  }
+  :where(.bulk-bar) > :where(.bulk-bar-count) { margin-inline-end: auto; }
+}

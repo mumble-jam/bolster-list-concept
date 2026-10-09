@@ -1,0 +1,120 @@
+/* Dialog: native <dialog>, opened with showModal(). The platform gives Escape to close,
+   focus moved inside, focus trapped, focus returned to the trigger, and inert background.
+   <dialog class="dialog" aria-labelledby="d-title" [data-size="sm|md|lg"] [data-variant="sheet|workspace"]>
+     <header class="dialog-header"><h2 id="d-title">Columns and filters</h2>
+       <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close>…</button></header>
+     <div class="dialog-body">…</div>
+     <footer class="dialog-footer">…buttons…</footer>
+   </dialog>
+   Variants:
+   - (default) centred modal: confirmations, forms, filters.
+   - sheet: picker for long lists (the as-is select sheet). Centred on desktop, bottom sheet on phones.
+   - workspace: the job modal, full-bleed with a dark header and its own nav.
+   Light dismiss (click on the backdrop): opt in with closedby="any" (see I-entries). */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  :where(.dialog) {
+    --_w: 35rem; /* 560 */
+    inline-size: min(var(--_w), calc(100vw - var(--space-8)));
+    max-block-size: min(85dvh, 52rem);
+    margin: auto;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-raised);
+    color: var(--color-content-primary);
+    box-shadow: var(--shadow-overlay);
+    overflow: hidden;
+    display: none;
+    flex-direction: column;
+    opacity: 0;
+    transform: scale(0.97);
+    transition:
+      opacity var(--duration-medium) var(--ease-out),
+      transform var(--duration-medium) var(--ease-out),
+      overlay var(--duration-medium) allow-discrete,
+      display var(--duration-medium) allow-discrete;
+  }
+  :where(.dialog[open]) { display: flex; opacity: 1; transform: none; }
+  @starting-style { :where(.dialog[open]) { opacity: 0; transform: scale(0.97); } }
+
+  :where(.dialog)::backdrop {
+    background: var(--color-surface-scrim);
+    opacity: 0;
+    transition: opacity var(--duration-medium) var(--ease-out), overlay var(--duration-medium) allow-discrete, display var(--duration-medium) allow-discrete;
+  }
+  :where(.dialog[open])::backdrop { opacity: 1; }
+  @starting-style { :where(.dialog[open])::backdrop { opacity: 0; } }
+
+  :where(.dialog[data-size="sm"]) { --_w: 25rem; }  /* 400: confirm */
+  :where(.dialog[data-size="lg"]) { --_w: 50rem; }  /* 800: filters and columns */
+
+  :where(.dialog-header) {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-block-size: var(--space-16);
+    padding: var(--space-3) var(--space-3) var(--space-3) var(--space-6);
+    border-block-end: var(--border-width-default) solid var(--color-line-subtle);
+    flex-shrink: 0;
+  }
+  :where(.dialog-header) > :where(h2) { flex: 1; min-inline-size: 0; font-size: var(--text-xl); line-height: var(--leading-lg); }
+  :where(.dialog-body) { flex: 1; min-block-size: 0; overflow: auto; padding: var(--space-6); }
+  :where(.dialog-footer) {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-6);
+    border-block-start: var(--border-width-default) solid var(--color-line-subtle);
+    flex-shrink: 0;
+  }
+
+  /* ---------- sheet: bottom sheet on phones ---------- */
+  :where(.dialog-handle) { display: none; }
+  @media (max-width: 767px) {
+    :where(.dialog[data-variant="sheet"]) {
+      inline-size: 100%;
+      max-inline-size: none;
+      max-block-size: 80dvh;
+      margin: auto 0 0;
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      transform: translateY(100%);
+      opacity: 1;
+    }
+    :where(.dialog[data-variant="sheet"][open]) { transform: none; }
+    @starting-style { :where(.dialog[data-variant="sheet"][open]) { transform: translateY(100%); } }
+    :where(.dialog[data-variant="sheet"]) :where(.dialog-handle) {
+      display: block;
+      inline-size: var(--space-10);
+      block-size: var(--space-1);
+      margin: var(--space-2) auto 0;
+      border-radius: var(--radius-full);
+      background: var(--color-line-strong);
+      flex-shrink: 0;
+    }
+    :where(.dialog-footer) { padding-block-end: calc(var(--space-4) + env(safe-area-inset-bottom)); }
+  }
+
+  /* ---------- workspace: the job modal ---------- */
+  :where(.dialog[data-variant="workspace"]) {
+    inline-size: calc(100vw - var(--space-8));
+    max-inline-size: none;
+    block-size: calc(100dvh - var(--space-8));
+    max-block-size: none;
+    border-radius: var(--radius-xl);
+  }
+  :where(.dialog[data-variant="workspace"]) :where(.dialog-header) {
+    min-block-size: var(--space-16);
+    padding-inline: var(--space-4);
+    border-block-end-color: var(--color-line-chrome);
+    background: var(--color-surface-chrome);
+    color: var(--color-content-on-chrome);
+  }
+  :where(.dialog[data-variant="workspace"]) :where(.dialog-header) :where(h2) { color: inherit; font-family: var(--font-sans); font-size: var(--text-base); font-weight: var(--font-weight-medium); }
+  :where(.dialog[data-variant="workspace"]) :where(.dialog-body) { display: flex; padding: 0; }
+  @media (max-width: 767px) {
+    :where(.dialog[data-variant="workspace"]) { inline-size: 100vw; block-size: 100dvh; border-radius: 0; }
+  }
+}

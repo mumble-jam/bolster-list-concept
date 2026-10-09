@@ -1,0 +1,66 @@
+/* Toast: short feedback after an action. Lives in one live region per page.
+   <div class="toast-region" aria-live="polite" aria-relevant="additions">
+     <div class="toast" data-tone="success|danger|warning|info" role="status">
+       <span class="toast-message">Proposal sent</span>
+       <button class="toast-action">Undo</button>
+       <button class="toast-close" aria-label="Dismiss">×</button>
+     </div>
+   </div>
+   Timing (I-entries): success and info leave after 5s (paused on hover/focus);
+   danger stays until dismissed and uses role="alert". */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  :where(.toast-region) {
+    position: fixed;
+    z-index: var(--z-toast);
+    inset-block-end: var(--space-6);
+    inset-inline-end: var(--space-6);
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--space-2);
+    inline-size: min(24rem, calc(100vw - var(--space-8)));
+    pointer-events: none;
+  }
+  @media (max-width: 767px) {
+    :where(.toast-region) { inset-inline: var(--space-4); inline-size: auto; inset-block-end: calc(var(--shell-bottom-bar-height) + var(--space-4)); }
+  }
+
+  :where(.toast) {
+    --_accent: var(--color-content-inverse);
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-2) var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    border-inline-start: var(--space-1) solid var(--_accent);
+    background: var(--color-surface-inverse);
+    color: var(--color-content-inverse);
+    box-shadow: var(--shadow-overlay);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+    pointer-events: auto;
+    animation: toast-in var(--duration-medium) var(--ease-out);
+  }
+  :where(.toast[data-tone="success"]) { --_accent: var(--color-feedback-success-accent); }
+  :where(.toast[data-tone="danger"])  { --_accent: var(--color-feedback-danger-accent); }
+  :where(.toast[data-tone="warning"]) { --_accent: var(--color-feedback-warning-accent); }
+  :where(.toast[data-tone="info"])    { --_accent: var(--color-feedback-info-accent); }
+  :where(.toast-message) { flex: 1; padding-block: var(--space-1); }
+  :where(.toast-action, .toast-close) {
+    flex-shrink: 0;
+    min-block-size: var(--control-height-sm);
+    padding: 0 var(--space-2);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: none;
+    color: inherit;
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+  }
+  :where(.toast-action) { color: var(--color-action-brand); }
+  :where(.toast-close) { inline-size: var(--control-height-sm); padding: 0; opacity: 0.8; }
+  @media (hover: hover) { :where(.toast-action:hover, .toast-close:hover) { background: var(--color-surface-inverse-hover); } }
+  @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
+}

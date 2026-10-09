@@ -1,0 +1,46 @@
+/* Tooltip: a short label for a control, shown on hover and keyboard focus. CSS only.
+   <span class="tooltip-anchor">
+     <button class="button" data-variant="ghost" data-icon-only aria-labelledby="tip-jobs">…svg…</button>
+     <span class="tooltip" role="tooltip" id="tip-jobs" data-side="right">Jobs</span>
+   </span>
+   Icon-only trigger: aria-labelledby → the tooltip is its name.
+   Trigger with its own label: aria-describedby → the tooltip adds detail.
+   Never put the only copy of important information in a tooltip; they don't exist on touch. */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  :where(.tooltip-anchor) { position: relative; display: inline-flex; }
+
+  :where(.tooltip) {
+    --_gap: var(--space-2);
+    position: absolute;
+    z-index: var(--z-tooltip);
+    inset-block-end: calc(100% + var(--_gap));
+    inset-inline-start: 50%;
+    translate: -50% 0;
+    inline-size: max-content;
+    max-inline-size: 16rem;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-tooltip);
+    color: var(--color-content-inverse);
+    font-size: var(--text-xs);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-xs);
+    box-shadow: var(--shadow-overlay);
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--duration-fast) var(--ease-out), visibility 0s linear var(--duration-fast);
+  }
+  :where(.tooltip[data-side="bottom"]) { inset-block: calc(100% + var(--_gap)) auto; }
+  :where(.tooltip[data-side="right"]) { inset-block: 50% auto; inset-inline-start: calc(100% + var(--_gap)); translate: 0 -50%; }
+  :where(.tooltip[data-side="left"]) { inset-block: 50% auto; inset-inline: auto calc(100% + var(--_gap)); translate: 0 -50%; }
+
+  /* 150ms delay before showing on hover; instant on keyboard focus; hides immediately */
+  @media (hover: hover) {
+    :where(.tooltip-anchor:hover) > :where(.tooltip) { opacity: 1; visibility: visible; transition-delay: 150ms, 0s; }
+  }
+  :where(.tooltip-anchor:has(:focus-visible)) > :where(.tooltip) { opacity: 1; visibility: visible; transition-delay: 0s; }
+}

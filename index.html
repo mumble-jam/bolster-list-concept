@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolster list concept</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="system/bolster.css">
+<link rel="stylesheet" href="shared/shell.css">
+<link rel="stylesheet" href="data-list.css">
+<style>
+  /* published copy: Inter stands in for Cera Pro */
+  :root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }
+</style>
+<script>try { document.documentElement.dataset.canvas = localStorage.getItem("bolster-concepts:canvas") === "cool" ? "cool" : "paper"; } catch { document.documentElement.dataset.canvas = "paper"; }</script>
+</head>
+<body>
+<div class="app-shell">
+  <main class="app-main">
+    <header class="page-header">
+      <div class="page-title">
+        <button class="button page-tool" data-variant="ghost" data-size="sm" data-icon-only data-collapse-sidebar aria-label="Hide menu"><i data-icon="panel-left" data-size="18"></i></button>
+        <h1 id="page-title">Jobs</h1>
+      </div>
+      <div class="page-header-actions">
+        <button class="button" data-variant="ghost" data-hide-phone id="export">Export</button>
+        <button class="button" id="create">Create job</button>
+      </div>
+    </header>
+
+    <div class="app-content list-page" data-width="wide">
+      <!-- slice cards filter by status; the last card is information, not a filter -->
+      <section class="slices" id="summary" aria-label="Summary">
+        <div class="slice-row" id="metrics" role="group" aria-label="Filter by status"></div>
+      </section>
+
+      <!-- the table card opens with its own header, as in Shopify: filter and search on the left, the period
+           and display on the right; a second row holds the count and chips once something is set. It sticks
+           under the page header, and the table header sticks under it -->
+      <!-- the list and, once a row is opened, its record beside it (on narrower screens the record opens as a sheet) -->
+      <div class="list-split" id="list-split">
+      <section class="card list-panel" aria-labelledby="page-title">
+        <div class="list-toolbar" id="list-toolbar" role="search" aria-label="Search and filter">
+          <div class="list-bar">
+            <button type="button" class="field-button add-filter" id="add-filter" aria-haspopup="menu" aria-expanded="false"><i data-icon="filter" data-size="16"></i><span>Add filter</span></button>
+            <label class="list-search"><i data-icon="search" data-size="16"></i><input type="search" id="search" aria-label="Search" placeholder="Search" enterkeyhint="search" autocomplete="off"></label>
+            <button type="button" class="field-button date-range" id="date-range" aria-haspopup="dialog" aria-expanded="false"><i data-icon="calendar" data-size="16"></i><span id="date-range-label">All time</span></button>
+            <span class="list-bar-sep" aria-hidden="true"></span>
+            <span class="tooltip-anchor"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only id="view-options" aria-labelledby="tip-display" aria-haspopup="menu" aria-expanded="false"><i data-icon="display-settings" data-size="16"></i></button><span class="tooltip" role="tooltip" id="tip-display" data-side="bottom">Display settings</span></span>
+          </div>
+          <div class="list-chips" id="list-chips" hidden>
+            <p class="result-count" id="result-count" aria-live="polite"></p>
+            <div class="filters" id="filters"></div>
+          </div>
+        </div>
+        <div id="banner"></div>
+        <div class="table-wrap" id="table-wrap"></div>
+        <div class="list-foot" id="list-foot"></div>
+      </section>
+      <section class="card detail" id="detail" aria-labelledby="detail-title" hidden></section>
+      </div>
+
+      <!-- floating bar: count, select all, actions, clear. Built to replace the other situational bars -->
+      <div class="floating-bar" id="bulk-bar" role="toolbar" aria-label="Bulk actions" hidden></div>
+    </div>
+  </main>
+
+</div>
+
+<!-- one shared popover for filter pickers, the view menu, display options and row menus -->
+<div class="pop" id="pop" popover></div>
+
+<dialog class="dialog peek detail" id="peek" aria-labelledby="detail-title"></dialog>
+
+<dialog class="dialog confirm" id="confirm" aria-labelledby="confirm-title">
+  <header class="dialog-header"><h2 id="confirm-title"></h2></header>
+  <div class="dialog-body"><p class="text-secondary" id="confirm-text"></p></div>
+  <footer class="dialog-footer"><button class="button" data-variant="secondary" data-close>Cancel</button><button class="button" data-variant="danger" id="confirm-go"></button></footer>
+</dialog>
+
+<dialog class="dialog notes" id="notes" aria-labelledby="notes-title">
+  <header class="dialog-header"><h2 id="notes-title">About this concept</h2>
+    <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close><i data-icon="xmark" data-size="16"></i></button></header>
+  <div class="dialog-body">
+    <section>
+      <h3>What it fixes</h3>
+      <p class="text-secondary">Today's list pages use one control for two jobs: the filter cards show big numbers and also act as tabs, while the real filters hide in an icon-only dialog. Rows open on double click only. Here each job has its own control.</p>
+    </section>
+    <section>
+      <h3>Round 2: what changed and why</h3>
+      <p class="text-secondary">Built from three research boards in Figma: metric cards, list page layout, and summary stats. A check of 63 list pages showed that cards above a list are an established but minority pattern, and that no product splits cards and stats into two styles, so the stats column became one card in the row.</p>
+    </section>
+    <section>
+      <h3>Principles</h3>
+      <ol>
+        <li><b>Four bands, top to bottom:</b> page header, slice cards, the table card (with its own header), and a floating bar while rows are selected. Each control lives in the band of the question it answers.</li>
+        <li><b>The table card has a header, as in Shopify.</b> "Add filter" and a bare search field on the left; the date range, a rule and the Display settings icon. Its menu is a short list of settings, each with its current value (Group by: None, Row height: Comfortable, Columns: All) opening a nested menu with a check by the choice. Sorting is in the column headers, and in this menu only on phones, where those are hidden on the right. Its filters still change the cards above. Scrolling follows option D from the "What stays on screen" research board: the page title scrolls away; once you are into the list, scrolling down hides the top bar and the card header (only the column header stays on desktop, only the tab bar on phones), and a few pixels back up brings them back in 300 ms. Menus, a focused field or Tab into either bar keep them in view.</li>
+        <li><b>Search becomes a chip.</b> Typing filters as you go; Enter (or leaving the field) turns the words into a chip, "Search: “basement”". Several chips must all match. Click a chip to edit its words, Backspace in the empty field takes back the last one, press / to jump to the field. A second row shows the count ("23 of 132 jobs"), the chips and Clear all once something narrows the list; at rest the All card already gives the total.</li>
+        <li><b>Add filter, then chips.</b> Pick a field, then a value; it becomes a chip with ×. A field left without a value disappears again. Status isn't a chip when a card already shows it.</li>
+        <li><b>Cards sit flat.</b> No shadow: white cards with warm edges on a warm Paper page, a warm table header and filled chips. A hovered card only darkens its edge. The table is warm through: row rules match the card edge, the header rule is a step darker, rows hover in the paper tone and the row ⋯ button in cement. Only selection stays blue.</li>
+        <li><b>Columns keep their width.</b> Each column has a set width that fits its longest value; the first column takes the rest. Sorting or loading more never moves a column, and every header keeps room for the sort arrow (it shows faintly on hover). When the columns don't all fit they narrow together and long values end in “…”.</li>
+        <li><b>Slice cards are the status filter.</b> "All" plus one card per status; the whole card toggles and stays outlined. Amount first, count in the corner. Empty slices stay, dimmed. They count what the other filters let through, so a card's number is what you get when you click it.</li>
+        <li><b>One card isn't a filter.</b> The last card holds a rate worked out across the slices (win rate, collected) with its counts, a split bar in the status colours and an ⓘ with the formula, plus one more figure. Below 5 decided jobs the big figure is the count (“2 of 4”), not a rate; with none it reads “None decided yet” over an empty bar. Every state fills the same three lines, so filtering changes the numbers, never the card’s shape.</li>
+        <li><b>The count is said once,</b> by the filters ("55 of 132 jobs"). The footer shows the range and loads 25 more; rows also load as you scroll. No totals row in this view.</li>
+        <li><b>Selection never moves the rows.</b> A floating bar at the bottom: the count, Select all, three or four actions, the risky one last behind a confirmation that names the number, and ×. It's built to replace the other situational bars later.</li>
+        <li><b>Rows open, "···" acts.</b> One click opens a row; row actions sit in "···", shown on hover and focus. From 1280 wide the record opens beside the list, as in Mercury: the list keeps its name, status and amount columns, the opened row stays marked, and the record sticks under the bars. Below 1280 it is a sheet from the side, full width on phones. The record reads top to bottom: status, the amount, a timeline, two actions and More, the details, then the document. The timeline runs oldest first: a solid line through what happened, then a dashed line to the next step, drawn as a hollow ring. On jobs each event wears the status shape it moved the job to (created: empty, sent: half, approved: full, declined: the slash). Long histories fold to "+ n more events". The sketch drops the view menu and refresh from the page header; saved views come back once we decide where they live.</li>
+        <li><b>Status has a shape, not just a colour.</b> Jobs: an empty circle for draft, a half-filled one for pending, a solid dot for booked, and a circle with a slash for declined (the client said no). One drawing on a 12px grid, 12px in the table badge and 14px on the cards. Draft and pending marks go a step darker than their old dots so each shape reaches 3:1.</li>
+        <li><b>Every state is designed:</b> loading, first-use empty, no results, and error. Switch between them in the concept controls.</li>
+        <li><b>Live areas keep their shape (I13).</b> What updates while you act elsewhere (filters, search, sort, selection) changes its values, never its layout. Every state fills the same slots at the same size, said by what a slot holds (“2 of 4”, “None decided yet”, an empty bar), not by lines coming and going. Sizes come from the whole list, not the rows on screen; optional parts leave a placeholder; anything that comes and goes appears where you acted or floats; a redraw never moves the page or your focus.</li>
+        <li><b>Phones:</b> cards and chips scroll sideways, rows become two-line items, the floating bar gives its actions their own row above the tab bar, and every menu and filter opens as a bottom sheet; a nested menu opens inside the sheet with a back row.</li>
+      </ol>
+    </section>
+    <section>
+      <h3>Open questions</h3>
+      <ul>
+        <li>Does every list need cards? Tabs with counts would do the filtering in less height; the catalog already has neither.</li>
+        <li>The insight card scrolls out of view below about 1,300px wide. Move it first, or drop it on narrow screens?</li>
+        <li>Should cards be single-choice (as now) or add to a multi-select status filter? Today a multi-select status shows as a chip and no card is selected.</li>
+        <li>Auto-loading on scroll, or only on "Load more"? Export and "Select all" already work on every matching row, not just the loaded ones.</li>
+        <li>Which other floating bars should this one replace first?</li>
+        <li>Create job scrolls away with the page title. Keep a compact Create in the card header once you are into the list, or accept a scroll up?</li>
+        <li>Where the concept still breaks I13: the chips row pushes the table down when the first filter is added; filtering to nothing collapses the table under the pointer; columns squeeze at 1024–1280 (horizontal scroll would fix it).</li>
+        <li>Shapes for the other lists: invoices (draft empty, outstanding half, paid full, overdue?) and customers. Should the shape mean progress everywhere, with a separate one for "stopped"?</li>
+      </ul>
+    </section>
+  </div>
+</dialog>
+
+<details class="concept-controls" id="concept-controls">
+  <summary><span class="concept-tag">Concept</span> Controls</summary>
+  <div class="concept-body">
+    <div class="field" data-size="sm"><label class="field-label" for="cc-state">State</label>
+      <div class="select"><select class="input" id="cc-state">
+        <option value="ready">Ready</option>
+        <option value="loading">Loading</option>
+        <option value="empty">Empty (no records yet)</option>
+        <option value="error">Error</option>
+      </select></div>
+      <p class="field-helper">"No results" shows up when filters exclude everything.</p></div>
+    <div class="field" data-size="sm"><label class="field-label" for="cc-canvas">Colour</label>
+      <div class="select"><select class="input" id="cc-canvas">
+        <option value="paper">Warm · cement, Paper page</option>
+        <option value="cool">Cool · the system’s greys</option>
+      </select></div>
+      <p class="field-helper">Two directions for the client. Both keep text at AA, in light and dark.</p></div>
+    <button class="button" data-variant="secondary" data-size="sm" data-open-dialog="notes">About this concept</button>
+    <div class="cluster" style="justify-content:space-between">
+      <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+    </div>
+  </div>
+</details>
+
+<div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
+<script src="shared/icons.js"></script>
+<script src="shared/shell.js"></script>
+<script src="system/specimens/specimen.js"></script>
+<script src="data.js"></script>
+<script src="data-list.js"></script>
+</body>
+</html>

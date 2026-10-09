@@ -1,0 +1,148 @@
+/* Button
+   <button class="button" data-variant="primary|brand|secondary|tertiary|ghost|danger"
+           data-size="sm|md|lg|xl">Label</button>
+   Defaults: primary, md. Icon-only: data-icon-only + aria-label.
+   Loading: aria-busy="true" (keep the label; it can say "Saving…").
+   Full width: data-block. Works on <a> too. See docs/decisions.md D4, D5. */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  :where(.button) {
+    /* variant inputs */
+    --_bg: var(--color-action-primary);
+    --_fg: var(--color-content-on-primary);
+    --_border: transparent;
+    --_bg-hover: var(--color-surface-default);
+    --_fg-hover: var(--color-content-primary);
+    --_border-hover: var(--color-content-primary);
+    --_bg-active: var(--color-surface-tint);
+    /* size inputs */
+    --_h: var(--control-height-md);
+    --_px: var(--space-4);
+    --_gap: var(--space-2);
+    --_font: var(--text-sm);
+    --_icon: 1rem;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--_gap);
+    flex-shrink: 0;
+    block-size: var(--_h);
+    min-inline-size: var(--_h);
+    padding: 0 var(--_px);
+    border: var(--border-width-default) solid var(--_border-state, var(--_border));
+    border-radius: var(--radius-sm);
+    background: var(--_bg-state, var(--_bg));
+    color: var(--_fg-state, var(--_fg));
+    font-family: var(--font-sans);
+    font-size: var(--_font);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-tight);
+    white-space: nowrap;
+    text-decoration: none;
+    user-select: none;
+    cursor: pointer;
+    transition-property: background-color, border-color, color;
+    transition-duration: var(--duration-fast);
+    transition-timing-function: var(--ease-standard);
+  }
+  :where(.button) > svg { inline-size: var(--_icon); block-size: var(--_icon); }
+
+  /* ---------- variants ---------- */
+  :where(.button[data-variant="brand"]) {
+    --_bg: var(--color-action-brand);
+    --_fg: var(--color-content-on-brand);
+    --_bg-hover: var(--color-surface-inverse);
+    --_fg-hover: var(--color-action-brand);
+    --_border-hover: transparent;
+    --_bg-active: var(--color-surface-inverse-active);
+  }
+  :where(.button[data-variant="secondary"]) {
+    --_bg: var(--color-surface-default);
+    --_fg: var(--color-content-primary);
+    --_border: var(--color-content-primary);
+    --_bg-hover: var(--color-surface-tint);
+    --_fg-hover: var(--color-content-primary);
+    --_border-hover: var(--color-content-primary);
+    --_bg-active: var(--color-surface-tint-hover);
+  }
+  :where(.button[data-variant="tertiary"]) {
+    --_bg: var(--color-surface-tint);
+    --_fg: var(--color-content-primary);
+    --_bg-hover: var(--color-surface-tint-hover);
+    --_fg-hover: var(--color-content-primary);
+    --_border-hover: transparent;
+    --_bg-active: var(--color-surface-tint-active);
+  }
+  :where(.button[data-variant="ghost"]) {
+    --_bg: transparent;
+    --_fg: var(--color-content-secondary);
+    --_bg-hover: var(--color-surface-tint);
+    --_fg-hover: var(--color-content-primary);
+    --_border-hover: transparent;
+    --_bg-active: var(--color-surface-tint-hover);
+  }
+  :where(.button[data-variant="danger"]) {
+    --_bg: var(--color-action-danger);
+    --_fg: var(--color-content-on-accent);
+    --_bg-hover: var(--color-action-danger-hover);
+    --_fg-hover: var(--color-content-on-accent);
+    --_border-hover: transparent;
+    --_bg-active: var(--color-action-danger-hover);
+  }
+
+  /* ---------- sizes (on the control-height scale) ---------- */
+  :where(.button[data-size="sm"]) { --_h: var(--control-height-sm); --_px: var(--space-3); --_gap: var(--space-1); --_font: var(--text-sm); }
+  :where(.button[data-size="lg"]) { --_h: var(--control-height-lg); --_px: var(--space-4); --_font: var(--text-base); --_icon: 1.25rem; }
+  :where(.button[data-size="xl"]) { --_h: 3.5rem; --_px: var(--space-6); --_font: var(--text-lg); --_icon: 1.5rem; }
+
+  :where(.button[data-icon-only]) { padding: 0; inline-size: var(--_h); }
+  :where(.button[data-block]) { display: flex; inline-size: 100%; }
+
+  /* ---------- states ---------- */
+  @media (hover: hover) {
+    :where(.button:hover:not(:disabled, [aria-disabled="true"], [aria-busy="true"])) {
+      --_bg-state: var(--_bg-hover);
+      --_fg-state: var(--_fg-hover);
+      --_border-state: var(--_border-hover);
+    }
+  }
+  :where(.button:active:not(:disabled, [aria-disabled="true"])) {
+    --_bg-state: var(--_bg-active);
+    --_fg-state: var(--_fg-hover);
+    --_border-state: var(--_border-hover);
+  }
+
+  :where(.button:disabled, .button[aria-disabled="true"]) {
+    --_bg-state: var(--color-surface-disabled);
+    --_fg-state: var(--color-content-disabled);
+    --_border-state: transparent;
+    cursor: not-allowed;
+  }
+  :where(.button[data-variant="secondary"]:disabled, .button[data-variant="secondary"][aria-disabled="true"]) {
+    --_bg-state: var(--color-surface-default);
+    --_border-state: var(--color-surface-disabled);
+  }
+  :where(.button[data-variant="ghost"]:disabled, .button[data-variant="ghost"][aria-disabled="true"]) { --_bg-state: transparent; }
+
+  /* loading: spinner before the label, clicks ignored */
+  :where(.button[aria-busy="true"]) { cursor: progress; pointer-events: none; }
+  :where(.button[aria-busy="true"])::before {
+    content: "";
+    inline-size: var(--_icon);
+    block-size: var(--_icon);
+    border-radius: var(--radius-full);
+    border: 2px solid currentColor;
+    border-inline-end-color: transparent;
+    animation: button-spin 0.8s linear infinite;
+  }
+  @keyframes button-spin { to { transform: rotate(1turn); } }
+
+  /* touch: at least 44px hit area without changing the drawn size */
+  @media (pointer: coarse) {
+    :where(.button[data-size="sm"]) { position: relative; }
+    :where(.button[data-size="sm"])::after { content: ""; position: absolute; inset: -6px 0; }
+  }
+}

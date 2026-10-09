@@ -1,0 +1,421 @@
+/* ============================================================
+   Bolster design system: tokens
+   Two layers. Primitives are the palette (what a value is);
+   semantic tokens are the API (what it's for). Components use
+   semantic tokens only. Names match the React prototype's
+   theme.css, so both read the same variables.
+   Decisions behind every value: docs/decisions.md (D-entries).
+   ============================================================ */
+
+@layer tokens, base, components, utilities;
+
+@layer tokens {
+  :root {
+    /* ---------- Primitives: brand ---------- */
+    --color-level-yellow: #fbff00;
+    --color-black: #1c1a1b;
+    --color-flame-white: #ffffff;
+
+    /* Cement (warm chrome) */
+    --color-cement-100: #fbfaf7;
+    --color-cement-200: #f7f5ef;
+    --color-cement-300: #f2efe8;
+    --color-cement-400: #eeeae0;
+    --color-cement-500: #e3d7bb;
+    --color-cement-700: #cbbe9e;
+    --color-cement-800: #ab9763;
+    --color-cement-900: #75663f;
+    --color-cement-950: #3b3320;
+    /* dark-theme chrome (D14) */
+    --color-cement-night-700: #34302a;
+    --color-cement-night-800: #2c2925;
+    --color-cement-night-900: #211f1c;
+
+    /* Blue print (brand blue) */
+    --color-blue-print-100: #cedbff;
+    --color-blue-print-200: #9cb7ff;
+    --color-blue-print-300: #6b93ff;
+    --color-blue-print-400: #396fff;
+    --color-blue-print-500: #084bff;
+    --color-blue-print-600: #003fe9;
+    --color-blue-print-700: #0039d2;
+    --color-blue-print-800: #002b9e;
+    --color-blue-print-900: #001d69;
+    --color-blue-print-950: #000e35;
+
+    /* Pitch black (warm neutral: ink) */
+    --color-pitch-black-100: #f4f3f4;
+    --color-pitch-black-200: #dcd9da;
+    --color-pitch-black-300: #c3bec1;
+    --color-pitch-black-400: #9e979b;
+    --color-pitch-black-500: #867c81;
+    --color-pitch-black-600: #6b6468;
+    --color-pitch-black-700: #514b4e;
+    --color-pitch-black-800: #443f41;
+    --color-pitch-black-900: #363335;
+    --color-pitch-black-950: #1c1a1b;
+    /* dark-theme surfaces (D14) */
+    --color-pitch-black-night-900: #242123;
+    --color-pitch-black-night-950: #141213;
+
+    /* Cool gray (cool neutral: surfaces and lines) */
+    --color-cool-gray-100: #f8f9fa;
+    --color-cool-gray-200: #e9ecef;
+    --color-cool-gray-300: #e3e8ed;
+    --color-cool-gray-400: #dee2e6;
+    --color-cool-gray-500: #ced4da;
+    --color-cool-gray-600: #adb5bd;
+    --color-cool-gray-700: #868e96;
+    --color-cool-gray-800: #495057;
+    --color-cool-gray-900: #343a40;
+    --color-cool-gray-950: #212529;
+
+    /* ---------- Primitives: system ramps ---------- */
+    --color-deep-red-100: #fff0f0;
+    --color-deep-red-200: #f2b2b2;
+    --color-deep-red-300: #eb8c8c;
+    --color-deep-red-400: #e56565;
+    --color-deep-red-500: #de3f3f;
+    --color-deep-red-600: #d22b2b;
+    --color-deep-red-700: #c32121;
+    --color-deep-red-800: #921919;
+    --color-deep-red-900: #611111;
+    --color-deep-red-950: #310808;
+
+    --color-orange-100: #fff3e2;
+    --color-orange-200: #f9deb8;
+    --color-orange-300: #f6ce95;
+    --color-orange-400: #f3bd71;
+    --color-orange-500: #f0ad4e;
+    --color-orange-600: #f4a028;
+    --color-orange-700: #eb9214;
+    --color-orange-800: #b06d0f;
+    --color-orange-900: #75490a;
+    --color-orange-950: #3b2405;
+
+    --color-yellow-100: #fff9eb;
+    --color-yellow-200: #fdecbc;
+    --color-yellow-300: #fce29b;
+    --color-yellow-400: #fbd979;
+    --color-yellow-500: #facf58;
+    --color-yellow-600: #fcc62f;
+    --color-yellow-700: #f8bc16;
+    --color-yellow-800: #c59206;
+    --color-yellow-900: #836104;
+    --color-yellow-950: #423102;
+
+    --color-matcha-100: #efffee;
+    --color-matcha-200: #c3e5c2;
+    --color-matcha-300: #a4d9a3;
+    --color-matcha-400: #86cc85;
+    --color-matcha-500: #68bf66;
+    --color-matcha-600: #54b152;
+    --color-matcha-700: #47a545;
+    --color-matcha-800: #357c34;
+    --color-matcha-900: #245323;
+    --color-matcha-950: #122911;
+
+    --color-green-100: #e1fff9;
+    --color-green-200: #bdfff2;
+    --color-green-300: #27fed6;
+    --color-green-400: #01dab2;
+    --color-green-500: #019277;
+    --color-green-600: #02836b;
+    --color-green-700: #01755f;
+    --color-green-800: #015847;
+    --color-green-900: #003a30;
+    --color-green-950: #001d18;
+
+    --color-blue-100: #ebf5ff;
+    --color-blue-200: #bddfff;
+    --color-blue-300: #79befd;
+    --color-blue-400: #4ca8fd;
+    --color-blue-500: #1f92fc;
+    --color-blue-600: #0282f9;
+    --color-blue-700: #0376df;
+    --color-blue-800: #0258a8;
+    --color-blue-900: #013b70;
+    --color-blue-950: #011d38;
+
+    --color-purple-100: #f8eeff;
+    --color-purple-200: #c1a8d4;
+    --color-purple-300: #a27cbf;
+    --color-purple-400: #8352a8;
+    --color-purple-500: #613d7c;
+    --color-purple-600: #583373;
+    --color-purple-700: #4e3163;
+    --color-purple-800: #3a254a;
+    --color-purple-900: #271832;
+
+    --color-raspberry-100: #ffe4e7;
+    --color-raspberry-500: #ef3c52;
+    --color-raspberry-700: #dd122b;
+    --color-raspberry-800: #a60e20;
+
+    --color-teal-100: #defff9;
+    --color-teal-500: #15b797;
+    --color-teal-800: #0d6e5b;
+
+    --color-cyan-100: #d8faff;
+    --color-cyan-500: #17a2b8;
+    --color-cyan-800: #0e616e;
+
+    /* ============================================================
+       Semantic tokens. Colours use light-dark(light, dark): the
+       active color-scheme picks the value (D14). Set data-theme
+       on <html> to force light or dark; default follows the OS.
+       ============================================================ */
+
+    /* ---------- surface (backgrounds) ---------- */
+    --color-surface-canvas: light-dark(var(--color-cool-gray-100), var(--color-pitch-black-950));
+    --color-surface-default: light-dark(var(--color-flame-white), var(--color-pitch-black-night-900));
+    --color-surface-raised: light-dark(var(--color-flame-white), var(--color-pitch-black-900));
+    --color-surface-sunken: light-dark(var(--color-cool-gray-200), var(--color-pitch-black-night-950));
+    --color-surface-hover: light-dark(var(--color-cool-gray-100), var(--color-pitch-black-900));
+    --color-surface-selected: light-dark(
+      color-mix(in srgb, var(--color-blue-print-100) 50%, var(--color-flame-white)),
+      color-mix(in srgb, var(--color-blue-print-700) 35%, var(--color-pitch-black-night-900))
+    );
+    --color-surface-disabled: light-dark(var(--color-pitch-black-200), var(--color-pitch-black-800));
+    --color-surface-inverse: light-dark(var(--color-pitch-black-950), var(--color-pitch-black-100));
+    --color-surface-inverse-hover: light-dark(var(--color-pitch-black-800), var(--color-pitch-black-200));
+    --color-surface-inverse-active: light-dark(var(--color-pitch-black-900), var(--color-pitch-black-300));
+    --color-surface-chrome: var(--color-pitch-black-950); /* top bar and rail stay dark in both themes */
+    --color-surface-chrome-hover: color-mix(in srgb, var(--color-flame-white) 8%, transparent);
+    --color-surface-chrome-selected: var(--color-pitch-black-700);
+    --color-surface-chrome-field: color-mix(in srgb, var(--color-flame-white) 10%, transparent);
+    --color-surface-sidebar: light-dark(var(--color-cement-100), var(--color-cement-night-900));
+    --color-surface-sidebar-hover: light-dark(var(--color-cement-200), var(--color-cement-night-800));
+    --color-surface-group: light-dark(var(--color-cement-100), var(--color-cement-night-900));
+    --color-surface-header: light-dark(var(--color-pitch-black-100), var(--color-pitch-black-900));
+    --color-surface-tooltip: light-dark(var(--color-pitch-black-700), var(--color-pitch-black-200));
+    --color-surface-tint: light-dark(var(--color-pitch-black-100), var(--color-pitch-black-900));
+    --color-surface-tint-hover: light-dark(var(--color-pitch-black-200), var(--color-pitch-black-800));
+    --color-surface-tint-active: light-dark(var(--color-pitch-black-300), var(--color-pitch-black-700));
+    --color-surface-scrim: light-dark(
+      color-mix(in srgb, var(--color-black) 55%, transparent),
+      color-mix(in srgb, #000 65%, transparent)
+    );
+
+    /* ---------- content (text and icons) ---------- */
+    --color-content-primary: light-dark(var(--color-black), var(--color-pitch-black-100));
+    --color-content-secondary: light-dark(var(--color-pitch-black-700), var(--color-pitch-black-300));
+    --color-content-tertiary: light-dark(var(--color-pitch-black-600), var(--color-pitch-black-400));
+    --color-content-disabled: light-dark(var(--color-pitch-black-400), var(--color-pitch-black-600));
+    --color-content-inverse: light-dark(var(--color-pitch-black-100), var(--color-black));
+    --color-content-on-chrome: var(--color-pitch-black-100);
+    --color-content-on-chrome-muted: var(--color-pitch-black-300);
+    --color-content-on-accent: var(--color-flame-white);
+    --color-content-on-brand: var(--color-black);
+    --color-content-on-primary: light-dark(var(--color-level-yellow), var(--color-black));
+    --color-content-link: light-dark(var(--color-blue-print-600), var(--color-blue-print-300));
+
+    /* ---------- line (borders and dividers) ---------- */
+    --color-line-subtle: light-dark(var(--color-cool-gray-200), var(--color-pitch-black-900));
+    --color-line-default: light-dark(var(--color-cool-gray-300), var(--color-pitch-black-800));
+    --color-line-strong: light-dark(var(--color-cool-gray-500), var(--color-pitch-black-600));
+    --color-line-input: light-dark(var(--color-pitch-black-500), var(--color-pitch-black-500));
+    --color-line-input-hover: light-dark(var(--color-pitch-black-700), var(--color-pitch-black-300));
+    --color-line-focus: light-dark(var(--color-blue-print-500), var(--color-blue-print-300));
+    --color-line-chrome: var(--color-pitch-black-800);
+    --color-line-sidebar: light-dark(var(--color-cement-400), var(--color-cement-night-700));
+
+    /* ---------- action ---------- */
+    /* Primary is Bolster's black button with highlighter text (D4); in dark it flips to yellow. */
+    --color-action-primary: light-dark(var(--color-black), var(--color-level-yellow));
+    /* Brand is the yellow call to action ("Preview and send"). */
+    --color-action-brand: var(--color-level-yellow);
+    --color-action-brand-hover: var(--color-yellow-600);
+    /* Accent is blue: selection, links, the selected filter card. */
+    --color-action-accent: light-dark(var(--color-blue-print-600), var(--color-blue-print-500));
+    --color-action-accent-hover: light-dark(var(--color-blue-print-700), var(--color-blue-print-600));
+    --color-action-accent-subtle: light-dark(
+      var(--color-blue-print-100),
+      color-mix(in srgb, var(--color-blue-print-700) 35%, var(--color-pitch-black-night-900))
+    );
+    --color-action-danger: light-dark(var(--color-deep-red-600), var(--color-deep-red-600));
+    --color-action-danger-hover: light-dark(var(--color-deep-red-700), var(--color-deep-red-700));
+
+    /* ---------- feedback ---------- */
+    --color-feedback-neutral-surface: light-dark(var(--color-cool-gray-200), var(--color-pitch-black-900));
+    --color-feedback-neutral-content: light-dark(var(--color-cool-gray-800), var(--color-pitch-black-200));
+    --color-feedback-success-surface: light-dark(var(--color-matcha-100), color-mix(in srgb, var(--color-matcha-900) 60%, var(--color-pitch-black-night-900)));
+    --color-feedback-success-content: light-dark(var(--color-matcha-800), var(--color-matcha-300));
+    --color-feedback-warning-surface: light-dark(var(--color-orange-100), color-mix(in srgb, var(--color-orange-900) 60%, var(--color-pitch-black-night-900)));
+    --color-feedback-warning-content: light-dark(var(--color-orange-900), var(--color-orange-300));
+    --color-feedback-danger-surface: light-dark(var(--color-deep-red-100), color-mix(in srgb, var(--color-deep-red-900) 60%, var(--color-pitch-black-night-900)));
+    --color-feedback-danger-content: light-dark(var(--color-deep-red-700), var(--color-deep-red-300));
+    --color-feedback-danger-solid: light-dark(var(--color-deep-red-600), var(--color-deep-red-700));
+    --color-feedback-info-surface: light-dark(var(--color-blue-100), color-mix(in srgb, var(--color-blue-900) 60%, var(--color-pitch-black-night-900)));
+    --color-feedback-info-content: light-dark(var(--color-blue-800), var(--color-blue-300));
+    /* accents: a stripe or icon on a dark toast */
+    --color-feedback-success-accent: var(--color-matcha-500);
+    --color-feedback-warning-accent: var(--color-yellow-700);
+    --color-feedback-danger-accent: var(--color-deep-red-500);
+    --color-feedback-info-accent: var(--color-blue-print-400);
+
+    /* ---------- job status (D12) ---------- */
+    --color-status-lead-surface: light-dark(var(--color-deep-red-100), color-mix(in srgb, var(--color-deep-red-900) 55%, var(--color-pitch-black-night-900)));
+    --color-status-lead-content: light-dark(var(--color-deep-red-800), var(--color-deep-red-200));
+    --color-status-lead-dot: var(--color-deep-red-500);
+    --color-status-draft-surface: light-dark(var(--color-pitch-black-100), var(--color-pitch-black-900));
+    --color-status-draft-content: light-dark(var(--color-pitch-black-700), var(--color-pitch-black-300));
+    --color-status-draft-dot: var(--color-pitch-black-400);
+    --color-status-pending-surface: light-dark(var(--color-yellow-100), color-mix(in srgb, var(--color-yellow-900) 55%, var(--color-pitch-black-night-900)));
+    --color-status-pending-content: light-dark(var(--color-yellow-900), var(--color-yellow-300));
+    --color-status-pending-dot: var(--color-yellow-700);
+    --color-status-booked-surface: light-dark(var(--color-green-100), color-mix(in srgb, var(--color-green-900) 55%, var(--color-pitch-black-night-900)));
+    --color-status-booked-content: light-dark(var(--color-green-800), var(--color-green-300));
+    --color-status-booked-dot: var(--color-green-500);
+    --color-status-in-progress-surface: light-dark(var(--color-matcha-100), color-mix(in srgb, var(--color-matcha-900) 55%, var(--color-pitch-black-night-900)));
+    --color-status-in-progress-content: light-dark(var(--color-matcha-900), var(--color-matcha-300));
+    --color-status-in-progress-dot: var(--color-matcha-500);
+    --color-status-active-surface: light-dark(var(--color-blue-print-100), color-mix(in srgb, var(--color-blue-print-900) 55%, var(--color-pitch-black-night-900)));
+    --color-status-active-content: light-dark(var(--color-blue-print-800), var(--color-blue-print-200));
+    --color-status-active-dot: var(--color-blue-print-500);
+    --color-status-outstanding-surface: light-dark(var(--color-orange-100), color-mix(in srgb, var(--color-orange-900) 55%, var(--color-pitch-black-night-900)));
+    --color-status-outstanding-content: light-dark(var(--color-orange-900), var(--color-orange-300));
+    --color-status-outstanding-dot: var(--color-orange-600);
+
+    /* ---------- control ---------- */
+    --color-control-on: light-dark(var(--color-black), var(--color-level-yellow));
+    --color-control-off: light-dark(var(--color-pitch-black-500), var(--color-pitch-black-500));
+    --color-control-knob: light-dark(var(--color-flame-white), var(--color-black));
+    --color-control-selected: light-dark(var(--color-black), var(--color-pitch-black-100));
+    --color-control-check: light-dark(var(--color-flame-white), var(--color-black));
+
+    /* ---------- avatar (D13): white initials clear 4.5:1 on each ---------- */
+    --color-content-on-avatar: var(--color-flame-white);
+    --color-avatar-1: var(--color-pitch-black-700);
+    --color-avatar-2: var(--color-blue-print-700);
+    --color-avatar-3: var(--color-green-700);
+    --color-avatar-4: var(--color-purple-500);
+    --color-avatar-5: var(--color-deep-red-800);
+    --color-avatar-6: var(--color-orange-900);
+    --color-avatar-7: var(--color-matcha-900);
+    --color-avatar-8: var(--color-cool-gray-800);
+
+    /* ---------- focus (D8) ---------- */
+    --color-focus-ring: var(--color-line-focus);
+    --focus-ring-width: 2px;
+    --focus-ring-offset: 2px;
+
+    /* ---------- Typography ---------- */
+    --font-sans: "Cera Pro", "Inter", ui-sans-serif, system-ui, sans-serif;
+    --font-display: "Space Grotesk", var(--font-sans);
+    --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700;
+
+    /* size ramp (px equivalents at a 16px root) */
+    --text-xxs: 0.625rem;   /* 10 */
+    --text-xs: 0.75rem;     /* 12 */
+    --text-sm: 0.875rem;    /* 14 */
+    --text-base: 1rem;      /* 16 */
+    --text-lg: 1.125rem;    /* 18 */
+    --text-xl: 1.25rem;     /* 20 */
+    --text-2xl: 1.5rem;     /* 24 */
+    --text-3xl: 1.875rem;   /* 30 */
+    --text-4xl: 2.25rem;    /* 36 */
+
+    /* line heights on the 4px grid */
+    --leading-xs: 1rem;     /* 16 */
+    --leading-sm: 1.25rem;  /* 20 */
+    --leading-base: 1.5rem; /* 24 */
+    --leading-lg: 1.75rem;  /* 28 */
+    --leading-xl: 2rem;     /* 32 */
+    --leading-2xl: 2.25rem; /* 36 */
+    --leading-3xl: 2.5rem;  /* 40 */
+    --leading-tight: 1;     /* single-line controls */
+
+    /* ---------- Spacing: 4px grid (D2) ---------- */
+    --spacing: 0.25rem;
+    --space-0: 0;
+    --space-px: 1px;        /* hairlines only */
+    --space-0-5: 0.125rem;  /* 2: optical nudges only, never layout */
+    --space-1: 0.25rem;     /* 4 */
+    --space-2: 0.5rem;      /* 8 */
+    --space-3: 0.75rem;     /* 12 */
+    --space-4: 1rem;        /* 16 */
+    --space-5: 1.25rem;     /* 20 */
+    --space-6: 1.5rem;      /* 24 */
+    --space-8: 2rem;        /* 32 */
+    --space-10: 2.5rem;     /* 40 */
+    --space-12: 3rem;       /* 48 */
+    --space-16: 4rem;       /* 64 */
+    --space-20: 5rem;       /* 80 */
+
+    /* ---------- Sizing ---------- */
+    --control-height-sm: 2rem;   /* 32 */
+    --control-height-md: 2.5rem; /* 40 */
+    --control-height-lg: 3rem;   /* 48 */
+    --touch-target-min: 2.75rem; /* 44 on touch */
+    --border-width-default: 1px;
+    --border-width-strong: 2px;
+
+    /* shell */
+    --shell-top-bar-height: 3.75rem;   /* 60 */
+    --shell-rail-width: 3.75rem;       /* 60 */
+    --shell-rail-expanded-width: 14.5rem;/* 232 */
+    --shell-sidebar-width: 16rem;      /* 256: the longest item plus 48 (D26) */
+    --shell-bottom-bar-height: 3.75rem;/* 60 */
+    --shell-top-control-height: 2.25rem;  /* 36: global search, top bar icon buttons */
+    --shell-rail-item-size: 2.75rem;      /* 44 */
+    --shell-sidebar-header-height: 4rem;  /* 64 */
+    --shell-nav-item-height: 2.25rem;     /* 36 */
+    --content-max-width: 80rem;        /* 1280 */
+    --content-max-width-wide: 93.75rem;/* 1500: dashboards */
+    --content-max-width-reading: 48rem;/* 768: forms, documents */
+
+    /* ---------- Shape ---------- */
+    --radius-2xs: 1px;      /* toggle knob */
+    --radius-xs: 0.125rem;  /* 2 */
+    --radius-sm: 0.25rem;   /* 4: Bolster's default corner */
+    --radius-md: 0.5rem;    /* 8 */
+    --radius-lg: 0.75rem;   /* 12 */
+    --radius-xl: 1rem;      /* 16: modal, large surfaces */
+    --radius-full: 9999px;
+
+    /* ---------- Depth ---------- */
+    --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.06), 0 1px 3px rgb(0 0 0 / 0.08);
+    --shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.1), 0 12px 32px rgb(0 0 0 / 0.12);
+
+    /* ---------- Layers (D9) ---------- */
+    --z-base: 0;
+    --z-raised: 10;
+    --z-sticky: 100;
+    --z-shell: 200;
+    --z-scrim: 300;
+    --z-modal: 400;
+    --z-popover: 500;
+    --z-toast: 600;
+    --z-tooltip: 700;
+
+    /* ---------- Motion (D10) ---------- */
+    --duration-instant: 0ms;
+    --duration-fast: 120ms;
+    --duration-medium: 240ms;
+    --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+    color-scheme: light dark;
+  }
+
+  :root[data-theme="light"] { color-scheme: light; }
+  :root[data-theme="dark"] { color-scheme: dark; }
+
+  /* Shadows can't use light-dark(): they deepen in dark. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.4);
+      --shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.5);
+  }
+
+}

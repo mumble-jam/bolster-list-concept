@@ -1,0 +1,23 @@
+/* Bolster design system: everything in one import.
+   import "bolster-ds/system/bolster.css"  (or link it from HTML)
+   Layer order is declared first so tokens < base < components < utilities,
+   whatever order the files arrive in. */
+@layer tokens, base, components, utilities;
+
+@import "./tokens.css";
+@import "./base.css";
+@import "./components/button.css";
+@import "./components/badge.css";
+@import "./components/field.css";
+@import "./components/choice.css";
+@import "./components/segmented-control.css";
+@import "./components/tabs.css";
+@import "./components/tooltip.css";
+@import "./components/menu.css";
+@import "./components/dialog.css";
+@import "./components/avatar.css";
+@import "./components/card.css";
+@import "./components/data-table.css";
+@import "./components/toast.css";
+@import "./components/shell.css";
+@import "./utilities.css";

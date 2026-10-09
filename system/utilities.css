@@ -1,0 +1,35 @@
+/* Bolster design system: utilities
+   Type roles and a few helpers. Every text style in the product
+   should be one of these roles (D6); line heights sit on the 4px grid. */
+
+@layer tokens, base, components, utilities;
+
+@layer utilities {
+  /* ---------- Type roles ---------- */
+  .text-display     { font-family: var(--font-display); font-size: var(--text-4xl); line-height: var(--leading-3xl); font-weight: var(--font-weight-medium); }
+  .text-title-page  { font-family: var(--font-display); font-size: var(--text-2xl); line-height: var(--leading-xl); font-weight: var(--font-weight-bold); }
+  .text-title-section { font-family: var(--font-display); font-size: var(--text-xl); line-height: var(--leading-lg); font-weight: var(--font-weight-medium); }
+  .text-title-card  { font-family: var(--font-sans); font-size: var(--text-base); line-height: var(--leading-base); font-weight: var(--font-weight-medium); }
+  .text-body-lg     { font-size: var(--text-base); line-height: var(--leading-base); font-weight: var(--font-weight-regular); }
+  .text-body        { font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-regular); }
+  .text-body-strong { font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); }
+  .text-label       { font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
+  .text-caption     { font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-regular); color: var(--color-content-secondary); }
+  .text-caption-strong { font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); }
+  .text-amount      { font-variant-numeric: tabular-nums; font-weight: var(--font-weight-medium); }
+  .text-amount-hero { font-family: var(--font-display); font-size: var(--text-3xl); line-height: var(--leading-2xl); font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; }
+
+  /* ---------- Content colour ---------- */
+  .text-primary   { color: var(--color-content-primary); }
+  .text-secondary { color: var(--color-content-secondary); }
+  .text-tertiary  { color: var(--color-content-tertiary); }
+
+  /* ---------- Helpers ---------- */
+  .visually-hidden {
+    position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+  .stack { display: flex; flex-direction: column; gap: var(--stack-gap, var(--space-4)); }
+  .cluster { display: flex; flex-wrap: wrap; align-items: center; gap: var(--cluster-gap, var(--space-2)); }
+}

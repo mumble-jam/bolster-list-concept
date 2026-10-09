@@ -1,0 +1,48 @@
+/* Tabs: switch between panels of one page.
+   <div class="tabs" role="tablist" aria-label="Job sections" [data-size="sm|md"]>
+     <button class="tab" role="tab" aria-selected="true" aria-controls="p1" id="t1">Overview</button>
+     <button class="tab" role="tab" aria-selected="false" aria-controls="p2" id="t2" tabindex="-1">Estimate <span class="badge" data-count>2</span></button>
+   </div>
+   <div role="tabpanel" id="p1" aria-labelledby="t1">…</div>
+   Arrow keys move between tabs: ~15 lines of JS, see specimens/tabs.html. */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  :where(.tabs) {
+    --_h: var(--control-height-md);
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-1);
+    border-block-end: var(--border-width-default) solid var(--color-line-default);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  :where(.tabs[data-size="md"]) { --_h: var(--control-height-lg); }
+
+  :where(.tab) {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    block-size: var(--_h);
+    margin-block-end: -1px;
+    padding: 0 var(--space-3);
+    border: 0;
+    border-block-end: var(--border-width-strong) solid transparent;
+    background: none;
+    color: var(--color-content-secondary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-medium);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard);
+  }
+  :where(.tabs[data-size="md"] .tab) { font-size: var(--text-base); }
+  :where(.tab) > svg { inline-size: 1rem; block-size: 1rem; }
+  @media (hover: hover) {
+    :where(.tab:hover) { color: var(--color-content-primary); background: var(--color-surface-tint); }
+  }
+  :where(.tab[aria-selected="true"]) { color: var(--color-content-primary); border-block-end-color: var(--color-content-primary); }
+  :where(.tab):focus-visible { outline-offset: -2px; }
+  :where(.tab:disabled) { color: var(--color-content-disabled); cursor: not-allowed; }
+}

@@ -1,0 +1,245 @@
+/* App shell: top bar, icon rail, section sidebar, bottom tab bar, page header, action bar.
+   <div class="app-shell">
+     <header class="top-bar">…</header>
+     <nav class="rail" aria-label="Main">
+       …<a class="rail-item" aria-current="page">svg<span class="rail-label">Jobs</span></a>…
+       <span class="rail-spacer"></span>…<hr class="rail-separator"><button class="rail-item" aria-pressed="false">…Pin sidebar</button>
+     </nav>
+     <nav class="sidebar" aria-label="Jobs">…<a class="sidebar-item" aria-current="page">Pipeline</a>…</nav>
+     <main class="app-main">
+       <header class="page-header"><h1>Pending jobs</h1><div class="page-header-actions">…</div></header>
+       …
+       <div class="action-bar">…</div>
+     </main>
+     <nav class="bottom-bar" aria-label="Main">…</nav>
+   </div>
+   Breakpoints (D15): ≥1024 rail + sidebar; 768–1023 rail, sidebar opens as an overlay;
+   <768 bottom bar, no rail.
+   Rail (D25): 60 wide; on hover it widens to 232 over the content and shows its labels
+   (.rail[data-expanded], set by a few lines of JS with a short hover delay). Pinned, the
+   .app-shell[data-rail-pinned] keeps it 232 wide in the layout. */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  :where(.app-shell) {
+    display: grid;
+    --_rail-column: var(--shell-rail-width);
+    grid-template-columns: var(--_rail-column) auto minmax(0, 1fr);
+    grid-template-rows: var(--shell-top-bar-height) 1fr;
+    grid-template-areas: "top top top" "rail side main";
+    min-block-size: 100dvh;
+    background: var(--color-surface-canvas);
+  }
+
+  /* ---------- top bar ---------- */
+  :where(.top-bar) {
+    grid-area: top;
+    position: sticky;
+    inset-block-start: 0;
+    z-index: var(--z-shell);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 0 var(--space-3);
+    background: var(--color-surface-chrome);
+    color: var(--color-content-on-chrome);
+    border-block-end: var(--border-width-default) solid var(--color-line-chrome);
+  }
+  :where(.top-bar-search) {
+    display: flex; align-items: center; gap: var(--space-2);
+    flex: 1; max-inline-size: 42rem; block-size: var(--shell-top-control-height);
+    margin-inline: auto; padding: 0 var(--space-3);
+    border: 0; border-radius: var(--radius-md);
+    background: var(--color-surface-chrome-field);
+    color: var(--color-content-on-chrome-muted);
+    font-size: var(--text-base); text-align: start; cursor: pointer;
+    transition: background-color var(--duration-fast) var(--ease-standard);
+  }
+  @media (hover: hover) { :where(.top-bar-search:hover) { background: color-mix(in srgb, var(--color-surface-chrome-field), var(--color-flame-white) 6%); } }
+  :where(.top-bar-search) { min-inline-size: 0; white-space: nowrap; }
+  :where(.top-bar-search) > :where(span) { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
+  :where(.top-bar-search) > kbd { margin-inline-start: auto; font: inherit; font-size: var(--text-xs); opacity: 0.8; }
+  :where(.top-bar .button[data-variant="ghost"]) { --_fg: var(--color-content-on-chrome-muted); --_fg-hover: var(--color-content-on-chrome); --_bg-hover: var(--color-surface-chrome-hover); --_bg-active: var(--color-surface-chrome-selected); }
+
+  /* ---------- rail ---------- */
+  /* the rail sits in a 60px column; expanded, it grows past the column, over the content */
+  :where(.rail) {
+    grid-area: rail;
+    position: sticky;
+    inset-block-start: var(--shell-top-bar-height);
+    z-index: var(--z-shell);
+    block-size: calc(100dvh - var(--shell-top-bar-height));
+    inline-size: var(--shell-rail-width);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: var(--space-3) var(--space-2);
+    overflow: hidden;
+    background: var(--color-surface-chrome);
+    transition: inline-size var(--duration-medium) var(--ease-out), box-shadow var(--duration-medium) var(--ease-out);
+  }
+  :where(.rail[data-expanded]) { inline-size: var(--shell-rail-expanded-width); z-index: var(--z-popover); box-shadow: var(--shadow-overlay); }
+  :where(.app-shell[data-rail-pinned]) { --_rail-column: var(--shell-rail-expanded-width); }
+  :where(.app-shell[data-rail-pinned]) > :where(.rail) { inline-size: var(--shell-rail-expanded-width); box-shadow: none; }
+
+  /* 44px rows: the icon in a 44px cell, the label after it (shown when expanded) */
+  :where(.rail-item) {
+    display: flex; align-items: center; flex: none;
+    inline-size: 100%; min-inline-size: var(--shell-rail-item-size); block-size: var(--shell-rail-item-size);
+    padding: 0; border: 0; border-radius: var(--radius-md);
+    background: transparent;
+    color: var(--color-content-on-chrome-muted);
+    font: inherit; text-align: start; text-decoration: none; white-space: nowrap;
+    overflow: hidden; cursor: pointer;
+    transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+  }
+  /* icons draw at 16 tall in a 20 wide box, as Font Awesome's fixed width does */
+  :where(.rail-item) > svg { flex: none; inline-size: 1.25rem; block-size: 1rem; margin-inline: calc((var(--shell-rail-item-size) - 1.25rem) / 2); }
+  :where(.rail-label) {
+    font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium);
+    opacity: 0; transition: opacity var(--duration-fast) var(--ease-standard);
+  }
+  :where(.rail[data-expanded], .app-shell[data-rail-pinned] > .rail) :where(.rail-label) { opacity: 1; }
+  @media (hover: hover) { :where(.rail-item:hover) { background: var(--color-surface-chrome-hover); color: var(--color-content-on-chrome); } }
+  :where(.rail-item[aria-current="page"]) { background: var(--color-surface-chrome-selected); color: var(--color-content-on-chrome); }
+  :where(.rail-item:focus-visible) { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
+  :where(.rail-spacer) { flex: 1; }
+  /* short rule before the pin button; it widens with the rail */
+  :where(.rail-separator) {
+    flex: none; align-self: center;
+    inline-size: 1.75rem; block-size: 0;
+    margin: var(--space-1) 0; border: 0;
+    border-block-start: var(--border-width-default) solid var(--color-line-chrome);
+    transition: inline-size var(--duration-medium) var(--ease-out);
+  }
+  :where(.rail[data-expanded], .app-shell[data-rail-pinned] > .rail) :where(.rail-separator) { inline-size: calc(100% - var(--space-3) * 2); }
+
+  /* ---------- section sidebar ---------- */
+  :where(.sidebar) {
+    grid-area: side;
+    position: sticky;
+    inset-block-start: var(--shell-top-bar-height);
+    block-size: calc(100dvh - var(--shell-top-bar-height));
+    inline-size: var(--shell-sidebar-width);
+    overflow-y: auto;
+    padding: 0 var(--space-2) var(--space-3);
+    border-inline-end: var(--border-width-default) solid var(--color-line-sidebar);
+    background: var(--color-surface-sidebar);
+  }
+  :where(.sidebar-title) {
+    display: flex; align-items: center;
+    block-size: var(--shell-sidebar-header-height);
+    margin: 0 calc(var(--space-2) * -1) var(--space-3);
+    padding: 0 var(--space-4);
+    border-block-end: var(--border-width-default) solid var(--color-line-sidebar);
+    font-family: var(--font-display); font-size: var(--text-2xl); line-height: var(--leading-xl); font-weight: var(--font-weight-medium);
+  }
+  :where(.sidebar-group) { display: flex; align-items: center; gap: var(--space-1); padding: var(--space-2) var(--space-3); color: var(--color-content-tertiary); font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); }
+  :where(.sidebar-item) {
+    display: flex; align-items: center; gap: var(--space-2);
+    min-block-size: var(--shell-nav-item-height);
+    margin-block-end: var(--space-0-5);
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-md);
+    color: var(--color-content-primary);
+    font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium);
+    text-decoration: none;
+  }
+  /* icon in a 28px column, drawn 18px tall, like the product's fixed-width icons */
+  :where(.sidebar-item) > svg { inline-size: 1.75rem; block-size: 1.125rem; flex: none; color: currentColor; }
+  :where(.sidebar-item) > :where(.badge) { margin-inline-start: auto; }
+  @media (hover: hover) { :where(.sidebar-item:hover) { background: var(--color-surface-sidebar-hover); } }
+  :where(.sidebar-item[aria-current="page"]) { background: var(--color-surface-default); box-shadow: var(--shadow-raised); }
+
+  /* ---------- main ---------- */
+  :where(.app-main) { grid-area: main; min-inline-size: 0; display: flex; flex-direction: column; }
+  :where(.app-content) { flex: 1; inline-size: 100%; max-inline-size: var(--content-max-width); margin-inline: auto; padding: var(--space-6); }
+  :where(.app-content[data-width="wide"]) { max-inline-size: var(--content-max-width-wide); }
+  :where(.app-content[data-width="reading"]) { max-inline-size: var(--content-max-width-reading); }
+  :where(.app-content[data-width="full"]) { max-inline-size: none; }
+
+  /* ---------- page header ---------- */
+  :where(.page-header) {
+    position: sticky;
+    inset-block-start: var(--shell-top-bar-height);
+    z-index: var(--z-sticky);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    /* same height as the sidebar header, so the two rules under them meet in one line */
+    min-block-size: var(--shell-sidebar-header-height);
+    padding: 0 var(--space-6);
+    border-block-end: var(--border-width-default) solid var(--color-line-subtle);
+    background: var(--color-surface-canvas);
+  }
+  :where(.page-header) > :where(h1) { flex: 1; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  :where(.page-header-actions) { display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0; }
+
+  /* ---------- action bar (sticky footer actions) ---------- */
+  :where(.action-bar) {
+    position: sticky;
+    inset-block-end: 0;
+    z-index: var(--z-sticky);
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-6) calc(var(--space-3) + env(safe-area-inset-bottom));
+    background: var(--color-surface-raised);
+    box-shadow: var(--shadow-overlay);
+  }
+
+  /* ---------- bottom tab bar (phones) ---------- */
+  :where(.bottom-bar) { display: none; }
+
+  @media (max-width: 1023px) {
+    :where(.app-shell) { --_rail-column: var(--shell-rail-width); grid-template-columns: var(--_rail-column) minmax(0, 1fr); grid-template-areas: "top top" "rail main"; }
+    :where(.app-shell[data-rail-pinned]) > :where(.rail) { inline-size: var(--shell-rail-width); }
+    :where(.sidebar) {
+      position: fixed;
+      inset-block: var(--shell-top-bar-height) 0;
+      inset-inline-start: var(--shell-rail-width);
+      z-index: var(--z-modal);
+      block-size: auto;
+      box-shadow: var(--shadow-overlay);
+      translate: calc(-100% - var(--shell-rail-width)) 0;
+      transition: translate var(--duration-medium) var(--ease-standard);
+    }
+    :where(.sidebar[data-open]) { translate: 0 0; }
+  }
+  @media (max-width: 767px) {
+    :where(.app-shell) { grid-template-columns: minmax(0, 1fr); grid-template-rows: var(--shell-top-bar-height) 1fr auto; grid-template-areas: "top" "main" "bottom"; }
+    :where(.rail) { display: none; }
+    :where(.sidebar) { inset-inline-start: 0; inset-block-end: var(--shell-bottom-bar-height); }
+    :where(.top-bar) { gap: var(--space-2); }
+    :where(.page-header) { flex-wrap: wrap; padding: var(--space-3) var(--space-4); inset-block-start: var(--shell-top-bar-height); }
+    :where(.page-header) > :where(h1) { flex-basis: 100%; }
+    :where(.page-header-actions) { flex: 1; }
+    :where(.page-header-actions) > :where(.input-group) { flex: 1; inline-size: auto !important; }
+    :where(.top-bar-search) > kbd { display: none; }
+    :where(.top-bar-search) { flex: 0 0 auto; inline-size: var(--control-height-md); margin-inline: auto 0; padding: 0; justify-content: center; }
+    :where(.top-bar-search) > :where(span) { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    :where(.app-content) { padding: var(--space-4); }
+    :where(.action-bar) { inset-block-end: var(--shell-bottom-bar-height); padding-inline: var(--space-4); }
+    :where(.bottom-bar) {
+      grid-area: bottom;
+      position: sticky;
+      inset-block-end: 0;
+      z-index: var(--z-shell);
+      display: flex;
+      block-size: calc(var(--shell-bottom-bar-height) + env(safe-area-inset-bottom));
+      padding-block-end: env(safe-area-inset-bottom);
+      background: var(--color-surface-chrome);
+    }
+    :where(.bottom-bar-item) {
+      flex: 1;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--space-1);
+      color: var(--color-content-on-chrome-muted);
+      font-size: var(--text-xxs); font-weight: var(--font-weight-medium);
+      text-decoration: none;
+    }
+    :where(.bottom-bar-item) > svg { inline-size: 1.25rem; block-size: 1.25rem; }
+    :where(.bottom-bar-item[aria-current="page"]) { color: var(--color-content-on-chrome); }
+    :where(.bottom-bar-item[aria-current="page"]) > svg { color: var(--color-action-brand); }
+  }
+}

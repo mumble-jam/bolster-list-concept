@@ -1,0 +1,37 @@
+/* Avatar: initials on a colour picked from 8 AA-safe tokens (D13).
+   <span class="avatar" data-color="1..8" [data-size="sm|md|lg"] role="img" aria-label="Hello Mublejam">HM</span>
+   Pick data-color from a stable hash of the person's id, not at random.
+   Always round: people are circles, companies and files are squares (use .card or an icon). */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  :where(.avatar) {
+    --_size: var(--control-height-sm); /* 32 */
+    --_bg: var(--color-avatar-1);
+    display: inline-grid;
+    place-items: center;
+    flex-shrink: 0;
+    inline-size: var(--_size);
+    block-size: var(--_size);
+    border-radius: var(--radius-full);
+    background: var(--_bg);
+    color: var(--color-content-on-avatar);
+    font-size: var(--text-xs);
+    font-weight: var(--font-weight-medium);
+    line-height: 1;
+    text-transform: uppercase;
+    overflow: hidden;
+    user-select: none;
+  }
+  :where(.avatar) > img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+  :where(.avatar[data-size="sm"]) { --_size: var(--space-6); font-size: var(--text-xxs); }  /* 24 */
+  :where(.avatar[data-size="lg"]) { --_size: var(--control-height-md); font-size: var(--text-sm); } /* 40 */
+  :where(.avatar[data-color="2"]) { --_bg: var(--color-avatar-2); }
+  :where(.avatar[data-color="3"]) { --_bg: var(--color-avatar-3); }
+  :where(.avatar[data-color="4"]) { --_bg: var(--color-avatar-4); }
+  :where(.avatar[data-color="5"]) { --_bg: var(--color-avatar-5); }
+  :where(.avatar[data-color="6"]) { --_bg: var(--color-avatar-6); }
+  :where(.avatar[data-color="7"]) { --_bg: var(--color-avatar-7); }
+  :where(.avatar[data-color="8"]) { --_bg: var(--color-avatar-8); }
+}

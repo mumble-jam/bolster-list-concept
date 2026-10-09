@@ -1,0 +1,56 @@
+/* Segmented control: a small set of mutually exclusive views or modes.
+   Native radios, so arrow keys and form submission work without JS.
+   <div class="segmented" role="radiogroup" aria-label="Margin type" [data-size="sm|md"]>
+     <label class="segmented-option"><input type="radio" name="margin" value="profit" checked> Profit</label>
+     <label class="segmented-option"><input type="radio" name="margin" value="markup"> Markup</label>
+   </div> */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  :where(.segmented) {
+    --_h: var(--control-height-sm);
+    display: inline-flex;
+    align-items: stretch;
+    gap: var(--space-0-5);
+    block-size: var(--_h);
+    padding: var(--space-0-5);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-sunken);
+    flex-shrink: 0;
+  }
+  :where(.segmented[data-size="md"]) { --_h: var(--control-height-md); }
+
+  :where(.segmented-option) {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-xs);
+    color: var(--color-control-off);
+    /* same weight in both states, so labels don't shift (fixes the as-is bold jump) */
+    font-size: var(--text-sm);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--leading-tight);
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+  }
+  :where(.segmented-option) > input { position: absolute; opacity: 0; inset: 0; margin: 0; cursor: inherit; }
+  :where(.segmented-option) > svg { inline-size: 1rem; block-size: 1rem; }
+  @media (hover: hover) {
+    :where(.segmented-option:hover:not(:has(:checked))) { color: var(--color-content-primary); }
+  }
+  :where(.segmented-option:has(:checked)) {
+    background: var(--color-surface-raised);
+    color: var(--color-content-primary);
+    box-shadow: var(--shadow-raised);
+  }
+  :where(.segmented-option:has(:focus-visible)) {
+    outline: var(--focus-ring-width) solid var(--color-focus-ring);
+    outline-offset: 1px;
+  }
+  :where(.segmented-option:has(:disabled)) { color: var(--color-content-disabled); cursor: not-allowed; }
+}
