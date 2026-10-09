@@ -749,6 +749,8 @@
      layers are one screen tall, stuck to the viewport, so a frame repaints one screen, not the whole page.
      The grid still scrolls with the page: its pattern is shifted by how far the layers have stuck (--_oy). */
   .app-main { position: relative; isolation: isolate; }
+  /* off unless Concept controls turns it on */
+  :root:not([data-grid]) .canvas-layers { display: none; }
   .canvas-layers {
     position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: clip;
     display: grid; grid-template: 1fr / 1fr;

@@ -784,6 +784,12 @@
       return;
     }
     if (t.id === "cc-state") { st.mode = t.value; st.selected.clear(); render(); }
+    if (t.id === "cc-grid") {
+      document.documentElement.toggleAttribute("data-grid", t.checked);
+      $("[data-net-open]").hidden = !t.checked;
+      if (!t.checked) { const p = $(".net-panel"); if (p) p.hidden = true; }
+      try { localStorage.setItem("bolster-concepts:grid", t.checked ? "on" : "off"); } catch {}
+    }
     if (t.id === "cc-canvas") { document.documentElement.dataset.canvas = t.value; try { localStorage.setItem("bolster-concepts:canvas", t.value); } catch {} }
   });
 
@@ -1019,7 +1025,7 @@ ${JSON.stringify(v)}`;
     };
     const go = () => { if (!raf) raf = requestAnimationFrame(tick); };
     main.addEventListener("pointermove", (e) => {
-      if (e.pointerType === "touch") return;
+      if (e.pointerType === "touch" || !document.documentElement.hasAttribute("data-grid")) return;
       px = e.clientX; py = e.clientY; over = true;
       lay.setProperty("--_vis", "1");
       go();
@@ -1031,6 +1037,14 @@ ${JSON.stringify(v)}`;
   }
 
   $("#cc-canvas").value = document.documentElement.dataset.canvas || "paper";
+  // the page grid: off unless it was turned on in this browser
+  {
+    let on = false;
+    try { on = localStorage.getItem("bolster-concepts:grid") === "on"; } catch {}
+    document.documentElement.toggleAttribute("data-grid", on);
+    $("#cc-grid").checked = on;
+    $("[data-net-open]").hidden = !on;
+  }
   addEventListener("hashchange", load);
   load();
 })();
