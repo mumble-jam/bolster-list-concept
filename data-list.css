@@ -599,17 +599,29 @@
     --_chip-bg: light-dark(var(--color-cement-400), var(--color-cement-night-800));
     --_chip-line: light-dark(color-mix(in srgb, var(--color-cement-500) 50%, var(--color-pitch-black-200)), var(--color-cement-night-700));
   }
-  /* the cards and the list card go warm too: row rules match the card edge, the header rule is a
-     step darker, rows hover in the paper tone, and the tints (row ⋯ button, secondary buttons,
-     skeletons) come from cement instead of the pink-grey, so they still show on a hovered row.
-     Selection stays blue: it means something */
-  :root:not([data-canvas="cool"]) :is(.list-panel, .slices, .detail) {
+  /* warm reaches every neutral on the page, not only the cards: rules match the card edge (a step darker
+     for the header rule, two for strong), hovers sit in the paper tone, and the tints behind ghost and
+     tertiary buttons, the search field, tabs, skeletons and the empty-state icon come from cement instead
+     of the pink-grey, so they show on a hovered row and on the paper canvas alike. The table head, the
+     segmented track, disabled fills, neutral and draft badges, and the dark cards follow. Text, inputs and the dark chrome keep
+     Bolster's own neutral; selection stays blue, since it means something */
+  :root:not([data-canvas="cool"]) {
     --color-line-subtle: var(--_card-line);
     --color-line-default: light-dark(color-mix(in srgb, var(--color-cement-500) 50%, var(--color-pitch-black-200)), color-mix(in srgb, var(--color-cement-night-700) 50%, var(--color-pitch-black-800)));
     --color-line-strong: light-dark(color-mix(in srgb, var(--color-cement-700) 50%, var(--color-pitch-black-300)), color-mix(in srgb, var(--color-pitch-black-600) 70%, var(--color-cement-900)));
     --color-surface-hover: light-dark(var(--color-cement-200), var(--color-cement-night-700));
     --color-surface-tint: light-dark(var(--color-cement-400), color-mix(in srgb, var(--color-cement-night-700) 50%, var(--color-pitch-black-800)));
     --color-surface-tint-hover: light-dark(color-mix(in srgb, var(--color-cement-500) 50%, var(--color-pitch-black-200)), color-mix(in srgb, var(--color-cement-night-700) 50%, var(--color-pitch-black-700)));
+    --color-surface-tint-active: light-dark(color-mix(in srgb, var(--color-cement-700) 45%, var(--color-pitch-black-200)), color-mix(in srgb, var(--color-cement-night-700) 40%, var(--color-pitch-black-600)));
+    --color-surface-header: var(--_table-head);
+    --color-surface-sunken: light-dark(var(--color-cement-400), color-mix(in srgb, var(--color-cement-night-900) 55%, var(--color-pitch-black-night-950)));
+    --color-surface-disabled: light-dark(color-mix(in srgb, var(--color-cement-500) 50%, var(--color-pitch-black-200)), var(--color-cement-night-700));
+    --color-feedback-neutral-surface: light-dark(var(--color-cement-400), var(--color-cement-night-800));
+    --color-feedback-neutral-content: light-dark(var(--color-cement-950), var(--color-pitch-black-200));
+    --color-status-draft-surface: light-dark(var(--color-cement-400), var(--color-cement-night-800));
+    /* in dark the cards, dialogs and panels lose their pink cast too; white stays white in light */
+    --color-surface-default: light-dark(var(--color-flame-white), color-mix(in srgb, var(--color-cement-night-900) 60%, var(--color-pitch-black-night-900)));
+    --color-surface-raised: light-dark(var(--color-flame-white), var(--color-cement-night-800));
   }
   :root[data-canvas="paper"] { --color-surface-canvas: light-dark(var(--color-cement-200), color-mix(in srgb, var(--color-cement-night-900) 55%, var(--color-pitch-black-night-950))); }
   /* the page header's rule goes warm with the canvas: the sidebar's rule */

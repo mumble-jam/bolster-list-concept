@@ -5,11 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bolster list concept</title>
 <meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="shared/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="shared/assets/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="shared/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=a7726141">
-<link rel="stylesheet" href="shared/shell.css?v=a7726141">
-<link rel="stylesheet" href="data-list.css?v=a7726141">
+<link rel="stylesheet" href="system/bolster.css?v=d75412b0">
+<link rel="stylesheet" href="shared/shell.css?v=d75412b0">
+<link rel="stylesheet" href="data-list.css?v=d75412b0">
 <script>try { document.documentElement.dataset.canvas = localStorage.getItem("bolster-concepts:canvas") === "cool" ? "cool" : "paper"; } catch { document.documentElement.dataset.canvas = "paper"; }</script>
 </head>
 <body>
@@ -95,7 +98,7 @@
         <li><b>The table card has a header, as in Shopify.</b> "Add filter" and a bare search field on the left; the date range, a rule and the Display settings icon. Its menu is a short list of settings, each with its current value (Group by: None, Row height: Comfortable, Columns: All) opening a nested menu with a check by the choice. Sorting is in the column headers, and in this menu only on phones, where those are hidden on the right. Its filters still change the cards above. Scrolling follows option D from the "What stays on screen" research board: the page title scrolls away; once you are into the list, scrolling down hides the top bar and the card header (only the column header stays on desktop, only the tab bar on phones), and a few pixels back up brings them back in 300 ms. Menus, a focused field or Tab into either bar keep them in view.</li>
         <li><b>Search becomes a chip.</b> Typing filters as you go; Enter (or leaving the field) turns the words into a chip, "Search: “basement”". Several chips must all match. Click a chip to edit its words, Backspace in the empty field takes back the last one, press / to jump to the field. A second row shows the count ("23 of 132 jobs"), the chips and Clear all once something narrows the list; at rest the All card already gives the total.</li>
         <li><b>Add filter, then chips.</b> Pick a field, then a value; it becomes a chip with ×. A field left without a value disappears again. Status isn't a chip when a card already shows it.</li>
-        <li><b>Cards sit flat.</b> No shadow: white cards with warm edges on a warm Paper page, a warm table header and filled chips. A hovered card only darkens its edge. The table is warm through: row rules match the card edge, the header rule is a step darker, rows hover in the paper tone and the row ⋯ button in cement. Only selection stays blue.</li>
+        <li><b>Cards sit flat.</b> No shadow: white cards with warm edges on a warm Paper page, a warm table header and filled chips. A hovered card only darkens its edge. Warm goes through the whole page: row rules match the card edge, the header rule is a step darker, rows hover in the paper tone, and every tint (ghost and secondary button hovers, the search field, skeletons, neutral and draft badges, disabled fills) comes from cement. In dark, cards and dialogs lose their pink cast too. Text, inputs and the dark top bar keep Bolster's own neutral, and selection stays blue.</li>
         <li><b>Columns keep their width.</b> Each column has a set width that fits its longest value; the first column takes the rest. Sorting or loading more never moves a column, and every header keeps room for the sort arrow (it shows faintly on hover). A column never gets narrower than that: when they don't all fit, the table scrolls sideways in its card, with the checkbox and name pinned on the left, a rule at their edge once you've scrolled, and a fade on the right while there's more. The column header still follows the page, under the bars.</li>
         <li><b>Slice cards are the status filter.</b> "All" plus one card per status; the whole card toggles and stays outlined. Amount first, count in the corner. Empty slices stay, dimmed. They count what the other filters let through, so a card's number is what you get when you click it.</li>
         <li><b>One card isn't a filter.</b> The last card holds a rate worked out across the slices (win rate, collected) with its counts, a split bar in the status colours and an ⓘ with the formula, plus one more figure. Below 5 decided jobs the big figure is the count (“2 of 4”), not a rate; with none it reads “None decided yet” over an empty bar. Every state fills the same three lines, so filtering changes the numbers, never the card’s shape.</li>
@@ -149,10 +152,10 @@
 </details>
 
 <div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
-<script src="shared/icons.js?v=a7726141"></script>
-<script src="shared/shell.js?v=a7726141"></script>
-<script src="system/specimens/specimen.js?v=a7726141"></script>
-<script src="data.js?v=a7726141"></script>
-<script src="data-list.js?v=a7726141"></script>
+<script src="shared/icons.js?v=d75412b0"></script>
+<script src="shared/shell.js?v=d75412b0"></script>
+<script src="system/specimens/specimen.js?v=d75412b0"></script>
+<script src="data.js?v=d75412b0"></script>
+<script src="data-list.js?v=d75412b0"></script>
 </body>
 </html>
