@@ -4,20 +4,20 @@
    whatever order the files arrive in. */
 @layer tokens, base, components, utilities;
 
-@import "./tokens.css";
-@import "./base.css";
-@import "./components/button.css";
-@import "./components/badge.css";
-@import "./components/field.css";
-@import "./components/choice.css";
-@import "./components/segmented-control.css";
-@import "./components/tabs.css";
-@import "./components/tooltip.css";
-@import "./components/menu.css";
-@import "./components/dialog.css";
-@import "./components/avatar.css";
-@import "./components/card.css";
-@import "./components/data-table.css";
-@import "./components/toast.css";
-@import "./components/shell.css";
-@import "./utilities.css";
+@import "./tokens.css?v=c4c45d4f";
+@import "./base.css?v=c4c45d4f";
+@import "./components/button.css?v=c4c45d4f";
+@import "./components/badge.css?v=c4c45d4f";
+@import "./components/field.css?v=c4c45d4f";
+@import "./components/choice.css?v=c4c45d4f";
+@import "./components/segmented-control.css?v=c4c45d4f";
+@import "./components/tabs.css?v=c4c45d4f";
+@import "./components/tooltip.css?v=c4c45d4f";
+@import "./components/menu.css?v=c4c45d4f";
+@import "./components/dialog.css?v=c4c45d4f";
+@import "./components/avatar.css?v=c4c45d4f";
+@import "./components/card.css?v=c4c45d4f";
+@import "./components/data-table.css?v=c4c45d4f";
+@import "./components/toast.css?v=c4c45d4f";
+@import "./components/shell.css?v=c4c45d4f";
+@import "./utilities.css?v=c4c45d4f";
