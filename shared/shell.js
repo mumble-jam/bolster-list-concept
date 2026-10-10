@@ -82,6 +82,8 @@ window.BolsterShell = (() => {
   const sections = [...NAV.main, ...NAV.bottom];
   const itemsOf = (s) => (s.items || []).filter((x) => x !== "-").concat((s.groups || []).flatMap((g) => g.items));
   const sectionOf = (itemId) => sections.find((s) => s.id === itemId || itemsOf(s).some((x) => x.id === itemId));
+  // the page title is the current menu item's own label (D28): pages ask the shell for it, never type their own
+  const label = (itemId) => { const s = sectionOf(itemId); return (s && (s.id === itemId ? s : itemsOf(s).find((x) => x.id === itemId)))?.label || ""; };
 
   let opts = { current: null, links: {} };
   let shell;
@@ -236,5 +238,5 @@ window.BolsterShell = (() => {
     });
   }
 
-  return { mount, setCurrent, hydrateIcons, toast, icon };
+  return { mount, setCurrent, label, hydrateIcons, toast, icon };
 })();

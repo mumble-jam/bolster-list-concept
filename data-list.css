@@ -708,7 +708,7 @@
   @property --_sk { syntax: "<number>"; inherits: true; initial-value: 1; }
   @property --_pa { syntax: "<number>"; inherits: true; initial-value: 0; }
   @property --_da { syntax: "<number>"; inherits: true; initial-value: 0; }
-  .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"]) {
+  .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"], [data-variant="danger"]) {
     /* yellow fill */
     --_edge: color-mix(in oklab, var(--_bg), black 10%);
     --_line: 0.21; --_sheen: 0.24; --_lip: 0.08;
@@ -735,19 +735,77 @@
     --_line: 0.3; --_sheen: 0.16; --_lip: 0.3;
   }
   @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"]) { --_line: 0.21; --_sheen: 0.24; --_lip: 0.08; --_shadow-k: 2.5; }
+    :root:not([data-theme="light"]) .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"], [data-variant="danger"]) { --_line: 0.21; --_sheen: 0.24; --_lip: 0.08; --_shadow-k: 2.5; }
   }
-  :root[data-theme="dark"] .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"]) { --_line: 0.21; --_sheen: 0.24; --_lip: 0.08; --_shadow-k: 2.5; }
+  :root[data-theme="dark"] .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"], [data-variant="danger"]) { --_line: 0.21; --_sheen: 0.24; --_lip: 0.08; --_shadow-k: 2.5; }
   @media (hover: hover) {
-    .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"]):hover:not(:disabled, [aria-disabled="true"], [aria-busy="true"]) { --_sa: calc(var(--_sheen) + 0.06); --_lift: -1px; --_sk: 1.5; }
+    .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"], [data-variant="danger"]):hover:not(:disabled, [aria-disabled="true"], [aria-busy="true"]) { --_sa: calc(var(--_sheen) + 0.06); --_lift: -1px; --_sk: 1.5; }
   }
   /* press lands at once (30ms); only the release eases */
-  .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"]):active:not(:disabled, [aria-disabled="true"]) {
+  .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"], [data-variant="danger"]):active:not(:disabled, [aria-disabled="true"]) {
     --_sa: 0; --_da: 0.02; --_pa: 0.12; --_lift: 1px; --_sk: 0.3;
     transition-duration: 30ms;
   }
-  .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"]):is(:disabled, [aria-disabled="true"]) { --_border: transparent; background-image: none; box-shadow: none; }
+  .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"], [data-variant="danger"]):is(:disabled, [aria-disabled="true"]) { --_border: transparent; background-image: none; box-shadow: none; }
   @media (prefers-reduced-motion: reduce) { .button { --_lift: 0px !important; } }
+
+  /* ---------- trying out: secondary, ghost and danger (from the buttons research board, 10 Oct) ----------
+     Secondary sits a clear step below the black primary: white with the CTAs' body, quieter (a cement
+     edge, a darker bottom edge, a white top line, a small warm shadow; lifts 1px on hover, sinks on press).
+     Tertiary is gone: secondary covers the record's actions. Ghost is for places that already say “button”
+     (toolbars, rows, bars, Close) and gets a hover you can see. Danger has three weights: red text in menus,
+     a quiet danger (red text, fills red when pointed at) where Delete is one action of several, and the
+     filled red, with the primary's body, only on the confirmation's final button. Red means can't be undone. */
+  :root {
+    --_sec-edge: light-dark(var(--color-cement-700), var(--color-cement-night-700));
+    --_sec-bottom: light-dark(var(--color-cement-800), color-mix(in oklab, var(--color-cement-night-700), black 35%));
+    --_sec-hover: light-dark(var(--color-cement-100), var(--color-cement-night-800));
+    --_sec-shade: light-dark(var(--color-cement-950), black);
+    --_sec-line: 0.8;
+    --_ghost-hover: light-dark(var(--color-cement-500), color-mix(in oklab, var(--color-cement-night-700), white 12%));
+    --_ghost-active: light-dark(color-mix(in srgb, var(--color-cement-500), var(--color-cement-700)), color-mix(in oklab, var(--color-cement-night-700), white 20%));
+  }
+  :root[data-canvas="cool"] {
+    --_sec-edge: light-dark(var(--color-pitch-black-300), var(--color-pitch-black-800));
+    --_sec-bottom: light-dark(var(--color-pitch-black-400), color-mix(in oklab, var(--color-pitch-black-800), black 35%));
+    --_sec-hover: light-dark(var(--color-pitch-black-100), var(--color-pitch-black-900));
+    --_sec-shade: black;
+    --_ghost-hover: var(--color-surface-tint-hover);
+    --_ghost-active: var(--color-surface-tint-active);
+  }
+  /* in dark a white top line shows at a whisper, and carries the edge */
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --_sec-line: 0.06; } }
+  :root[data-theme="dark"] { --_sec-line: 0.06; }
+  .button[data-variant="secondary"] {
+    --_sk: 1; --_pa: 0; --_lift: 0px;
+    --_bg: var(--color-surface-default); --_bg-hover: var(--_sec-hover); --_bg-active: var(--_sec-hover);
+    --_fg: var(--color-content-primary); --_fg-hover: var(--color-content-primary);
+    --_border: var(--_sec-edge); --_border-hover: var(--_sec-edge);
+    border-block-end-color: var(--_sec-bottom);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / calc(var(--_sec-line) * (1 - var(--_pa) * 8))),
+      inset 0 1px 3px rgb(0 0 0 / var(--_pa)),
+      0 1px 2px rgb(from var(--_sec-shade) r g b / calc(0.08 * var(--_sk))),
+      0 4px 8px rgb(from var(--_sec-shade) r g b / max(0, calc((var(--_sk) - 1) * 0.15)));
+    translate: 0 var(--_lift);
+    transition-property: --_sk, --_pa, translate, background-color, border-color, color;
+    transition-duration: 150ms; transition-timing-function: var(--ease-out);
+  }
+  @media (hover: hover) { .button[data-variant="secondary"]:hover:not(:disabled, [aria-disabled="true"], [aria-busy="true"]) { --_sk: 1.4; --_lift: -1px; } }
+  .button[data-variant="secondary"]:active:not(:disabled, [aria-disabled="true"]) { --_sk: 0.3; --_pa: 0.08; --_lift: 1px; transition-duration: 30ms; }
+  .button[data-variant="secondary"]:is(:disabled, [aria-disabled="true"]) { box-shadow: none; translate: none; border-block-end-color: var(--color-surface-disabled); }
+  @media (prefers-reduced-motion: reduce) { .button[data-variant="secondary"] { --_lift: 0px !important; } }
+  .button[data-variant="ghost"] { --_bg-hover: var(--_ghost-hover); --_bg-active: var(--_ghost-active); }
+  /* quiet danger: looks like its neighbours with red text; fills red only when pointed at */
+  .button[data-variant="ghost"][data-tone="danger"] {
+    --_fg: var(--color-feedback-danger-content); --_fg-hover: var(--color-content-on-accent);
+    --_bg-hover: var(--color-action-danger); --_bg-active: var(--color-action-danger-hover);
+  }
+  /* on the inverse floating bar the red flips with it: red 300 on the dark bar, red 700 on the light one */
+  .floating-bar .button[data-variant="ghost"][data-tone="danger"] {
+    --_fg: light-dark(var(--color-deep-red-300), var(--color-deep-red-700)); --_fg-hover: var(--color-content-on-accent);
+    --_bg-hover: var(--color-action-danger); --_bg-active: var(--color-action-danger-hover);
+  }
 
   /* ---------- trying out: tactile cards (Concept controls → Tune the cards) ----------
      The CTAs' body, quieter, so cards read as surfaces and the buttons stay the things you press. Light falls

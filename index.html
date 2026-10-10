@@ -10,9 +10,9 @@
 <link rel="apple-touch-icon" href="shared/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=816ee912">
-<link rel="stylesheet" href="shared/shell.css?v=816ee912">
-<link rel="stylesheet" href="data-list.css?v=816ee912">
+<link rel="stylesheet" href="system/bolster.css?v=627fbaf1">
+<link rel="stylesheet" href="shared/shell.css?v=627fbaf1">
+<link rel="stylesheet" href="data-list.css?v=627fbaf1">
 <script>try { document.documentElement.dataset.canvas = localStorage.getItem("bolster-concepts:canvas") === "cool" ? "cool" : "paper"; } catch { document.documentElement.dataset.canvas = "paper"; }</script>
 </head>
 <body>
@@ -101,6 +101,7 @@
         <li><b>Add filter, then chips.</b> Pick a field, then a value; it becomes a chip with ×. A field left without a value disappears again. A card is a filter too: picking one presses the card and adds its chip ("Status: Booked"), so the count row always says what narrowed the list; × on the chip, or the card again, takes it off.</li>
         <li><b>Cards sit flat.</b> No shadow: white cards with warm edges on a warm Paper page, a warm table header and filled chips. A hovered card only darkens its edge. Warm goes through the whole page: row rules match the card edge, the header rule is a step darker, rows hover in the paper tone, and every tint (ghost and secondary button hovers, the search field, skeletons, neutral and draft badges, disabled fills) comes from cement. In dark, cards and dialogs lose their pink cast too. Text, inputs and the dark top bar keep Bolster's own neutral, and selection stays blue.</li>
         <li><b>A grid on the page, lit by the pointer (trying out, on by default).</b> A faint grid, its cells half as tall as the page header and starting from the top-right corner so a line runs along the header's rule, sits on the page between the cards and brightens in a soft area around the pointer, trailing it a little; in dark, a soft blue-violet light sits under it. It's decoration only: behind the content, hidden from screen readers, never on the cards, and still on phones as a faint grid everywhere. Turn it off, or tune it, in Concept controls.</li>
+        <li><b>Buttons below the primary (from the buttons research).</b> Secondary is white with the primary’s body, quieter: a cement edge, a darker bottom edge, a small warm shadow, a 1 px lift. Tertiary is gone; the record’s actions are secondary. Ghost stays for toolbars, rows, bars and Close, with a hover you can see. Red means it can’t be undone: Delete is red text in menus and on the bulk bar (filling red when pointed at), and the filled red appears only on the confirmation, named for the outcome (“Delete 3 jobs” beside “Keep jobs”, which starts focused). Archive can be undone, so it isn’t red.</li>
         <li><b>Tactile cards (trying out, on by default).</b> The buttons' body, quieter, so cards read as surfaces and buttons stay the things you press: a white line along the top, a darker bottom edge, a faint sheen and shade, and two shadows tinted with the page. The status cards are buttons, so they move: hover lifts them a pixel, a press sinks them, and the selected filter stays pressed in. Turn it off, pick a preset, or tune every value in Concept controls.</li>
         <li><b>Explanations use the screen’s own words (D27).</b> Info notes name cards, statuses and columns exactly as the screen does, and show each status with its mark, as on its card. A term the screen doesn’t show (won, decided, invoiced) is defined once in the screen’s labels, then used the same way in the card’s own figures.</li>
         <li><b>Columns keep their width.</b> Each column is measured, not guessed: as wide as the widest value it can ever hold across the whole list (every status, even one no row has yet, and its header); the first column takes the rest and is the only one that truncates. Sorting or loading more never moves a column, and every header keeps room for the sort arrow (it shows faintly on hover). A column never gets narrower than that: when they don't all fit, the table scrolls sideways in its card, with the checkbox and name pinned on the left, a rule at their edge once you've scrolled, and a fade on the right while there's more. The column header still follows the page, under the bars.</li>
@@ -155,6 +156,7 @@
       <label class="choice"><input type="checkbox" role="switch" class="toggle" id="cc-cards"> Tactile cards</label>
       <button class="button" data-variant="secondary" data-size="sm" data-tune="cards" hidden>Tune the cards</button></div>
     <button class="button" data-variant="secondary" data-size="sm" data-open-dialog="notes">About this concept</button>
+    <a class="button" data-variant="secondary" data-size="sm" href="components.html">Components, and who decided them</a>
     <div class="cluster" style="justify-content:space-between">
       <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
     </div>
@@ -162,10 +164,10 @@
 </details>
 
 <div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
-<script src="shared/icons.js?v=816ee912"></script>
-<script src="shared/shell.js?v=816ee912"></script>
-<script src="system/specimens/specimen.js?v=816ee912"></script>
-<script src="data.js?v=816ee912"></script>
-<script src="data-list.js?v=816ee912"></script>
+<script src="shared/icons.js?v=627fbaf1"></script>
+<script src="shared/shell.js?v=627fbaf1"></script>
+<script src="system/specimens/specimen.js?v=627fbaf1"></script>
+<script src="data.js?v=627fbaf1"></script>
+<script src="data-list.js?v=627fbaf1"></script>
 </body>
 </html>

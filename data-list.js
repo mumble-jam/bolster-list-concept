@@ -144,8 +144,10 @@
   }
 
   function renderHeader() {
-    $("#page-title").textContent = cfg.title;
-    document.title = `${cfg.title} · Bolster`;
+    // D28: the title is the menu item's label (Job list, not Jobs)
+    const title = BolsterShell.label(cfg.nav) || cfg.title;
+    $("#page-title").textContent = title;
+    document.title = `${title} · Bolster`;
     $("#create").textContent = cfg.create;
     BolsterShell.setCurrent(cfg.nav);
     $("#cc-state").value = st.mode;
@@ -304,7 +306,7 @@
     CSS.highlights?.delete("search-hit");
 
     if (st.mode === "empty") {
-      wrap.innerHTML = state(I.inbox, `No ${cfg.noun[1]} yet`, `${cfg.title} you create or import show up here, with totals and filters.`,
+      wrap.innerHTML = state(I.inbox, `No ${cfg.noun[1]} yet`, `${cfg.noun[1][0].toUpperCase() + cfg.noun[1].slice(1)} you create or import show up here, with totals and filters.`,
         `<button class="button" data-concept-action="${esc(cfg.create)}">${esc(cfg.create)}</button><button class="button" data-variant="secondary" data-concept-action="Import from a spreadsheet">Import from a spreadsheet</button>`);
       return;
     }
@@ -367,7 +369,7 @@
       }
     }
 
-    const caption = `<caption class="visually-hidden">${esc(cfg.title)}, sorted by ${esc((cfg.columns.find((x) => x.key === st.sort.key) || c[0]).label.toLowerCase())}, ${st.sort.dir === "asc" ? "ascending" : "descending"}</caption>`;
+    const caption = `<caption class="visually-hidden">${esc($("#page-title").textContent)}, sorted by ${esc((cfg.columns.find((x) => x.key === st.sort.key) || c[0]).label.toLowerCase())}, ${st.sort.dir === "asc" ? "ascending" : "descending"}</caption>`;
     wrap.innerHTML = `<table class="data-table" data-density="${st.density}">${caption}${head}<tbody>${body}</tbody></table>`;
     syncSelectPage(shownRows.map((x) => x.id));
     markHits();
@@ -411,12 +413,14 @@
   // a menu row that opens its own menu (drills in on phones)
   const sub = (name, label, icon, value, items, cls = "") => `<div class="submenu-row${cls}"><button type="button" class="menu-item submenu-trigger" role="menuitem" data-sub="${name}" data-focus-key="sub-${name}" aria-haspopup="menu" aria-expanded="false" aria-controls="pop-sub-${name}">${mi(icon)}<span class="submenu-label">${label}</span><span class="submenu-value">${esc(value)}</span>${I.chevR}</button><div class="pop submenu" id="pop-sub-${name}" popover role="menu" aria-label="${label}"><button type="button" class="menu-item submenu-back" data-sub-back="${name}">${I.chevL}<span class="submenu-label">${label}</span></button>${items}</div></div>`;
   const risky = (a) => /^(archive|delete)/i.test(a);
+  // red is for what can't be undone: Delete. Archive still confirms and sits apart, but isn't red
+  const destructive = (a) => /^delete/i.test(a);
   const selectedRows = () => cfg.rows.filter((r) => st.selected.has(r.id));
   // a list of actions as menu items: plain ones, then the menus as labelled sections, then the risky ones in
   // red after a rule. In the bulk menus the risky ones confirm and the rest name what's selected.
   function actionItems(list, { bulk = false, peek, nested = false } = {}) {
     const n = st.selected.size, what = n === 1 ? `1 ${cfg.noun[0]}` : `${fmt.count(n)} ${cfg.noun[1]}`;
-    const item = (a) => `<button type="button" class="menu-item" role="menuitem"${risky(a) ? ' data-tone="danger"' : ""} ${a === "Open" ? `data-peek="${peek}"` : risky(a) && bulk ? `data-confirm="${esc(a)}"` : `data-concept-action="${esc(a)}${bulk ? ` ${what}` : ""}"`}>${mi(actionIcons[a])}${esc(a)}</button>`;
+    const item = (a) => `<button type="button" class="menu-item" role="menuitem"${destructive(a) ? ' data-tone="danger"' : ""} ${a === "Open" ? `data-peek="${peek}"` : risky(a) && bulk ? `data-confirm="${esc(a)}"` : `data-concept-action="${esc(a)}${bulk ? ` ${what}` : ""}"`}>${mi(actionIcons[a])}${esc(a)}</button>`;
     const sectionItems = (g) => g.items.map((i) => g.current === undefined ? item(i)
       : `<button type="button" class="menu-item" role="menuitemradio" aria-checked="${i === g.current}" data-concept-action="${esc(g.label)} to ${esc(i.toLowerCase())}${bulk ? ` for ${what}` : ""}"><span class="menu-icon"></span>${esc(i)}${i === g.current ? I.check : ""}</button>`).join("");
     const plain = list.filter((a) => typeof a === "string" && !risky(a));
@@ -446,10 +450,10 @@
       const danger = bar.filter((a) => typeof a === "string" && risky(a));
       acts = bar.map((a, i) => (typeof a !== "string" ? menu(i, a.label) : risky(a) ? "" : btn(a))).join("")
         + (more.length ? menu("more", "More") : "")
-        + (danger.length ? `<span class="floating-bar-sep" aria-hidden="true"></span>${danger.map((a) => `<button type="button" class="button" data-variant="ghost" data-size="sm" data-confirm="${esc(a)}">${esc(a)}</button>`).join("")}` : "");
+        + (danger.length ? `<span class="floating-bar-sep" aria-hidden="true"></span>${danger.map((a) => `<button type="button" class="button" data-variant="ghost" data-size="sm"${destructive(a) ? ' data-tone="danger"' : ""} data-confirm="${esc(a)}">${esc(a)}</button>`).join("")}` : "");
     } else {
       acts = cfg.bulk.map((a) => risky(a)
-        ? `<span class="floating-bar-sep" aria-hidden="true"></span><button type="button" class="button" data-variant="ghost" data-size="sm" data-confirm="${esc(a)}">${esc(a)}</button>`
+        ? `<span class="floating-bar-sep" aria-hidden="true"></span><button type="button" class="button" data-variant="ghost" data-size="sm"${destructive(a) ? ' data-tone="danger"' : ""} data-confirm="${esc(a)}">${esc(a)}</button>`
         : `<button type="button" class="button" data-variant="ghost" data-size="sm" data-concept-action="${esc(a)} ${what}">${esc(a)}</button>`).join("");
     }
     bar.innerHTML = `<span class="floating-bar-count" aria-live="polite">${fmt.count(n)} selected</span>${n < matching ? `<button type="button" class="floating-bar-link" data-select-matching>Select all ${fmt.count(matching)}</button>` : `<button type="button" class="floating-bar-link" data-clear-selection>Unselect all</button>`}<span class="floating-bar-sep" aria-hidden="true"></span><span class="floating-bar-actions">${acts}</span><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Clear selection" data-clear-selection>${I.xl}</button>`;
@@ -461,10 +465,15 @@
     $("#confirm-text").textContent = /^delete/i.test(action)
       ? `This can’t be undone.`
       : `They leave every list and view. You can bring them back from Archived for 30 days.`;
-    const go = $("#confirm-go");
+    // Delete: the red button, named for the outcome, beside “Keep jobs”, and focus starts on keeping them,
+    // so Enter never destroys. Archive can be undone, so it's the primary button and starts focused
+    const del = destructive(action), go = $("#confirm-go"), keep = $("#confirm [data-close]");
+    go.dataset.variant = del ? "danger" : "primary";
     go.textContent = `${action} ${what}`;
     go.dataset.action = `${action} ${what}`;
+    keep.textContent = del ? `Keep ${n === 1 ? cfg.noun[0] : cfg.noun[1]}` : "Cancel";
     $("#confirm").showModal();
+    (del ? keep : go).focus();
   }
 
   // ---------- shared popover ----------
@@ -728,7 +737,7 @@
           <p class="detail-amount${p.amount ? "" : " is-empty"}">${p.amount ? money(p.amount) : esc(p.empty)}</p>
           <p class="detail-sub">${esc(p.sub)}</p>
           ${timelineHtml(p.timeline)}
-          <div class="detail-actions">${p.actions.map(([l, i]) => `<button type="button" class="button" data-variant="tertiary" data-concept-action="${esc(l)}">${ic(`m-${i}`, 14)}${esc(l)}</button>`).join("")}<button type="button" class="button" data-variant="tertiary" data-row-menu="${x.id}" aria-haspopup="menu" aria-expanded="false">More${I.chev}</button></div>
+          <div class="detail-actions">${p.actions.map(([l, i]) => `<button type="button" class="button" data-variant="secondary" data-concept-action="${esc(l)}">${ic(`m-${i}`, 14)}${esc(l)}</button>`).join("")}<button type="button" class="button" data-variant="secondary" data-row-menu="${x.id}" aria-haspopup="menu" aria-expanded="false">More${I.chev}</button></div>
         </div>
         <dl class="detail-section detail-fields">${p.fields.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join("")}</dl>
         ${p.doc ? `<div class="detail-section detail-doc"><div class="detail-doc-head"><span>${esc(p.doc.label)}</span><button type="button" class="link-button" data-concept-action="${esc(p.doc.view)}">${esc(p.doc.view)}${ic("m-external", 12)}</button></div><button type="button" class="detail-file" data-concept-action="Download ${esc(p.doc.name)}">${ic("m-file", 14)}<span>${esc(p.doc.name)}</span>${ic("m-download", 14)}</button></div>` : ""}
