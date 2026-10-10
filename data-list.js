@@ -653,7 +653,6 @@
         ${sub("group", "Group by", "layers", st.group ? filterDef(st.group).label : "None", groupItems)}
         ${sub("density", "Row height", "line-height", st.density === "compact" ? "Compact" : "Comfortable", densityItems)}
         ${sub("cols", "Columns", "columns-3", shown === opt.length ? "All" : `${shown} of ${opt.length}`, colItems)}
-        <hr class="pop-phone-only"><button type="button" class="menu-item pop-phone-only" role="menuitem" data-concept-action="Export ${cfg.noun[1]}">${mi("download")}Export</button>
       </div>`;
     } else if (p.kind === "bulk") {
       const { bar, more } = cfg.actionsFor(selectedRows());
@@ -1149,8 +1148,7 @@ ${JSON.stringify(v)}`;
   {
     const main = $(".app-main"), head = $(".page-header"), root = document.documentElement.style;
     let grid;
-    // on phones the page header folds into the top bar, so the cells follow the top bar there
-    const cell = () => root.setProperty("--net-cell", `${(head.offsetHeight || $(".top-bar").offsetHeight) / grid.v.div}px`);
+    const cell = () => root.setProperty("--net-cell", `${head.offsetHeight / grid.v.div}px`);
     grid = tuner({
       id: "net", title: "Grid",
       groups: [

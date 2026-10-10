@@ -676,29 +676,6 @@
   /* the search field's hover sits in the card header, outside any menu: same warm fill */
   :root:not([data-canvas="cool"]) .list-toolbar { --color-surface-hover: light-dark(var(--color-cement-300), var(--color-cement-night-800)); }
 
-  /* ---------- phones (D29): the page header folds into the top bar; Create floats ----------
-     The title shows in the top bar (shell.js); the page's h1 stays for screen readers. Export moves into
-     Display settings. Create becomes a labelled button above the tab bar, bottom right, in thumb reach;
-     it shrinks to + while you scroll down and steps aside while rows are ticked (the bulk bar takes the spot) */
-  @media (max-width: 767px) {
-    .page-header { min-block-size: 0; padding: 0; border: 0; gap: 0; }
-    .page-header .page-title h1 { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
-    #create {
-      position: fixed; z-index: var(--z-sticky);
-      inset-inline-end: var(--space-4); inset-block-end: calc(var(--shell-bottom-bar-height) + var(--space-4));
-      block-size: 3rem; padding-inline: var(--space-4) var(--space-5); gap: var(--space-2);
-      border-radius: var(--radius-lg); font-size: var(--text-base);
-      filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.18));
-      transition-property: --_sa, --_sk, --_pa, --_da, translate, padding, font-size, background-color, border-color, color;
-    }
-    #create::before { content: "+"; font-size: 1.375rem; line-height: 1; font-weight: var(--font-weight-regular); }
-    :root[data-chrome-hidden] #create { padding-inline: 0; inline-size: 3.5rem; block-size: 3.5rem; font-size: 0; gap: 0; }
-    :root[data-chrome-hidden] #create::before { font-size: 1.75rem; }
-    :root:has(#bulk-bar:not([hidden])) #create { display: none; }
-    /* room after the last row, so the floating button never sits on it */
-    .app-content.list-page { padding-block-end: calc(var(--space-4) + 4.5rem); }
-  }
-
   /* ---------- concept controls (tooling, not part of the design) ---------- */
   .concept-controls {
     position: fixed; inset-inline-end: var(--space-4); inset-block-end: var(--space-4); z-index: var(--z-toast);

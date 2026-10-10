@@ -10,9 +10,9 @@
 <link rel="apple-touch-icon" href="shared/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=6a019d77">
-<link rel="stylesheet" href="shared/shell.css?v=6a019d77">
-<link rel="stylesheet" href="data-list.css?v=6a019d77">
+<link rel="stylesheet" href="system/bolster.css?v=a4270f56">
+<link rel="stylesheet" href="shared/shell.css?v=a4270f56">
+<link rel="stylesheet" href="data-list.css?v=a4270f56">
 <script>try { document.documentElement.dataset.canvas = localStorage.getItem("bolster-concepts:canvas") === "cool" ? "cool" : "paper"; } catch { document.documentElement.dataset.canvas = "paper"; }</script>
 </head>
 <body>
@@ -101,7 +101,6 @@
         <li><b>Add filter, then chips.</b> Pick a field, then a value; it becomes a chip with ×. A field left without a value disappears again. A card is a filter too: picking one presses the card and adds its chip ("Status: Booked"), so the count row always says what narrowed the list; × on the chip, or the card again, takes it off.</li>
         <li><b>Cards sit flat.</b> No shadow: white cards with warm edges on a warm Paper page, a warm table header and filled chips. A hovered card only darkens its edge. Warm goes through the whole page: row rules match the card edge, the header rule is a step darker, rows hover in the paper tone, and every tint (ghost and secondary button hovers, the search field, skeletons, neutral and draft badges, disabled fills) comes from cement. In dark, cards and dialogs lose their pink cast too. Text, inputs and the dark top bar keep Bolster's own neutral, and selection stays blue.</li>
         <li><b>A grid on the page, lit by the pointer (trying out, on by default).</b> A faint grid, its cells half as tall as the page header and starting from the top-right corner so a line runs along the header's rule, sits on the page between the cards and brightens in a soft area around the pointer, trailing it a little; in dark, a soft blue-violet light sits under it. It's decoration only: behind the content, hidden from screen readers, never on the cards, and still on phones as a faint grid everywhere. Turn it off, or tune it, in Concept controls.</li>
-        <li><b>Phones: one bar, Create floats (D29).</b> The top bar and the page header become one 56 px bar with the page’s title, search, Bolton and the account; no logo or menu button (the tab bar and More reach everything; help and switching company are in the account menu). “+ Create job” floats above the tab bar, shrinks to + while you scroll down, and makes way for the bulk bar. Export is in Display settings.</li>
         <li><b>Buttons below the primary (from the buttons research).</b> Secondary is white with the primary’s body, quieter: a cement edge, a darker bottom edge, a small warm shadow, a 1 px lift. Tertiary is gone; the record’s actions are secondary. Ghost stays for toolbars, rows, bars and Close, with a hover you can see. Red means it can’t be undone: Delete is red text in menus and on the bulk bar (filling red when pointed at), and the filled red appears only on the confirmation, named for the outcome (“Delete 3 jobs” beside “Keep jobs”, which starts focused). Archive can be undone, so it isn’t red.</li>
         <li><b>Tactile cards (trying out, on by default).</b> The buttons' body, quieter, so cards read as surfaces and buttons stay the things you press: a white line along the top, a darker bottom edge, a faint sheen and shade, and two shadows tinted with the page. The status cards are buttons, so they move: hover lifts them a pixel, a press sinks them, and the selected filter stays pressed in. Turn it off, pick a preset, or tune every value in Concept controls.</li>
         <li><b>Explanations use the screen’s own words (D27).</b> Info notes name cards, statuses and columns exactly as the screen does, and show each status with its mark, as on its card. A term the screen doesn’t show (won, decided, invoiced) is defined once in the screen’s labels, then used the same way in the card’s own figures.</li>
@@ -165,10 +164,10 @@
 </details>
 
 <div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
-<script src="shared/icons.js?v=6a019d77"></script>
-<script src="shared/shell.js?v=6a019d77"></script>
-<script src="system/specimens/specimen.js?v=6a019d77"></script>
-<script src="data.js?v=6a019d77"></script>
-<script src="data-list.js?v=6a019d77"></script>
+<script src="shared/icons.js?v=a4270f56"></script>
+<script src="shared/shell.js?v=a4270f56"></script>
+<script src="system/specimens/specimen.js?v=a4270f56"></script>
+<script src="data.js?v=a4270f56"></script>
+<script src="data-list.js?v=a4270f56"></script>
 </body>
 </html>
