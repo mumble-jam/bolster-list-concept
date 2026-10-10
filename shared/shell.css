@@ -58,6 +58,11 @@
 
   /* ---------- section sidebar ---------- */
   .bs-sidebar { scrollbar-width: thin; }
+  /* the phone menu: sections as rows, the ones with items drill in */
+  .bs-sidebar button.sidebar-item { inline-size: 100%; border: 0; background: none; font-family: inherit; text-align: start; cursor: pointer; }
+  .bs-sidebar .sidebar-item[aria-current="true"] { background: var(--color-surface-default); box-shadow: var(--shadow-raised); }
+  .bs-sidebar .bs-chev { display: inline-flex; margin-inline-start: auto; color: var(--color-content-tertiary); }
+  .bs-sidebar .bs-back { color: var(--color-content-secondary); }
   .bs-sep { margin: var(--space-2) 0; border: 0; border-block-start: var(--border-width-default) solid var(--color-line-sidebar); }
 
   /* settings groups: 12px medium label with a small chevron, collapsible */

@@ -161,8 +161,19 @@ window.BolsterShell = (() => {
     });
   }
 
+  // phones have no rail, so More (and the menu button) open every first-level item here instead of
+  // the current section's items; one with items drills in, with a way back
+  function moreHtml() {
+    const cur = sectionOf(opts.current)?.id;
+    const row = (s) => itemsOf(s).length
+      ? `<button type="button" class="sidebar-item" data-more-section="${s.id}"${s.id === cur ? ' aria-current="true"' : ""}>${icon(s.icon, 18)}<span>${esc(s.label)}</span><span class="bs-chev">${icon("chevron-right", 14)}</span></button>`
+      : `<a class="sidebar-item" ${sectionHref(s)}${s.id === cur ? ' aria-current="page"' : ""}>${icon(s.icon, 18)}<span>${esc(s.label)}</span></a>`;
+    return `<h2 class="sidebar-title">Menu</h2>${NAV.main.map(row).join("")}<hr class="bs-sep">${NAV.bottom.map(row).join("")}`;
+  }
+  const backRow = `<button type="button" class="sidebar-item bs-back" data-more-back>${icon("chevron-left", 14)}<span>All of the menu</span></button>`;
+
   function sidebarHtml(section) {
-    const link = (x) => `<a class="sidebar-item" ${linkAttrs(x.id)} data-item="${x.id}">${icon(x.icon, 18)}<span>${esc(x.label)}</span></a>`;
+    const link = (x) => `<a class="sidebar-item" ${linkAttrs(x.id)} data-item="${x.id}"${x.id === opts.current ? ' aria-current="page"' : ""}>${icon(x.icon, 18)}<span>${esc(x.label)}</span></a>`;
     let body = "";
     if (section.items) body = section.items.map((x) => (x === "-" ? `<hr class="bs-sep">` : link(x))).join("");
     if (section.groups) body = section.groups.map((g) => `<details class="bs-group"${g.closed && !g.items.some((x) => x.id === opts.current) ? "" : " open"}><summary class="sidebar-group">${esc(g.label)}${icon("chevron-down", 14)}</summary>${g.items.map(link).join("")}</details>`).join("");
@@ -216,6 +227,7 @@ window.BolsterShell = (() => {
     railBehaviour();
 
     const narrow = matchMedia("(max-width: 1023px)");
+    const phone = matchMedia("(max-width: 767px)");
     document.addEventListener("click", (e) => {
       const nb = e.target.closest("[data-not-built]");
       if (nb) {
@@ -225,6 +237,18 @@ window.BolsterShell = (() => {
         toast(`${name} isn't part of this prototype yet.`);
         return;
       }
+      const side0 = shell.querySelector(".sidebar");
+      // the menu button and More: specimen.js has just toggled the overlay; fill it for this width
+      if (e.target.closest("[data-toggle-sidebar]")) {
+        e.preventDefault();
+        const open = side0.hasAttribute("data-open");
+        if (open) { side0.innerHTML = phone.matches ? moreHtml() : sidebarHtml(sectionOf(opts.current)); side0.setAttribute("aria-label", phone.matches ? "Menu" : sectionOf(opts.current)?.label || "Section"); }
+        shell.querySelectorAll("[data-toggle-sidebar]").forEach((b) => b.setAttribute("aria-expanded", open));
+        return;
+      }
+      const drill = e.target.closest("[data-more-section]");
+      if (drill) { side0.innerHTML = backRow + sidebarHtml(sections.find((x) => x.id === drill.dataset.moreSection)); side0.querySelector("[data-more-back]").focus(); return; }
+      if (e.target.closest("[data-more-back]")) { side0.innerHTML = moreHtml(); side0.querySelector(".sidebar-item")?.focus(); return; }
       if (e.target.closest("[data-collapse-sidebar]")) {
         if (narrow.matches) shell.querySelector(".sidebar").toggleAttribute("data-open");
         else shell.toggleAttribute("data-sidebar-hidden");
