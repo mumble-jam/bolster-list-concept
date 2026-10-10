@@ -85,9 +85,20 @@
     .bs-hamburger { display: inline-grid; }
     .bs-top .bs-logo { display: none; }
   }
+  .bs-title { display: none; }
+  @media (min-width: 768px) { .bs-phone-only { display: none; } }
+  /* phones (D29): one 56px bar, and it's the page's: the page title on the left, search, Bolton and the
+     account on the right, on the page's own colour. No logo, no menu button (the tab bar and More reach
+     everything); help and company switching move into the account menu */
   @media (max-width: 767px) {
-    .bs-company { display: none; }
-    .bs-top .top-bar-search { margin-inline-start: auto; }
+    :root { --shell-top-bar-height: 3.5rem; }
+    .bs-company, .bs-help, .bs-top .bs-hamburger { display: none; }
+    .bs-top { gap: var(--space-1); padding-inline: var(--space-4) var(--space-2); background: var(--color-surface-canvas); color: var(--color-content-primary); border-block-end-color: var(--color-line-sidebar); }
+    .bs-title { display: block; flex: 1; min-inline-size: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-display); font-size: var(--text-xl); line-height: var(--leading-lg); font-weight: var(--font-weight-medium); color: var(--color-content-primary); }
+    .bs-top .top-bar-search { margin-inline-start: 0; background: none; color: var(--color-content-secondary); }
+    .bs-top .bs-icon-btn { color: var(--color-content-secondary); }
+    .bs-top-actions { gap: var(--space-1); }
+    @media (hover: hover) { .bs-top .top-bar-search:hover, .bs-top .bs-icon-btn:hover { background: var(--color-surface-hover); color: var(--color-content-primary); } }
   }
 
   /* ---------- page header tools: hide menu, refresh ---------- */
