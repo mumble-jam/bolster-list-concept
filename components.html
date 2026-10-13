@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=9ddd4d6e">
-<link rel="stylesheet" href="data-list.css?v=9ddd4d6e">
+<link rel="stylesheet" href="system/bolster.css?v=675bc397">
+<link rel="stylesheet" href="data-list.css?v=675bc397">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -109,7 +109,7 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=9ddd4d6e"></script>
+<script src="shared/icons.js?v=675bc397"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -126,7 +126,7 @@ const C = [
   ["Shell", "Favicon", "yours", "Bolster's mark in white instead of yellow.", "The black tile behind it and the PNG fallback."],
 
   ["Page", "Page header", "steered", "Its title scrolls away (variant D).", "Its contents: the hide-menu button, the title, Export and Create job."],
-  ["Page", "Create on phones", "yours", "The three frames from the floating-button research (D29): Create floats above the tab bar, shrinks to + while you scroll, and gives way to the bulk bar. A transition between the two (13 Oct).", "The sizes; the morph: 300 ms with the bars, the right edge holding, the label fading and clipping, the + growing into the square."],
+  ["Page", "Create on phones", "yours", "The three frames from the floating-button research (D29): Create floats above the tab bar, shrinks to + while you scroll, and gives way to the bulk bar. A transition between the two, the label dissolving into a soft right edge rather than cut (13 Oct).", "The sizes; the morph: 300 ms with the bars, the right edge holding, the soft edge's width and timing, the + growing into the square."],
   ["Page", "Scrolling", "yours", "Research on too many fixed elements, then variant D on desktop and phones: the title scrolls away, the top bar and card header hide on scroll down and come back on scroll up.", "The 300ms slide, and keeping focus out from under the bars."],
   ["Page", "Primary and brand buttons", "yours", "Claude Design-style body, then your values from the button tuner (edge, lines, sheen, shadows, hover lift, press sink, 150ms).", "Nothing: the values are yours."],
   ["Page", "Secondary, ghost and danger buttons", "steered", "Research asked for (10 Oct, Figma research page); you took all my recommendations: a quieter tactile secondary, no tertiary, a ghost hover that shows, red only for Delete in three weights.", "The values: cement edge and shadow, hover fills, the confirmation wording “Keep jobs”."],
@@ -259,6 +259,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=9ddd4d6e"></script>
+<script src="system/specimens/specimen.js?v=675bc397"></script>
 </body>
 </html>

@@ -73,8 +73,9 @@
      the tab bar, bottom right, in thumb reach. It shrinks to + while you scroll down (the chrome slides
      away) and steps aside while rows are ticked: the bulk bar takes the spot, one thing at the bottom.
      The shrink is one movement with the bars: the label's column closes (1fr to 0fr, which animates
-     where a width from auto can't) and the label fades, so the + rides the right edge in and settles in
-     a square; the label stays the button's name. <button data-float><span class="float-label">…</span></button> */
+     where a width from auto can't) and the label slides into the right edge through a soft edge, so the
+     + rides the right edge in and settles in a square; the label stays the button's name. <button data-float><span class="float-label">…</span></button> */
+  @property --_fade { syntax: "<length>"; inherits: false; initial-value: 0px; }
   @media (max-width: 767px) {
     /* .button too: as strong as the tactile button's own transitions, which it extends */
     .button[data-float] {
@@ -89,10 +90,17 @@
         grid-template-columns var(--_morph), column-gap var(--_morph), padding var(--_morph), block-size var(--_morph);
     }
     [data-float]::before { content: "+"; text-align: center; font-size: 1.375rem; line-height: 1; font-weight: var(--font-weight-regular); transition: scale var(--_morph); }
-    [data-float] .float-label { min-inline-size: 0; overflow: hidden; white-space: nowrap; transition: opacity 200ms var(--ease-out) 60ms; }
+    /* the label slides into the right edge through a soft edge: its last 16 px (about a fifth of a label)
+       fade out, so it dissolves into the edge rather than being cut. The soft edge comes on as the shrink
+       starts and goes once the button is open again, so at rest the label is whole */
+    [data-float] .float-label {
+      min-inline-size: 0; overflow: hidden; white-space: nowrap;
+      -webkit-mask-image: linear-gradient(to left, transparent, #000 var(--_fade)); mask-image: linear-gradient(to left, transparent, #000 var(--_fade));
+      transition: --_fade 120ms linear 260ms;
+    }
     :root[data-chrome-hidden] [data-float] { grid-template-columns: 1.5rem 0fr; column-gap: 0; padding-inline: calc(var(--space-4) - var(--border-width-default)); block-size: 3.5rem; } /* 56 square */
     :root[data-chrome-hidden] [data-float]::before { scale: 1.27; }
-    :root[data-chrome-hidden] [data-float] .float-label { opacity: 0; transition-delay: 0ms; transition-duration: 150ms; }
+    :root[data-chrome-hidden] [data-float] .float-label { --_fade: 1rem; transition: --_fade 60ms linear; }
     :root:has(.floating-bar:not([hidden])) [data-float] { display: none; }
     /* room after the last row, so the floating button never sits on it */
     .app-content.list-page { padding-block-end: calc(var(--space-4) + 4.5rem); }
