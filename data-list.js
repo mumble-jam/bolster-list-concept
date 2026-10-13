@@ -31,12 +31,12 @@
       view: v.id, filters: clone(v.filters), added: [], terms: [], search: "",
       sort: { ...(v.sort || c.defaultSort) }, group: v.group || null,
       density: "comfortable", hidden: c.columns.filter((x) => x.hidden).map((x) => x.key),
-      limit: STEP, selected: new Set(), collapsed: new Set(), mode: "ready",
+      limit: STEP, selected: new Set(), collapsed: new Set(), mode: "ready", picking: false,
     };
   }
   function applyView(v) {
     Object.assign(st, { view: v.id, filters: clone(v.filters), added: [], sort: { ...(v.sort || cfg.defaultSort) }, group: v.group || null, limit: STEP, collapsed: new Set() });
-    st.selected.clear();
+    st.selected.clear(); st.picking = false;
   }
   const currentView = () => cfg.views.find((v) => v.id === st.view);
   const norm = (filters) => JSON.stringify(Object.keys(filters).filter((k) => isSet(k, filters[k])).sort().map((k) => [k, Array.isArray(filters[k]) ? [...filters[k]].sort() : filters[k]]));
@@ -346,9 +346,12 @@
       return;
     }
 
+    // phones (L-phone-row): the overline (id and a date) and the line under the name, as cells of their
+    // own; they show only below 768, where the row becomes an item with four corners
+    const phoneCells = (x) => cfg.phone ? `<td data-m="over" class="row-phone">${cfg.phone.over(x) || ""}</td><td data-m="where" class="row-phone">${cfg.phone.where(x) || ""}</td>` : "";
     const rowHtml = (x) => {
       const name = cfg.search(x).split(" ").slice(0, 4).join(" ");
-      return `<tr data-id="${x.id}"${st.selected.has(x.id) ? " data-selected" : ""}${openId === x.id ? ' data-open aria-current="true"' : ""}><td class="data-table-select"><input type="checkbox" class="checkbox" data-select="${x.id}" aria-label="Select ${esc(name)}"${st.selected.has(x.id) ? " checked" : ""}></td>${c.map((col) => `<td data-key="${col.key}"${col.required ? " data-primary" : ""}${col.numeric ? " data-numeric" : ""}${col.hideBelow ? ` data-hide-below="${col.hideBelow}"` : ""}${col.m ? ` data-m="${col.m}"` : ""}><div class="cell">${col.render(x)}</div></td>`).join("")}<td class="row-actions"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-row-menu="${x.id}" aria-label="Actions for ${esc(name)}" aria-haspopup="menu" aria-expanded="false">${I.dots}</button></td></tr>`;
+      return `<tr data-id="${x.id}"${st.selected.has(x.id) ? " data-selected" : ""}${openId === x.id ? ' data-open aria-current="true"' : ""}><td class="data-table-select"><input type="checkbox" class="checkbox" data-select="${x.id}" aria-label="Select ${esc(name)}"${st.selected.has(x.id) ? " checked" : ""}></td>${c.map((col) => `<td data-key="${col.key}"${col.required ? " data-primary" : ""}${col.numeric ? " data-numeric" : ""}${col.hideBelow ? ` data-hide-below="${col.hideBelow}"` : ""}${col.m ? ` data-m="${col.m}"` : ""}><div class="cell">${col.render(x)}</div></td>`).join("")}<td class="row-actions"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-row-menu="${x.id}" aria-label="Actions for ${esc(name)}" aria-haspopup="menu" aria-expanded="false">${I.dots}</button></td>${phoneCells(x)}</tr>`;
     };
 
     let body = "";
@@ -438,14 +441,33 @@
     if (nested) return [plain.map(item).join("") + groups.map((g) => sub(`act-${g.icon}`, esc(g.label), g.icon, g.current || "", sectionItems(g))).join(""), danger.map(item).join("")].filter(Boolean).join("<hr>");
     return [plain.map(item).join(""), ...groups.map((g) => `<div class="pop-section">${esc(g.label)}</div>${sectionItems(g)}`), danger.map(item).join("")].filter(Boolean).join("<hr>");
   }
+  // tick or untick one row in place (phones' select mode), and leave the mode with every box unticked
+  function pickRow(id, on = !st.selected.has(id)) {
+    on ? st.selected.add(id) : st.selected.delete(id);
+    const tr = $(`#table-wrap tbody tr[data-id="${CSS.escape(id)}"]`);
+    tr?.toggleAttribute("data-selected", on);
+    const box = tr && $("input[data-select]", tr);
+    if (box) box.checked = on;
+    renderBulk(); syncSelectPage();
+  }
+  function unpick() {
+    st.picking = false; st.selected.clear();
+    $$("#table-wrap tbody tr[data-selected]").forEach((tr) => { tr.removeAttribute("data-selected"); const box = $("input[data-select]", tr); if (box) box.checked = false; });
+    renderBulk(); syncSelectPage();
+  }
   function renderBulk() {
     const bar = $("#bulk-bar");
     const n = st.selected.size;
-    const on = n > 0 && st.mode === "ready";
+    // phones have no checkbox column: selecting is a mode (Select, or a long press), and the bar stays up
+    // while it's on, even with nothing ticked yet
+    const on = (n > 0 || (st.picking && phoneMQ.matches)) && st.mode === "ready";
     bar.hidden = !on;
+    const pick = $("#select-mode");
+    if (pick) { pick.hidden = st.mode !== "ready" || !cfg.rows.length; pick.textContent = on ? "Done" : "Select"; }
     document.querySelector(".list-page").toggleAttribute("data-selecting", on);
     document.body.toggleAttribute("data-selecting", on);
     if (!on) { bar.innerHTML = ""; return; }
+    if (!n) { bar.setAttribute("aria-label", "Select mode"); bar.innerHTML = `<span class="floating-bar-count" aria-live="polite">Tap ${esc(cfg.noun[1])} to select</span><button type="button" class="floating-bar-link" data-select-matching>Select all ${fmt.count(rowsWhere().length)}</button><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Stop selecting" data-clear-selection>${I.xl}</button>`; return; }
     const matching = rowsWhere().length;
     const what = n === 1 ? `1 ${cfg.noun[0]}` : `${fmt.count(n)} ${cfg.noun[1]}`;
     bar.setAttribute("aria-label", `Bulk actions for ${n} selected`);
@@ -889,12 +911,13 @@
     if (q("[data-detail-close]")) return closeDetail();
     if ((el = q("[data-tl-more]"))) { const ol = el.closest(".timeline"); $$("[data-fold]", ol).forEach((li) => (li.hidden = false)); const first = $("[data-fold]", ol); el.closest("li").remove(); first?.setAttribute("tabindex", "-1"); first?.focus({ preventScroll: true }); return; }
     if (q("[data-select-matching]")) { rowsWhere().forEach((x) => st.selected.add(x.id)); renderBody(); renderBulk(); $("#bulk-bar .floating-bar-link")?.focus(); return; }
-    if (q("[data-clear-selection]")) { st.selected.clear(); renderBody(); renderBulk(); $("#select-page")?.focus({ preventScroll: true }); return; }
+    if (q("[data-clear-selection]")) { unpick(); $("#select-page")?.focus({ preventScroll: true }); return; }
+    if (q("#select-mode")) { st.picking || st.selected.size ? unpick() : ((st.picking = true), renderBulk()); return; }
     if ((el = q("[data-confirm]"))) { if (pop.contains(el)) pop.hidePopover(); return openConfirm(el.dataset.confirm); }
     if (q("#confirm-go")) {
       const what = $("#confirm-go").dataset.action;
       $("#confirm").close();
-      st.selected.clear(); renderBody(); renderBulk();
+      unpick();
       toast(`Concept only: “${what}” isn't wired up.`);
       return;
     }
@@ -930,7 +953,7 @@
       $("#select-page")?.focus({ preventScroll: true });
       return;
     }
-    if (t.id === "cc-state") { st.mode = t.value; st.selected.clear(); render(); }
+    if (t.id === "cc-state") { st.mode = t.value; st.selected.clear(); st.picking = false; render(); }
     if (t.id === "cc-grid") {
       document.documentElement.toggleAttribute("data-grid", t.checked);
       $('[data-tune="net"]').hidden = !t.checked;
@@ -1044,9 +1067,29 @@
   // pinned cells sit above the row's link, so a click anywhere on a row still opens it
   tableWrap.addEventListener("click", (e) => {
     const tr = e.target.closest("tbody tr[data-id]");
-    if (!tr || e.target.closest("a, button, input, label, select")) return;
+    if (!tr) return;
+    // on phones, while selecting (or just after the long press that started it), a tap ticks the row
+    if (phoneMQ.matches && (document.body.hasAttribute("data-selecting") || Date.now() - pressedAt < 700)) {
+      if (e.target.closest("input, [data-row-menu]")) return;
+      e.preventDefault(); e.stopPropagation();
+      if (Date.now() - pressedAt >= 700) pickRow(tr.dataset.id);
+      return;
+    }
+    if (e.target.closest("a, button, input, label, select")) return;
     openPeek(tr.dataset.id);
   });
+  // phones: hold a row to start selecting with it ticked (as in Mail, Files, Gmail); moving cancels, so scrolls don't
+  let press = null, pressedAt = 0;
+  const unpress = () => { if (press) clearTimeout(press.t); press = null; };
+  tableWrap.addEventListener("pointerdown", (e) => {
+    const tr = e.target.closest("tbody tr[data-id]");
+    if (!phoneMQ.matches || !tr || e.button !== 0 || st.mode !== "ready" || e.target.closest("input, button")) return;
+    unpress();
+    press = { x: e.clientX, y: e.clientY, t: setTimeout(() => { press = null; pressedAt = Date.now(); st.picking = true; pickRow(tr.dataset.id, true); navigator.vibrate?.(10); }, 450) };
+  });
+  tableWrap.addEventListener("pointermove", (e) => { if (press && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 8) unpress(); });
+  for (const ev of ["pointerup", "pointercancel", "pointerleave"]) tableWrap.addEventListener(ev, unpress);
+  tableWrap.addEventListener("contextmenu", (e) => { if (phoneMQ.matches && e.target.closest("tbody tr[data-id]")) e.preventDefault(); });
 
   const html = document.documentElement;
   const DOWN = 24, UP = 6; // px of travel before the bars go, and before they come back

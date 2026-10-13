@@ -158,6 +158,15 @@ window.BDS_RECIPE = (() => {
       return out;
     });
 
+    // ---------- phones (L-phone-row): the id and the top date on the overline, the name's detail (less the id) under the name ----------
+    const idKey = fields.find((f) => f.type === "id")?.key;
+    const titleT = name.title || `{${name.key}}`;
+    const dateCol = dates[0] && columns.find((c) => c.key === dates[0].key);
+    const phone = {
+      over: (x) => [idKey && !titleT.includes(`{${idKey}}`) ? esc(text(x[idKey])) : "", dateCol ? dateCol.render(x) : ""].filter(Boolean).join(" · "),
+      where: (x) => esc(fill(name.detail, idKey ? { ...x, [idKey]: "" } : x)),
+    };
+
     // ---------- filters: the picker comes from the type ----------
     const valuesOf = (k) => [...new Set(rows.map((x) => text(x[k])).filter(Boolean))].sort();
     const filters = d.filters.map((f) => {
@@ -237,7 +246,7 @@ window.BDS_RECIPE = (() => {
       metrics, insight: null,
       allCard: d.summary?.all ? { big: measure(d.summary.all) } : null,
       statusMap: statusCol ? statusMap : null,
-      columns, filters,
+      columns, filters, phone,
       groups: d.group?.options || [],
       defaultSort: { key: d.sort.column, dir: d.sort.dir },
       views,

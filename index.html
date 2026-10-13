@@ -10,9 +10,9 @@
 <link rel="apple-touch-icon" href="shared/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=c08440e1">
-<link rel="stylesheet" href="shared/shell.css?v=c08440e1">
-<link rel="stylesheet" href="data-list.css?v=c08440e1">
+<link rel="stylesheet" href="system/bolster.css?v=962ce8b5">
+<link rel="stylesheet" href="shared/shell.css?v=962ce8b5">
+<link rel="stylesheet" href="data-list.css?v=962ce8b5">
 <script>try { document.documentElement.dataset.canvas = localStorage.getItem("bolster-concepts:canvas") === "cool" ? "cool" : "paper"; } catch { document.documentElement.dataset.canvas = "paper"; }</script>
 </head>
 <body>
@@ -25,6 +25,8 @@
         <h1 id="page-title">Jobs</h1>
       </div>
       <div class="page-header-actions">
+        <!-- phones only: selecting is a mode there (L-selection); it reads Done while it's on -->
+        <button class="button" data-variant="ghost" id="select-mode">Select</button>
         <button class="button" data-variant="ghost" data-hide-phone id="export">Export</button>
         <button class="button" id="create">Create job</button>
       </div>
@@ -115,8 +117,9 @@
         <li><b>Status has a shape, not just a colour.</b> Jobs: an empty circle for draft, a half-filled one for pending, a solid dot for booked, and a circle with a slash for declined (the client said no). One drawing on a 12px grid, 12px in the table badge and 14px on the cards. Draft and pending marks go a step darker than their old dots so each shape reaches 3:1.</li>
         <li><b>Every state is designed:</b> loading, first-use empty, no results, and error. Switch between them in the concept controls.</li>
         <li><b>Live areas keep their shape (I13).</b> What updates while you act elsewhere (filters, search, sort, selection) changes its values, never its layout. Every state fills the same slots at the same size, said by what a slot holds (“2 of 4”, “None decided yet”, an empty bar), not by lines coming and going. Sizes come from the whole list, not the rows on screen; optional parts leave a placeholder; anything that comes and goes appears where you acted or floats; a redraw never moves the page or your focus.</li>
-        <li><b>Phones:</b> the insight card (Win rate) leads the card row so the overview is in the first screen; cards and chips scroll sideways, rows become two-line items, the floating bar gives its actions their own row above the tab bar, and every menu and filter opens as a bottom sheet; a nested menu opens inside the sheet with a back row.</li>
+        <li><b>Phones:</b> the insight card (Win rate) leads the card row so the overview is in the first screen; cards and chips scroll sideways, the floating bar gives its actions their own row above the tab bar, and every menu and filter opens as a bottom sheet; a nested menu opens inside the sheet with a back row.</li>
         <li><b>Built from a description (D31).</b> Turn on “Lists built from page descriptions” in Concept controls and the four lists are drawn from their page descriptions (system/recipes/list/concept) by recipe.js, with sample rows made from each column’s type, instead of the hand-written data.js. A note on each list says what the renderer can’t draw yet (custom figures like Win rate). Any description opens with ?d=path.</li>
+        <li><b>Phones: rows have four corners (D32).</b> The number and a date on a quiet overline, the amount top right, the name across the full width at 16 px (it wraps to two lines rather than being cut), then the address, job or unit and the status. There's no checkbox column: Select in the page header, or a long press on a row, starts selecting; the boxes slide in and a tap ticks instead of opening.</li>
         <li><b>Phones: Create floats (D29).</b> “+ Create job” leaves the page header and floats bottom right above the tab bar, shrinks to + while you scroll down, and makes way for the bulk bar while rows are ticked.</li>
       </ol>
     </section>
@@ -171,11 +174,11 @@
 </details>
 
 <div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
-<script src="shared/icons.js?v=c08440e1"></script>
-<script src="shared/shell.js?v=c08440e1"></script>
-<script src="system/specimens/specimen.js?v=c08440e1"></script>
-<script src="data.js?v=c08440e1"></script>
-<script src="recipe.js?v=c08440e1"></script>
+<script src="shared/icons.js?v=962ce8b5"></script>
+<script src="shared/shell.js?v=962ce8b5"></script>
+<script src="system/specimens/specimen.js?v=962ce8b5"></script>
+<script src="data.js?v=962ce8b5"></script>
+<script src="recipe.js?v=962ce8b5"></script>
 <script>
   // ?from=description builds the four lists from their page descriptions; ?d=<path> adds one more list
   // from any description. Either way data-list.js starts once the descriptions are compiled.

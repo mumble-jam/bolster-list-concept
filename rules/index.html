@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../system/bolster.css?v=c08440e1">
-<link rel="stylesheet" href="../system/specimens/specimen.css?v=c08440e1">
+<link rel="stylesheet" href="../system/bolster.css?v=962ce8b5">
+<link rel="stylesheet" href="../system/specimens/specimen.css?v=962ce8b5">
 <style>
   .rule-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr)); }
   .rule-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
@@ -32,7 +32,7 @@
   <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
 </header>
 <main class="spec-main">
-  <p class="spec-intro">How any list page in Bolster is described, and the rules it follows. One set of files serves two readers: this page (the back office, for people) and the <code>bolster-page</code> skill (the front office, for Claude), which turns a screenshot and a short survey into a page description. 21 rules, 10 decided and 11 proposed. Generated from <code>system/recipes/list/rules.json</code> and <code>schema.json</code> by <code>scripts/build-rules.mjs</code>; don't edit it by hand.</p>
+  <p class="spec-intro">How any list page in Bolster is described, and the rules it follows. One set of files serves two readers: this page (the back office, for people) and the <code>bolster-page</code> skill (the front office, for Claude), which turns a screenshot and a short survey into a page description. 21 rules, 12 decided and 9 proposed. Generated from <code>system/recipes/list/rules.json</code> and <code>schema.json</code> by <code>scripts/build-rules.mjs</code>; don't edit it by hand.</p>
 
   <section class="spec-section">
     <h2>How a page gets made</h2>
@@ -90,12 +90,12 @@
     </div>
   </article>
   <article class="card rule-card" id="L-name-first">
-    <header class="card-header rule-head"><h3><code>L-name-first</code> Rows lead with a name, not a code</h3><span class="badge" data-tone="warning">Proposed</span></header>
+    <header class="card-header rule-head"><h3><code>L-name-first</code> Rows lead with a name, not a code</h3><span class="badge" data-tone="success">Decided</span></header>
     <div class="card-body rule-body">
       <p>The name column's title starts with words a person recognises (customer, job, item); numbers and codes go to its detail line.</p>
       <p class="text-secondary"><b>Why:</b> People read about the first two words of each row (NN/g); “INV-1199 · Lucia Ruiz-Ortega” spends them on the number.</p>
       
-      <p class="rule-meta"><span class="badge">check</span> <span class="text-secondary">· Tables on phones research</span></p>
+      <p class="rule-meta"><span class="badge">check</span> <span class="text-secondary">· D32, Tables on phones research</span></p>
     </div>
   </article>
   <article class="card rule-card" id="L-status-stage">
@@ -216,12 +216,12 @@
     </div>
   </article>
   <article class="card rule-card" id="L-phone-row">
-    <header class="card-header rule-head"><h3><code>L-phone-row</code> On phones, a row has four corners and an unbroken name</h3><span class="badge" data-tone="warning">Proposed</span></header>
+    <header class="card-header rule-head"><h3><code>L-phone-row</code> On phones, a row has four corners and an unbroken name</h3><span class="badge" data-tone="success">Decided</span></header>
     <div class="card-body rule-body">
-      <p>Below 768 a row is an item, not a table row: the id and a date top left, the key figure top right, the name across the full width (wrapping to two lines, never cut on the first), then the place or description bottom left and the status bottom right.</p>
+      <p>Below 768 a row is an item, not a table row: the id and a date top left, the key figure top right, the name across the full width (wrapping to two lines, never cut on the first), then the place or description bottom left and the status bottom right. No checkbox column: selecting is a mode (Select, or a long press).</p>
       <p class="text-secondary"><b>Why:</b> Our phone rows cut 24 of 25 job names; every source says lead with the name and let it wrap.</p>
       
-      <p class="rule-meta"><span class="badge">renderer</span> <span class="text-secondary">· Tables on phones research</span></p>
+      <p class="rule-meta"><span class="badge">renderer</span> <span class="text-secondary">· D32, Tables on phones research</span></p>
     </div>
   </article>
   <article class="card rule-card" id="L-ask">
@@ -296,9 +296,9 @@
   <section class="spec-section">
     <h2>The concept's lists, described</h2>
     <p class="text-secondary">The four lists in the data list concept, written as descriptions and checked when this page was built. A failure here is the concept breaking a rule, which is the point of checking.</p>
-    <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>File</th><th>What it is</th><th>Check</th></tr></thead><tbody><tr><td><code>concept/catalog.json</code></td><td>9 columns · no status · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/customers.json</code></td><td>9 columns · 3 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/invoices.json</code></td><td>8 columns · 4 statuses · rows peek</td><td><span class="badge" data-tone="danger">Fails</span> <span class="text-secondary">L-name-first   the name's title starts with {number}, a code; move it to the detail line</span></td></tr><tr><td><code>concept/jobs.json</code></td><td>8 columns · 5 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr></tbody></table></div>
+    <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>File</th><th>What it is</th><th>Check</th></tr></thead><tbody><tr><td><code>concept/catalog.json</code></td><td>9 columns · no status · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/customers.json</code></td><td>9 columns · 3 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/invoices.json</code></td><td>8 columns · 4 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/jobs.json</code></td><td>8 columns · 5 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr></tbody></table></div>
   </section>
 </main>
-<script src="../system/specimens/specimen.js?v=c08440e1"></script>
+<script src="../system/specimens/specimen.js?v=962ce8b5"></script>
 </body>
 </html>

@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Components · Bolster list concept</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="shared/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="shared/assets/favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
+<link rel="stylesheet" href="system/bolster.css?v=962ce8b5">
+<link rel="stylesheet" href="data-list.css?v=962ce8b5">
+<script>try { document.documentElement.dataset.canvas = localStorage.getItem("bolster-concepts:canvas") === "cool" ? "cool" : "paper"; } catch { document.documentElement.dataset.canvas = "paper"; }</script>
+<style>
+  @layer concept {
+    /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
+       solid = you decided, half = you steered, dashed = my call */
+    body { background: var(--color-surface-canvas); }
+    .inv { max-inline-size: 64rem; margin-inline: auto; padding: var(--space-8) var(--space-4) var(--space-16); display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+    .inv-head { display: grid; gap: var(--space-2); }
+    .inv-head h1 { font-size: var(--text-2xl); line-height: var(--leading-2xl); text-wrap: balance; }
+    .inv-head p { max-inline-size: 42rem; color: var(--color-content-secondary); }
+    .inv-legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--space-3); }
+    .inv-level { display: grid; gap: var(--space-1); padding: var(--space-3) var(--space-4); border: var(--border-width-default) solid var(--_card-line); border-radius: var(--radius-lg); background: var(--color-surface-default); }
+    .inv-level b { display: flex; align-items: center; gap: var(--space-2); font-weight: var(--font-weight-medium); }
+    .inv-level b span:last-child { margin-inline-start: auto; font-family: var(--font-display); font-size: var(--text-lg); font-variant-numeric: tabular-nums; }
+    .inv-level p { font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
+    .inv-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+    .inv-tools a { font-size: var(--text-sm); }
+    .inv-tools .segmented { max-inline-size: 100%; overflow-x: auto; scrollbar-width: none; }
+    .inv-group { display: grid; gap: var(--space-2); }
+    .inv-group[hidden] { display: none; }
+    .inv-group h2 { font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
+    .inv-list { margin: 0; padding: 0; list-style: none; border: var(--border-width-default) solid var(--_card-line); border-radius: var(--radius-lg); background: var(--color-surface-default); overflow: clip; }
+    .inv-item { display: grid; grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-2) var(--space-6); padding: var(--space-4); }
+    .inv-item + .inv-item { border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
+    .inv-item[hidden] { display: none; }
+    .inv-name { display: flex; align-items: flex-start; gap: var(--space-2); font-weight: var(--font-weight-medium); }
+    .inv-name .mark { margin-block-start: 0.2em; }
+    .inv-col { display: grid; align-content: start; gap: var(--space-1); font-size: var(--text-sm); line-height: var(--leading-sm); }
+    .inv-col h3 { font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-tertiary); }
+    .inv-col p { color: var(--color-content-secondary); }
+    .inv-item[data-level="mine"] .inv-you p { color: var(--color-content-tertiary); }
+    .inv-empty { padding: var(--space-6); text-align: center; color: var(--color-content-secondary); }
+    @media (max-width: 767px) {
+      .inv { padding-block-start: var(--space-6); }
+      .inv-item { grid-template-columns: minmax(0, 1fr); }
+    }
+    /* to-dos: a toggle on every component; marked ones gather in a list at the top, with a note and a done box */
+    .inv-namecol { display: grid; align-content: start; justify-items: start; gap: var(--space-2); }
+    .inv-todo-btn[aria-pressed="true"] { color: var(--color-action-accent); }
+    .inv-item[data-todo] { background: var(--color-surface-selected); }
+    .todo { display: grid; gap: var(--space-3); padding: var(--space-4); border: var(--border-width-default) solid var(--_card-line); border-radius: var(--radius-lg); background: var(--color-surface-default); }
+    .todo-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+    .todo-head h2 { margin-inline-end: auto; font-size: var(--text-base); line-height: var(--leading-base); font-weight: var(--font-weight-medium); }
+    .todo-head output { font-size: var(--text-xs); color: var(--color-content-secondary); }
+    .todo-empty { font-size: var(--text-sm); color: var(--color-content-secondary); }
+    .todo-list { margin: 0; padding: 0; list-style: none; display: grid; }
+    .todo-row { display: grid; grid-template-columns: auto minmax(8rem, 14rem) minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); padding-block: var(--space-2); }
+    .todo-row + .todo-row { border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
+    .todo-name { display: flex; align-items: center; gap: var(--space-2); min-inline-size: 0; font-size: var(--text-sm); font-weight: var(--font-weight-medium); }
+    .todo-name small { font-weight: var(--font-weight-regular); color: var(--color-content-tertiary); }
+    .todo-row[data-done] .todo-name > span:last-child { text-decoration: line-through; color: var(--color-content-tertiary); }
+    .todo-row .input { inline-size: 100%; }
+    @media (max-width: 767px) {
+      .todo-row { grid-template-columns: auto minmax(0, 1fr) auto; }
+      .todo-row .input { grid-column: 2 / -1; grid-row: 2; }
+    }
+    .mark[data-level="yours"] { --_dot: var(--color-action-accent); }
+    .mark[data-level="steered"] { --_dot: var(--color-status-pending-dot); }
+    .mark[data-level="mine"] { --_dot: var(--color-content-tertiary); }
+  }
+</style>
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<main class="inv">
+  <header class="inv-head">
+    <p class="text-caption"><a href="index.html">Jobs list concept</a></p>
+    <h1>Components, and who decided them</h1>
+    <p>Every component the jobs list concept uses, marked by how much of it came from you. Built from your messages on 8 to 10 October and the commits behind them. Where you only reported a bug, that doesn't count as a design decision, so it's noted but the component stays my call.</p>
+  </header>
+
+  <section class="inv-legend" aria-label="Levels">
+    <div class="inv-level"><b><span class="mark" data-mark="full" data-level="yours"></span><span>You decided</span><span id="n-yours"></span></b><p>You specified how it looks or behaves: a shape, a rule, a reference to copy, or values from a tuner.</p></div>
+    <div class="inv-level"><b><span class="mark" data-mark="half" data-level="steered"></span><span>You steered</span><span id="n-steered"></span></b><p>You asked for it or set the direction; the details are mine.</p></div>
+    <div class="inv-level"><b><span class="mark" data-mark="dashed" data-level="mine"></span><span>My call</span><span id="n-mine"></span></b><p>Never discussed. I made it up from the system, best practice or Bolster's habits.</p></div>
+  </section>
+
+  <div class="inv-tools">
+    <div class="segmented" role="radiogroup" aria-label="Show" data-size="sm">
+      <label class="segmented-option"><input type="radio" name="show" value="all" checked> All</label>
+      <label class="segmented-option"><input type="radio" name="show" value="yours"> You decided</label>
+      <label class="segmented-option"><input type="radio" name="show" value="steered"> You steered</label>
+      <label class="segmented-option"><input type="radio" name="show" value="mine"> My call</label>
+      <label class="segmented-option"><input type="radio" name="show" value="todo"> To-dos</label>
+    </div>
+    <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+  </div>
+
+  <section class="todo" id="todo" aria-labelledby="todo-title">
+    <div class="todo-head"><h2 id="todo-title">Your to-dos</h2><output aria-live="polite"></output>
+      <button class="button" data-variant="ghost" data-size="sm" data-clear-done hidden>Clear done</button>
+      <button class="button" data-variant="secondary" data-size="sm" data-copy hidden>Copy as text</button></div>
+    <p class="todo-empty">Mark a component with To-do and it lands here, with room for a note on what to decide.</p>
+    <ul class="todo-list"></ul>
+  </section>
+
+  <div id="groups"></div>
+</main>
+
+<script src="shared/icons.js?v=962ce8b5"></script>
+<script>
+// [group, name, level, your input, my part]
+const C = [
+  ["Foundations", "Warm and cool colour", "yours", "A warmer page (8 Oct); Paper and cement edges from your Figma sketch; only Warm and Cool in the controls, for the client to pick; warm on every neutral; the sidebar follows Cool.", "Which cement step goes where, and the warm dark theme."],
+  ["Foundations", "Type", "steered", "Cera Pro and Space Grotesk come from your prototype's tokens; you chose Inter for the published copy.", "Sizes and weights here: the page title, the big card numbers, table text and sub-lines."],
+  ["Foundations", "Icons", "yours", "Font Awesome 6 Pro, Light (Regular for search and help), with your key; table-cells-columns for display settings; smaller, bolder icons in menus.", "Every other pick: filter, calendar, one icon per attribute in menus, the action icons."],
+  ["Foundations", "Corners", "yours", "Every button 8px (9 Oct).", "12px on cards, menus, dialogs and the record; round chips, badges and avatars."],
+  ["Foundations", "Spacing and layout", "steered", "Follow the layout rules from the list research boards (8 Oct).", "The actual gaps and paddings."],
+  ["Foundations", "Words", "steered", "Explanations use the screen's own words (D27); the search field just says Search.", "All the other copy: labels, menu items, empty and error text, the About dialog."],
+
+  ["Shell", "Top bar", "yours", "As in Bolster; your Bolster and Bolton assets; Bolton's head sized to the help icon, then 10% bigger; all three corner circles the same size.", "Nothing beyond matching Bolster."],
+  ["Shell", "Rail", "yours", "Bolster's item sizes, its bottom part, hover to expand (8 Oct); the logo stays when collapsed (9 Oct, trying out).", "Pinning the rail open."],
+  ["Shell", "Section sidebar", "yours", "Bolster's sizes, but with the border colour you preferred over Bolster's; as wide as its longest item plus 48; follows Cool; warm hover on its collapse button.", "Its hover and current-item tones."],
+  ["Shell", "Favicon", "yours", "Bolster's mark in white instead of yellow.", "The black tile behind it and the PNG fallback."],
+
+  ["Page", "Page header", "steered", "Its title scrolls away (variant D).", "Its contents: the hide-menu button, the title, Export and Create job."],
+  ["Page", "Scrolling", "yours", "Research on too many fixed elements, then variant D on desktop and phones: the title scrolls away, the top bar and card header hide on scroll down and come back on scroll up.", "The 300ms slide, and keeping focus out from under the bars."],
+  ["Page", "Primary and brand buttons", "yours", "Claude Design-style body, then your values from the button tuner (edge, lines, sheen, shadows, hover lift, press sink, 150ms).", "Nothing: the values are yours."],
+  ["Page", "Secondary, ghost and danger buttons", "steered", "Research asked for (10 Oct, Figma research page); you took all my recommendations: a quieter tactile secondary, no tertiary, a ghost hover that shows, red only for Delete in three weights.", "The values: cement edge and shadow, hover fills, the confirmation wording “Keep jobs”."],
+
+  ["Status cards", "Status cards", "yours", "Big numbers on top of the table, clickable, never tabs (8 Oct); filter cards on the page; In progress replaces Draft (9 Oct); picking a card shows its chip.", "The anatomy (label, count, total), the All card and the pressed look."],
+  ["Status cards", "Status marks", "yours", "Shapes, not just colours: empty draft, half pending, solid booked, a slash for declined; then a set that makes room for In progress.", "The quarter steps (dashed, quarter, half, three quarters), the 12/14px drawing and the colours."],
+  ["Status cards", "Insight card", "steered", "Different from the other cards, between Jobber and Deel; the “2 of 4” version below five decided; you questioned a selected state for it.", "Win rate as the figure, the split bar, the second figure (average won job)."],
+  ["Status cards", "Info popovers", "steered", "Their copy follows your rule: the screen's own words, statuses drawn with their marks (D27).", "The ⓘ button and its popover."],
+  ["Status cards", "Tactile cards", "steered", "Asked for (9 Oct), with sliders in the concept controls.", "Every value: the body, both shadows, hover, press and selected. Not tuned by you yet."],
+
+  ["Table card", "Table in a card", "yours", "The table sits in a card and the rest outside it; a Shopify-style card header (8 Oct).", "The card's edge and its two header rows."],
+  ["Table card", "Add filter", "yours", "Add filter, then chips (8 Oct); styled like the All time button.", "The field menu: which fields, their order and icons."],
+  ["Table card", "Search", "yours", "Beside the date range, in the Shopify header; just “Search”; typed words become a chip; matches highlighted in the table (9 Oct).", "Live filtering while you type, the / shortcut, highlighter yellow, and which fields get marked."],
+  ["Table card", "Filter chips", "yours", "Field and value in the same grey at rest; the whole chip turns blue on hover; the × only darkens.", "Size, fill and the popover each chip opens."],
+  ["Table card", "Filter value pickers", "mine", "Never discussed.", "Option lists with counts, checkbox or radio by filter type, amount ranges, Apply and Clear."],
+  ["Table card", "Date range", "steered", "The button came from your Figma sketch; search moved next to it.", "Its options and their popover."],
+  ["Table card", "Display settings", "yours", "Its icon (table-cells-columns) and tooltip; group by, row height and columns as nested menus with a check by the choice; no Sort by where the headers sort.", "Sort kept in the menu on phones, where the headers are hidden; Reset view."],
+  ["Table card", "Count and Clear all", "steered", "A count with the filters (8 Oct); the card's missing chip (9 Oct).", "“31 of 132 jobs”, and the second row only once something narrows the list."],
+
+  ["Table", "Column headers and sorting", "mine", "You reported jumps when sorting, which made the rule that focus stays put.", "Header style, sort arrows, sticky header, hover-revealed arrow."],
+  ["Table", "Rows", "mine", "You reported the hover lag between the first cell and the rest.", "Avatar and two-line name, row heights, hover, selected colour, the open row's blue edge."],
+  ["Table", "Sideways scroll", "yours", "Scroll sideways once columns reach their content width (9 Oct).", "Pinned checkbox and name, the edge rule once scrolled, the fade on the right."],
+  ["Table", "Column widths", "steered", "A status must never clip, as a rule (9 Oct).", "Measuring every value, every status and the header offscreen."],
+  ["Table", "Status badges", "steered", "The marks inside them are yours.", "The badge itself: pill, tint and text."],
+  ["Table", "Grouped rows", "steered", "Group by as a nested menu with a check.", "Group rows with a chevron, count and total; collapsing."],
+  ["Table", "Load more", "steered", "Load more and scrolling combined, no total row (8 Oct).", "The footer range (“Showing 1–50 of 132”) and loading as you scroll."],
+  ["Table", "Phone rows", "mine", "Never discussed.", "Rows become two-line items on phones."],
+
+  ["Selection and actions", "Checkbox selection", "mine", "Never discussed.", "The checkbox column, select all shown, partial state."],
+  ["Selection and actions", "Floating bar", "yours", "Bulk actions in a floating bar that will replace Bolster's other situational bars (8 Oct); “Unselect all” once everything is selected.", "Its layout, count and link, and its own row above the tab bar on phones."],
+  ["Selection and actions", "Job actions", "yours", "As Bolster has them, by status (9 Oct).", "What goes in More, and the Download and Change status submenus."],
+  ["Selection and actions", "Row menu", "steered", "Its actions follow Bolster's, as above.", "The ⋯ button and the menu's shape."],
+  ["Selection and actions", "Confirm dialog", "mine", "Never discussed.", "The danger confirmation for delete."],
+
+  ["Record", "Record panel", "steered", "Closer to Mercury than a drawer, with more weight on the timeline (9 Oct).", "Beside the list from 1280px and a sheet below; the hero amount, fields and document row."],
+  ["Record", "Timeline", "steered", "A real line and some colour, “some design” (9 Oct).", "Status-shape dots, dashed and dotted lines, the next step."],
+  ["Record", "Record actions", "yours", "When the second action doesn't fit beside More, show one action plus More.", "Measuring the fit and moving the second action into More."],
+
+  ["Menus and overlays", "Menus", "steered", "Warm, not cold; nested menus with a check; icons, then smaller and bolder (14px Regular).", "Item height, padding, separators, shadow, hover."],
+  ["Menus and overlays", "Bottom sheets on phones", "steered", "Menus as bottom sheets on phones (9 Oct).", "Nested menus drill in with a back row; the warm scrim."],
+  ["Menus and overlays", "Tooltip", "steered", "A tooltip on display settings.", "Its style and placement."],
+
+  ["Feedback and states", "Loading", "mine", "Never discussed.", "Skeleton rows and cards."],
+  ["Feedback and states", "Empty, no results, error", "mine", "Never discussed.", "Wording, icons and actions for each state."],
+  ["Feedback and states", "Toasts", "mine", "Never discussed.", "What confirms an action, and how it dismisses."],
+
+  ["Trying out", "Canvas grid", "yours", "Mike's grid around the pointer, light and dark; cells from the page header, from the top-right corner; your tuned values; on by default.", "The way it trails and fades, and keeping it cheap to run."],
+
+  ["Concept tooling", "Concept controls and tuners", "yours", "Sliders beside the concept (you named them tuners); Warm and Cool only; switches for the grid and the cards.", "The panel's layout and Copy settings."],
+];
+
+const LEVEL = { yours: ["full", "You decided"], steered: ["half", "You steered"], mine: ["dashed", "My call"] };
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const ic = (n, z = 14) => (window.BolsterIcons ? BolsterIcons(n, z) : "");
+const groups = [...new Set(C.map((x) => x[0]))];
+document.getElementById("groups").innerHTML = groups.map((g) => `<section class="inv-group" data-group><h2>${g}</h2><ul class="inv-list">${C.filter((x) => x[0] === g).map(([, name, lv, you, me]) =>
+  `<li class="inv-item" data-level="${lv}" data-id="${slug(name)}"><div class="inv-namecol"><div class="inv-name"><span class="mark" data-mark="${LEVEL[lv][0]}" data-level="${lv}" role="img" aria-label="${LEVEL[lv][1]}"></span><span>${esc(name)}</span></div>
+   <button type="button" class="button inv-todo-btn" data-variant="ghost" data-size="sm" data-todo-toggle="${slug(name)}" aria-pressed="false" aria-label="To-do: ${esc(name)}"></button></div>
+   <div class="inv-col inv-you"><h3>Your input</h3><p>${esc(you)}</p></div><div class="inv-col"><h3>My part</h3><p>${esc(me)}</p></div></li>`).join("")}</ul></section>`).join("");
+for (const lv of Object.keys(LEVEL)) document.getElementById(`n-${lv}`).textContent = C.filter((x) => x[2] === lv).length;
+
+// to-dos live in this browser only: { id: { note, done } }, in the order they were marked
+const KEY = "bolster-concepts:components-todo";
+let todos = {};
+try { todos = JSON.parse(localStorage.getItem(KEY)) || {}; } catch {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(todos)); } catch {} };
+const byId = Object.fromEntries(C.map((x) => [slug(x[1]), x]));
+let show = "all";
+
+function filter() {
+  document.querySelectorAll(".inv-item").forEach((li) => (li.hidden = show === "todo" ? !(li.dataset.id in todos) : show !== "all" && li.dataset.level !== show));
+  document.querySelectorAll("[data-group]").forEach((g) => (g.hidden = !g.querySelector(".inv-item:not([hidden])")));
+}
+function render() {
+  // the toggles in the list
+  document.querySelectorAll(".inv-item [data-todo-toggle]").forEach((b) => {
+    const on = b.dataset.todoToggle in todos;
+    b.setAttribute("aria-pressed", on);
+    b.innerHTML = `${ic(on ? "check" : "circle-plus")}${on ? "To-do" : "Add to to-dos"}`;
+    b.closest(".inv-item").toggleAttribute("data-todo", on);
+  });
+  // the list at the top: rebuilt only when the set changes, so a note being typed keeps its focus
+  const ids = Object.keys(todos).filter((id) => byId[id]);
+  const list = document.querySelector(".todo-list");
+  if (list.dataset.ids !== ids.join()) {
+    list.dataset.ids = ids.join();
+    list.innerHTML = ids.map((id) => {
+      const [g, name, lv] = byId[id];
+      return `<li class="todo-row" data-id="${id}"${todos[id].done ? " data-done" : ""}>
+        <input type="checkbox" class="checkbox" data-done="${id}" aria-label="Done: ${esc(name)}"${todos[id].done ? " checked" : ""}>
+        <span class="todo-name"><span class="mark" data-mark="${LEVEL[lv][0]}" data-level="${lv}" role="img" aria-label="${LEVEL[lv][1]}"></span><span>${esc(name)} <small>${esc(g)}</small></span></span>
+        <input class="input" data-size="sm" data-note="${id}" placeholder="What to decide" aria-label="Note for ${esc(name)}" value="${esc(todos[id].note || "")}">
+        <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-todo-toggle="${id}" aria-label="Remove ${esc(name)} from to-dos">${ic("xmark", 16)}</button></li>`;
+    }).join("");
+  }
+  list.querySelectorAll(".todo-row").forEach((r) => r.toggleAttribute("data-done", !!todos[r.dataset.id]?.done));
+  const done = ids.filter((id) => todos[id].done).length;
+  document.querySelector(".todo-head output").textContent = ids.length ? `${done} of ${ids.length} done` : "";
+  document.querySelector(".todo-empty").hidden = ids.length > 0;
+  document.querySelector("[data-copy]").hidden = !ids.length;
+  document.querySelector("[data-clear-done]").hidden = !done;
+  filter();
+}
+
+document.addEventListener("click", (e) => {
+  const t = e.target.closest("[data-todo-toggle]");
+  if (t) {
+    const id = t.dataset.todoToggle;
+    if (id in todos) delete todos[id]; else todos[id] = { note: "", done: false };
+    save(); render();
+    // removing from the list at the top: focus goes back to the list, not to the page's start
+    if (!document.contains(t)) document.querySelector(".todo-list input, [data-todo-toggle]")?.focus();
+  }
+  if (e.target.closest("[data-clear-done]")) { for (const id of Object.keys(todos)) if (todos[id].done) delete todos[id]; save(); render(); }
+  if (e.target.closest("[data-copy]")) {
+    const b = e.target.closest("[data-copy]");
+    const text = "To-dos from the components page\n" + Object.keys(todos).filter((id) => byId[id]).map((id) => {
+      const [g, name, lv] = byId[id];
+      return `${todos[id].done ? "[x]" : "[ ]"} ${name} (${g}; ${LEVEL[lv][1].toLowerCase()})${todos[id].note ? `: ${todos[id].note}` : ""}`;
+    }).join("\n");
+    const say = (m) => { b.textContent = m; setTimeout(() => (b.textContent = "Copy as text"), 2000); };
+    navigator.clipboard?.writeText(text).then(() => say("Copied"), () => say("Couldn't copy"));
+  }
+});
+document.addEventListener("change", (e) => {
+  if (e.target.name === "show") { show = e.target.value; filter(); }
+  if (e.target.dataset.done) { todos[e.target.dataset.done].done = e.target.checked; save(); render(); }
+});
+document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
+render();
+</script>
+<script src="system/specimens/specimen.js?v=962ce8b5"></script>
+</body>
+</html>

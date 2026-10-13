@@ -9,8 +9,9 @@
   .view-button { gap: var(--space-1); color: var(--color-content-secondary); }
   .view-dirty { font-size: var(--text-xs); color: var(--color-content-tertiary); white-space: nowrap; }
   @media (max-width: 767px) {
-    .page-title { flex-basis: 100%; }
     .page-header-actions .button[data-hide-phone] { display: none; }
+    /* Create floats and Export goes, so the title shares its line with Select, which sits at the end */
+    .page-header-actions { flex: none; margin-inline-start: auto; }
   }
 
   /* ---------- page: toolbar, slices, table card, floating bar ---------- */
@@ -487,24 +488,55 @@
     @keyframes shimmer { to { background-position: -200% 0; } }
   }
 
-  /* ---------- phones: rows become two-line items ---------- */
+  /* ---------- phones: rows become items with four corners (L-phone-row, D32) ----------
+     The id and a date on a quiet overline top left, the key figure top right, the name across the full
+     width (16 px, wrapping to two lines, never cut on the first), then where (address, job or unit)
+     bottom left and the status bottom right. No checkbox column: selecting is a mode, and while it's
+     on the boxes slide in from the left. A list without its own overline puts its date (sub) there. */
+  @property --_pick-w { syntax: "<length>"; inherits: true; initial-value: 0px; }
+  @media (min-width: 768px) {
+    .data-table td.row-phone { display: none; }
+    #select-mode { display: none; }
+  }
   @media (max-width: 767px) {
     .data-table thead { display: none; }
     .data-table, .data-table tbody { display: block; }
-    .data-table tbody tr { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "sel title trail" "sel sub badge"; align-items: center; column-gap: var(--space-3); row-gap: var(--space-1); padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4); border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
+    .data-table tbody tr {
+      display: grid; grid-template-columns: var(--_pick-w) minmax(0, 1fr) auto;
+      grid-template-areas: "sel over trail" "sel title title" "sel where badge";
+      align-items: center; column-gap: 0; row-gap: var(--space-1);
+      padding: var(--space-3) var(--space-4);
+      border-block-end: var(--border-width-default) solid var(--color-line-subtle);
+      -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+      transition: --_pick-w 200ms var(--ease-out);
+    }
+    .list-page[data-selecting] .data-table tbody tr { --_pick-w: 2.25rem; }
     .data-table tbody td { display: none; block-size: auto; padding: 0; border: 0; }
-    .data-table tbody td[data-m] { display: block; }
-    .data-table td.data-table-select { display: block; grid-area: sel; }
+    .data-table tbody td[data-m] { display: block; min-inline-size: 0; }
+    .data-table td.data-table-select { display: flex; align-items: center; grid-area: sel; align-self: stretch; overflow: hidden; visibility: hidden; padding: 0; }
+    .list-page[data-selecting] .data-table td.data-table-select { visibility: visible; }
+    .data-table td[data-m="over"], .data-table tr:not(:has(td[data-m="over"])) td[data-m="sub"] { grid-area: over; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .data-table tr:has(td[data-m="over"]) td[data-m="sub"] { display: none; }
     .data-table td[data-m="title"] { grid-area: title; }
     .data-table td[data-m="title"] .cell-main { min-inline-size: 0; }
-    .data-table td[data-m="sub"] { grid-area: sub; font-size: var(--text-xs); color: var(--color-content-secondary); }
-    .data-table td[data-m="trail"] { grid-area: trail; text-align: end; font-weight: var(--font-weight-medium); }
-    .data-table td[data-m="badge"] { grid-area: badge; justify-self: end; }
+    .data-table td[data-m="title"] .data-table-link {
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; white-space: normal; overflow: hidden;
+      font-size: var(--text-base); line-height: calc(var(--leading-sm) + var(--space-0-5)); overflow-wrap: anywhere;
+    }
+    .data-table tr:has(td[data-m="where"]) td[data-m="title"] .cell-sub { display: none; }
+    .data-table td[data-m="title"] .cell-sub { font-size: var(--text-sm); line-height: var(--leading-sm); }
+    .data-table td[data-m="where"] { grid-area: where; font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .data-table td[data-m="trail"] { grid-area: trail; padding-inline-start: var(--space-3); text-align: end; font-size: var(--text-base); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; }
+    .data-table td[data-m="badge"] { grid-area: badge; justify-self: end; padding-inline-start: var(--space-3); }
     .data-table td.row-actions { display: none; }
     .data-table .cell-main .avatar { display: none; }
+    /* a ticked or opened row tints as a whole, not cell by cell */
+    .data-table tbody tr[data-selected] { background: var(--color-surface-selected); }
+    .data-table tbody tr:is([data-selected], [data-open]) td { background: none; box-shadow: none; }
     .data-table tbody tr.group-row { display: block; padding: 0; }
     .data-table .group-row td { display: block; padding: var(--space-2) var(--space-4); }
   }
+  @media (max-width: 767px) and (prefers-reduced-motion: reduce) { .data-table tbody tr { transition: none; } }
 
   /* ---------- the record: beside the list from 1280 up, a side sheet below that ----------
      As in Mercury: the list keeps its title, status and amount columns and the opened row stays

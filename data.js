@@ -161,6 +161,8 @@
       more: [{ label: "Average won job", value: (s) => { const b = s.filter((x) => WON.has(x.status)); return b.length ? fmt.money0(sum(b, (x) => x.total) / b.length) : "–"; }, sub: (s) => { const n = s.filter((x) => WON.has(x.status)).length; return n ? `from ${fmt.plural(n, "job", "jobs")}` : "none won yet"; } }],
     },
     statusMap: EST_STATUS,
+    // phones (L-phone-row): the number and last activity on the overline, the address under the name
+    phone: { over: (x) => `${esc(x.number)} · ${fmt.ago(x.modified)}`, where: (x) => esc(x.client.address) },
     columns: [
       { key: "job", label: "Job", m: "title", required: true, sort: (x) => `${x.job} ${x.client.name}`, render: (x) => main(x.id, `${x.client.name} · ${x.job}`, `${x.number} · ${x.client.address}`, x.client) },
       { key: "status", label: "Status", w: "6.5rem", m: "badge", sort: (x) => Object.keys(EST_STATUS).indexOf(x.status), render: (x) => badge(EST_STATUS[x.status]) },
@@ -287,8 +289,9 @@
       more: [{ label: "Average time to pay", value: (s) => { const p = s.filter((x) => x.paidIn); return p.length ? `${Math.round(sum(p, (x) => x.paidIn) / p.length)} days` : "–"; }, sub: (s) => { const n = s.filter((x) => x.paidIn).length; return n ? fmt.plural(n, "paid invoice", "paid invoices") : "none paid yet"; } }],
     },
     statusMap: INV_STATUS,
+    phone: { over: (x) => `${esc(x.number)} · ${x.status === "overdue" ? `<span class="cell-danger">${ageDays(x.due)} days late</span>` : x.status === "paid" ? `Paid in ${x.paidIn} days` : `Due ${fmt.date(x.due)}`}`, where: (x) => esc(x.job) },
     columns: [
-      { key: "number", label: "Invoice", m: "title", required: true, sort: (x) => x.number, render: (x) => main(x.id, `${x.number} · ${x.client.name}`, x.job, x.client) },
+      { key: "number", label: "Invoice", m: "title", required: true, sort: (x) => x.client.name, render: (x) => main(x.id, x.client.name, `${x.number} · ${x.job}`, x.client) },
       { key: "status", label: "Status", w: "7.5rem", m: "badge", sort: (x) => Object.keys(INV_STATUS).indexOf(x.status), render: (x) => badge(INV_STATUS[x.status]) },
       { key: "issued", label: "Issued", w: "5rem", hideBelow: "lg", sort: (x) => +x.issued, render: (x) => `<span class="cell-muted">${fmt.date(x.issued)}</span>` },
       { key: "due", label: "Due", w: "8rem", m: "sub", sort: (x) => +x.due, render: (x) => (x.status === "overdue" ? `<span class="cell-danger">${ageDays(x.due)} days late</span>` : x.status === "paid" ? `<span class="cell-muted">Paid in ${x.paidIn} days</span>` : `<span class="cell-muted">${fmt.date(x.due)}</span>`) },
@@ -378,6 +381,7 @@
       more: [{ label: "Top source", value: (s) => { const c = {}; s.forEach((x) => (c[x.source] = (c[x.source] || 0) + 1)); return Object.entries(c).sort((a, b) => b[1] - a[1])[0]?.[0] || "–"; }, sub: (s) => { const c = {}; s.forEach((x) => (c[x.source] = (c[x.source] || 0) + 1)); const top = Object.values(c).sort((a, b) => b - a)[0]; return top ? `${top} of ${s.length}` : "no sources yet"; } }],
     },
     statusMap: CL_STATUS,
+    phone: { over: (x) => fmt.ago(x.lastContact), where: (x) => esc(x.address) },
     columns: [
       { key: "name", label: "Customer", m: "title", required: true, sort: (x) => x.name, render: (x) => main(x.id, x.name, x.address, x) },
       { key: "status", label: "Status", w: "5.5rem", m: "badge", sort: (x) => Object.keys(CL_STATUS).indexOf(x.status), render: (x) => badge(CL_STATUS[x.status]) },
@@ -445,6 +449,8 @@
     searchIn: ["category", "vendor"],
     dateKey: "updated",
     cardKey: null, metrics: [], insight: null,
+    // no status, so the unit takes the bottom line; the vendor joins the overline
+    phone: { over: (x) => `${esc(x.category)} · ${esc(x.vendor)}`, where: (x) => `per ${esc(x.unit)}` },
     columns: [
       { key: "name", label: "Item", m: "title", required: true, sort: (x) => x.name, render: (x) => main(x.id, x.name, `${x.category} · ${x.vendor}`) },
       { key: "category", label: "Category", w: "6rem", hideBelow: "md", sort: (x) => x.category, render: (x) => `<span class="badge">${esc(x.category)}</span>` },

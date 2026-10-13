@@ -13,12 +13,12 @@
   },
   "columns": [
     {
-      "key": "number",
+      "key": "invoice",
       "label": "Invoice",
       "type": "name",
       "priority": 1,
-      "title": "{number} · {client}",
-      "detail": "{job}",
+      "title": "{client}",
+      "detail": "{number} · {job}",
       "leading": "avatar",
       "avatarFrom": "client"
     },
@@ -74,6 +74,11 @@
       "key": "client",
       "label": "Client",
       "type": "record"
+    },
+    {
+      "key": "number",
+      "label": "Invoice number",
+      "type": "id"
     },
     {
       "key": "job",
