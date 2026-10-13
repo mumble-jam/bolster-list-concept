@@ -131,7 +131,7 @@
        or they'd lead and the rest of the row would follow */
     .list-panel .data-table tbody td:is(.data-table-select, [data-primary]) { background: var(--_row-bg); transition: background-color var(--duration-fast) var(--ease-standard); }
     .list-panel .table-wrap[data-scrolled] .data-table [data-primary] { box-shadow: inset -1px 0 0 var(--color-line-default); }
-    .group-head { position: sticky; inset-inline-start: var(--space-4); display: inline-flex; align-items: center; }
+    .group-head { position: sticky; inset-inline-start: var(--space-4); }
   }
   .data-table tbody tr[data-selected] td { background: var(--color-surface-selected); }
   @media (hover: hover) and (min-width: 768px) {
@@ -167,6 +167,8 @@
   @media (hover: hover) { .data-table th:not([aria-sort]) .data-table-sort:hover::after { visibility: visible; } }
   .data-table th .data-table-sort:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
   .data-table .group-row td { block-size: auto; padding-block: var(--space-2); background: var(--color-surface-group); border-block-end-color: var(--color-line-default); }
+  /* a flex row at every width: in a line box the count would sit on the chevron's bottom edge, not the name's baseline */
+  .group-head { display: inline-flex; align-items: center; }
   .group-toggle { display: inline-flex; align-items: center; gap: var(--space-2); padding: 0; border: 0; background: none; color: var(--color-content-primary); font: inherit; font-weight: var(--font-weight-medium); cursor: pointer; }
   .group-toggle svg { inline-size: 1rem; block-size: 1rem; transition: rotate var(--duration-fast) var(--ease-standard); }
   .group-toggle[aria-expanded="false"] svg { rotate: -90deg; }
