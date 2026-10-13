@@ -716,8 +716,15 @@
   .concept-controls:not([open]) summary::after { content: "▴"; }
   .concept-tag { padding: 0 var(--space-2); border-radius: var(--radius-full); background: var(--color-action-accent); color: var(--color-content-on-accent); font-size: var(--text-xxs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); }
   .concept-body { display: grid; gap: var(--space-3); padding: var(--space-1) var(--space-3) var(--space-3); }
-  /* on phones the pill sits bottom left: bottom right is Create's */
-  @media (max-width: 767px) { .concept-controls { inset-block-end: calc(var(--shell-bottom-bar-height) + var(--space-3)); inset-inline: var(--space-3) auto; } }
+  /* on phones there's no pill: the controls open from More (the shell lists them there) as a panel
+     above the tab bar, and closing them hides them again */
+  @media (max-width: 767px) {
+    .concept-controls:not([open]) { display: none; }
+    .concept-controls {
+      inset-block-end: calc(var(--shell-bottom-bar-height) + var(--space-3)); inset-inline: var(--space-3);
+      inline-size: auto; max-inline-size: none; max-block-size: calc(100dvh - var(--shell-bottom-bar-height) - var(--space-8)); overflow-y: auto;
+    }
+  }
 
   .notes { --_w: 44rem; }
   .notes .dialog-body { display: grid; gap: var(--space-5); font-size: var(--text-sm); }

@@ -168,7 +168,9 @@ window.BolsterShell = (() => {
     const row = (s) => itemsOf(s).length
       ? `<button type="button" class="sidebar-item" data-more-section="${s.id}"${s.id === cur ? ' aria-current="true"' : ""}>${icon(s.icon, 18)}<span>${esc(s.label)}</span><span class="bs-chev">${icon("chevron-right", 14)}</span></button>`
       : `<a class="sidebar-item" ${sectionHref(s)}${s.id === cur ? ' aria-current="page"' : ""}>${icon(s.icon, 18)}<span>${esc(s.label)}</span></a>`;
-    return `<h2 class="sidebar-title">Menu</h2>${NAV.main.map(row).join("")}<hr class="bs-sep">${NAV.bottom.map(row).join("")}`;
+    // a page can add its own entries at the end (data-more-entry="Label" on the element they open)
+    const extra = [...document.querySelectorAll("[data-more-entry]")].map((el) => `<button type="button" class="sidebar-item" data-more-open="${el.id}">${icon(el.dataset.moreIcon || "sliders", 18)}<span>${esc(el.dataset.moreEntry)}</span></button>`).join("");
+    return `<h2 class="sidebar-title">Menu</h2>${NAV.main.map(row).join("")}<hr class="bs-sep">${NAV.bottom.map(row).join("")}${extra ? `<hr class="bs-sep">${extra}` : ""}`;
   }
   const backRow = `<button type="button" class="sidebar-item bs-back" data-more-back>${icon("chevron-left", 14)}<span>All of the menu</span></button>`;
 
@@ -249,6 +251,14 @@ window.BolsterShell = (() => {
       const drill = e.target.closest("[data-more-section]");
       if (drill) { side0.innerHTML = backRow + sidebarHtml(sections.find((x) => x.id === drill.dataset.moreSection)); side0.querySelector("[data-more-back]").focus(); return; }
       if (e.target.closest("[data-more-back]")) { side0.innerHTML = moreHtml(); side0.querySelector(".sidebar-item")?.focus(); return; }
+      const extra = e.target.closest("[data-more-open]");
+      if (extra) {
+        side0.removeAttribute("data-open");
+        shell.querySelectorAll("[data-toggle-sidebar]").forEach((b) => b.setAttribute("aria-expanded", false));
+        const el = document.getElementById(extra.dataset.moreOpen);
+        if (el) { el.open = true; el.querySelector("summary")?.focus(); }
+        return;
+      }
       if (e.target.closest("[data-collapse-sidebar]")) {
         if (narrow.matches) shell.querySelector(".sidebar").toggleAttribute("data-open");
         else shell.toggleAttribute("data-sidebar-hidden");
