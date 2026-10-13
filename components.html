@@ -78,7 +78,7 @@
   <header class="inv-head">
     <p class="text-caption"><a href="index.html">Jobs list concept</a></p>
     <h1>Components, and who decided them</h1>
-    <p>Every component the jobs list concept uses, marked by how much of it came from you. Built from your messages on 8 to 10 October and the commits behind them. Where you only reported a bug, that doesn't count as a design decision, so it's noted but the component stays my call.</p>
+    <p>Every component the jobs list concept uses, marked by how much of it came from you. Built from your messages on 8 to 13 October and the commits behind them. Where you only reported a bug, that doesn't count as a design decision, so it's noted but the component stays my call.</p>
   </header>
 
   <section class="inv-legend" aria-label="Levels">
@@ -113,7 +113,7 @@
 <script>
 // [group, name, level, your input, my part]
 const C = [
-  ["Foundations", "Warm and cool colour", "yours", "A warmer page (8 Oct); Paper and cement edges from your Figma sketch; only Warm and Cool in the controls, for the client to pick; warm on every neutral; the sidebar follows Cool.", "Which cement step goes where, and the warm dark theme."],
+  ["Foundations", "Warm and cool colour", "yours", "A warmer page (8 Oct); Paper and cement edges from your Figma sketch; warm on every neutral. Then the status quo (13 Oct, D33): warm in light, cool in dark, as the system's own tokens; the Colour switch is gone.", "Which cement step goes where, and the new tokens (card edge, open row, menu hover)."],
   ["Foundations", "Type", "steered", "Cera Pro and Space Grotesk come from your prototype's tokens; you chose Inter for the published copy.", "Sizes and weights here: the page title, the big card numbers, table text and sub-lines."],
   ["Foundations", "Icons", "yours", "Font Awesome 6 Pro, Light (Regular for search and help), with your key; table-cells-columns for display settings; smaller, bolder icons in menus.", "Every other pick: filter, calendar, one icon per attribute in menus, the action icons."],
   ["Foundations", "Corners", "yours", "Every button 8px (9 Oct).", "12px on cards, menus, dialogs and the record; round chips, badges and avatars."],
@@ -126,13 +126,14 @@ const C = [
   ["Shell", "Favicon", "yours", "Bolster's mark in white instead of yellow.", "The black tile behind it and the PNG fallback."],
 
   ["Page", "Page header", "steered", "Its title scrolls away (variant D).", "Its contents: the hide-menu button, the title, Export and Create job."],
+  ["Page", "Create on phones", "yours", "The three frames from the floating-button research (D29): Create floats above the tab bar, shrinks to + while you scroll, and gives way to the bulk bar.", "The sizes and the shrink's timing."],
   ["Page", "Scrolling", "yours", "Research on too many fixed elements, then variant D on desktop and phones: the title scrolls away, the top bar and card header hide on scroll down and come back on scroll up.", "The 300ms slide, and keeping focus out from under the bars."],
   ["Page", "Primary and brand buttons", "yours", "Claude Design-style body, then your values from the button tuner (edge, lines, sheen, shadows, hover lift, press sink, 150ms).", "Nothing: the values are yours."],
   ["Page", "Secondary, ghost and danger buttons", "steered", "Research asked for (10 Oct, Figma research page); you took all my recommendations: a quieter tactile secondary, no tertiary, a ghost hover that shows, red only for Delete in three weights.", "The values: cement edge and shadow, hover fills, the confirmation wording “Keep jobs”."],
 
   ["Status cards", "Status cards", "yours", "Big numbers on top of the table, clickable, never tabs (8 Oct); filter cards on the page; In progress replaces Draft (9 Oct); picking a card shows its chip.", "The anatomy (label, count, total), the All card and the pressed look."],
-  ["Status cards", "Status marks", "yours", "Shapes, not just colours: empty draft, half pending, solid booked, a slash for declined; then a set that makes room for In progress.", "The quarter steps (dashed, quarter, half, three quarters), the 12/14px drawing and the colours."],
-  ["Status cards", "Insight card", "steered", "Different from the other cards, between Jobber and Deel; the “2 of 4” version below five decided; you questioned a selected state for it.", "Win rate as the figure, the split bar, the second figure (average won job)."],
+  ["Status cards", "Status marks", "yours", "Shapes, not just colours: empty draft, half pending, solid booked, a slash for declined; then a set that makes room for In progress; In progress in blue (13 Oct).", "The quarter steps (dashed, quarter, half, three quarters), the 12/14px drawing and the other colours."],
+  ["Status cards", "Insight card", "steered", "Different from the other cards, between Jobber and Deel; the “2 of 4” version below five decided; you questioned a selected state for it; first on phones, so the overview is in the first screen (13 Oct).", "Win rate as the figure, the split bar, the second figure (average won job)."],
   ["Status cards", "Info popovers", "steered", "Their copy follows your rule: the screen's own words, statuses drawn with their marks (D27).", "The ⓘ button and its popover."],
   ["Status cards", "Tactile cards", "steered", "Asked for (9 Oct), with sliders in the concept controls.", "Every value: the body, both shadows, hover, press and selected. Not tuned by you yet."],
 
@@ -152,10 +153,10 @@ const C = [
   ["Table", "Status badges", "steered", "The marks inside them are yours.", "The badge itself: pill, tint and text."],
   ["Table", "Grouped rows", "steered", "Group by as a nested menu with a check.", "Group rows with a chevron, count and total; collapsing."],
   ["Table", "Load more", "steered", "Load more and scrolling combined, no total row (8 Oct).", "The footer range (“Showing 1–50 of 132”) and loading as you scroll."],
-  ["Table", "Phone rows", "mine", "Never discussed.", "Rows become two-line items on phones."],
+  ["Table", "Phone rows", "yours", "Names not cut on the first line, then direction C from the tables-on-phones research (13 Oct, D32): the number and a date on an overline, the amount top right, the name full width at 16 px, where and status below; invoices lead with the customer.", "The overline at 12 px (the system has no 13), the catalog's category on its overline, and how lists built from a description fill the corners."],
 
-  ["Selection and actions", "Checkbox selection", "mine", "Never discussed.", "The checkbox column, select all shown, partial state."],
-  ["Selection and actions", "Floating bar", "yours", "Bulk actions in a floating bar that will replace Bolster's other situational bars (8 Oct); “Unselect all” once everything is selected.", "Its layout, count and link, and its own row above the tab bar on phones."],
+  ["Selection and actions", "Checkbox selection", "steered", "On phones selecting is a mode, from direction C (13 Oct): Select, or a long press; the checkboxes slide in.", "The desktop checkbox column, select all and its partial state; the 450 ms hold and the slide."],
+  ["Selection and actions", "Floating bar", "yours", "Bulk actions in a floating bar that will replace Bolster's other situational bars (8 Oct); “Unselect all” once everything is selected. Then the research's A and D (13 Oct, D34): on desktop a count chip that holds its own ×, icons beside labels, one rule before a red Delete, 48 tall with 14 px corners; on phones the header shows the count with Select all and Done, and the tab bar turns into the action bar.", "Escape clearing the selection, folding into More below 1100 wide, two actions plus More and Delete on phones, disabled until something is ticked, the slide-up."],
   ["Selection and actions", "Job actions", "yours", "As Bolster has them, by status (9 Oct).", "What goes in More, and the Download and Change status submenus."],
   ["Selection and actions", "Row menu", "steered", "Its actions follow Bolster's, as above.", "The ⋯ button and the menu's shape."],
   ["Selection and actions", "Confirm dialog", "mine", "Never discussed.", "The danger confirmation for delete."],
@@ -174,7 +175,7 @@ const C = [
 
   ["Trying out", "Canvas grid", "yours", "Mike's grid around the pointer, light and dark; cells from the page header, from the top-right corner; your tuned values; on by default.", "The way it trails and fades, and keeping it cheap to run."],
 
-  ["Concept tooling", "Concept controls and tuners", "yours", "Sliders beside the concept (you named them tuners); Warm and Cool only; switches for the grid and the cards.", "The panel's layout and Copy settings."],
+  ["Concept tooling", "Concept controls and tuners", "yours", "Sliders beside the concept (you named them tuners); switches for the grid and the cards; on phones, in the More menu instead of a pill (13 Oct). The Warm and Cool switch went with the status quo (D33).", "The panel's layout and Copy settings."],
 ];
 
 const LEVEL = { yours: ["full", "You decided"], steered: ["half", "You steered"], mine: ["dashed", "My call"] };
