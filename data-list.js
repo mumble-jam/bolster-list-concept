@@ -236,6 +236,8 @@
     row.innerHTML = phoneMQ.matches ? insight(scope) + all + cards.join("") : all + cards.join("") + insight(scope);
   }
   const phoneMQ = matchMedia("(max-width: 767px)");
+  const narrowMQ = matchMedia("(min-width: 768px) and (max-width: 1099px)");
+  [phoneMQ, narrowMQ].forEach((m) => m.addEventListener("change", () => { if (!$("#bulk-bar").hidden || st.picking) renderBulk(); }));
   phoneMQ.addEventListener("change", () => renderSlices());
 
   // the one card that isn't a filter: label with a definition, the value with its counts, the parts, then a second figure
@@ -450,43 +452,60 @@
     if (box) box.checked = on;
     renderBulk(); syncSelectPage();
   }
-  function unpick() {
-    st.picking = false; st.selected.clear();
+  function untick() {
+    st.selected.clear();
     $$("#table-wrap tbody tr[data-selected]").forEach((tr) => { tr.removeAttribute("data-selected"); const box = $("input[data-select]", tr); if (box) box.checked = false; });
     renderBulk(); syncSelectPage();
+  }
+  function unpick() { st.picking = false; untick(); }
+  // the bar's actions for what's ticked: the list's own set, with Delete pulled out to go last after a rule.
+  // Room decides how many stay on the bar (D34): all from 1100 up, one below that, two on phones (with More
+  // and Delete that makes four slots, the tab bar's count); the rest go to the top of More
+  function bulkSet() {
+    let bar, more;
+    if (cfg.actionsFor) ({ bar, more } = cfg.actionsFor(selectedRows()));
+    else { bar = cfg.bulk; more = []; }
+    const del = bar.filter((a) => typeof a === "string" && destructive(a));
+    let acts = bar.filter((a) => !(typeof a === "string" && destructive(a)));
+    const keep = phoneMQ.matches ? 2 : narrowMQ.matches ? 1 : Infinity;
+    if (acts.length > keep) { more = [...acts.slice(keep), ...more]; acts = acts.slice(0, keep); }
+    return { acts, more, del };
   }
   function renderBulk() {
     const bar = $("#bulk-bar");
     const n = st.selected.size;
     // phones have no checkbox column: selecting is a mode (Select, or a long press), and the bar stays up
-    // while it's on, even with nothing ticked yet
+    // while it's on, even with nothing ticked yet (its actions wait, disabled)
     const on = (n > 0 || (st.picking && phoneMQ.matches)) && st.mode === "ready";
+    const matching = on ? rowsWhere().length : 0, all = n > 0 && n >= matching;
     bar.hidden = !on;
     const pick = $("#select-mode");
     if (pick) { pick.hidden = st.mode !== "ready" || !cfg.rows.length; pick.textContent = on ? "Done" : "Select"; }
+    // phones: the header carries the count and Select all while selecting
+    const sc = $("#select-count"), sa = $("#select-all");
+    if (sc) { sc.hidden = !on; sc.textContent = n ? `${fmt.count(n)} selected` : `Select ${cfg.noun[1]}`; }
+    if (sa) { sa.hidden = !on; sa.textContent = all ? "Unselect all" : "Select all"; sa.toggleAttribute("data-select-matching", !all); sa.toggleAttribute("data-unselect-all", all); }
     document.querySelector(".list-page").toggleAttribute("data-selecting", on);
     document.body.toggleAttribute("data-selecting", on);
     if (!on) { bar.innerHTML = ""; return; }
-    if (!n) { bar.setAttribute("aria-label", "Select mode"); bar.innerHTML = `<span class="floating-bar-count" aria-live="polite">Tap ${esc(cfg.noun[1])} to select</span><button type="button" class="floating-bar-link" data-select-matching>Select all ${fmt.count(rowsWhere().length)}</button><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Stop selecting" data-clear-selection>${I.xl}</button>`; return; }
-    const matching = rowsWhere().length;
     const what = n === 1 ? `1 ${cfg.noun[0]}` : `${fmt.count(n)} ${cfg.noun[1]}`;
-    bar.setAttribute("aria-label", `Bulk actions for ${n} selected`);
-    let acts;
-    if (cfg.actionsFor) {
-      // actions that depend on what's selected; menus (Download, Change status, More) open from the bar
-      const { bar, more } = cfg.actionsFor(selectedRows());
-      const btn = (a) => `<button type="button" class="button" data-variant="ghost" data-size="sm" data-concept-action="${esc(a)} ${what}">${esc(a)}</button>`;
-      const menu = (key, label) => `<button type="button" class="button" data-variant="ghost" data-size="sm" data-bulk-menu="${key}" aria-haspopup="menu" aria-expanded="false">${esc(label)}${I.chev}</button>`;
-      const danger = bar.filter((a) => typeof a === "string" && risky(a));
-      acts = bar.map((a, i) => (typeof a !== "string" ? menu(i, a.label) : risky(a) ? "" : btn(a))).join("")
-        + (more.length ? menu("more", "More") : "")
-        + (danger.length ? `<span class="floating-bar-sep" aria-hidden="true"></span>${danger.map((a) => `<button type="button" class="button" data-variant="ghost" data-size="sm"${destructive(a) ? ' data-tone="danger"' : ""} data-confirm="${esc(a)}">${esc(a)}</button>`).join("")}` : "");
-    } else {
-      acts = cfg.bulk.map((a) => risky(a)
-        ? `<span class="floating-bar-sep" aria-hidden="true"></span><button type="button" class="button" data-variant="ghost" data-size="sm"${destructive(a) ? ' data-tone="danger"' : ""} data-confirm="${esc(a)}">${esc(a)}</button>`
-        : `<button type="button" class="button" data-variant="ghost" data-size="sm" data-concept-action="${esc(a)} ${what}">${esc(a)}</button>`).join("");
-    }
-    bar.innerHTML = `<span class="floating-bar-count" aria-live="polite">${fmt.count(n)} selected</span>${n < matching ? `<button type="button" class="floating-bar-link" data-select-matching>Select all ${fmt.count(matching)}</button>` : `<button type="button" class="floating-bar-link" data-clear-selection>Unselect all</button>`}<span class="floating-bar-sep" aria-hidden="true"></span><span class="floating-bar-actions">${acts}</span><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Clear selection" data-clear-selection>${I.xl}</button>`;
+    bar.setAttribute("aria-label", n ? `Bulk actions for ${n} selected` : "Select mode");
+    const { acts, more, del } = bulkSet();
+    const dis = n ? "" : " disabled";
+    const icon = (a) => { const name = typeof a === "string" ? actionIcons[a] : a.icon; return name ? ic(`m-${name}`, 14) : ""; };
+    const label = (t) => `<span class="floating-bar-label">${esc(t)}</span>`;
+    const chev = `<span class="floating-bar-chev" aria-hidden="true">${I.chev}</span>`;
+    const btn = (inner, attrs) => `<button type="button" class="button" data-variant="ghost" data-size="sm"${dis} ${attrs}>${inner}</button>`;
+    const menuAttrs = (key) => `data-bulk-menu="${key}" aria-haspopup="menu" aria-expanded="false"`;
+    const actions = acts.map((a, i) => typeof a !== "string"
+      ? btn(icon(a) + label(a.label) + chev, menuAttrs(i))
+      : btn(icon(a) + label(a), risky(a) ? `data-confirm="${esc(a)}"` : `data-concept-action="${esc(a)} ${what}"`)).join("")
+      + (more.length ? btn(`<span class="floating-bar-more-icon" aria-hidden="true">${ic("ellipsis", 20)}</span>${label("More")}${chev}`, menuAttrs("more")) : "");
+    const danger = del.map((a) => btn(ic("m-trash", 14) + label(a), `data-tone="danger" data-confirm="${esc(a)}"`)).join("");
+    bar.innerHTML = `<button type="button" class="floating-bar-count" data-clear-selection aria-label="Clear selection (${fmt.count(n)} selected)">${ic("xmark", 12)}<span aria-live="polite">${all && n > 1 ? `All ${fmt.count(n)} selected` : `${fmt.count(n)} selected`}</span></button>`
+      + (all ? `<button type="button" class="floating-bar-link" data-unselect-all>Unselect all</button>` : `<button type="button" class="floating-bar-link" data-select-matching>Select all ${fmt.count(matching)}</button>`)
+      + `<span class="floating-bar-sep" aria-hidden="true"></span><span class="floating-bar-actions">${actions}</span>`
+      + (danger ? `<span class="floating-bar-sep" aria-hidden="true"></span>${danger}` : "");
   }
   function openConfirm(action) {
     const n = st.selected.size;
@@ -685,8 +704,8 @@
         ${sub("cols", "Columns", "columns-3", shown === opt.length ? "All" : `${shown} of ${opt.length}`, colItems)}
       </div>`;
     } else if (p.kind === "bulk") {
-      const { bar, more } = cfg.actionsFor(selectedRows());
-      const g = p.key === "more" ? null : bar[+p.key];
+      const { acts, more } = bulkSet();
+      const g = p.key === "more" ? null : acts[+p.key];
       pop.innerHTML = `<div class="pop-body" style="padding-block-start:var(--space-2)">${g ? actionItems([{ ...g }], { bulk: true }).replace(/^<div class="pop-section">[^<]*<\/div>/, "") : actionItems(more, { bulk: true, nested: true })}</div>`;
     } else if (p.kind === "row" && cfg.actionsFor) {
       // the row's menu: everything Bolster offers for this job's status; from the record, minus its own buttons
@@ -823,6 +842,14 @@
     $("#list-split").removeAttribute("data-open");
     if (focus && id) $(`.data-table-link[data-peek="${id}"]`)?.focus();
   }
+  // Escape clears the selection (and leaves select mode), unless a menu, dialog or text field takes it first
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape" || e.defaultPrevented || (!st.selected.size && !st.picking)) return;
+    if (document.querySelector(":popover-open, dialog[open]") || e.target.closest?.("input:not([type=checkbox]), textarea, select, [contenteditable]")) return;
+    const inBar = $("#bulk-bar").contains(document.activeElement);
+    unpick();
+    if (inBar) $("#select-page")?.focus({ preventScroll: true });
+  });
   // Escape on the sheet: back to the row it came from (I11)
   $("#peek").addEventListener("close", () => { if (!splitMQ.matches && openId) { const id = openId; openId = null; markRow(); $(`.data-table-link[data-peek="${id}"]`)?.focus(); } });
   // crossing the breakpoint moves an open record between the side and the sheet
@@ -910,8 +937,9 @@
     if ((el = q("[data-peek]"))) { e.preventDefault(); openPeek(el.dataset.peek); return; }
     if (q("[data-detail-close]")) return closeDetail();
     if ((el = q("[data-tl-more]"))) { const ol = el.closest(".timeline"); $$("[data-fold]", ol).forEach((li) => (li.hidden = false)); const first = $("[data-fold]", ol); el.closest("li").remove(); first?.setAttribute("tabindex", "-1"); first?.focus({ preventScroll: true }); return; }
-    if (q("[data-select-matching]")) { rowsWhere().forEach((x) => st.selected.add(x.id)); renderBody(); renderBulk(); $("#bulk-bar .floating-bar-link")?.focus(); return; }
+    if ((el = q("[data-select-matching]"))) { const head = el.id === "select-all"; rowsWhere().forEach((x) => st.selected.add(x.id)); renderBody(); renderBulk(); (head ? el : $("#bulk-bar .floating-bar-link"))?.focus({ preventScroll: true }); return; }
     if (q("[data-clear-selection]")) { unpick(); $("#select-page")?.focus({ preventScroll: true }); return; }
+    if ((el = q("[data-unselect-all]"))) { const head = el.id === "select-all"; untick(); (head ? el : $("#bulk-bar .floating-bar-link") || $("#select-page"))?.focus({ preventScroll: true }); return; }
     if (q("#select-mode")) { st.picking || st.selected.size ? unpick() : ((st.picking = true), renderBulk()); return; }
     if ((el = q("[data-confirm]"))) { if (pop.contains(el)) pop.hidePopover(); return openConfirm(el.dataset.confirm); }
     if (q("#confirm-go")) {

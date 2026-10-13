@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=1c57e923">
-<link rel="stylesheet" href="specimen.css?v=1c57e923">
+<link rel="stylesheet" href="../bolster.css?v=2ab4e3c4">
+<link rel="stylesheet" href="specimen.css?v=2ab4e3c4">
 <style>.spec-panel .floating-bar { position: static; margin: 0; }</style>
 <style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
 </head>
@@ -19,41 +19,41 @@
   <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
 </header>
 <main class="spec-main">
-  <p class="spec-intro">Bulk actions for the rows you've ticked. It floats at the bottom of the screen, so the rows stay where they are while you select. Count first, then select all (or unselect all), the actions, the risky ones last after a rule, and clear. Inverse: dark in light, light in dark. Written to replace the other situational bars later (save changes, compare, move).</p>
+  <p class="spec-intro">Bulk actions for the rows you've ticked (D34). On desktop a dark capsule floats at the bottom of the list, so the rows stay where they are while you select. The count is a chip that holds its own ×, and Escape does the same, so the bar's end is free. Then Select all, the actions with the product's icons beside their labels, and Delete in red after a rule. On phones the bar takes the tab bar's place.</p>
 
   <section class="spec-section">
-    <h2>Two jobs selected</h2>
-    <div class="spec-panel" data-surface="canvas">
-      <div class="floating-bar" role="toolbar" aria-label="Bulk actions for 2 selected">
-        <span class="floating-bar-count">2 selected</span><button type="button" class="floating-bar-link">Select all 132</button>
-        <span class="floating-bar-sep" aria-hidden="true"></span>
-        <span class="floating-bar-actions"><button type="button" class="button" data-variant="ghost" data-size="sm">Change status<i data-icon="chevron-down" data-size="14"></i></button><button type="button" class="button" data-variant="ghost" data-size="sm">Download</button><span class="floating-bar-sep" aria-hidden="true"></span><button type="button" class="button" data-variant="ghost" data-size="sm">Archive</button><button type="button" class="button" data-variant="ghost" data-size="sm" data-tone="danger">Delete</button></span>
-        <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Clear selection"><i data-icon="xmark"></i></button>
-      </div>
-    </div>
+    <h2>Several jobs ticked</h2>
+    <div class="spec-panel" data-surface="canvas"><div class="spec-row" style="justify-content:center"><div class="floating-bar" role="toolbar" aria-label="Bulk actions for 3 selected"><button type="button" class="floating-bar-count" aria-label="Clear selection (3 selected)"><i data-icon="xmark" data-size="12"></i><span>3 selected</span></button><button type="button" class="floating-bar-link">Select all 132</button><span class="floating-bar-sep" aria-hidden="true"></span><span class="floating-bar-actions"><button type="button" class="button" data-variant="ghost" data-size="sm"><i data-icon="m-status" data-size="14"></i><span class="floating-bar-label">Change status</span><span class="floating-bar-chev" aria-hidden="true"><i data-icon="chevron-down" data-size="14"></i></span></button><button type="button" class="button" data-variant="ghost" data-size="sm"><i data-icon="m-archive" data-size="14"></i><span class="floating-bar-label">Archive</span></button></span><span class="floating-bar-sep" aria-hidden="true"></span><button type="button" class="button" data-variant="ghost" data-size="sm" data-tone="danger"><i data-icon="m-trash" data-size="14"></i><span class="floating-bar-label">Delete</span></button></div></div></div>
   </section>
 
   <section class="spec-section">
-    <h2>Phones: select mode, nothing ticked yet</h2>
-    <p>Selecting is a mode on phones (I6): Select in the page header, or a long press on a row. While it's on, the bar takes the floating Create's place, even before anything is ticked.</p>
-    <div class="spec-panel" data-surface="canvas" style="max-inline-size:375px">
-      <div class="floating-bar" role="toolbar" aria-label="Select mode">
-        <span class="floating-bar-count">Tap jobs to select</span><button type="button" class="floating-bar-link">Select all 132</button>
-        <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Stop selecting"><i data-icon="xmark"></i></button>
-      </div>
-    </div>
+    <h2>One job, every action</h2>
+    <p>One pending job: its own actions, then More for the rest (Delete lives there for a pending job). From 1100 wide everything fits.</p>
+    <div class="spec-panel" data-surface="canvas"><div class="spec-row" style="justify-content:center"><div class="floating-bar" role="toolbar" aria-label="Bulk actions for 1 selected"><button type="button" class="floating-bar-count" aria-label="Clear selection (1 selected)"><i data-icon="xmark" data-size="12"></i><span>1 selected</span></button><button type="button" class="floating-bar-link">Select all 132</button><span class="floating-bar-sep" aria-hidden="true"></span><span class="floating-bar-actions"><button type="button" class="button" data-variant="ghost" data-size="sm"><i data-icon="m-pen" data-size="14"></i><span class="floating-bar-label">Edit</span></button><button type="button" class="button" data-variant="ghost" data-size="sm"><i data-icon="m-send" data-size="14"></i><span class="floating-bar-label">Send now</span></button><button type="button" class="button" data-variant="ghost" data-size="sm"><i data-icon="m-file-signature" data-size="14"></i><span class="floating-bar-label">Sign and book now</span></button><button type="button" class="button" data-variant="ghost" data-size="sm"><i data-icon="m-archive" data-size="14"></i><span class="floating-bar-label">Archive</span></button><button type="button" class="button" data-variant="ghost" data-size="sm"><span class="floating-bar-more-icon" aria-hidden="true"><i data-icon="ellipsis" data-size="20"></i></span><span class="floating-bar-label">More</span><span class="floating-bar-chev" aria-hidden="true"><i data-icon="chevron-down" data-size="14"></i></span></button></span></div></div></div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Everything ticked, and below 1100 wide</h2>
+    <p>With all of them ticked the chip says so and the link turns into Unselect all. Below 1100 wide one action stays on the bar and the rest fold into More; the labels stay.</p>
+    <div class="spec-panel" data-surface="canvas" style="display:grid;gap:var(--space-4);justify-items:center"><div class="floating-bar" role="toolbar" aria-label="Bulk actions for 132 selected"><button type="button" class="floating-bar-count" aria-label="Clear selection (All 132 selected)"><i data-icon="xmark" data-size="12"></i><span>All 132 selected</span></button><button type="button" class="floating-bar-link">Unselect all</button><span class="floating-bar-sep" aria-hidden="true"></span><span class="floating-bar-actions"><button type="button" class="button" data-variant="ghost" data-size="sm"><i data-icon="m-status" data-size="14"></i><span class="floating-bar-label">Change status</span><span class="floating-bar-chev" aria-hidden="true"><i data-icon="chevron-down" data-size="14"></i></span></button><button type="button" class="button" data-variant="ghost" data-size="sm"><i data-icon="m-archive" data-size="14"></i><span class="floating-bar-label">Archive</span></button></span><span class="floating-bar-sep" aria-hidden="true"></span><button type="button" class="button" data-variant="ghost" data-size="sm" data-tone="danger"><i data-icon="m-trash" data-size="14"></i><span class="floating-bar-label">Delete</span></button></div><div class="floating-bar" role="toolbar" aria-label="Bulk actions for 3 selected"><button type="button" class="floating-bar-count" aria-label="Clear selection (3 selected)"><i data-icon="xmark" data-size="12"></i><span>3 selected</span></button><button type="button" class="floating-bar-link">Select all 132</button><span class="floating-bar-sep" aria-hidden="true"></span><span class="floating-bar-actions"><button type="button" class="button" data-variant="ghost" data-size="sm"><i data-icon="m-status" data-size="14"></i><span class="floating-bar-label">Change status</span><span class="floating-bar-chev" aria-hidden="true"><i data-icon="chevron-down" data-size="14"></i></span></button><button type="button" class="button" data-variant="ghost" data-size="sm"><span class="floating-bar-more-icon" aria-hidden="true"><i data-icon="ellipsis" data-size="20"></i></span><span class="floating-bar-label">More</span><span class="floating-bar-chev" aria-hidden="true"><i data-icon="chevron-down" data-size="14"></i></span></button></span><span class="floating-bar-sep" aria-hidden="true"></span><button type="button" class="button" data-variant="ghost" data-size="sm" data-tone="danger"><i data-icon="m-trash" data-size="14"></i><span class="floating-bar-label">Delete</span></button></div></div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Phones: the tab bar turns into the action bar</h2>
+    <p>Below 768 the page header shows the count with Select all and Done, and the bar sits where the tab bar was, in the chrome's own dark: up to two actions, More, and Delete last, each an icon over its label. Until something is ticked the actions wait, disabled. Try it in the live list on the <a href="list-page.html">List page</a>: tap Select, or hold a row.</p>
   </section>
 
   <section class="spec-section">
     <h2>Rules</h2>
     <ul class="spec-stack" style="max-width:70ch;padding-left:var(--space-5)">
       <li>Only where the list has bulk actions (L-selection); never invent them.</li>
-      <li>Red is for what can't be undone: Delete. Archive and Delete confirm first; the confirmation's final button is the only filled red.</li>
+      <li>Red is for what can't be undone: Delete, last and after a rule. Archive and Delete confirm first; the confirmation's final button is the only filled red.</li>
+      <li>The chip's × and Escape clear the selection; on phones Done does.</li>
       <li>Actions that depend on what's selected (one job vs several) change with the selection; menus (Change status, More) open from the bar.</li>
     </ul>
   </section>
 </main>
-<script src="../../shared/icons.js?v=1c57e923"></script>
-<script src="specimen.js?v=1c57e923"></script>
+<script src="../../shared/icons.js?v=2ab4e3c4"></script>
+<script src="specimen.js?v=2ab4e3c4"></script>
 </body>
 </html>

@@ -88,6 +88,17 @@
     /* room after the last row, so the floating button never sits on it */
     .app-content.list-page { padding-block-end: calc(var(--space-4) + 4.5rem); }
   }
+  /* phones, while selecting (D34): the title gives way to the count, Select all and Done sit at the end
+     of the header, and the tab bar steps aside for the action bar (floating-bar.css) */
+  .select-count { display: none; }
+  @media (max-width: 767px) {
+    body[data-selecting] .page-title > :not(.select-count) { display: none; }
+    body[data-selecting] .select-count:not([hidden]) {
+      display: block; margin: 0; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      font-family: var(--font-display); font-size: var(--text-2xl); line-height: var(--leading-xl); font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums;
+    }
+    body[data-selecting] .bottom-bar { visibility: hidden; }
+  }
   /* phones only (Select: selecting is a mode there) */
   @media (min-width: 768px) { [data-phone-only] { display: none; } }
 }

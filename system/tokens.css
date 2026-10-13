@@ -268,6 +268,8 @@
     --color-feedback-info-content: light-dark(var(--color-blue-800), var(--color-blue-300));
     /* danger text on the inverse floating bar: it flips with the bar */
     --color-feedback-danger-on-inverse: light-dark(var(--color-deep-red-300), var(--color-deep-red-700));
+    /* …and on the chrome, which stays dark in both themes (the phone action bar) */
+    --color-feedback-danger-on-chrome: var(--color-deep-red-300);
     /* accents: a stripe or icon on a dark toast */
     --color-feedback-success-accent: var(--color-matcha-500);
     --color-feedback-warning-accent: var(--color-yellow-700);

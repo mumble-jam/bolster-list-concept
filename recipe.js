@@ -204,7 +204,7 @@ window.BDS_RECIPE = (() => {
 
     // ---------- actions ----------
     const label = (a) => (typeof a === "string" ? a : a.label);
-    const act = (a) => (typeof a === "string" ? a : a.menu ? { label: a.label, icon: "share", items: a.menu } : a.label);
+    const act = (a) => (typeof a === "string" ? a : a.menu ? { label: a.label, icon: "status", items: a.menu } : a.label);
     const ICON = { Edit: "pen", Duplicate: "copy", Send: "send", "Send now": "send", "Send reminder": "bell", Message: "message", Archive: "archive", Delete: "trash", Download: "download", "Record payment": "credit-card", "Mark as paid": "credit-card", "Create job": "file-plus", "Invoice this project": "file-invoice", "Review customer": "star" };
     const recordActions = (x) => {
       const list = d.actions?.byStatus ? d.actions.byStatus[x[statusCol]]?.primary || [] : (d.actions?.row || []).filter((a) => !/^(open|edit)$/i.test(label(a)));

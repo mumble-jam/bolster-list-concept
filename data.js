@@ -194,9 +194,9 @@
     // are menus. Bolster's order puts Archive and Delete mid-bar; here they go last, after a rule (risky last).
     // Bolster has no declined set we could reach read-only; declined borrows draft's. See audit/patterns.
     actionsFor: (rows) => {
-      const status = { label: "Change status", icon: "share", items: ["Pending", "Declined", "Booked", "In progress", "Closed"], current: rows.length === 1 ? EST_STATUS[rows[0].status].label : "" };
+      const status = { label: "Change status", icon: "status", items: ["Pending", "Declined", "Booked", "In progress", "Closed"], current: rows.length === 1 ? EST_STATUS[rows[0].status].label : "" };
       const download = { label: "Download", icon: "download", items: ["Download proposal (PDF)", "Download scope of work (Excel)"] };
-      if (rows.length !== 1) return { bar: ["Archive", "Delete", status], more: [] };
+      if (rows.length !== 1) return { bar: [status, "Archive", "Delete"], more: [] };
       return {
         draft: { bar: ["Edit", "Duplicate", "Archive", "Delete"], more: [status] },
         pending: { bar: ["Edit", "Send now", "Sign and book now", "Archive"], more: ["Review customer", download, "Duplicate", status, "Delete"] },
@@ -500,7 +500,7 @@
     Open: "sidebar-right", Edit: "pen", "Preview and send": "send", Duplicate: "copy", Archive: "archive",
     "Send reminder": "bell", "Record payment": "credit-card", Void: "ban", Message: "message", "Create job": "file-plus",
     "Send now": "send", "Sign and book now": "file-signature", "Invoice this project": "file-invoice", "Review customer": "star",
-    Delete: "trash", Download: "download", "Download proposal (PDF)": "file-pdf", "Download scope of work (Excel)": "file-excel", "Change status": "share",
+    Delete: "trash", Download: "download", "Download proposal (PDF)": "file-pdf", "Download scope of work (Excel)": "file-excel", "Change status": "status",
   };
 
   window.BDS_CONCEPT = {

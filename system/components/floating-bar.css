@@ -1,48 +1,114 @@
-/* Floating bar: bulk actions for the selected rows, stuck to the bottom of the screen.
-   <div class="floating-bar" role="toolbar" aria-label="Bulk actions for 2 selected">
-     <span class="floating-bar-count">2 selected</span><button class="floating-bar-link">Select all 133</button>
-     <span class="floating-bar-sep"></span><span class="floating-bar-actions">…ghost buttons…</span>
-     <button class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Clear selection">×</button>
+/* Floating bar: bulk actions for the selected rows (D34).
+   <div class="floating-bar" role="toolbar" aria-label="Bulk actions for 3 selected">
+     <button class="floating-bar-count" aria-label="Clear selection (3 selected)"><svg…×/><span aria-live="polite">3 selected</span></button>
+     <button class="floating-bar-link">Select all 132</button>
+     <span class="floating-bar-sep" aria-hidden="true"></span>
+     <span class="floating-bar-actions">
+       <button class="button" data-variant="ghost" data-size="sm" aria-haspopup="menu"><svg…/><span class="floating-bar-label">Change status</span><span class="floating-bar-chev">⌄</span></button>
+       <button class="button" data-variant="ghost" data-size="sm"><svg…/><span class="floating-bar-label">Archive</span></button>
+       <button class="button" data-variant="ghost" data-size="sm" aria-haspopup="menu"><span class="floating-bar-more-icon">⋯</span><span class="floating-bar-label">More</span><span class="floating-bar-chev">⌄</span></button>
+     </span>
+     <span class="floating-bar-sep" aria-hidden="true"></span>
+     <button class="button" data-variant="ghost" data-size="sm" data-tone="danger"><svg…bin/><span class="floating-bar-label">Delete</span></button>
    </div>
-   Count first, select all, the actions, the risky ones last after a rule, clear. On phones it takes the
-   floating Create's place. D17, I6 */
+   Desktop: a dark capsule that floats at the bottom of the list. The count is a chip that holds its own ×
+   (Escape does the same), so the bar's end is free; actions carry the product's icons beside their labels;
+   one rule after Select all and one before the red Delete. 48 tall with 6 padding: the 8 px buttons inside
+   a 14 px capsule keep their corners concentric. It slides up 8 px and fades in.
+   Phones: it takes the tab bar's place, in the chrome's own dark: icons over labels, More, Delete last.
+   The count, Select all and Done move to the page header (list-page.css). I6, D17 */
 
 @layer tokens, base, components, utilities;
 
 @layer components {
-  /* ---------- floating bar: rows stay put while you select; it sticks to the bottom of the screen.
-     Written to replace the other situational bars (save changes, compare, move) later. ---------- */
   .floating-bar {
     position: sticky; inset-block-end: var(--space-6); z-index: var(--z-sticky);
     justify-self: center;
-    display: flex; align-items: center; gap: var(--space-1);
+    display: flex; align-items: center; gap: var(--space-0-5);
     max-inline-size: 100%; min-block-size: var(--control-height-lg);
     margin-block-start: var(--space-2);
-    padding: var(--space-1) var(--space-1) var(--space-1) var(--space-4);
-    border-radius: var(--radius-lg);
+    padding: calc(var(--space-1) + var(--space-0-5));
+    border-radius: calc(var(--radius-md) + var(--space-1) + var(--space-0-5));
     background: var(--color-surface-inverse); color: var(--color-content-inverse);
     box-shadow: var(--shadow-overlay);
     font-size: var(--text-sm);
+    transition: opacity var(--duration-medium) var(--ease-out), translate var(--duration-medium) var(--ease-out), display var(--duration-medium) allow-discrete;
   }
+  @starting-style { .floating-bar { opacity: 0; translate: 0 var(--space-2); } }
   .floating-bar[hidden] { display: none; }
-  .floating-bar .button[data-variant="ghost"] { --_fg: var(--color-content-inverse); --_fg-hover: var(--color-content-inverse); --_bg-hover: var(--color-surface-inverse-hover); --_bg-active: var(--color-surface-inverse-active); flex: none; }
-  .floating-bar-count { flex: none; padding-inline-end: var(--space-2); font-weight: var(--font-weight-medium); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .floating-bar-link { flex: none; padding: 0 var(--space-2); white-space: nowrap; }
-  .floating-bar-link { block-size: var(--control-height-sm); border: 0; border-radius: var(--radius-sm); background: none; color: inherit; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
-  @media (hover: hover) { .floating-bar-link:hover { background: var(--color-surface-inverse-hover); } }
   .floating-bar :focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
-  .floating-bar-sep { flex: none; inline-size: var(--border-width-default); block-size: var(--space-5); margin-inline: var(--space-1); background: currentColor; opacity: 0.25; }
-  .floating-bar-actions { display: flex; align-items: center; gap: var(--space-1); min-inline-size: 0; overflow-x: auto; scrollbar-width: none; }
-  @media (max-width: 767px) {
-    /* phones: count, select all and clear on one line; the actions get their own scrolling row */
-    .floating-bar { justify-self: stretch; flex-wrap: wrap; row-gap: 0; inset-block-end: calc(var(--shell-bottom-bar-height) + var(--space-3)); padding-block: var(--space-1) var(--space-2); }
-    .floating-bar-sep { display: none; }
-    .floating-bar-actions { order: 3; flex-basis: 100%; margin-inline-start: calc(var(--space-3) * -1); }
-    .floating-bar [data-clear-selection] { margin-inline-start: auto; }
+
+  /* the count, a chip that clears the selection */
+  .floating-bar-count {
+    flex: none; display: inline-flex; align-items: center; gap: var(--space-2);
+    block-size: calc(var(--control-height-sm) + var(--space-1));
+    padding: 0 var(--space-3) 0 calc(var(--space-2) + var(--space-0-5));
+    border: 0; border-radius: var(--radius-md);
+    background: var(--color-surface-inverse-hover); color: inherit;
+    font: inherit; font-weight: var(--font-weight-medium); white-space: nowrap; font-variant-numeric: tabular-nums;
+    cursor: pointer; transition: background-color var(--duration-fast) var(--ease-standard);
   }
-  /* danger flips with the inverse bar: red 300 on the dark bar, red 700 on the light one */
+  .floating-bar-count > svg { inline-size: auto; block-size: 0.75rem; flex: none; opacity: 0.75; }
+  @media (hover: hover) { .floating-bar-count:hover { background: color-mix(in srgb, var(--color-surface-inverse-hover), var(--color-content-inverse) 10%); } }
+
+  /* select all: a quiet underlined link */
+  .floating-bar-link {
+    flex: none; block-size: calc(var(--control-height-sm) + var(--space-1)); padding: 0 calc(var(--space-2) + var(--space-0-5));
+    border: 0; border-radius: var(--radius-md); background: none;
+    color: color-mix(in srgb, var(--color-content-inverse) 72%, var(--color-surface-inverse));
+    font: inherit; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
+  }
+  @media (hover: hover) { .floating-bar-link:hover { color: var(--color-content-inverse); } }
+  .floating-bar-sep { flex: none; inline-size: var(--border-width-default); block-size: var(--space-5); margin-inline: var(--space-1); background: currentColor; opacity: 0.16; }
+  .floating-bar-actions { display: flex; align-items: center; gap: var(--space-0-5); min-inline-size: 0; }
+
+  /* the actions: ghost buttons, 36 tall, a 14 px icon beside the label */
+  .floating-bar .button {
+    --_h: calc(var(--control-height-sm) + var(--space-1)); --_icon: 0.875rem; --_gap: var(--space-2); --_px: var(--space-3);
+    flex: none;
+  }
+  .floating-bar .button[data-variant="ghost"] { --_fg: var(--color-content-inverse); --_fg-hover: var(--color-content-inverse); --_bg-hover: var(--color-surface-inverse-hover); --_bg-active: var(--color-surface-inverse-active); }
+  .floating-bar .button > svg { opacity: 0.75; }
+  .floating-bar-label { white-space: nowrap; }
+  .floating-bar-chev { display: inline-flex; margin-inline-start: calc(var(--space-1) * -1); opacity: 0.55; }
+  .floating-bar-chev > svg { inline-size: 0.625rem; block-size: 0.625rem; }
+  .floating-bar-more-icon { display: none; }
+  /* Delete: red, after the rule; it fills red when pointed at and confirms (D33) */
   .floating-bar .button[data-variant="ghost"][data-tone="danger"] {
     --_fg: var(--color-feedback-danger-on-inverse); --_fg-hover: var(--color-content-on-accent);
     --_bg-hover: var(--color-action-danger); --_bg-active: var(--color-action-danger-hover);
+  }
+  .floating-bar .button[data-tone="danger"] > svg { opacity: 1; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .floating-bar { transition: opacity var(--duration-medium) var(--ease-out), display var(--duration-medium) allow-discrete; }
+    @starting-style { .floating-bar { translate: none; } }
+  }
+
+  /* ---------- phones: the tab bar turns into the action bar ---------- */
+  @media (max-width: 767px) {
+    .floating-bar {
+      position: fixed; inset: auto 0 0; z-index: calc(var(--z-shell) + 1); justify-self: stretch;
+      margin: 0; gap: 0; border-radius: 0; box-shadow: none;
+      min-block-size: calc(var(--shell-bottom-bar-height) + env(safe-area-inset-bottom));
+      padding: 0 var(--space-1) env(safe-area-inset-bottom);
+      background: var(--color-surface-chrome); color: var(--color-content-on-chrome);
+      transition: opacity var(--duration-medium) var(--ease-out), display var(--duration-medium) allow-discrete;
+    }
+    @starting-style { .floating-bar { translate: none; } }
+    .floating-bar-count, .floating-bar-link, .floating-bar-sep, .floating-bar-chev { display: none; }
+    .floating-bar-actions { display: contents; }
+    .floating-bar .button {
+      --_h: var(--shell-bottom-bar-height); --_icon: 1.25rem; --_gap: var(--space-1); --_px: var(--space-1);
+      flex: 1 1 0; min-inline-size: 0; flex-direction: column; border-radius: var(--radius-md);
+      font-size: var(--text-xs);
+    }
+    .floating-bar .button[data-variant="ghost"] { --_fg: var(--color-content-on-chrome); --_fg-hover: var(--color-content-on-chrome); --_bg-hover: var(--color-surface-chrome-hover); --_bg-active: var(--color-surface-chrome-hover); }
+    .floating-bar .button[data-variant="ghost"][data-tone="danger"] { --_fg: var(--color-feedback-danger-on-chrome); --_fg-hover: var(--color-feedback-danger-on-chrome); --_bg-hover: var(--color-surface-chrome-hover); --_bg-active: var(--color-surface-chrome-hover); }
+    .floating-bar .button > svg { opacity: 1; }
+    .floating-bar .button:disabled { --_fg-state: var(--color-content-on-chrome-muted); --_bg-state: transparent; opacity: 0.5; }
+    .floating-bar-label { max-inline-size: 100%; overflow: hidden; text-overflow: ellipsis; }
+    .floating-bar-more-icon { display: inline-flex; }
+    .floating-bar-more-icon > svg { inline-size: auto; block-size: 1.25rem; }
   }
 }
