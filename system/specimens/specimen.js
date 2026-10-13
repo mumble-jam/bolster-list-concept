@@ -1,5 +1,47 @@
 // Specimen helpers (not required for styling). Vanilla, no dependencies.
 
+// Global navigation: one list of every page in the back office, drawn as a sidebar on the left (the
+// shell's sidebar items). From 1024 wide it's always there; narrower, a menu button in the page header
+// opens it as a drawer (a popover, so Escape and a click outside close it). Links are worked out from
+// this script's own address, so they hold wherever the folder is served.
+(() => {
+  const script = document.currentScript;
+  if (!script || document.querySelector(".spec-nav")) return;
+  const root = new URL("../", script.src); // system/
+  const CONCEPT = "../index.html";
+  const NAV = [
+    ["Overview", [["Catalog", "index.html"]]],
+    ["Foundations", [["Tokens", "specimens/tokens.html"], ["App shell", "specimens/shell.html"]]],
+    ["Page types", [["List page", "specimens/list-page.html"], ["List recipe", "specimens/list-recipe.html"]]],
+    ["List page parts", [["Summary cards", "specimens/summary-cards.html"], ["Table card", "specimens/table-card.html"], ["Record", "specimens/record.html"], ["Floating bar", "specimens/floating-bar.html"], ["Popover", "specimens/popover.html"], ["States", "specimens/states.html"]]],
+    ["Components", [["Button", "specimens/button.html"], ["Badge", "specimens/badge.html"], ["Field", "specimens/field.html"], ["Checkbox, radio, toggle", "specimens/choice.html"], ["Segmented control", "specimens/segmented-control.html"], ["Tabs", "specimens/tabs.html"], ["Tooltip, menu, dialog", "specimens/overlays.html"], ["Data table, cards, avatars", "specimens/data.html"], ["Toast", "specimens/toast.html"]]],
+    ["Live", [["List concept ↗", CONCEPT]]],
+  ];
+  const here = location.pathname.replace(/\/$/, "/index.html");
+  const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const nav = document.createElement("nav");
+  nav.className = "spec-nav"; nav.id = "spec-nav"; nav.setAttribute("aria-label", "Design system"); nav.setAttribute("popover", "");
+  nav.innerHTML = `<a class="sidebar-title spec-nav-title" href="${new URL("index.html", root).href}">Bolster design system</a>
+    <p class="spec-nav-note"><span class="badge" data-tone="info">Status quo · Oct 2026</span></p>` +
+    NAV.map(([group, items]) => `<p class="sidebar-group">${esc(group)}</p>` + items.map(([label, path]) => {
+      const url = new URL(path, root);
+      const on = url.pathname === here;
+      return `<a class="sidebar-item" href="${url.href}"${on ? ' aria-current="page"' : ""}>${esc(label)}</a>`;
+    }).join("")).join("");
+  document.body.prepend(nav);
+  // narrow screens: a menu button at the start of the page header opens the drawer
+  const header = document.querySelector(".spec-header");
+  if (header) {
+    const btn = document.createElement("button");
+    btn.type = "button"; btn.className = "button spec-nav-toggle"; btn.dataset.variant = "ghost"; btn.dataset.size = "sm"; btn.dataset.iconOnly = "";
+    btn.setAttribute("aria-label", "Menu"); btn.setAttribute("popovertarget", "spec-nav"); btn.setAttribute("aria-controls", "spec-nav");
+    btn.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+    header.prepend(btn);
+    nav.addEventListener("toggle", (e) => btn.setAttribute("aria-expanded", e.newState === "open"));
+  }
+  nav.querySelector('[aria-current="page"]')?.scrollIntoView({ block: "nearest" });
+})();
+
 // Theme: auto → light → dark, remembered per browser.
 (() => {
   const root = document.documentElement;
