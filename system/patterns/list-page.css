@@ -52,7 +52,7 @@
   }
   @media (min-width: 768px) and (max-width: 1023px) { :root[data-chrome-hidden] .rail { inset-block-start: 0; block-size: 100dvh; } }
   :root { scroll-padding-block-start: calc(var(--list-head-top, 0px) + var(--space-2)); }
-  @media (prefers-reduced-motion: reduce) { .top-bar, .list-toolbar, .list-panel .data-table thead, .rail, .sidebar, .bs-logo { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .top-bar, .list-toolbar, .list-panel .data-table thead, .rail, .sidebar, .bs-logo, [data-float], [data-float]::before, [data-float] .float-label { transition: none; } }
 
   /* ---------- the record: beside the list from 1280 up, a side sheet below that ----------
      As in Mercury: the list keeps its title, status and amount columns and the opened row stays
@@ -71,19 +71,28 @@
   /* ---------- phones: Create floats ----------
      The top bar and page header stay; Create leaves the page header and becomes a labelled button above
      the tab bar, bottom right, in thumb reach. It shrinks to + while you scroll down (the chrome slides
-     away) and steps aside while rows are ticked: the bulk bar takes the spot, one thing at the bottom */
+     away) and steps aside while rows are ticked: the bulk bar takes the spot, one thing at the bottom.
+     The shrink is one movement with the bars: the label's column closes (1fr to 0fr, which animates
+     where a width from auto can't) and the label fades, so the + rides the right edge in and settles in
+     a square; the label stays the button's name. <button data-float><span class="float-label">…</span></button> */
   @media (max-width: 767px) {
-    [data-float] {
+    /* .button too: as strong as the tactile button's own transitions, which it extends */
+    .button[data-float] {
+      --_morph: 300ms var(--ease-out);
       position: fixed; z-index: var(--z-sticky);
       inset-inline-end: var(--space-4); inset-block-end: calc(var(--shell-bottom-bar-height) + var(--space-4));
-      block-size: 3rem; padding-inline: var(--space-4) var(--space-5); gap: var(--space-2);
+      display: inline-grid; grid-template-columns: 1.5rem 1fr; align-items: center; column-gap: var(--space-2);
+      block-size: 3rem; padding-inline: var(--space-4) var(--space-5);
       border-radius: var(--radius-lg); font-size: var(--text-base);
       filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.18));
-      transition-property: --_sa, --_sk, --_pa, --_da, translate, padding, inline-size, block-size, font-size, background-color, border-color, color;
+      transition: --_sa 150ms, --_sk 150ms, --_pa 150ms, --_da 150ms, translate 150ms, background-color var(--duration-fast), border-color var(--duration-fast), color var(--duration-fast),
+        grid-template-columns var(--_morph), column-gap var(--_morph), padding var(--_morph), block-size var(--_morph);
     }
-    [data-float]::before { content: "+"; font-size: 1.375rem; line-height: 1; font-weight: var(--font-weight-regular); }
-    :root[data-chrome-hidden] [data-float] { padding-inline: 0; inline-size: 3.5rem; block-size: 3.5rem; font-size: 0; gap: 0; }
-    :root[data-chrome-hidden] [data-float]::before { font-size: 1.75rem; }
+    [data-float]::before { content: "+"; text-align: center; font-size: 1.375rem; line-height: 1; font-weight: var(--font-weight-regular); transition: scale var(--_morph); }
+    [data-float] .float-label { min-inline-size: 0; overflow: hidden; white-space: nowrap; transition: opacity 200ms var(--ease-out) 60ms; }
+    :root[data-chrome-hidden] [data-float] { grid-template-columns: 1.5rem 0fr; column-gap: 0; padding-inline: calc(var(--space-4) - var(--border-width-default)); block-size: 3.5rem; } /* 56 square */
+    :root[data-chrome-hidden] [data-float]::before { scale: 1.27; }
+    :root[data-chrome-hidden] [data-float] .float-label { opacity: 0; transition-delay: 0ms; transition-duration: 150ms; }
     :root:has(.floating-bar:not([hidden])) [data-float] { display: none; }
     /* room after the last row, so the floating button never sits on it */
     .app-content.list-page { padding-block-end: calc(var(--space-4) + 4.5rem); }

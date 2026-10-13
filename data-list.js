@@ -148,7 +148,7 @@
     const title = BolsterShell.label(cfg.nav) || cfg.title;
     $("#page-title").textContent = title;
     document.title = `${title} · Bolster`;
-    $("#create").textContent = cfg.create;
+    $("#create .float-label").textContent = cfg.create;
     $("#create").hidden = !cfg.create;
     // lists built from a page description (recipe.js) say so, and say what the renderer couldn't draw
     const rn = $("#recipe-note");
