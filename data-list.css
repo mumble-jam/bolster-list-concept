@@ -189,7 +189,9 @@
 
   @media (max-width: 767px) {
     .slice-row { margin-inline: calc(var(--space-4) * -1); padding-inline: var(--space-4); scroll-padding-inline: var(--space-4); }
-    .slice-row { grid-template-columns: repeat(var(--_slices, 5), minmax(8.5rem, max-content)) max-content; }
+    /* the insight card comes first on phones (data-list.js puts it first), then All and the slices */
+    .slice-row { grid-template-columns: max-content repeat(var(--_slices, 5), minmax(8.5rem, max-content)); }
+    .slice-row .slice-insight[aria-hidden="true"] { order: -1; }
   }
 
   /* search hits: the matched letters on Bolster's highlighter yellow; the text keeps its colour */

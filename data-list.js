@@ -227,8 +227,11 @@
     });
     row.style.setProperty("--_slices", cfg.metrics.length + 1);
     row.toggleAttribute("data-no-insight", !cfg.insight);
-    row.innerHTML = all + cards.join("") + insight(scope);
+    // on phones the insight leads: it's the overview, so it belongs in the first screen, not behind a swipe
+    row.innerHTML = phoneMQ.matches ? insight(scope) + all + cards.join("") : all + cards.join("") + insight(scope);
   }
+  const phoneMQ = matchMedia("(max-width: 767px)");
+  phoneMQ.addEventListener("change", () => renderSlices());
 
   // the one card that isn't a filter: label with a definition, the value with its counts, the parts, then a second figure
   function insight(scope) {
