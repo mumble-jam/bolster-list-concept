@@ -1,0 +1,252 @@
+{
+  "recipe": "list",
+  "schemaVersion": 1,
+  "nav": "leads-and-customers",
+  "noun": {
+    "one": "customer",
+    "many": "customers"
+  },
+  "source": {
+    "product": "Data list concept",
+    "page": "concepts/data-list/#customers",
+    "date": "2026-10-13"
+  },
+  "columns": [
+    {
+      "key": "name",
+      "label": "Customer",
+      "type": "name",
+      "priority": 1,
+      "title": "{name}",
+      "detail": "{address}",
+      "leading": "avatar",
+      "avatarFrom": "name"
+    },
+    {
+      "key": "status",
+      "label": "Status",
+      "type": "status",
+      "priority": 3
+    },
+    {
+      "key": "contact",
+      "label": "Contact",
+      "type": "contact",
+      "priority": 6
+    },
+    {
+      "key": "owner",
+      "label": "Owner",
+      "type": "person",
+      "priority": 5
+    },
+    {
+      "key": "source",
+      "label": "Source",
+      "type": "category",
+      "priority": 8,
+      "hidden": true
+    },
+    {
+      "key": "lastContact",
+      "label": "Last contact",
+      "type": "date",
+      "priority": 4
+    },
+    {
+      "key": "openJobs",
+      "label": "Open jobs",
+      "type": "count",
+      "priority": 7,
+      "total": true
+    },
+    {
+      "key": "lifetime",
+      "label": "Lifetime value",
+      "type": "money",
+      "priority": 2,
+      "total": true,
+      "empty": "–"
+    },
+    {
+      "key": "city",
+      "label": "City",
+      "type": "address",
+      "priority": 9,
+      "hidden": true
+    }
+  ],
+  "fields": [
+    {
+      "key": "address",
+      "label": "Address",
+      "type": "address"
+    }
+  ],
+  "status": {
+    "column": "status",
+    "values": [
+      {
+        "value": "lead",
+        "label": "Lead",
+        "stage": "new"
+      },
+      {
+        "value": "active",
+        "label": "Active",
+        "stage": "underway"
+      },
+      {
+        "value": "past",
+        "label": "Past",
+        "stage": "neutral"
+      }
+    ]
+  },
+  "summary": {
+    "all": {
+      "agg": "count"
+    },
+    "slices": [
+      {
+        "value": "lead",
+        "measure": {
+          "agg": "count"
+        },
+        "note": "{notContacted} not contacted this week"
+      },
+      {
+        "value": "active",
+        "measure": {
+          "agg": "count"
+        },
+        "note": "{openJobs} open jobs"
+      },
+      {
+        "value": "past",
+        "measure": {
+          "agg": "count"
+        },
+        "note": "{lifetime} lifetime"
+      }
+    ],
+    "insight": {
+      "label": "Lifetime value",
+      "explain": "The total of each customer’s [Booked] and [In progress] jobs, for the customers your filters let through."
+    }
+  },
+  "search": {
+    "columns": [
+      "name",
+      "contact",
+      "city"
+    ],
+    "hint": "Search by name, email, phone or city"
+  },
+  "dateRange": {
+    "column": "lastContact"
+  },
+  "filters": [
+    {
+      "column": "status",
+      "pinned": true
+    },
+    {
+      "column": "owner"
+    },
+    {
+      "column": "lastContact",
+      "pinned": true
+    },
+    {
+      "column": "city"
+    },
+    {
+      "column": "source"
+    },
+    {
+      "column": "lifetime"
+    }
+  ],
+  "sort": {
+    "column": "lastContact",
+    "dir": "desc"
+  },
+  "group": {
+    "options": [
+      "status",
+      "owner",
+      "city",
+      "source"
+    ],
+    "default": null
+  },
+  "views": [
+    {
+      "id": "all",
+      "label": "Everyone",
+      "icon": "users",
+      "filters": {}
+    },
+    {
+      "id": "my-leads",
+      "label": "My leads",
+      "icon": "user",
+      "filters": {
+        "status": [
+          "lead"
+        ],
+        "owner": [
+          "me"
+        ]
+      }
+    },
+    {
+      "id": "quiet",
+      "label": "Gone quiet",
+      "icon": "clock",
+      "filters": {
+        "status": [
+          "past"
+        ],
+        "lastContact": "older90"
+      },
+      "sort": {
+        "column": "lifetime",
+        "dir": "desc"
+      }
+    }
+  ],
+  "rowClick": "peek",
+  "selection": {
+    "enabled": true,
+    "bulk": [
+      "Message",
+      "Change owner",
+      "Archive"
+    ]
+  },
+  "create": {
+    "label": "Add customer"
+  },
+  "export": true,
+  "actions": {
+    "row": [
+      "Open",
+      "Message",
+      "Create job",
+      "Archive"
+    ]
+  },
+  "record": {
+    "heading": "{name}",
+    "fields": [
+      "contact",
+      "owner",
+      "source",
+      "openJobs"
+    ],
+    "timeline": true,
+    "openLabel": "Open customer"
+  }
+}

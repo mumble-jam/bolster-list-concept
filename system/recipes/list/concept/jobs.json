@@ -1,0 +1,410 @@
+{
+  "recipe": "list",
+  "schemaVersion": 1,
+  "nav": "job-list",
+  "noun": {
+    "one": "job",
+    "many": "jobs"
+  },
+  "source": {
+    "product": "Data list concept",
+    "page": "concepts/data-list/#jobs",
+    "date": "2026-10-13"
+  },
+  "columns": [
+    {
+      "key": "job",
+      "label": "Job",
+      "type": "name",
+      "priority": 1,
+      "title": "{client} · {job}",
+      "detail": "{number} · {address}",
+      "leading": "avatar",
+      "avatarFrom": "client"
+    },
+    {
+      "key": "status",
+      "label": "Status",
+      "type": "status",
+      "priority": 3
+    },
+    {
+      "key": "owner",
+      "label": "Owner",
+      "type": "person",
+      "priority": 5
+    },
+    {
+      "key": "source",
+      "label": "Source",
+      "type": "category",
+      "priority": 8,
+      "hidden": true
+    },
+    {
+      "key": "created",
+      "label": "Created",
+      "type": "date",
+      "priority": 6
+    },
+    {
+      "key": "modified",
+      "label": "Last activity",
+      "type": "date",
+      "priority": 4
+    },
+    {
+      "key": "total",
+      "label": "Total",
+      "type": "money",
+      "priority": 2,
+      "total": true,
+      "empty": "No price yet"
+    },
+    {
+      "key": "city",
+      "label": "City",
+      "type": "address",
+      "priority": 9,
+      "hidden": true
+    }
+  ],
+  "fields": [
+    {
+      "key": "client",
+      "label": "Client",
+      "type": "record"
+    },
+    {
+      "key": "number",
+      "label": "Job number",
+      "type": "id"
+    },
+    {
+      "key": "address",
+      "label": "Address",
+      "type": "address"
+    }
+  ],
+  "status": {
+    "column": "status",
+    "values": [
+      {
+        "value": "draft",
+        "label": "Draft",
+        "stage": "draft"
+      },
+      {
+        "value": "pending",
+        "label": "Pending",
+        "stage": "waiting"
+      },
+      {
+        "value": "booked",
+        "label": "Booked",
+        "stage": "won"
+      },
+      {
+        "value": "in-progress",
+        "label": "In progress",
+        "stage": "underway"
+      },
+      {
+        "value": "declined",
+        "label": "Declined",
+        "stage": "lost"
+      }
+    ]
+  },
+  "summary": {
+    "all": {
+      "agg": "sum",
+      "column": "total"
+    },
+    "slices": [
+      {
+        "value": "pending",
+        "measure": {
+          "agg": "sum",
+          "column": "total"
+        },
+        "note": "{count} awaiting reply"
+      },
+      {
+        "value": "booked",
+        "measure": {
+          "agg": "sum",
+          "column": "total"
+        },
+        "note": "{count} not started"
+      },
+      {
+        "value": "in-progress",
+        "measure": {
+          "agg": "sum",
+          "column": "total"
+        },
+        "note": "{count} underway"
+      },
+      {
+        "value": "declined",
+        "measure": {
+          "agg": "sum",
+          "column": "total"
+        },
+        "note": "{count}, by the client"
+      }
+    ],
+    "insight": {
+      "label": "Win rate",
+      "explain": "Won ÷ decided, for the jobs your filters let through. Won is {booked} plus {in-progress}; decided adds {declined}. {draft} and {pending} jobs aren’t decided yet, so they don’t count."
+    }
+  },
+  "search": {
+    "columns": [
+      "job",
+      "client",
+      "number",
+      "address",
+      "city"
+    ],
+    "hint": "Search by client, job, address or number"
+  },
+  "dateRange": {
+    "column": "created"
+  },
+  "filters": [
+    {
+      "column": "status",
+      "pinned": true
+    },
+    {
+      "column": "owner"
+    },
+    {
+      "column": "created",
+      "pinned": true
+    },
+    {
+      "column": "total"
+    },
+    {
+      "column": "city"
+    },
+    {
+      "column": "source"
+    }
+  ],
+  "sort": {
+    "column": "modified",
+    "dir": "desc"
+  },
+  "group": {
+    "options": [
+      "status",
+      "owner",
+      "city"
+    ],
+    "default": null
+  },
+  "views": [
+    {
+      "id": "all",
+      "label": "All jobs",
+      "icon": "list",
+      "filters": {}
+    },
+    {
+      "id": "mine",
+      "label": "My open jobs",
+      "icon": "user",
+      "filters": {
+        "owner": [
+          "me"
+        ],
+        "status": [
+          "draft",
+          "pending"
+        ]
+      }
+    },
+    {
+      "id": "stale",
+      "label": "Needs follow-up",
+      "icon": "clock",
+      "filters": {
+        "status": [
+          "pending"
+        ],
+        "created": "older90"
+      },
+      "sort": {
+        "column": "created",
+        "dir": "asc"
+      }
+    },
+    {
+      "id": "big",
+      "label": "Large jobs",
+      "icon": "dollar",
+      "filters": {
+        "total": {
+          "min": 20000
+        }
+      },
+      "sort": {
+        "column": "total",
+        "dir": "desc"
+      }
+    },
+    {
+      "id": "by-owner",
+      "label": "By owner",
+      "icon": "layers",
+      "filters": {
+        "status": [
+          "draft",
+          "pending"
+        ]
+      },
+      "group": "owner"
+    }
+  ],
+  "rowClick": "peek",
+  "selection": {
+    "enabled": true,
+    "bulk": [
+      {
+        "label": "Change status",
+        "menu": [
+          "Pending",
+          "Declined",
+          "Booked",
+          "In progress",
+          "Closed"
+        ]
+      },
+      "Archive",
+      {
+        "label": "Delete",
+        "tone": "danger"
+      }
+    ]
+  },
+  "create": {
+    "label": "Create job"
+  },
+  "export": true,
+  "actions": {
+    "byStatus": {
+      "draft": {
+        "primary": [
+          "Edit",
+          "Duplicate",
+          "Archive"
+        ],
+        "more": [
+          "Change status",
+          {
+            "label": "Delete",
+            "tone": "danger"
+          }
+        ]
+      },
+      "pending": {
+        "primary": [
+          "Edit",
+          "Send now",
+          "Sign and book now",
+          "Archive"
+        ],
+        "more": [
+          "Review customer",
+          {
+            "label": "Download",
+            "menu": [
+              "Download proposal (PDF)",
+              "Download scope of work (Excel)"
+            ]
+          },
+          "Duplicate",
+          "Change status",
+          {
+            "label": "Delete",
+            "tone": "danger"
+          }
+        ]
+      },
+      "booked": {
+        "primary": [
+          "Edit",
+          "Invoice this project",
+          "Review customer",
+          {
+            "label": "Download",
+            "menu": [
+              "Download proposal (PDF)",
+              "Download scope of work (Excel)"
+            ]
+          }
+        ],
+        "more": [
+          "Duplicate",
+          "Change status",
+          {
+            "label": "Delete",
+            "tone": "danger"
+          }
+        ]
+      },
+      "in-progress": {
+        "primary": [
+          "Edit",
+          "Invoice this project",
+          "Review customer",
+          {
+            "label": "Download",
+            "menu": [
+              "Download proposal (PDF)",
+              "Download scope of work (Excel)"
+            ]
+          }
+        ],
+        "more": [
+          "Duplicate",
+          "Change status",
+          {
+            "label": "Delete",
+            "tone": "danger"
+          }
+        ]
+      },
+      "declined": {
+        "primary": [
+          "Edit",
+          "Duplicate",
+          "Archive"
+        ],
+        "more": [
+          "Change status",
+          {
+            "label": "Delete",
+            "tone": "danger"
+          }
+        ]
+      }
+    }
+  },
+  "record": {
+    "heading": "{job} for {client}",
+    "fields": [
+      "owner",
+      "created",
+      "modified",
+      "source"
+    ],
+    "timeline": true,
+    "document": "Proposal",
+    "openLabel": "Open job"
+  }
+}

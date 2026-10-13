@@ -149,6 +149,11 @@
     $("#page-title").textContent = title;
     document.title = `${title} · Bolster`;
     $("#create").textContent = cfg.create;
+    $("#create").hidden = !cfg.create;
+    // lists built from a page description (recipe.js) say so, and say what the renderer couldn't draw
+    const rn = $("#recipe-note");
+    rn.hidden = !cfg.fromDescription;
+    if (cfg.fromDescription) rn.innerHTML = `<b>Built from a page description.</b> ${cfg.notes.length ? cfg.notes.map(esc).join(" ") : "Everything in it is drawn."}`;
     BolsterShell.setCurrent(cfg.nav);
     $("#cc-state").value = st.mode;
   }
@@ -759,6 +764,8 @@
   const refit = new ResizeObserver((es) => es.forEach((e) => fitActions(e.target)));
   function openPeek(id) {
     if (!cfg.rows.some((r) => r.id === id)) return;
+    // D30: this list's rows open the record itself, which the concept doesn't build
+    if (cfg.rowClick === "open") { toast(`Rows here open the ${cfg.noun[0]} itself (D30); the record isn't part of this concept.`); return; }
     if (pop.matches(":popover-open")) pop.hidePopover();
     openId = id;
     markRow();
@@ -930,6 +937,7 @@
       if (!t.checked) tuners.find((x) => x.id === "net")?.close();
       try { localStorage.setItem("bolster-concepts:grid", t.checked ? "on" : "off"); } catch {}
     }
+    if (t.id === "cc-recipe") { const u = new URL(location.href); t.checked ? u.searchParams.set("from", "description") : u.searchParams.delete("from"); location.href = u.href; return; }
     if (t.id === "cc-cards") { tactile(t.checked); try { localStorage.setItem("bolster-concepts:tactile", t.checked ? "on" : "off"); } catch {} }
     if (t.id === "cc-canvas") { document.documentElement.dataset.canvas = t.value; try { localStorage.setItem("bolster-concepts:canvas", t.value); } catch {} }
   });
@@ -1240,6 +1248,7 @@ ${JSON.stringify(v)}`;
     const html = document.documentElement;
     if (on) html.dataset.tactile = ["slices", "table", "record"].filter((k) => cards.v[k]).join(" "); else html.removeAttribute("data-tactile");
     $("#cc-cards").checked = on;
+    $("#cc-recipe").checked = new URLSearchParams(location.search).get("from") === "description";
     $('[data-tune="cards"]').hidden = !on;
     if (!on) cards.close();
   };

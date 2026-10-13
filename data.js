@@ -499,6 +499,8 @@
 
   window.BDS_CONCEPT = {
     TODAY, fmt, esc, ageDays, attrIcons, actionIcons,
+    // the parts recipe.js builds a list from a page description with
+    kit: { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, person, main, pastPresets, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf, MIN_SAMPLE },
     configs: { jobs: estimatesConfig, invoices: invoicesConfig, customers: clientsConfig, catalog: itemsConfig },
   };
 })();

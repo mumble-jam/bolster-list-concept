@@ -10,9 +10,9 @@
 <link rel="apple-touch-icon" href="shared/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=c7107626">
-<link rel="stylesheet" href="shared/shell.css?v=c7107626">
-<link rel="stylesheet" href="data-list.css?v=c7107626">
+<link rel="stylesheet" href="system/bolster.css?v=c08440e1">
+<link rel="stylesheet" href="shared/shell.css?v=c08440e1">
+<link rel="stylesheet" href="data-list.css?v=c08440e1">
 <script>try { document.documentElement.dataset.canvas = localStorage.getItem("bolster-concepts:canvas") === "cool" ? "cool" : "paper"; } catch { document.documentElement.dataset.canvas = "paper"; }</script>
 </head>
 <body>
@@ -31,6 +31,8 @@
     </header>
 
     <div class="app-content list-page" data-width="wide">
+      <!-- shown only when the list was built from a page description: what the renderer couldn't draw -->
+      <p class="recipe-note" id="recipe-note" hidden></p>
       <!-- slice cards filter by status; the last card is information, not a filter -->
       <section class="slices" id="summary" aria-label="Summary">
         <div class="slice-row" id="metrics" role="group" aria-label="Filter by status"></div>
@@ -114,6 +116,7 @@
         <li><b>Every state is designed:</b> loading, first-use empty, no results, and error. Switch between them in the concept controls.</li>
         <li><b>Live areas keep their shape (I13).</b> What updates while you act elsewhere (filters, search, sort, selection) changes its values, never its layout. Every state fills the same slots at the same size, said by what a slot holds (“2 of 4”, “None decided yet”, an empty bar), not by lines coming and going. Sizes come from the whole list, not the rows on screen; optional parts leave a placeholder; anything that comes and goes appears where you acted or floats; a redraw never moves the page or your focus.</li>
         <li><b>Phones:</b> the insight card (Win rate) leads the card row so the overview is in the first screen; cards and chips scroll sideways, rows become two-line items, the floating bar gives its actions their own row above the tab bar, and every menu and filter opens as a bottom sheet; a nested menu opens inside the sheet with a back row.</li>
+        <li><b>Built from a description (D31).</b> Turn on “Lists built from page descriptions” in Concept controls and the four lists are drawn from their page descriptions (system/recipes/list/concept) by recipe.js, with sample rows made from each column’s type, instead of the hand-written data.js. A note on each list says what the renderer can’t draw yet (custom figures like Win rate). Any description opens with ?d=path.</li>
         <li><b>Phones: Create floats (D29).</b> “+ Create job” leaves the page header and floats bottom right above the tab bar, shrinks to + while you scroll down, and makes way for the bulk bar while rows are ticked.</li>
       </ol>
     </section>
@@ -156,6 +159,9 @@
     <div class="field" data-size="sm">
       <label class="choice"><input type="checkbox" role="switch" class="toggle" id="cc-cards"> Tactile cards</label>
       <button class="button" data-variant="secondary" data-size="sm" data-tune="cards" hidden>Tune the cards</button></div>
+    <div class="field" data-size="sm">
+      <label class="choice"><input type="checkbox" role="switch" class="toggle" id="cc-recipe"> Lists built from page descriptions</label>
+      <p class="field-helper">The same four lists, drawn from system/recipes/list/concept/*.json by recipe.js instead of the hand-written data.js.</p></div>
     <button class="button" data-variant="secondary" data-size="sm" data-open-dialog="notes">About this concept</button>
     <a class="button" data-variant="secondary" data-size="sm" href="components.html">Components, and who decided them</a>
     <div class="cluster" style="justify-content:space-between">
@@ -165,10 +171,23 @@
 </details>
 
 <div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
-<script src="shared/icons.js?v=c7107626"></script>
-<script src="shared/shell.js?v=c7107626"></script>
-<script src="system/specimens/specimen.js?v=c7107626"></script>
-<script src="data.js?v=c7107626"></script>
-<script src="data-list.js?v=c7107626"></script>
+<script src="shared/icons.js?v=c08440e1"></script>
+<script src="shared/shell.js?v=c08440e1"></script>
+<script src="system/specimens/specimen.js?v=c08440e1"></script>
+<script src="data.js?v=c08440e1"></script>
+<script src="recipe.js?v=c08440e1"></script>
+<script>
+  // ?from=description builds the four lists from their page descriptions; ?d=<path> adds one more list
+  // from any description. Either way data-list.js starts once the descriptions are compiled.
+  (() => {
+    const p = new URLSearchParams(location.search), C = window.BDS_CONCEPT, R = window.BDS_RECIPE;
+    const start = () => { const s = document.createElement("script"); s.src = "data-list.js"; document.body.append(s); };
+    const want = p.get("from") === "description" ? ["jobs", "invoices", "customers", "catalog"].map((id) => [id, `system/recipes/list/concept/${id}.json`]) : [];
+    if (p.get("d")) { want.push(["description", p.get("d")]); if (!location.hash) history.replaceState(null, "", "#description"); }
+    if (!want.length) return start();
+    Promise.all(want.map(([id, url]) => fetch(url).then((r) => r.json()).then((d) => { C.configs[id] = R.compile(d, { id }); })))
+      .catch((e) => console.error("Couldn't build a list from its description", e)).finally(start);
+  })();
+</script>
 </body>
 </html>

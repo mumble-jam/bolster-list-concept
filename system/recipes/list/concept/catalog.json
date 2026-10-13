@@ -1,0 +1,38 @@
+{
+  "recipe": "list", "schemaVersion": 1,
+  "nav": "catalog",
+  "noun": { "one": "item", "many": "items" },
+  "source": { "product": "Data list concept", "page": "concepts/data-list/#catalog", "date": "2026-10-13" },
+  "columns": [
+    { "key": "name", "label": "Item", "type": "name", "priority": 1, "title": "{name}", "detail": "{category} · {vendor}" },
+    { "key": "category", "label": "Category", "type": "category", "priority": 5 },
+    { "key": "unit", "label": "Unit", "type": "text", "priority": 3 },
+    { "key": "vendor", "label": "Vendor", "type": "category", "priority": 8, "hidden": true },
+    { "key": "cost", "label": "Cost", "type": "money", "priority": 4 },
+    { "key": "markup", "label": "Markup", "type": "percent", "priority": 6 },
+    { "key": "price", "label": "Price", "type": "money", "priority": 2 },
+    { "key": "usedIn", "label": "Used in", "type": "count", "priority": 7, "empty": "Unused" },
+    { "key": "updated", "label": "Price updated", "type": "date", "priority": 9, "hidden": true }
+  ],
+  "search": { "columns": ["name", "category", "vendor"], "hint": "Search by item, category or vendor" },
+  "dateRange": { "column": "updated" },
+  "filters": [
+    { "column": "category", "pinned": true },
+    { "column": "vendor", "pinned": true },
+    { "column": "price" },
+    { "column": "updated" }
+  ],
+  "sort": { "column": "name", "dir": "asc" },
+  "group": { "options": ["category", "vendor"], "default": "category" },
+  "views": [
+    { "id": "all", "label": "All items", "icon": "layers", "filters": {}, "group": "category" },
+    { "id": "stale", "label": "Prices to review", "icon": "clock", "filters": { "updated": "older90" }, "sort": { "column": "usedIn", "dir": "desc" } },
+    { "id": "flat", "label": "Flat list", "icon": "list", "filters": {} }
+  ],
+  "rowClick": "peek",
+  "selection": { "enabled": true, "bulk": ["Update prices", "Change category", "Archive"] },
+  "create": { "label": "Add item" },
+  "export": true,
+  "actions": { "row": ["Edit", "Duplicate", "Archive"] },
+  "record": { "heading": "{name}", "fields": ["vendor", "usedIn", "updated"], "timeline": true, "openLabel": "Edit item" }
+}

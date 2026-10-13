@@ -703,6 +703,10 @@
     .app-content.list-page { padding-block-end: calc(var(--space-4) + 4.5rem); }
   }
 
+  /* a list drawn from a page description says so: tooling, so it borrows the concept controls' dashed accent */
+  .recipe-note { margin: 0 0 var(--space-3); padding: var(--space-2) var(--space-3); border: 1.5px dashed var(--color-action-accent); border-radius: var(--radius-md); font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  .recipe-note b { color: var(--color-content-primary); font-weight: var(--font-weight-medium); }
+
   /* ---------- concept controls (tooling, not part of the design) ---------- */
   .concept-controls {
     position: fixed; inset-inline-end: var(--space-4); inset-block-end: var(--space-4); z-index: var(--z-toast);

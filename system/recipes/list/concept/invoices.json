@@ -1,0 +1,262 @@
+{
+  "recipe": "list",
+  "schemaVersion": 1,
+  "nav": "invoices",
+  "noun": {
+    "one": "invoice",
+    "many": "invoices"
+  },
+  "source": {
+    "product": "Data list concept",
+    "page": "concepts/data-list/#invoices",
+    "date": "2026-10-13"
+  },
+  "columns": [
+    {
+      "key": "number",
+      "label": "Invoice",
+      "type": "name",
+      "priority": 1,
+      "title": "{number} · {client}",
+      "detail": "{job}",
+      "leading": "avatar",
+      "avatarFrom": "client"
+    },
+    {
+      "key": "status",
+      "label": "Status",
+      "type": "status",
+      "priority": 3
+    },
+    {
+      "key": "issued",
+      "label": "Issued",
+      "type": "date",
+      "priority": 6
+    },
+    {
+      "key": "due",
+      "label": "Due",
+      "type": "date",
+      "priority": 4
+    },
+    {
+      "key": "owner",
+      "label": "Owner",
+      "type": "person",
+      "priority": 8,
+      "hidden": true
+    },
+    {
+      "key": "amount",
+      "label": "Amount",
+      "type": "money",
+      "priority": 5,
+      "total": true
+    },
+    {
+      "key": "balance",
+      "label": "Balance due",
+      "type": "money",
+      "priority": 2,
+      "total": true
+    },
+    {
+      "key": "city",
+      "label": "City",
+      "type": "address",
+      "priority": 9,
+      "hidden": true
+    }
+  ],
+  "fields": [
+    {
+      "key": "client",
+      "label": "Client",
+      "type": "record"
+    },
+    {
+      "key": "job",
+      "label": "Job",
+      "type": "text"
+    }
+  ],
+  "status": {
+    "column": "status",
+    "values": [
+      {
+        "value": "draft",
+        "label": "Draft",
+        "stage": "draft"
+      },
+      {
+        "value": "outstanding",
+        "label": "Outstanding",
+        "stage": "waiting"
+      },
+      {
+        "value": "overdue",
+        "label": "Overdue",
+        "stage": "late"
+      },
+      {
+        "value": "paid",
+        "label": "Paid",
+        "stage": "done"
+      }
+    ]
+  },
+  "summary": {
+    "all": {
+      "agg": "sum",
+      "column": "amount"
+    },
+    "slices": [
+      {
+        "value": "outstanding",
+        "measure": {
+          "agg": "sum",
+          "column": "balance"
+        },
+        "note": "{count} not due yet"
+      },
+      {
+        "value": "overdue",
+        "measure": {
+          "agg": "sum",
+          "column": "balance"
+        },
+        "note": "Oldest {oldest} days late"
+      },
+      {
+        "value": "paid",
+        "measure": {
+          "agg": "sum",
+          "column": "amount"
+        }
+      },
+      {
+        "value": "draft",
+        "measure": {
+          "agg": "sum",
+          "column": "amount"
+        },
+        "note": "{count} not sent"
+      }
+    ],
+    "insight": {
+      "label": "Collected",
+      "explain": "{paid} ÷ invoiced, by amount, for the invoices your filters let through. Invoiced is {paid}, {outstanding} and {overdue}; {draft} invoices aren’t sent yet, so they don’t count."
+    }
+  },
+  "search": {
+    "columns": [
+      "number",
+      "client",
+      "job",
+      "city"
+    ],
+    "hint": "Search by number, client, job or city"
+  },
+  "dateRange": {
+    "column": "issued"
+  },
+  "filters": [
+    {
+      "column": "status",
+      "pinned": true
+    },
+    {
+      "column": "issued",
+      "pinned": true
+    },
+    {
+      "column": "balance"
+    },
+    {
+      "column": "owner"
+    },
+    {
+      "column": "city"
+    }
+  ],
+  "sort": {
+    "column": "issued",
+    "dir": "desc"
+  },
+  "group": {
+    "options": [
+      "status",
+      "city",
+      "owner"
+    ],
+    "default": null
+  },
+  "views": [
+    {
+      "id": "all",
+      "label": "All invoices",
+      "icon": "list",
+      "filters": {}
+    },
+    {
+      "id": "chase",
+      "label": "To chase",
+      "icon": "bell",
+      "filters": {
+        "status": [
+          "overdue"
+        ]
+      },
+      "sort": {
+        "column": "due",
+        "dir": "asc"
+      }
+    },
+    {
+      "id": "month",
+      "label": "Issued this month",
+      "icon": "calendar",
+      "filters": {
+        "issued": "30"
+      }
+    }
+  ],
+  "rowClick": "peek",
+  "selection": {
+    "enabled": true,
+    "bulk": [
+      "Send reminder",
+      "Mark as paid",
+      "Download PDFs"
+    ]
+  },
+  "create": {
+    "label": "Create invoice"
+  },
+  "export": true,
+  "actions": {
+    "row": [
+      "Open",
+      "Send reminder",
+      "Record payment",
+      {
+        "label": "Void",
+        "tone": "danger"
+      }
+    ]
+  },
+  "record": {
+    "heading": "Invoice to {client}",
+    "fields": [
+      "issued",
+      "due",
+      "amount",
+      "balance",
+      "owner"
+    ],
+    "timeline": true,
+    "document": "Invoice",
+    "openLabel": "Open invoice"
+  }
+}
