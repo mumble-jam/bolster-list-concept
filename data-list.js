@@ -681,12 +681,12 @@
         pop.innerHTML = `${head}<form data-range><div class="range">${box("range-min", "Minimum", v.min)}${box("range-max", "Maximum", v.max)}</div><div class="pop-foot"><button class="button" data-size="sm">Apply</button></div></form>`;
       }
     } else if (p.kind === "add") {
-      pop.innerHTML = `<div class="pop-body" style="padding-block-start:var(--space-2)"><div class="pop-section">Filter by</div>${addable().map((f) => `<button type="button" class="menu-item" role="menuitem" data-add="${f.key}">${mi(attrIcons[f.key])}${esc(f.label)}</button>`).join("")}</div>`;
+      pop.innerHTML = `<div class="pop-body"><div class="pop-section">Filter by</div>${addable().map((f) => `<button type="button" class="menu-item" role="menuitem" data-add="${f.key}">${mi(attrIcons[f.key])}${esc(f.label)}</button>`).join("")}</div>`;
     } else if (p.kind === "info") {
       pop.innerHTML = `<div class="pop-note"><h3>${esc(cfg.insight.label)}</h3><p>${terms(cfg.insight.info)}</p></div>`;
     } else if (p.kind === "view") {
       const dirty = isDirty();
-      pop.innerHTML = `<div class="pop-body" style="padding-block-start:var(--space-2)"><div class="pop-section">Views</div>${cfg.views.map((v) => `<button type="button" class="menu-item" role="menuitemradio" aria-checked="${v.id === st.view}" data-view="${v.id}">${mi(v.icon)}${esc(v.label)}</button>`).join("")}<hr><button type="button" class="menu-item" role="menuitem" data-concept-action="Save as a new view">${mi("save")}Save as new view…</button>${dirty ? `<button type="button" class="menu-item" role="menuitem" data-concept-action="Update “${esc(currentView().label)}”">${mi("refresh-cw")}Update “${esc(currentView().label)}”</button><button type="button" class="menu-item" role="menuitem" data-reset-view>${mi("undo")}Discard changes</button>` : ""}</div>`;
+      pop.innerHTML = `<div class="pop-body"><div class="pop-section">Views</div>${cfg.views.map((v) => `<button type="button" class="menu-item" role="menuitemradio" aria-checked="${v.id === st.view}" data-view="${v.id}">${mi(v.icon)}${esc(v.label)}</button>`).join("")}<hr><button type="button" class="menu-item" role="menuitem" data-concept-action="Save as a new view">${mi("save")}Save as new view…</button>${dirty ? `<button type="button" class="menu-item" role="menuitem" data-concept-action="Update “${esc(currentView().label)}”">${mi("refresh-cw")}Update “${esc(currentView().label)}”</button><button type="button" class="menu-item" role="menuitem" data-reset-view>${mi("undo")}Discard changes</button>` : ""}</div>`;
     } else if (p.kind === "display") {
       // every setting is a row with its current value; each opens a nested menu, a check by what's chosen
       const opt = cfg.columns.filter((c) => !c.required);
@@ -697,7 +697,7 @@
       const groupItems = [["", "None"], ...cfg.groups.map((k) => [k, filterDef(k).label])].map(([v, l]) => item("menuitemradio", (st.group || "") === v, `data-group-pick="${v}" data-focus-key="g-${v || "none"}"`, l, v ? attrIcons[v] : "list")).join("");
       const densityItems = [["comfortable", "Comfortable"], ["compact", "Compact"]].map(([v, l]) => item("menuitemradio", st.density === v, `data-density-pick="${v}" data-focus-key="d-${v}"`, l)).join("");
       const colItems = opt.map((c) => item("menuitemcheckbox", !st.hidden.includes(c.key), `data-col-toggle="${c.key}" data-focus-key="c-${c.key}"`, c.label, attrIcons[c.key])).join("");
-      pop.innerHTML = `<div class="pop-body" style="padding-block-start:var(--space-2)">
+      pop.innerHTML = `<div class="pop-body">
         ${sub("sort", "Sort by", "sort", cfg.columns.find((c) => c.key === st.sort.key)?.label ?? "", sortItems, " pop-phone-only")}
         ${sub("group", "Group by", "layers", st.group ? filterDef(st.group).label : "None", groupItems)}
         ${sub("density", "Row height", "line-height", st.density === "compact" ? "Compact" : "Comfortable", densityItems)}
@@ -706,19 +706,19 @@
     } else if (p.kind === "bulk") {
       const { acts, more } = bulkSet();
       const g = p.key === "more" ? null : acts[+p.key];
-      pop.innerHTML = `<div class="pop-body" style="padding-block-start:var(--space-2)">${g ? actionItems([{ ...g }], { bulk: true }).replace(/^<div class="pop-section">[^<]*<\/div>/, "") : actionItems(more, { bulk: true, nested: true })}</div>`;
+      pop.innerHTML = `<div class="pop-body">${g ? actionItems([{ ...g }], { bulk: true }).replace(/^<div class="pop-section">[^<]*<\/div>/, "") : actionItems(more, { bulk: true, nested: true })}</div>`;
     } else if (p.kind === "row" && cfg.actionsFor) {
       // the row's menu: everything Bolster offers for this job's status; from the record, minus its own buttons
       const x = cfg.rows.find((r) => r.id === p.key);
       const { bar, more } = cfg.actionsFor([x]);
       const own = p.from?.closest(".detail") ? ["Open", ...$$(".detail-actions [data-concept-action]:not([hidden])", p.from.closest(".detail")).map((b) => b.dataset.conceptAction)] : [];
       const list = ["Open", ...bar, ...more].filter((a) => !own.includes(a));
-      pop.innerHTML = `<div class="pop-body" style="padding-block-start:var(--space-2)">${actionItems(list, { peek: p.key, nested: true })}</div>`;
+      pop.innerHTML = `<div class="pop-body">${actionItems(list, { peek: p.key, nested: true })}</div>`;
     } else if (p.kind === "row") {
       // from the record's More, "Open" (and the catalog's "Edit") would only reopen it
       const folded = p.from?.closest(".detail") ? $$(".detail-actions [data-concept-action][hidden]", p.from.closest(".detail")).map((b) => b.dataset.conceptAction) : [];
       const acts = [...folded, ...cfg.rowActions.filter((a) => !folded.includes(a) && !(p.from?.closest(".detail") && (a === "Open" || a === "Edit")))];
-      pop.innerHTML = `<div class="pop-body" style="padding-block-start:var(--space-2)">${acts.map((a, i) => `${i === acts.length - 1 ? "<hr>" : ""}<button type="button" class="menu-item" role="menuitem"${i === acts.length - 1 ? ' data-tone="danger"' : ""} ${a === "Open" || a === "Edit" ? `data-peek="${p.key}"` : `data-concept-action="${esc(a)}"`}>${mi(actionIcons[a])}${esc(a)}</button>`).join("")}</div>`;
+      pop.innerHTML = `<div class="pop-body">${acts.map((a, i) => `${i === acts.length - 1 ? "<hr>" : ""}<button type="button" class="menu-item" role="menuitem"${i === acts.length - 1 ? ' data-tone="danger"' : ""} ${a === "Open" || a === "Edit" ? `data-peek="${p.key}"` : `data-concept-action="${esc(a)}"`}>${mi(actionIcons[a])}${esc(a)}</button>`).join("")}</div>`;
     }
     pop.style.inlineSize = p.kind === "row" || p.kind === "bulk" || p.kind === "add" ? "auto" : p.kind === "info" ? "16rem" : "";
   }
@@ -1152,10 +1152,11 @@
   }
   // ---------- tuners: concept tooling, a panel of sliders that writes custom properties, opened from Concept controls ----------
   // groups are [legend, rows, note?]; a row is [key, label, min, max, step, unit], [key, label, "color"] or [key, label, "check"].
-  // Values live in localStorage; "Copy settings" puts them on the clipboard to paste in the chat.
+  // Values live in localStorage, only the ones moved off the default, so a new default reaches everyone
+  // (the key's :2 drops the old saves, which held every value); "Copy settings" puts them on the clipboard.
   const tuners = [];
   function tuner({ id, title, groups, def, presets, set }) {
-    const rows = groups.flatMap(([, r]) => r), key = `bolster-concepts:${id}`;
+    const rows = groups.flatMap(([, r]) => r), key = `bolster-concepts:${id}:2`;
     let v = { ...def }, panel;
     try { v = { ...def, ...JSON.parse(localStorage.getItem(key)) }; } catch {}
     const fmt = (r) => (r[2] === "color" ? v[r[0]] : r[2] === "check" ? (v[r[0]] ? "on" : "off") : Number(v[r[0]]).toFixed((String(r[4]).split(".")[1] || "").length) + r[5]);
@@ -1171,7 +1172,7 @@
         }
         const p = panel.querySelector("[data-preset]"); if (p) p.value = preset();
       }
-      try { localStorage.setItem(key, JSON.stringify(v)); } catch {}
+      try { localStorage.setItem(key, JSON.stringify(Object.fromEntries(Object.entries(v).filter(([k, x]) => x !== def[k])))); } catch {}
     }
     const settings = () => {
       const edited = rows.filter(([k]) => v[k] !== def[k]).map(([, l]) => l.toLowerCase());
@@ -1294,7 +1295,7 @@ ${JSON.stringify(v)}`;
       ["Cards you can press", [["lift", "Hover lift", 0, 4, 0.5, "px"], ["hoverK", "Hover shadow ×", 1, 3, 0.1, ""], ["sink", "Press sinks", 0, 3, 0.5, "px"], ["pressIn", "Press, inner shadow", 0, 0.3, 0.01, ""], ["onIn", "Selected, inner shadow", 0, 0.3, 0.01, ""], ["onK", "Selected, shadow ×", 0, 1, 0.05, ""], ["ms", "Duration", 0, 400, 10, "ms"]],
         "Only the status cards move, being buttons. Hover lifts a pixel or two; a press lands at once and eases back; a selected filter stays pressed in, a toggle that's on. Reduced motion keeps them still."],
     ],
-    def: { radius: 12, edge: 15, lip: 0.05, sheen: 0.04, shade: 0.015, depth: 64, sc: "#3b3320", cy: 1, cb: 2, ca: 0.07, ay: 4, ab: 10, aa: 0.045, lineL: 0.8, lineD: 0.07, darkK: 2.5,
+    def: { radius: 16, edge: 15, lip: 0.05, sheen: 0.04, shade: 0.015, depth: 64, sc: "#3b3320", cy: 1, cb: 2, ca: 0.07, ay: 4, ab: 10, aa: 0.045, lineL: 0.8, lineD: 0.07, darkK: 2.5,
       lift: 1, hoverK: 1.6, sink: 1, pressIn: 0.1, onIn: 0.07, onK: 0.3, ms: 150 },
     presets: {
       tactile: { name: "Tactile (default)" },

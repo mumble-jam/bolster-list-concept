@@ -21,7 +21,9 @@
   }
   .pop-head { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-3) var(--space-2) var(--space-4); }
   .pop-head h3 { flex: 1; font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); }
-  .pop-body { padding: 0 var(--space-2) var(--space-2); display: grid; gap: var(--space-0-5); }
+  /* rows sit 8 in from the edge, the border included, so their 4 corners follow the menu's 12 (D35) */
+  .pop-body { --_in: calc(var(--inset-menu) - var(--border-width-default)); padding: 0 var(--_in) var(--_in); display: grid; gap: var(--space-0-5); }
+  .pop-body:first-child { padding-block-start: var(--_in); }
   .tooltip-anchor:has([aria-expanded="true"]) > .tooltip { opacity: 0; visibility: hidden; transition: none; }
   /* a setting that opens a nested menu: its name, the current value, a chevron */
   .submenu-label { flex: 1; min-inline-size: 0; }
@@ -29,7 +31,7 @@
   .submenu-trigger > svg { inline-size: 0.75rem; block-size: 0.75rem; }
   .submenu-trigger[aria-expanded="true"] { background: var(--color-surface-hover); }
   /* the nested menu: as wide as its longest option, so the check sits close to the chosen one */
-  .pop.submenu { inline-size: max-content; min-inline-size: 10rem; padding: var(--space-1); }
+  .pop.submenu { inline-size: max-content; min-inline-size: 10rem; }
   /* leading icons: 14px Font Awesome Regular, a step smaller and bolder than the 16px Light icons
      elsewhere, in an 18px slot (Font Awesome's fixed width, 1.25 × 14) so labels line up whatever
      the icon's shape; secondary like the system's menu icons, red with a danger row */
@@ -95,8 +97,8 @@
   }
 
   /* menus and popovers sit on white: rows hover a step stronger, the edge is the cards', the shadow is
-     tinted with the page, and the corner is 12 (4 on the rows inside its 8 padding, so the curves stay
-     concentric). Re-pointed inside them, so anything nested picks it up unchanged */
+     tinted with the page, and the corner is 12 with 4 on the rows, 8 in from the edge, so the curves
+     share a centre (D35). Re-pointed inside them, so anything nested picks it up unchanged */
   :is(.pop, .menu) {
     --color-surface-hover: var(--color-surface-hover-control);
     --color-line-default: var(--color-line-card);
@@ -106,5 +108,6 @@
   /* (phones keep the sheet's own corners) */
   @media (min-width: 768px) { :is(.pop, .menu) { border-radius: var(--radius-lg); } }
   :is(.pop, .menu) :is(.menu-item, .option) { border-radius: var(--radius-sm); }
+  :is(.menu, .pop.submenu) { padding: calc(var(--inset-menu) - var(--border-width-default)); }
   .pop-section { color: var(--color-content-section); }
 }

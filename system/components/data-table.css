@@ -175,7 +175,8 @@
   .group-meta { margin-inline-start: var(--space-3); font-size: var(--text-xs); color: var(--color-content-secondary); font-variant-numeric: tabular-nums; }
 
   /* ---------- footer: the range, and more rows (they also load as you scroll) ---------- */
-  .list-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-block-start: var(--border-width-default) solid var(--color-line-subtle); font-size: var(--text-sm); color: var(--color-content-secondary); }
+  /* Load more sits in the card's corner, 8 in like the bar's controls (D35); the range text lines up with the cells */
+  .list-foot { --_in: calc(var(--inset-card) - var(--border-width-default)); display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--_in) var(--_in) var(--_in) var(--space-4); border-block-start: var(--border-width-default) solid var(--color-line-subtle); font-size: var(--text-sm); color: var(--color-content-secondary); }
   .list-foot:empty { display: none; }
   .list-foot-range { font-variant-numeric: tabular-nums; }
 

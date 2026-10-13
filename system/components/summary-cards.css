@@ -29,7 +29,7 @@
     min-inline-size: 7.5rem;
     display: grid; align-content: space-between; gap: var(--space-2);
     min-block-size: 5rem; padding: var(--space-3) var(--space-4);
-    border: var(--border-width-default) solid var(--color-line-default); border-radius: var(--radius-lg);
+    border: var(--border-width-default) solid var(--color-line-default); border-radius: var(--radius-xl);
     background: var(--color-surface-default); color: var(--color-content-primary);
     font: inherit; text-align: start; scroll-snap-align: start;
   }

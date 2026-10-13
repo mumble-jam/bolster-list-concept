@@ -36,6 +36,8 @@
   /* while its picker is open, the chip reads as hovered */
   .chip[data-open] > .chip-main, .chip[data-open] .chip-field { color: var(--color-content-link); }
   .chip[data-active] { gap: 0; border-style: solid; border-color: var(--color-line-default); border-radius: var(--radius-lg); background: var(--color-surface-header); color: var(--color-content-secondary); }
+  /* its buttons sit inside the 1px edge, so their corners are a pixel tighter (D35) */
+  .chip[data-active] > button { border-radius: calc(var(--radius-lg) - var(--border-width-default)); }
   .chip[data-active] .chip-main { gap: calc(var(--space-1) + var(--space-0-5)); padding-inline: var(--space-3) var(--space-1); }
   .chip[data-active] .chip-remove { padding-inline: var(--space-1) var(--space-3); }
   .chip-field, .chip-value { color: inherit; }

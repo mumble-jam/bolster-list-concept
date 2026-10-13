@@ -18,7 +18,8 @@
   }
   :root[data-chrome-hidden] .detail.card { --_top: var(--space-4); }
   .detail[hidden] { display: none; }
-  .detail-head { display: flex; align-items: center; gap: var(--space-1); flex: none; padding: var(--space-3) var(--space-3) var(--space-3) var(--space-5); border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
+  /* open and close sit in the card's corner, 8 in like the list bar's controls (D35) */
+  .detail-head { --_in: calc(var(--inset-card) - var(--border-width-default)); display: flex; align-items: center; gap: var(--space-1); flex: none; padding: var(--_in) var(--_in) var(--_in) var(--space-5); border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
   .detail-head h2 { flex: 1; min-inline-size: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-sans); font-size: var(--text-sm); font-weight: var(--font-weight-regular); color: var(--color-content-secondary); }
   .detail-head h2:focus { outline: none; }
   .detail-head h2:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }

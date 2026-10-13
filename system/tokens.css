@@ -407,6 +407,11 @@
     --radius-lg: 0.75rem;   /* 12 */
     --radius-xl: 1rem;      /* 16: modal, large surfaces */
     --radius-full: 9999px;
+    /* Nested corners (D35): something rounded sitting in a rounded corner shares that corner's centre,
+       so its radius is the outer one minus the gap between their edges (r = R − d), the gap the same
+       across and down. These are the gaps, from the outer edge; the padding is the gap less the border. */
+    --inset-card: calc(var(--radius-xl) - var(--radius-md)); /* 8: a card's 16 around 8px controls */
+    --inset-menu: calc(var(--radius-lg) - var(--radius-sm)); /* 8: a menu's 12 around 4px rows */
 
     /* ---------- Depth ---------- */
     --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.06), 0 1px 3px rgb(0 0 0 / 0.08);

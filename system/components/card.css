@@ -17,7 +17,7 @@
     display: flex;
     flex-direction: column;
     border: var(--border-width-default) solid var(--color-line-subtle);
-    border-radius: var(--radius-lg);
+    border-radius: var(--radius-xl);
     background: var(--color-surface-default);
     color: var(--color-content-primary);
   }
@@ -83,7 +83,7 @@
   @property --_ci { syntax: "<number>"; inherits: false; initial-value: 0; }
   @property --_cl { syntax: "<length>"; inherits: false; initial-value: 0px; }
   :root {
-    --card-radius: 12px; --card-edge: 15%; --card-lip: 0.05; --card-sheen: 0.04; --card-shade: 0.015; --card-depth: 64px;
+    --card-radius: var(--radius-xl); --card-edge: 15%; --card-lip: 0.05; --card-sheen: 0.04; --card-shade: 0.015; --card-depth: 64px;
     --card-cy: 1px; --card-cb: 2px; --card-ca: 0.07; --card-ay: 4px; --card-ab: 10px; --card-aa: 0.045;
     --card-line-l: 0.8; --card-line-d: 0.07; --card-dark-k: 2.5;
     --card-lift: 1px; --card-hover-k: 1.6; --card-sink: 1px; --card-press-in: 0.1; --card-on-in: 0.07; --card-on-k: 0.3; --card-ms: 150ms;
