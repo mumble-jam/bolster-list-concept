@@ -9,9 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=962ce8b5">
-<link rel="stylesheet" href="data-list.css?v=962ce8b5">
-<script>try { document.documentElement.dataset.canvas = localStorage.getItem("bolster-concepts:canvas") === "cool" ? "cool" : "paper"; } catch { document.documentElement.dataset.canvas = "paper"; }</script>
+<link rel="stylesheet" href="system/bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="data-list.css?v=8aa38bbc">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -22,7 +21,7 @@
     .inv-head h1 { font-size: var(--text-2xl); line-height: var(--leading-2xl); text-wrap: balance; }
     .inv-head p { max-inline-size: 42rem; color: var(--color-content-secondary); }
     .inv-legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: var(--space-3); }
-    .inv-level { display: grid; gap: var(--space-1); padding: var(--space-3) var(--space-4); border: var(--border-width-default) solid var(--_card-line); border-radius: var(--radius-lg); background: var(--color-surface-default); }
+    .inv-level { display: grid; gap: var(--space-1); padding: var(--space-3) var(--space-4); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-lg); background: var(--color-surface-default); }
     .inv-level b { display: flex; align-items: center; gap: var(--space-2); font-weight: var(--font-weight-medium); }
     .inv-level b span:last-child { margin-inline-start: auto; font-family: var(--font-display); font-size: var(--text-lg); font-variant-numeric: tabular-nums; }
     .inv-level p { font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
@@ -32,7 +31,7 @@
     .inv-group { display: grid; gap: var(--space-2); }
     .inv-group[hidden] { display: none; }
     .inv-group h2 { font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
-    .inv-list { margin: 0; padding: 0; list-style: none; border: var(--border-width-default) solid var(--_card-line); border-radius: var(--radius-lg); background: var(--color-surface-default); overflow: clip; }
+    .inv-list { margin: 0; padding: 0; list-style: none; border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-lg); background: var(--color-surface-default); overflow: clip; }
     .inv-item { display: grid; grid-template-columns: minmax(10rem, 14rem) minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-2) var(--space-6); padding: var(--space-4); }
     .inv-item + .inv-item { border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
     .inv-item[hidden] { display: none; }
@@ -51,7 +50,7 @@
     .inv-namecol { display: grid; align-content: start; justify-items: start; gap: var(--space-2); }
     .inv-todo-btn[aria-pressed="true"] { color: var(--color-action-accent); }
     .inv-item[data-todo] { background: var(--color-surface-selected); }
-    .todo { display: grid; gap: var(--space-3); padding: var(--space-4); border: var(--border-width-default) solid var(--_card-line); border-radius: var(--radius-lg); background: var(--color-surface-default); }
+    .todo { display: grid; gap: var(--space-3); padding: var(--space-4); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-lg); background: var(--color-surface-default); }
     .todo-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
     .todo-head h2 { margin-inline-end: auto; font-size: var(--text-base); line-height: var(--leading-base); font-weight: var(--font-weight-medium); }
     .todo-head output { font-size: var(--text-xs); color: var(--color-content-secondary); }
@@ -110,7 +109,7 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=962ce8b5"></script>
+<script src="shared/icons.js?v=8aa38bbc"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -259,6 +258,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=962ce8b5"></script>
+<script src="system/specimens/specimen.js?v=8aa38bbc"></script>
 </body>
 </html>

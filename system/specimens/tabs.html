@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tabs · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Tabs</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">Panels of one page (the job's Overview, Estimate, Takeoff). Tabs change what's shown, not what's saved. Arrow keys move between tabs (specimen.js). Labels are sentence case.</p>
+  <section class="spec-section">
+    <h2>Live example</h2>
+    <div class="spec-panel">
+      <div class="tabs" role="tablist" aria-label="Job sections">
+        <button class="tab" role="tab" id="t1" aria-controls="p1" aria-selected="true">Overview</button>
+        <button class="tab" role="tab" id="t2" aria-controls="p2" aria-selected="false" tabindex="-1">Estimate <span class="badge" data-count>5</span></button>
+        <button class="tab" role="tab" id="t3" aria-controls="p3" aria-selected="false" tabindex="-1">Takeoff</button>
+        <button class="tab" role="tab" id="t4" aria-controls="p4" aria-selected="false" tabindex="-1" disabled>Selections</button>
+      </div>
+      <div role="tabpanel" id="p1" aria-labelledby="t1" style="padding-top:var(--space-4)">Overview panel.</div>
+      <div role="tabpanel" id="p2" aria-labelledby="t2" hidden style="padding-top:var(--space-4)">Estimate panel.</div>
+      <div role="tabpanel" id="p3" aria-labelledby="t3" hidden style="padding-top:var(--space-4)">Takeoff panel.</div>
+    </div>
+  </section>
+  <section class="spec-section">
+    <h2>States and sizes</h2>
+    <div class="spec-panel">
+      <div class="tabs" role="presentation" style="margin-bottom:var(--space-6)">
+        <span class="tab" aria-selected="true">Selected</span><span class="tab">Default</span><span class="tab" data-state="hover">Hover</span><span class="tab" data-state="focus">Focus</span>
+      </div>
+      <div class="tabs" data-size="md" role="presentation">
+        <span class="tab" aria-selected="true">Medium · 48</span><span class="tab">Invoices</span><span class="tab">Payments</span>
+      </div>
+    </div>
+<code class="spec-code">&lt;div class="tabs" role="tablist" aria-label="Job sections"&gt;
+  &lt;button class="tab" role="tab" aria-selected="true" aria-controls="p1" id="t1"&gt;Overview&lt;/button&gt;
+  &lt;button class="tab" role="tab" aria-selected="false" aria-controls="p2" id="t2" tabindex="-1"&gt;Estimate&lt;/button&gt;
+&lt;/div&gt;</code>
+  </section>
+</main>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

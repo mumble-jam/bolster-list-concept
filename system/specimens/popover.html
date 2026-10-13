@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Popover · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>
+  /* specimen only: popovers drawn in place, not in the top layer */
+  .spec-panel .pop { position: static; max-block-size: none; }
+  .spec-panel .pop.submenu { display: grid; }
+</style>
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Popover</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">Menus and small panels that open under their trigger: a filter's options, display settings, a row's actions. Native popovers, so Escape and a click outside close them. They sit on white with the cards' edge, a shadow tinted with the page and 12px corners (4 on the rows inside). On phones every popover is a bottom sheet with a handle, and a nested menu opens inside it with a back row.</p>
+
+  <section class="spec-section">
+    <h2>A filter's options</h2>
+    <div class="spec-panel" data-surface="canvas">
+      <div class="pop" role="dialog" aria-label="Filter by status">
+        <div class="pop-head"><h3>Status</h3></div>
+        <div class="pop-body">
+          <label class="option"><input type="checkbox" class="checkbox"><span class="option-label"><span class="badge" data-status="draft" data-mark="dashed">Draft</span></span><span class="option-count">14</span></label>
+          <label class="option"><input type="checkbox" class="checkbox" checked><span class="option-label"><span class="badge" data-status="pending" data-mark="quarter">Pending</span></span><span class="option-count">33</span></label>
+          <label class="option"><input type="checkbox" class="checkbox" checked><span class="option-label"><span class="badge" data-status="booked" data-mark="half">Booked</span></span><span class="option-count">31</span></label>
+          <label class="option"><input type="checkbox" class="checkbox"><span class="option-label"><span class="badge" data-status="in-progress" data-mark="three">In progress</span></span><span class="option-count">31</span></label>
+          <label class="option"><input type="checkbox" class="checkbox"><span class="option-label"><span class="badge" data-tone="danger" data-mark="slash">Declined</span></span><span class="option-count">23</span></label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Display settings and a nested menu</h2>
+    <p>Each setting shows its current value and opens its own menu, with a check by the choice.</p>
+    <div class="spec-panel" data-surface="canvas">
+      <div class="spec-row" style="align-items:flex-start">
+        <div class="pop" role="menu" aria-label="Display settings" style="inline-size:auto;min-inline-size:16rem">
+          <div class="pop-body" style="padding-block-start:var(--space-2)">
+            <div class="submenu-row"><button type="button" class="menu-item submenu-trigger" role="menuitem"><span class="menu-icon"><i data-icon="m-layers" data-size="14"></i></span><span class="submenu-label">Group by</span><span class="submenu-value">None</span><i data-icon="chevron-right" data-size="12"></i></button></div>
+            <div class="submenu-row"><button type="button" class="menu-item submenu-trigger" role="menuitem" aria-expanded="true"><span class="menu-icon"><i data-icon="m-line-height" data-size="14"></i></span><span class="submenu-label">Row height</span><span class="submenu-value">Comfortable</span><i data-icon="chevron-right" data-size="12"></i></button></div>
+            <div class="submenu-row"><button type="button" class="menu-item submenu-trigger" role="menuitem"><span class="menu-icon"><i data-icon="m-columns-3" data-size="14"></i></span><span class="submenu-label">Columns</span><span class="submenu-value">All</span><i data-icon="chevron-right" data-size="12"></i></button></div>
+          </div>
+        </div>
+        <div class="pop submenu" role="menu" aria-label="Row height">
+          <button type="button" class="menu-item" role="menuitemradio" aria-checked="true"><span class="menu-icon"></span>Comfortable<i data-icon="check" data-size="14"></i></button>
+          <button type="button" class="menu-item" role="menuitemradio" aria-checked="false"><span class="menu-icon"></span>Compact</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>A row's actions</h2>
+    <div class="spec-panel" data-surface="canvas">
+      <div class="pop" role="menu" aria-label="Row actions" style="inline-size:auto;min-inline-size:14rem">
+        <div class="pop-body" style="padding-block-start:var(--space-2)">
+          <button type="button" class="menu-item" role="menuitem"><span class="menu-icon"><i data-icon="m-external" data-size="14"></i></span>Open</button>
+          <button type="button" class="menu-item" role="menuitem"><span class="menu-icon"><i data-icon="m-pen" data-size="14"></i></span>Edit</button>
+          <button type="button" class="menu-item" role="menuitem"><span class="menu-icon"><i data-icon="m-copy" data-size="14"></i></span>Duplicate</button>
+          <div class="pop-section">Change status</div>
+          <button type="button" class="menu-item" role="menuitemradio" aria-checked="true"><span class="menu-icon"></span>Booked<i data-icon="check" data-size="14"></i></button>
+          <button type="button" class="menu-item" role="menuitemradio" aria-checked="false"><span class="menu-icon"></span>In progress</button>
+          <hr>
+          <button type="button" class="menu-item" role="menuitem" data-tone="danger"><span class="menu-icon"><i data-icon="m-trash" data-size="14"></i></span>Delete</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="../../shared/icons.js?v=8aa38bbc"></script>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

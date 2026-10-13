@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>List page recipe · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>
+  .rule-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr)); }
+  .rule-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+  .rule-head h3 { font-size: var(--text-base); line-height: var(--leading-base); }
+  .rule-head code, .spec-table code { font-family: var(--font-mono); font-size: var(--text-xs); color: var(--color-content-secondary); }
+  .rule-body { display: grid; gap: var(--space-2); font-size: var(--text-sm); line-height: var(--leading-sm); }
+  .rule-survey { padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--color-surface-sunken); }
+  .rule-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); }
+  .field-title { margin-block: var(--space-6) var(--space-2); font-size: var(--text-base); }
+  .table-scroll { overflow-x: auto; }
+  .flow { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr)); counter-reset: step; }
+  .flow li { list-style: none; padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--color-surface-default); border: var(--border-width-default) solid var(--color-line-subtle); font-size: var(--text-sm); line-height: var(--leading-sm); }
+  .flow li b { display: block; margin-block-end: var(--space-1); }
+</style>
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>List page recipe</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">How any list page in Bolster is described, and the rules it follows. One set of files serves two readers: this page (the back office, for people) and the <code>bolster-page</code> skill (the front office, for Claude), which turns a screenshot and a short survey into a page description. 21 rules, 12 decided and 9 proposed. Generated from <code>system/recipes/list/rules.json</code> and <code>schema.json</code> by <code>scripts/build-rules.mjs</code>; don't edit it by hand.</p>
+
+  <section class="spec-section">
+    <h2>How a page gets made</h2>
+    <p class="text-secondary">Tested on four of Bolster's live lists (jobs, invoices, customers, vendors) and its catalog sheet, Oct 2026: each list became a passing description with 20 to 22 assumptions; the sheet was rightly turned away. Their gaps shaped the fields, types and questions here.</p>
+    <ol class="flow">
+      <li><b>1 · Screenshot or brief</b>Someone shares a page from Bolster, or describes one.</li>
+      <li><b>2 · Read</b>Claude lists what it sees: columns, statuses, cards, toolbar, actions.</li>
+      <li><b>3 · Survey</b>Up to seven questions for what a picture can't show, each with a default.</li>
+      <li><b>4 · Describe</b>A page description: data, not drawing. Where the original breaks a rule, the rule wins.</li>
+      <li><b>5 · Check</b><code>check.mjs</code> holds it to the rules below.</li>
+      <li><b>6 · Render</b><code>recipe.js</code> draws it with the system's components and sample data, and names anything it can't draw yet.</li>
+    </ol>
+  </section>
+
+  <section class="spec-section">
+    <h2>Rules</h2>
+    <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>Enforced by</th><th>Means</th></tr></thead><tbody>
+      <tr><td><span class="badge">schema</span></td><td>The description can't be written any other way: schema.json allows nothing else.</td></tr><tr><td><span class="badge">check</span></td><td>check.mjs fails the description if it breaks the rule.</td></tr><tr><td><span class="badge">renderer</span></td><td>The page's code does it; the description has no say.</td></tr><tr><td><span class="badge">survey</span></td><td>The front office asks, unless the screenshot already answers it.</td></tr>
+    </tbody></table></div>
+    <div class="rule-grid" style="margin-block-start:var(--space-4)">
+  <article class="card rule-card" id="L-title">
+    <header class="card-header rule-head"><h3><code>L-title</code> The page title is the menu item's name</h3><span class="badge" data-tone="success">Decided</span></header>
+    <div class="card-body rule-body">
+      <p>A list page's title is the label of the menu item that opens it, word for word; the description names the menu item, never a title.</p>
+      <p class="text-secondary"><b>Why:</b> One source: renaming the menu renames the page, and the selected menu item and the header can't disagree.</p>
+      
+      <p class="rule-meta"><span class="badge">schema</span> <span class="badge">check</span> <span class="text-secondary">· D28</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-row-click">
+    <header class="card-header rule-head"><h3><code>L-row-click</code> A row click either peeks or opens</h3><span class="badge" data-tone="success">Decided</span></header>
+    <div class="card-body rule-body">
+      <p>Every list declares what clicking a row does, one of two: peek (the record beside the list from 1280 up, a side sheet below) or open (the record itself, as a page or a full-screen workspace). Checkbox clicks never open; the row's name is always a real link.</p>
+      <p class="text-secondary"><b>Why:</b> A screenshot can't show it and lists differ: a quick look suits lists people triage, the full record suits lists people work in.</p>
+      <p class="rule-survey"><b>Survey asks every time:</b> “When someone clicks a row, should it open a summary beside the list (peek), or go straight to the full record (open)?” <span class="text-secondary">Default: peek</span></p>
+      <p class="rule-meta"><span class="badge">schema</span> <span class="badge">survey</span> <span class="text-secondary">· D30, D17, I6, I7</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-types">
+    <header class="card-header rule-head"><h3><code>L-types</code> Every column has a type</h3><span class="badge" data-tone="warning">Proposed</span></header>
+    <div class="card-body rule-body">
+      <p>Each column declares one of the types in the types table. The type decides alignment, format, sort direction, the filter picker and where the value sits on a phone; the description never sets those one by one.</p>
+      <p class="text-secondary"><b>Why:</b> One answer per column covers six decisions, so pages come out alike and the survey stays short.</p>
+      
+      <p class="rule-meta"><span class="badge">schema</span> <span class="badge">renderer</span> <span class="text-secondary">· Tables on phones research (Figma, Oct 2026)</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-priority">
+    <header class="card-header rule-head"><h3><code>L-priority</code> Every column has a priority, and one is the name</h3><span class="badge" data-tone="warning">Proposed</span></header>
+    <div class="card-body rule-body">
+      <p>Priority 1 is the row's name: exactly one column, type name, never hidden. 2 is the key figure (left unused when the list has none), 3 the status; higher numbers leave first as the screen narrows and beside an open peek. Numbers needn't be consecutive.</p>
+      <p class="text-secondary"><b>Why:</b> What survives at each width is decided once, not per breakpoint. NN/g: lead with a readable name.</p>
+      
+      <p class="rule-meta"><span class="badge">schema</span> <span class="badge">check</span> <span class="text-secondary">· D17, Tables on phones research</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-name-first">
+    <header class="card-header rule-head"><h3><code>L-name-first</code> Rows lead with a name, not a code</h3><span class="badge" data-tone="success">Decided</span></header>
+    <div class="card-body rule-body">
+      <p>The name column's title starts with words a person recognises (customer, job, item); numbers and codes go to its detail line.</p>
+      <p class="text-secondary"><b>Why:</b> People read about the first two words of each row (NN/g); “INV-1199 · Lucia Ruiz-Ortega” spends them on the number.</p>
+      
+      <p class="rule-meta"><span class="badge">check</span> <span class="text-secondary">· D32, Tables on phones research</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-status-stage">
+    <header class="card-header rule-head"><h3><code>L-status-stage</code> Status values take their look from a stage</h3><span class="badge" data-tone="success">Decided</span></header>
+    <div class="card-body rule-body">
+      <p>A status column lists its values in lifecycle order, each with a stage (new, draft, waiting, won, underway, done, lost, late, neutral). The stage picks the badge's colour and shape; a list never picks colours itself.</p>
+      <p class="text-secondary"><b>Why:</b> The same stage looks the same in every list, and colour is never the only signal (the shape carries it too).</p>
+      
+      <p class="rule-meta"><span class="badge">schema</span> <span class="badge">renderer</span> <span class="text-secondary">· D12</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-summary">
+    <header class="card-header rule-head"><h3><code>L-summary</code> Summary cards are status slices</h3><span class="badge" data-tone="success">Decided</span></header>
+    <div class="card-body rule-body">
+      <p>Cards above the list are the status column's values, in the order of status.values, after an All card: at most five plus All, each a filter and a figure, each named exactly as its status. One optional insight card that isn't a filter. A card that combines statuses or counts a segment (“Fresh leads”, “Booked or in progress”) becomes a saved view instead; a condition worked out from data (past due) becomes a derived status. No status column, no cards.</p>
+      <p class="text-secondary"><b>Why:</b> Cards that filter and cards that don't would look alike; tying them to status keeps the rule simple.</p>
+      
+      <p class="rule-meta"><span class="badge">schema</span> <span class="badge">check</span> <span class="text-secondary">· D17, I8</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-create">
+    <header class="card-header rule-head"><h3><code>L-create</code> One create action, named for the noun</h3><span class="badge" data-tone="success">Decided</span></header>
+    <div class="card-body rule-body">
+      <p>At most one main action: “Create &lt;noun&gt;” for records the business makes, “Add &lt;noun&gt;” for records it keeps (customers, items). In the page header from tablet up; floating above the tab bar on phones.</p>
+      <p class="text-secondary"><b>Why:</b> One primary per view (D4); a name that says what you'll get.</p>
+      
+      <p class="rule-meta"><span class="badge">check</span> <span class="badge">renderer</span> <span class="text-secondary">· D4, D29</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-selection">
+    <header class="card-header rule-head"><h3><code>L-selection</code> Checkboxes only where there are bulk actions</h3><span class="badge" data-tone="warning">Proposed</span></header>
+    <div class="card-body rule-body">
+      <p>Selection is on only when the list has bulk actions, and then the bulk bar replaces the page's floating action. On phones selection is a mode (long press, or Select) rather than a checkbox column. When checkboxes show but the actions don't, the actions stay unresolved until someone says (the checker accepts that while the question is open).</p>
+      <p class="text-secondary"><b>Why:</b> A checkbox column costs every row width; on a phone it buys a rare task.</p>
+      <p class="rule-survey"><b>Survey asks when the screenshot doesn't show it:</b> “I can see checkboxes. What can people do to several {nouns} at once, and is any of it destructive?” <span class="text-secondary">Default: Leave the bulk actions unresolved and say so; never invent them.</span></p>
+      <p class="rule-meta"><span class="badge">check</span> <span class="badge">renderer</span> <span class="badge">survey</span> <span class="text-secondary">· D17, Tables on phones research, Bulk actions bar research</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-risky">
+    <header class="card-header rule-head"><h3><code>L-risky</code> Risky actions go last and are confirmed</h3><span class="badge" data-tone="success">Decided</span></header>
+    <div class="card-body rule-body">
+      <p>Destructive actions (tone danger) come last in any list of actions, after a rule, and always ask first; the confirmation's button is named for the outcome (“Delete 3 jobs”) beside a safe way out, focused first.</p>
+      <p class="text-secondary"><b>Why:</b> Nothing irreversible sits where a hurried thumb lands.</p>
+      
+      <p class="rule-meta"><span class="badge">check</span> <span class="badge">renderer</span> <span class="text-secondary">· D4, Secondary, ghost and danger buttons research</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-next-step">
+    <header class="card-header rule-head"><h3><code>L-next-step</code> At most one button on a row: the next step</h3><span class="badge" data-tone="warning">Proposed</span></header>
+    <div class="card-body rule-body">
+      <p>A list may show one labelled button per row, in a Next step column: the step that moves this row on, decided by its status alone. Everything else a row can do goes in its ··· menu and the record.</p>
+      <p class="text-secondary"><b>Why:</b> Bolster's lists lean on a per-row next step (Pending jobs, Send, Archive); one, labelled, keeps the row readable and the button predictable.</p>
+      <p class="rule-survey"><b>Survey asks when the screenshot doesn't show it:</b> “Each row has a button. What decides which one shows, and what's under More actions?” <span class="text-secondary">Default: One button per status, as seen; the rest go to the row's ··· menu.</span></p>
+      <p class="rule-meta"><span class="badge">schema</span> <span class="badge">renderer</span> <span class="badge">survey</span> <span class="text-secondary">· Dry run on Bolster's lists, Oct 2026</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-sort">
+    <header class="card-header rule-head"><h3><code>L-sort</code> One default sort</h3><span class="badge" data-tone="warning">Proposed</span></header>
+    <div class="card-body rule-body">
+      <p>Every list declares one default sort on a sortable column. One arrow at a time: a second arrow in an original is noise, not a second sort. People change it from the column headers; that's a view state, not a new default.</p>
+      <p class="text-secondary"><b>Why:</b> The order a list opens in is a decision, not an accident of the database.</p>
+      <p class="rule-survey"><b>Survey asks when the screenshot doesn't show it:</b> “Which order should the list open in?” <span class="text-secondary">Default: The column with a sort arrow, if the rows really are in that order; otherwise the latest activity, newest first, or the main date if there's no activity column.</span></p>
+      <p class="rule-meta"><span class="badge">schema</span> <span class="badge">check</span> <span class="badge">survey</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-filters">
+    <header class="card-header rule-head"><h3><code>L-filters</code> Filters come from columns; three at most are pinned</h3><span class="badge" data-tone="warning">Proposed</span></header>
+    <div class="card-body rule-body">
+      <p>Each filter is a column, and its picker follows the column's type. At most three are pinned in the toolbar before anything is applied (usually status, owner and a date); the rest wait behind “Add filter”.</p>
+      <p class="text-secondary"><b>Why:</b> A toolbar of every filter is a form; three is what fits beside search at tablet width.</p>
+      
+      <p class="rule-meta"><span class="badge">check</span> <span class="text-secondary">· List page layout research, Filter value pickers research</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-date-range">
+    <header class="card-header rule-head"><h3><code>L-date-range</code> Lists with a date get a date range</h3><span class="badge" data-tone="warning">Proposed</span></header>
+    <div class="card-body rule-body">
+      <p>A list with a date column offers the date range picker on its main date (created, issued, due), even if the original has none. Lists without a meaningful date leave it out.</p>
+      <p class="text-secondary"><b>Why:</b> “Last 30 days” is the most common question asked of any list.</p>
+      
+      <p class="rule-meta"><span class="badge">survey</span> <span class="text-secondary">· List page layout research</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-search">
+    <header class="card-header rule-head"><h3><code>L-search</code> Search says what it searches</h3><span class="badge" data-tone="warning">Proposed</span></header>
+    <div class="card-body rule-body">
+      <p>Search names its columns, and its placeholder lists them in plain words: “Search by client, job, address or number”.</p>
+      <p class="text-secondary"><b>Why:</b> An empty field that says “Search” leaves people guessing what will match.</p>
+      
+      <p class="rule-meta"><span class="badge">schema</span> <span class="badge">check</span> <span class="text-secondary">· Table rows research</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-group">
+    <header class="card-header rule-head"><h3><code>L-group</code> Group only by a status, a person or a category</h3><span class="badge" data-tone="warning">Proposed</span></header>
+    <div class="card-body rule-body">
+      <p>Display settings offers grouping by columns of type status, person, record, category or address (by city), never by names, money or dates.</p>
+      <p class="text-secondary"><b>Why:</b> Groups need a handful of values; a group per row isn't a group.</p>
+      
+      <p class="rule-meta"><span class="badge">check</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-words">
+    <header class="card-header rule-head"><h3><code>L-words</code> Counts, empty states and confirmations use the noun</h3><span class="badge" data-tone="success">Decided</span></header>
+    <div class="card-body rule-body">
+      <p>“132 jobs”, “Jobs you create show up here”, “Delete 3 jobs?”: every sentence about rows is built from the noun, so no list writes its own.</p>
+      <p class="text-secondary"><b>Why:</b> Consistent copy without anyone writing it.</p>
+      
+      <p class="rule-meta"><span class="badge">schema</span> <span class="badge">renderer</span> <span class="text-secondary">· D28</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-explain">
+    <header class="card-header rule-head"><h3><code>L-explain</code> Explanations use the screen's own words</h3><span class="badge" data-tone="success">Decided</span></header>
+    <div class="card-body rule-body">
+      <p>A figure's explanation names statuses and labels exactly as the screen shows them: {status} for a status, [Label] for any other label.</p>
+      <p class="text-secondary"><b>Why:</b> The note beside the cards can't say “won” when the cards say Booked.</p>
+      
+      <p class="rule-meta"><span class="badge">check</span> <span class="text-secondary">· D27</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-phone-row">
+    <header class="card-header rule-head"><h3><code>L-phone-row</code> On phones, a row has four corners and an unbroken name</h3><span class="badge" data-tone="success">Decided</span></header>
+    <div class="card-body rule-body">
+      <p>Below 768 a row is an item, not a table row: the id and a date top left, the key figure top right, the name across the full width (wrapping to two lines, never cut on the first), then the place or description bottom left and the status bottom right. No checkbox column: selecting is a mode (Select, or a long press).</p>
+      <p class="text-secondary"><b>Why:</b> Our phone rows cut 24 of 25 job names; every source says lead with the name and let it wrap.</p>
+      
+      <p class="rule-meta"><span class="badge">renderer</span> <span class="text-secondary">· D32, Tables on phones research</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-ask">
+    <header class="card-header rule-head"><h3><code>L-ask</code> Ask what the screenshot can't show</h3><span class="badge" data-tone="success">Decided</span></header>
+    <div class="card-body rule-body">
+      <p>The front office asks, rather than guesses, anything the screenshot can't show: the questions below, most important first. Seven at most in one message; the rest take their defaults and are listed as assumptions. Contradictions in the screenshot (a sort arrow the rows don't follow, a card count the rows contradict) are always worth a question.</p>
+      <p class="text-secondary"><b>Why:</b> A confident guess that's wrong costs more than a question.</p>
+      <p class="rule-survey"><b>Survey asks when unclear:</b> “Which of these statuses means the work is won, underway, done or lost?” <span class="text-secondary">Default: Read from the status names when they're unambiguous (Paid is done, Declined is lost).</span></p>
+      <p class="rule-meta"><span class="badge">survey</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-case">
+    <header class="card-header rule-head"><h3><code>L-case</code> Sentence case everywhere</h3><span class="badge" data-tone="success">Decided</span></header>
+    <div class="card-body rule-body">
+      <p>Headers, statuses, cards, views and buttons are in sentence case: “In progress”, “Past due”, “Create job”. Names of people, companies and products keep their capitals.</p>
+      <p class="text-secondary"><b>Why:</b> The system writes everything in sentence case; Title Case reads as shouting in a dense table.</p>
+      
+      <p class="rule-meta"><span class="badge">check</span> <span class="text-secondary">· CLAUDE.md</span></p>
+    </div>
+  </article></div>
+  </section>
+
+  <section class="spec-section">
+    <h2>The survey's questions</h2>
+    <p class="text-secondary">What the front office asks when a screenshot can't answer, most important first. Seven at most in one message; the rest take their defaults and are listed for review.</p>
+    <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>Asks</th><th>When</th><th>Default</th><th>Rule</th></tr></thead><tbody>
+      <tr><td>“When someone clicks a {noun}, should a summary open beside the list, or should it go straight to the full {noun}?”</td><td>always</td><td>Beside the list (peek).</td><td><a href="#L-row-click"><code>L-row-click</code></a></td></tr><tr><td>“The {what} is cut off at the edge. What is it, and are there more past it?”</td><td>when columns or cards run off the edge</td><td>Leave it out and list it as dropped.</td><td><a href="#L-ask"><code>L-ask</code></a></td></tr><tr><td>“I can see {statuses}. Are there others the screenshot doesn't show? Which means won, underway, done or lost?”</td><td>when statuses are seen</td><td>Only the ones seen, with stages read from their names.</td><td><a href="#L-status-stage"><code>L-status-stage</code></a></td></tr><tr><td>“What do the {cards} cards count? Cards here are statuses, so I'll turn the others into saved views.”</td><td>when cards aren't statuses</td><td>Statuses become cards; segments become saved views; derived conditions become derived statuses.</td><td><a href="#L-summary"><code>L-summary</code></a></td></tr><tr><td>“What can people do to several {nouns} at once, and is any of it destructive?”</td><td>when checkboxes show without a bulk bar</td><td>Unresolved: asked, not invented.</td><td><a href="#L-selection"><code>L-selection</code></a></td></tr><tr><td>“What decides each row's button, and what's under More actions?”</td><td>when rows carry buttons</td><td>One per status, as seen; the rest in ···.</td><td><a href="#L-next-step"><code>L-next-step</code></a></td></tr><tr><td>“What do you call one row, and what does + make?”</td><td>when the title names two kinds, or the + has no label</td><td>The broader noun in the title (“customer” for Leads and customers); Add for kept records, Create for made ones.</td><td><a href="#L-words"><code>L-words</code></a></td></tr><tr><td>“Which order should the list open in?”</td><td>when no arrow shows, or the rows don't follow it</td><td>As L-sort says.</td><td><a href="#L-sort"><code>L-sort</code></a></td></tr><tr><td>“Is {value} the total, or what's still owed?”</td><td>when a number has no label</td><td>The total.</td><td><a href="#L-types"><code>L-types</code></a></td></tr><tr><td>“What does search look in, and are there columns that are hidden by default?”</td><td>always, merged into another question</td><td>The visible text columns; no hidden ones.</td><td><a href="#L-search"><code>L-search</code></a></td></tr><tr><td>“Should the page offer Export?”</td><td>never on its own</td><td>Only if the original shows it.</td><td><a href="#L-ask"><code>L-ask</code></a></td></tr>
+    </tbody></table></div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Dropped by design</h2>
+    <p class="text-secondary">What an original page may have that a rebuilt one won't, and why.</p>
+    <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>What</th><th>Why</th></tr></thead><tbody>
+      <tr><td>A refresh button beside the title</td><td>Lists stay current on their own; live areas update in place (I13).</td></tr><tr><td>A page title that differs from its menu item</td><td>L-title.</td></tr><tr><td>An icon-only + for create</td><td>L-create: it says what it makes.</td></tr><tr><td>“Search this table…”</td><td>L-search: it says what it looks in.</td></tr><tr><td>Times of day in list cells, except today and yesterday</td><td>L-types: the record has the full time.</td></tr><tr><td>A second sort arrow</td><td>L-sort: one sort.</td></tr><tr><td>Shell controls (company switcher, “Use old navigation”, global search)</td><td>The shell, not the page.</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Column types</h2>
+    <p class="text-secondary">One word per column decides six things (rule <a href="#L-types">L-types</a>).</p>
+    <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>Type</th><th>Aligns</th><th>Shows as</th><th>Sorts</th><th>Filter</th><th>On a phone</th></tr></thead><tbody>
+      <tr><td><code>name</code></td><td>start</td><td>Two lines: title and detail, from the column's templates</td><td>A–Z</td><td>none (search finds it)</td><td>the name line, full width</td></tr><tr><td><code>text</code></td><td>start</td><td>As is, one line</td><td>A–Z</td><td>none, or search</td><td>leaves first</td></tr><tr><td><code>id</code></td><td>start</td><td>As is, tabular figures</td><td>A–Z</td><td>none (search finds it)</td><td>overline, top left</td></tr><tr><td><code>money</code></td><td>end</td><td>$1,234.56, tabular; the column's empty text when there's none</td><td>largest first</td><td>range (min, max)</td><td>top right</td></tr><tr><td><code>number</code></td><td>end</td><td>1,234, tabular</td><td>largest first</td><td>range</td><td>top right if it's the key figure</td></tr><tr><td><code>percent</code></td><td>end</td><td>12%, tabular</td><td>largest first</td><td>range</td><td>leaves</td></tr><tr><td><code>count</code></td><td>end</td><td>“3 estimates”, or the column's empty text</td><td>largest first</td><td>range</td><td>leaves</td></tr><tr><td><code>date</code></td><td>start</td><td>Relative within a week (“2 days ago”), else 7 Oct; the year only when it isn't this one</td><td>newest first</td><td>date presets (last 7, 30, 90 days …)</td><td>overline, after the id</td></tr><tr><td><code>status</code></td><td>start</td><td>Badge with the stage's colour and shape</td><td>lifecycle order</td><td>multi-select of values, as badges</td><td>bottom right</td></tr><tr><td><code>person</code></td><td>start</td><td>Avatar and name</td><td>A–Z</td><td>multi-select of people, “Me” first</td><td>leaves</td></tr><tr><td><code>category</code></td><td>start</td><td>Neutral tag</td><td>A–Z</td><td>multi-select of values</td><td>overline or bottom left</td></tr><tr><td><code>address</code></td><td>start</td><td>Street, city; one line</td><td>A–Z by city</td><td>multi-select of cities</td><td>bottom left</td></tr><tr><td><code>contact</code></td><td>start</td><td>Email over phone</td><td>A–Z</td><td>none (search finds it)</td><td>leaves</td></tr><tr><td><code>datetime</code></td><td>start</td><td>Like date, with the time when it's today or yesterday (“Today 7:30pm”); the time otherwise in the record</td><td>newest first</td><td>date presets</td><td>overline, after the id</td></tr><tr><td><code>duration</code></td><td>end</td><td>Whole units with the column's unit: “40 days”</td><td>largest first</td><td>range</td><td>overline or leaves</td></tr><tr><td><code>record</code></td><td>start</td><td>Avatar (initials of the record) and name; a link to that record. Any linked record: a customer, vendor, quote or job</td><td>A–Z</td><td>multi-select of records, searchable</td><td>in the name's title, or leaves</td></tr><tr><td><code>flags</code></td><td>start</td><td>Up to two attention badges, then “+n” (“COI missing”, “Licence missing”); nothing when clear</td><td>most flags first</td><td>has any, or a chosen flag</td><td>under the name</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <section class="spec-section">
+    <h2>The page description</h2>
+    <p class="text-secondary">Everything a list page needs, as data. Claude fills this from a screenshot plus a short survey; the renderer turns it into the page; check.mjs holds it to the rules in rules.json. Anything the description doesn't say comes from the rules, never from the page's author.</p>
+    
+  <h3 class="field-title">Page</h3>
+  <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>Field</th><th>Takes</th><th>Means</th></tr></thead>
+  <tbody><tr><td><code>recipe</code> <span class="text-tertiary">required</span></td><td>“list”</td><td>The page type. Only lists for now.</td></tr><tr><td><code>schemaVersion</code> <span class="text-tertiary">required</span></td><td>“1”</td><td></td></tr><tr><td><code>nav</code> <span class="text-tertiary">required</span></td><td>string</td><td>The menu item that opens this page (its id in the shell's menu). The page title is that item's label (rule L-title), so there is no title field.</td></tr><tr><td><code>noun</code> <span class="text-tertiary">required</span></td><td>object</td><td>What one row is, in the product's words, lower case. Drives the count (“132 jobs”), the create label, empty states and confirmations.</td></tr><tr><td><code>source</code></td><td>object</td><td>Where the description came from, for review.</td></tr><tr><td><code>columns</code> <span class="text-tertiary">required</span></td><td>list of columns</td><td>In reading order, left to right. Hidden columns are offered under Columns in Display settings.</td></tr><tr><td><code>status</code></td><td>object</td><td>The lifecycle column, if the list has one. Each value takes its colour and shape from its stage (rule L-status-stage).</td></tr><tr><td><code>summary</code></td><td>object</td><td>The cards above the list. Status slices are filters as well as figures (rule L-summary).</td></tr><tr><td><code>search</code> <span class="text-tertiary">required</span></td><td>object</td><td></td></tr><tr><td><code>dateRange</code></td><td>object</td><td>The date the toolbar's date range picker applies to. Leave out for lists without a meaningful date.</td></tr><tr><td><code>filters</code> <span class="text-tertiary">required</span></td><td>list of filters</td><td>What “Add filter” offers, in order. The picker comes from the column's type (rule L-types).</td></tr><tr><td><code>sort</code> <span class="text-tertiary">required</span></td><td>object</td><td>The one default sort (rule L-sort).</td></tr><tr><td><code>group</code></td><td>object</td><td></td></tr><tr><td><code>views</code></td><td>list of views</td><td>Saved views offered in the views menu. The first is the default.</td></tr><tr><td><code>rowClick</code> <span class="text-tertiary">required</span></td><td><code>peek</code> · <code>open</code></td><td>What clicking a row does (rule L-row-click): peek opens the record beside the list (a side sheet below 1280); open goes to the record itself.</td></tr><tr><td><code>selection</code> <span class="text-tertiary">required</span></td><td>object</td><td>Checkboxes and the bulk bar (rule L-selection).</td></tr><tr><td><code>create</code></td><td>object or null</td><td>The page's one main action (rule L-create). Null when the list can't create.</td></tr><tr><td><code>export</code></td><td>boolean</td><td>Whether the page header offers Export. False unless the original shows it or the person asks.</td></tr><tr><td><code>actions</code></td><td>object</td><td>Actions on one row: in the row's ··· menu and the record.</td></tr><tr><td><code>record</code></td><td>object</td><td>What the peek (or the record) shows first. Left out: the name, status, key figure, the fields of columns priority 4 and up, and the timeline.</td></tr><tr><td><code>fields</code></td><td>list of fields</td><td>Data the page uses but doesn't show as a column: keys for the name's templates, search, the record and notes (client, number, address). Columns are fields too, so don't repeat them here.</td></tr><tr><td><code>unresolved</code></td><td>list of object</td><td>Questions asked but not answered yet. The checker treats these fields as pending: what would be an error becomes a warning.</td></tr><tr><td><code>dropped</code></td><td>list of object</td><td>Parts of the original left out, and why (a rule, a duplicate, nothing to map it to).</td></tr><tr><td><code>assumptions</code></td><td>list of assumptions</td><td>What was assumed rather than seen or answered, so a reviewer can check it.</td></tr></tbody></table></div>
+    
+  <h3 class="field-title">Column</h3>
+  <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>Field</th><th>Takes</th><th>Means</th></tr></thead>
+  <tbody><tr><td><code>key</code> <span class="text-tertiary">required</span></td><td>string</td><td></td></tr><tr><td><code>label</code> <span class="text-tertiary">required</span></td><td>string</td><td>The header, sentence case.</td></tr><tr><td><code>type</code> <span class="text-tertiary">required</span></td><td><code>name</code> · <code>text</code> · <code>id</code> · <code>money</code> · <code>number</code> · <code>percent</code> · <code>count</code> · <code>duration</code> · <code>date</code> · <code>datetime</code> · <code>status</code> · <code>person</code> · <code>category</code> · <code>address</code> · <code>contact</code> · <code>record</code> · <code>flags</code></td><td>Decides alignment, format, sorting, the filter picker and where the value sits on a phone (rule L-types). record is a linked record (a customer, a vendor) with its avatar; person is a teammate; flags is a set of attention badges (“COI missing”, “Licence missing”), not a lifecycle.</td></tr><tr><td><code>priority</code> <span class="text-tertiary">required</span></td><td>integer</td><td>1 is the row's name (exactly one); 2 the key figure, left unused when the list has none; 3 the status; higher numbers leave first as the screen narrows (rule L-priority). Numbers needn't be consecutive.</td></tr><tr><td><code>hidden</code></td><td>boolean</td><td>Off by default; offered under Columns.</td></tr><tr><td><code>title</code></td><td>string</td><td>Name column only: what the first line shows, with {key} fields from columns or fields, e.g. “{client} · {job}”. Separators only, no literal words (“Invoice #”): the header already says what the row is. A missing value drops with its separator. A column folded into the name stays a hidden column if people filter or sort by it, otherwise it becomes a field.</td></tr><tr><td><code>detail</code></td><td>string</td><td>Name column only: the quieter second line, e.g. “{number} · {address}”.</td></tr><tr><td><code>total</code></td><td>boolean</td><td>Numeric columns: show a total under the list.</td></tr><tr><td><code>empty</code></td><td>string</td><td>What an empty cell says (“No price yet”, “Unnamed vendor”); a dash otherwise. On the name column it replaces a missing name, not a placeholder one.</td></tr><tr><td><code>leading</code></td><td><code>avatar</code> · <code>icon</code> · <code>none</code></td><td>Name column only: what sits before the name. avatar takes initials from avatarFrom; icon is the record kind's icon.</td></tr><tr><td><code>avatarFrom</code></td><td>string</td><td>Name column only: the field whose initials and colour the avatar shows (often the customer). Missing value: the record kind's icon instead.</td></tr><tr><td><code>unit</code></td><td>string</td><td>count and duration: the unit noun, singular (“estimate”, “day”), for “3 estimates”, “40 days”.</td></tr></tbody></table></div>
+    
+  <h3 class="field-title">Status value</h3>
+  <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>Field</th><th>Takes</th><th>Means</th></tr></thead>
+  <tbody><tr><td><code>value</code> <span class="text-tertiary">required</span></td><td>string</td><td></td></tr><tr><td><code>label</code> <span class="text-tertiary">required</span></td><td>string</td><td></td></tr><tr><td><code>stage</code> <span class="text-tertiary">required</span></td><td><code>new</code> · <code>draft</code> · <code>waiting</code> · <code>won</code> · <code>underway</code> · <code>done</code> · <code>lost</code> · <code>late</code> · <code>neutral</code></td><td>Where the value sits in the lifecycle; picks its colour and shape.</td></tr><tr><td><code>derived</code></td><td>string</td><td>For a status worked out from other fields rather than set by people: how, in words (“outstanding and past its due date”). A row that meets it shows this status instead of its stored one, and counts only here; list it right after the status it comes from.</td></tr></tbody></table></div>
+    
+  <h3 class="field-title">Field</h3>
+  <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>Field</th><th>Takes</th><th>Means</th></tr></thead>
+  <tbody><tr><td><code>key</code> <span class="text-tertiary">required</span></td><td>string</td><td></td></tr><tr><td><code>label</code></td><td>string</td><td></td></tr><tr><td><code>type</code> <span class="text-tertiary">required</span></td><td><code>name</code> · <code>text</code> · <code>id</code> · <code>money</code> · <code>number</code> · <code>percent</code> · <code>count</code> · <code>duration</code> · <code>date</code> · <code>datetime</code> · <code>status</code> · <code>person</code> · <code>category</code> · <code>address</code> · <code>contact</code> · <code>record</code> · <code>flags</code></td><td>Decides alignment, format, sorting, the filter picker and where the value sits on a phone (rule L-types). record is a linked record (a customer, a vendor) with its avatar; person is a teammate; flags is a set of attention badges (“COI missing”, “Licence missing”), not a lifecycle.</td></tr></tbody></table></div>
+    
+  <h3 class="field-title">Action</h3>
+  <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>Field</th><th>Takes</th><th>Means</th></tr></thead>
+  <tbody><tr><td><code>label</code> <span class="text-tertiary">required</span></td><td>string</td><td></td></tr><tr><td><code>tone</code></td><td><code>danger</code></td><td>Destructive: last in its list, always confirmed (rule L-risky).</td></tr><tr><td><code>menu</code></td><td>list of string</td><td>A submenu's choices.</td></tr></tbody></table></div>
+  </section>
+
+  <section class="spec-section">
+    <h2>The concept's lists, described</h2>
+    <p class="text-secondary">The four lists in the data list concept, written as descriptions and checked when this page was built. A failure here is the concept breaking a rule, which is the point of checking.</p>
+    <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>File</th><th>What it is</th><th>Check</th></tr></thead><tbody><tr><td><code>concept/catalog.json</code></td><td>9 columns · no status · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/customers.json</code></td><td>9 columns · 3 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/invoices.json</code></td><td>8 columns · 4 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/jobs.json</code></td><td>8 columns · 5 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr></tbody></table></div>
+  </section>
+</main>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+/* Record: one row's details, beside the list from 1280 up (a sticky card) and a side sheet below that.
+   <section class="card detail" aria-labelledby="detail-title">
+     <header class="detail-head"><h2 id="detail-title" tabindex="-1">EST-2136</h2>…open, close…</header>
+     <div class="detail-scroll"><div class="detail-section detail-hero">…status, amount, timeline, actions…</div>
+       <div class="detail-section"><dl class="detail-fields">…</dl></div></div>
+   </section>
+   The sheet: <dialog class="dialog peek">…the same parts…</dialog>. D22, D23, I6 */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  .detail.card {
+    --_top: calc(var(--list-toolbar-top, 0px) + var(--space-4));
+    position: sticky; inset-block-start: var(--_top);
+    display: flex; flex-direction: column; max-block-size: calc(100dvh - var(--_top) - var(--space-4));
+    padding: 0; border-color: var(--color-line-card); overflow: hidden;
+    transition: inset-block-start 300ms var(--ease-out), max-block-size 300ms var(--ease-out);
+  }
+  :root[data-chrome-hidden] .detail.card { --_top: var(--space-4); }
+  .detail[hidden] { display: none; }
+  .detail-head { display: flex; align-items: center; gap: var(--space-1); flex: none; padding: var(--space-3) var(--space-3) var(--space-3) var(--space-5); border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
+  .detail-head h2 { flex: 1; min-inline-size: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-sans); font-size: var(--text-sm); font-weight: var(--font-weight-regular); color: var(--color-content-secondary); }
+  .detail-head h2:focus { outline: none; }
+  .detail-head h2:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
+  .detail-head .button svg, .detail-doc-head svg { color: var(--color-content-secondary); }
+  .detail-sep { inline-size: var(--border-width-default); block-size: var(--space-5); margin-inline: var(--space-1); background: var(--color-line-subtle); }
+  .detail-scroll { overflow: auto; overscroll-behavior: contain; }
+  .detail-section { margin: 0; padding: var(--space-5); }
+  .detail-section + .detail-section { border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
+  .detail-hero { display: grid; justify-items: start; gap: var(--space-1); }
+  .detail-amount { margin: var(--space-2) 0 0; font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1.15; font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; }
+  .detail-amount.is-empty { color: var(--color-content-tertiary); font-size: var(--text-2xl); }
+  .detail-cents { font-size: 0.5em; vertical-align: 0.8em; margin-inline-start: 1px; }
+  .detail-sub { margin: 0; font-size: var(--text-sm); color: var(--color-content-secondary); }
+  /* one row: both actions and More when they fit; when they don't, the first action and More, and the
+     second moves into More (data-list.js measures). Buttons never shrink below their label, so a row that
+     doesn't fit shows as overflow to measure, instead of squeezing the labels */
+  .detail-actions { display: flex; gap: var(--space-2); justify-self: stretch; min-inline-size: 0; margin-block-start: var(--space-5); }
+  .detail-actions .button { flex: 1 1 auto; gap: var(--space-2); min-inline-size: max-content; padding-inline: var(--space-3); white-space: nowrap; }
+  .detail-actions .button[hidden] { display: none; }
+  .detail-actions .button svg { flex: none; }
+  .detail-fields { display: grid; gap: var(--space-3); font-size: var(--text-sm); }
+  .detail-fields > div { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); min-block-size: var(--space-6); }
+  .detail-fields dt { flex: none; color: var(--color-content-secondary); }
+  .detail-fields dd { margin: 0; min-inline-size: 0; text-align: end; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .detail-fields .cell-person { display: inline-flex; align-items: center; gap: var(--space-2); }
+  .detail-doc { display: grid; gap: var(--space-2); }
+  .detail-doc-head { display: flex; align-items: center; justify-content: space-between; font-size: var(--text-sm); color: var(--color-content-secondary); }
+  .detail .link-button { display: inline-flex; align-items: center; gap: var(--space-1); padding: 0; border: 0; background: none; color: var(--color-content-link); font: inherit; font-size: var(--text-sm); cursor: pointer; }
+  .detail .link-button svg { color: currentColor; }
+  @media (hover: hover) { .detail .link-button:hover { text-decoration: underline; text-underline-offset: 3px; } }
+  .detail .link-button:focus-visible, .detail-file:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
+  .detail-file { display: flex; align-items: center; gap: var(--space-3); inline-size: 100%; padding: var(--space-3) var(--space-4); border: var(--border-width-default) solid var(--color-line-default); border-radius: var(--radius-md); background: var(--color-surface-default); color: var(--color-content-primary); font: inherit; font-size: var(--text-sm); text-align: start; cursor: pointer; }
+  .detail-file span { flex: 1; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .detail-file svg { flex: none; color: var(--color-content-secondary); }
+  @media (hover: hover) { .detail-file:hover { border-color: var(--color-line-strong); } }
+
+  /* the timeline: a line through the events, solid for what happened, dashed to the next step.
+     Job events wear the status shape they moved the job to; others are small dots, green for money
+     in, red for a miss; the next step is a hollow dashed ring */
+  .timeline { list-style: none; justify-self: stretch; margin: var(--space-5) 0 0; padding: 0; font-size: var(--text-sm); }
+  .timeline li { position: relative; display: grid; grid-template-columns: var(--space-4) minmax(0, 1fr); column-gap: var(--space-3); padding-block-end: var(--space-4); }
+  .timeline li:last-child { padding-block-end: 0; }
+  .timeline li::before { content: ""; position: absolute; inset-block: calc(var(--space-1) + 14px) 2px; inset-inline-start: calc(var(--space-2) - 1px); inline-size: 0; border-inline-start: 2px solid var(--color-action-accent); }
+  .timeline li[data-line="dashed"]::before { border-inline-start-style: dashed; border-color: var(--color-line-strong); }
+  .timeline li[data-line="dotted"]::before { border-inline-start-style: dotted; }
+  .timeline li[data-line="none"]::before { content: none; }
+  .tl-dot { justify-self: center; margin-block-start: var(--space-1); inline-size: var(--space-2); block-size: var(--space-2); margin-inline: auto; border-radius: var(--radius-full); background: var(--color-action-accent); translate: 0 3px; }
+  .tl-dot.mark { inline-size: 14px; block-size: 14px; translate: 0 0; background: var(--_dot); }
+  .tl-dot[data-tone="good"] { background: var(--color-status-booked-dot); }
+  .tl-dot[data-tone="bad"] { background: var(--color-feedback-danger-accent); }
+  .tl-dot[data-next] { inline-size: 14px; block-size: 14px; translate: 0 0; background: none; border: 2px dashed var(--color-line-strong); box-sizing: border-box; }
+  .timeline p { margin: 0; }
+  .tl-what { font-weight: var(--font-weight-medium); color: var(--color-content-primary); }
+  .tl-meta { margin-block-start: var(--space-0-5); font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  li[data-next] .tl-what { color: var(--color-content-secondary); }
+  .tl-more { min-block-size: var(--space-6); }
+  .tl-more .link-button { grid-column: 2; }
+  .tl-more > .link-button svg { inline-size: auto; block-size: 0.625rem; }
+
+  /* narrower screens: the same record as a sheet from the side */
+  .dialog.peek {
+    --_w: 26rem;
+    margin: 0 0 0 auto;
+    inline-size: min(var(--_w), 100vw);
+    block-size: 100dvh;
+    max-block-size: none;
+    border-radius: 0;
+    transform: translateX(var(--space-6));
+  }
+  .dialog.peek[open] { display: flex; flex-direction: column; transform: none; }
+  @starting-style { .dialog.peek[open] { transform: translateX(var(--space-6)); } }
+  .dialog.peek .detail-scroll { flex: 1; }
+  @media (max-width: 767px) { .dialog.peek { inline-size: 100vw; max-inline-size: none; } }
+}

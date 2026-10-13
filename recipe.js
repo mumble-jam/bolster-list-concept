@@ -16,10 +16,10 @@ window.BDS_RECIPE = (() => {
   // ---------- a stage's look (rule L-status-stage): the colour and, where the system has one, the shape ----------
   const STAGE = {
     new: { attr: 'data-status="lead"', dot: "var(--color-status-lead-dot)" },
-    draft: { attr: 'data-status="draft"', dot: "var(--status-draft-mark)", mark: "dashed" },
-    waiting: { attr: 'data-status="pending"', dot: "var(--status-pending-mark)", mark: "quarter" },
+    draft: { attr: 'data-status="draft"', dot: "var(--color-status-draft-mark)", mark: "dashed" },
+    waiting: { attr: 'data-status="pending"', dot: "var(--color-status-pending-mark)", mark: "quarter" },
     won: { attr: 'data-status="booked"', dot: "var(--color-status-booked-dot)", mark: "half" },
-    underway: { attr: 'data-status="in-progress"', dot: "var(--status-in-progress-mark)", mark: "three" },
+    underway: { attr: 'data-status="in-progress"', dot: "var(--color-status-in-progress-mark)", mark: "three" },
     done: { attr: 'data-tone="success"', dot: "var(--color-feedback-success-accent)" },
     lost: { attr: 'data-tone="danger"', dot: "var(--color-feedback-danger-accent)", mark: "slash" },
     late: { attr: 'data-tone="danger"', dot: "var(--color-feedback-danger-accent)" },

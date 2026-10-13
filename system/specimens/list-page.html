@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>List page · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>
+  .lp-frames { display: flex; flex-wrap: wrap; gap: var(--space-6); align-items: flex-start; }
+  .lp-frame { display: grid; gap: var(--space-2); min-inline-size: 0; }
+  .lp-frame iframe { border: 1px solid var(--color-line-default); border-radius: var(--radius-lg); background: var(--color-surface-canvas); }
+  .lp-frame figcaption { font-size: var(--text-sm); color: var(--color-content-secondary); }
+  .lp-desk { inline-size: min(100%, 60rem); aspect-ratio: 16 / 10; }
+  .lp-phone { inline-size: 375px; max-inline-size: 100%; block-size: 720px; }
+  .lp-anatomy { counter-reset: part; display: grid; gap: var(--space-3); max-inline-size: 70ch; margin: 0; padding: 0; list-style: none; }
+  .lp-anatomy li { display: grid; grid-template-columns: var(--space-8) minmax(0, 1fr); gap: var(--space-2); }
+  .lp-anatomy li::before { counter-increment: part; content: counter(part); display: grid; place-items: center; inline-size: var(--space-6); block-size: var(--space-6); border-radius: var(--radius-full); background: var(--color-surface-tint); font-size: var(--text-xs); font-weight: 500; }
+  .lp-anatomy b { font-weight: 500; }
+</style>
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>List page</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">The page that lists one kind of record: jobs, invoices, customers, the catalog. It's built from the components below, arranged by <code>patterns/list-page.css</code>, and described page by page with the list recipe, so a new list is a description, not new code. The frames are the live example: try a status card, a filter, a row, and Select on the phone.</p>
+
+  <section class="spec-section">
+    <h2>Live</h2>
+    <div class="lp-frames">
+      <figure class="lp-frame" style="margin:0"><iframe class="lp-desk" src="../../index.html#jobs" title="The jobs list, desktop" loading="lazy"></iframe><figcaption>Desktop (scaled to the frame)</figcaption></figure>
+      <figure class="lp-frame" style="margin:0"><iframe class="lp-phone" src="../../index.html#invoices" title="The invoices list at phone width" loading="lazy"></iframe><figcaption>Phone, 375 wide</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Anatomy, top to bottom</h2>
+    <ol class="lp-anatomy">
+      <li><span><b>Page header.</b> The title (with the view menu once saved views exist), Export, and Create. On phones Create floats bottom right above the tab bar and shrinks to + while you scroll; Select takes its place in the header. <a href="shell.html">App shell</a></span></li>
+      <li><span><b>Summary cards.</b> One status card per status, after All, and one insight card. On phones the insight leads. <a href="summary-cards.html">Summary cards</a></span></li>
+      <li><span><b>The table card.</b> Its header (add filter, search, the date range, display settings), the chips once something is set, the table, the footer. <a href="table-card.html">Table card</a></span></li>
+      <li><span><b>The record.</b> A row click peeks (beside the list from 1280, a side sheet below) or opens the record itself; the list says which. <a href="record.html">Record</a></span></li>
+      <li><span><b>The floating bar.</b> Bulk actions once rows are ticked; on phones selecting is a mode. <a href="floating-bar.html">Floating bar</a></span></li>
+      <li><span><b>Menus and popovers.</b> Filters, display settings and row actions; bottom sheets on phones. <a href="popover.html">Popover</a></span></li>
+      <li><span><b>States.</b> Loading, empty, no results and error, inside the table card. <a href="states.html">States</a></span></li>
+    </ol>
+  </section>
+
+  <section class="spec-section">
+    <h2>Behaviour</h2>
+    <table class="spec-table">
+      <thead><tr><th>What</th><th>How</th><th>Where it's written</th></tr></thead>
+      <tbody>
+        <tr><td>Scrolling</td><td>The title scrolls away. Into the list, scrolling down hides the top bar and the card header (the column header stays on desktop, the tab bar on phones); a few pixels back up brings them back in 300 ms. Menus, a focused field, or Tab into a bar keep them.</td><td class="spec-label">list-page.css · data-chrome-hidden</td></tr>
+        <tr><td>A row click</td><td>Peek or open, declared per list. Checkboxes never open; the name stays a real link.</td><td class="spec-label">D30 · I6</td></tr>
+        <tr><td>Selecting</td><td>Checkboxes and a select-all header on desktop; on phones Select or a long press, then taps tick.</td><td class="spec-label">I6 · D32</td></tr>
+        <tr><td>Columns</td><td>Widths from the headers, never the rows; the checkbox and name stay pinned when the table scrolls sideways.</td><td class="spec-label">data-table.css</td></tr>
+        <tr><td>Phone rows</td><td>Four corners: number and date, amount, the name across the full width, where and status.</td><td class="spec-label">D32 · L-phone-row</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="spec-section">
+    <h2>Building a new list</h2>
+    <p>Describe it, don't draw it: a page description says what the page is (columns and their types, statuses, cards, filters, actions, what a click does) and the rules decide the rest. The <a href="list-recipe.html">list recipe</a> holds the rules, the survey's questions and every field; the <code>bolster-page</code> skill turns a screenshot and a short survey into a description; the renderer draws it in this page.</p>
+  </section>
+</main>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

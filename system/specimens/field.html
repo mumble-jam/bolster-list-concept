@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Field · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Field</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">Text inputs, text areas, native selects and money inputs share one field frame: label above, control, helper below. Borders clear 3:1 against the page so the control is findable (the as-is border was 2.9:1). Focus turns the border blue with a 1px inner ring. Errors colour both the border and the helper.</p>
+
+  <section class="spec-section">
+    <h2>States</h2>
+    <div class="spec-panel">
+      <div class="spec-grid">
+        <div class="field"><label class="field-label" for="f1">Default</label><input class="input" id="f1" placeholder="Lakeside Drywall"><p class="field-helper">Shown on proposals</p></div>
+        <div class="field"><label class="field-label" for="f2">Hover</label><input class="input" id="f2" value="Lakeside Drywall" data-state="hover"></div>
+        <div class="field"><label class="field-label" for="f3">Focus</label><input class="input" id="f3" value="Lakeside Drywall" data-state="focus"></div>
+        <div class="field"><label class="field-label" for="f4">Error</label><input class="input" id="f4" value="hello@" aria-invalid="true" aria-describedby="f4h"><p class="field-helper" id="f4h">Enter a full email address, like name@company.com</p></div>
+        <div class="field"><label class="field-label" for="f5">Disabled</label><input class="input" id="f5" value="Lakeside Drywall" disabled></div>
+        <div class="field"><label class="field-label" for="f6">Read only</label><input class="input" id="f6" value="LD-100000678" readonly></div>
+        <div class="field"><label class="field-label" for="f7">Optional <span class="field-optional">(optional)</span></label><input class="input" id="f7"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Sizes</h2>
+    <p>32 for dense tables, 40 by default, 48 for touch-first forms. A form uses one size throughout, including its selects (the as-is form mixed 48px fields with 40px selects).</p>
+    <div class="spec-panel">
+      <div class="spec-grid">
+        <div class="field" data-size="sm"><label class="field-label" for="s1">Small · 32</label><input class="input" id="s1" value="12"></div>
+        <div class="field"><label class="field-label" for="s2">Medium · 40</label><input class="input" id="s2" value="Lakeside Drywall"></div>
+        <div class="field" data-size="lg"><label class="field-label" for="s3">Large · 48</label><input class="input" id="s3" value="Lakeside Drywall"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Select, text area, money, search</h2>
+    <div class="spec-panel">
+      <div class="spec-grid">
+        <div class="field"><label class="field-label" for="c1">Company type</label>
+          <div class="select"><select class="input" id="c1"><option value="">Choose a type</option><option>Drywall and insulation</option><option>General contractor</option><option>Flooring</option></select></div>
+          <p class="field-helper">Native select for short lists; long searchable lists use the picker dialog</p></div>
+        <div class="field"><label class="field-label" for="c2">Unit price</label>
+          <div class="input-group"><span class="input-adornment">$</span><input class="input" id="c2" data-numeric inputmode="decimal" value="1,009.10"><span class="input-adornment">per sq ft</span></div></div>
+        <div class="field"><label class="field-label visually-hidden" for="c3">Search this table</label>
+          <div class="input-group"><span class="input-adornment"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span><input class="input" id="c3" type="search" placeholder="Search this table"></div></div>
+        <div class="field" style="grid-column:1/-1"><label class="field-label" for="c4">Notes to customer</label><textarea class="input" id="c4" rows="3">Price includes removal of existing drywall.</textarea></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Rules</h2>
+    <ul class="spec-stack" style="max-width:70ch;padding-left:var(--space-5)">
+      <li>Every control has a visible label. Placeholder text is an example, never the label.</li>
+      <li>Empty values stay empty: never render "null" or "$0.00" for an unset price (the as-is settings page shows "null").</li>
+      <li>Error text says how to fix it, in sentence case.</li>
+      <li>One search field design app-wide (the audit found four).</li>
+    </ul>
+<code class="spec-code">&lt;div class="field"&gt;
+  &lt;label class="field-label" for="email"&gt;Email&lt;/label&gt;
+  &lt;input class="input" id="email" type="email" aria-describedby="email-help"&gt;
+  &lt;p class="field-helper" id="email-help"&gt;We send proposal replies here&lt;/p&gt;
+&lt;/div&gt;</code>
+  </section>
+</main>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

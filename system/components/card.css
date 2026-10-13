@@ -5,7 +5,9 @@
    <div class="filter-cards" role="radiogroup" aria-label="Filter proposals">
      <label class="filter-card"><input type="radio" name="f" checked>
        <span class="filter-card-label">All proposals</span><span class="filter-card-meta">$3,104,769.30</span><span class="filter-card-count">20</span></label>
-   </div> */
+   </div> 
+   Cards (and status cards) have a quiet body: a top line, a darker bottom edge, a contact and an ambient
+   shadow tinted with the page. data-cards="flat" on the root turns it off. */
 
 @layer tokens, base, components, utilities;
 
@@ -68,4 +70,59 @@
     box-shadow: inset 0 0 0 1px var(--color-action-accent);
   }
   :where(.filter-card:has(:focus-visible)) { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: var(--focus-ring-offset); }
+
+  /* ---------- tactile cards ----------
+     The CTAs' body, quieter, so cards read as surfaces and the buttons stay the things you press. Light falls
+     from above: a white line along the top (it carries the edge in dark, where shadows hardly show), a
+     darker bottom edge, a faint sheen and shade, then two shadows tinted with the page (cement on warm):
+     a tight contact one that seats the card and a soft ambient one that lifts it. Only the status cards
+     move, being buttons: hover lifts, a press lands at once and eases back, and a selected filter stays
+     pressed in, a toggle that's on. Every number is a --card-* property (a tuner can set them on the root);
+     data-cards="flat" on the root turns the body off. */
+  @property --_cs { syntax: "<number>"; inherits: false; initial-value: 1; }
+  @property --_ci { syntax: "<number>"; inherits: false; initial-value: 0; }
+  @property --_cl { syntax: "<length>"; inherits: false; initial-value: 0px; }
+  :root {
+    --card-radius: 12px; --card-edge: 15%; --card-lip: 0.05; --card-sheen: 0.04; --card-shade: 0.015; --card-depth: 64px;
+    --card-cy: 1px; --card-cb: 2px; --card-ca: 0.07; --card-ay: 4px; --card-ab: 10px; --card-aa: 0.045;
+    --card-line-l: 0.8; --card-line-d: 0.07; --card-dark-k: 2.5;
+    --card-lift: 1px; --card-hover-k: 1.6; --card-sink: 1px; --card-press-in: 0.1; --card-on-in: 0.07; --card-on-k: 0.3; --card-ms: 150ms;
+    /* per theme: the top line, the shadow scale and the shadow colour (cement on warm unless picked) */
+    --_card-top: var(--card-line-l); --_card-k: 1; --_card-sc: var(--card-shadow-l, var(--color-shadow-tint));
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --_card-top: var(--card-line-d); --_card-k: var(--card-dark-k); --_card-sc: #000; } }
+  :root[data-theme="dark"] { --_card-top: var(--card-line-d); --_card-k: var(--card-dark-k); --_card-sc: #000; }
+  :root:not([data-cards="flat"]) :is(.card, .slice) {
+    --_ring: 0 0 transparent;
+    border-radius: var(--card-radius);
+    border-color: var(--color-line-card);
+    border-block-end-color: color-mix(in oklab, var(--color-line-card), black var(--card-edge));
+    background-image: linear-gradient(rgb(255 255 255 / var(--card-sheen)), transparent var(--card-depth)), linear-gradient(to top, rgb(0 0 0 / var(--card-shade)), transparent var(--card-depth));
+    box-shadow:
+      var(--_ring),
+      inset 0 1px 0 rgb(255 255 255 / calc(var(--_card-top) * (1 - var(--_ci) * 6))),
+      inset 0 -1px 0 rgb(0 0 0 / var(--card-lip)),
+      inset 0 1px 3px rgb(0 0 0 / var(--_ci)),
+      0 var(--card-cy) var(--card-cb) rgb(from var(--_card-sc) r g b / calc(var(--card-ca) * var(--_card-k) * var(--_cs))),
+      0 var(--card-ay) var(--card-ab) rgb(from var(--_card-sc) r g b / calc(var(--card-aa) * var(--_card-k) * var(--_cs)));
+  }
+  :root:not([data-cards="flat"]) button.slice {
+    translate: 0 var(--_cl);
+    transition-property: --_cs, --_ci, --_cl, border-color, background-color;
+    transition-duration: var(--card-ms); transition-timing-function: var(--ease-out);
+  }
+  /* the lift and shadow say "hover", so the edge doesn't change */
+  @media (hover: hover) { :root:not([data-cards="flat"]) button.slice:hover { --_cl: calc(var(--card-lift) * -1); --_cs: var(--card-hover-k); border-color: var(--color-line-card); border-block-end-color: color-mix(in oklab, var(--color-line-card), black var(--card-edge)); } }
+  :root:not([data-cards="flat"]) button.slice[aria-pressed="true"] { --_ring: inset 0 0 0 1px var(--color-action-accent); --_ci: var(--card-on-in); --_cs: var(--card-on-k); --_cl: 0px; border-color: var(--color-action-accent); }
+  :root:not([data-cards="flat"]) button.slice:active { --_ci: var(--card-press-in); --_cs: 0; --_cl: var(--card-sink); transition-duration: 30ms; }
+  @media (prefers-reduced-motion: reduce) { :root:not([data-cards="flat"]) .slice { --_cl: 0px !important; } }
+  /* the row scrolls sideways, so it clips; room for the shadow below and the lift above, given back by the margin */
+  :root:not([data-cards="flat"]) .slice-row {
+    --_reach: max(var(--space-1), calc(var(--card-ay) + var(--card-ab)));
+    padding-block: calc(var(--space-1) + var(--card-lift)) var(--_reach);
+    margin-block: calc((var(--space-1) + var(--card-lift)) * -1) calc(var(--_reach) * -1);
+  }
+  @media (min-width: 768px) {
+    :root:not([data-cards="flat"]) .slice-row { padding-inline: max(var(--space-1), var(--card-ab)); margin-inline: calc(max(var(--space-1), var(--card-ab)) * -1); }
+  }
 }

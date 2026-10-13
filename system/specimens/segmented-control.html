@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Segmented control · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Segmented control</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">Two to four mutually exclusive options: a mode (Profit / Markup) or a view (List / Sheet / Cards). Native radios, so arrow keys work. Labels keep one weight in both states, so they don't jump when selected.</p>
+  <section class="spec-section">
+    <h2>Sizes and states</h2>
+    <div class="spec-panel">
+      <table class="spec-table">
+        <tbody>
+          <tr><td class="spec-label">sm · 32</td><td>
+            <div class="segmented" role="radiogroup" aria-label="Margin type">
+              <label class="segmented-option"><input type="radio" name="m" checked> Profit</label>
+              <label class="segmented-option"><input type="radio" name="m"> Markup</label>
+            </div></td></tr>
+          <tr><td class="spec-label">md · 40</td><td>
+            <div class="segmented" data-size="md" role="radiogroup" aria-label="Estimate view">
+              <label class="segmented-option"><input type="radio" name="v"> List</label>
+              <label class="segmented-option"><input type="radio" name="v" checked> Sheet</label>
+              <label class="segmented-option"><input type="radio" name="v"> Cards</label>
+            </div></td></tr>
+          <tr><td class="spec-label">hover · focus</td><td>
+            <div class="segmented" role="radiogroup" aria-label="Show">
+              <label class="segmented-option"><input type="radio" name="o" checked> On</label>
+              <label class="segmented-option" data-state="hover"><input type="radio" name="o"> Off</label>
+            </div>
+            <span style="display:inline-block;width:var(--space-4)"></span>
+            <div class="segmented" role="radiogroup" aria-label="Group by">
+              <label class="segmented-option" data-state="focus"><input type="radio" name="g" checked> Date</label>
+              <label class="segmented-option"><input type="radio" name="g"> Job</label>
+            </div></td></tr>
+        </tbody>
+      </table>
+    </div>
+<code class="spec-code">&lt;div class="segmented" role="radiogroup" aria-label="Margin type"&gt;
+  &lt;label class="segmented-option"&gt;&lt;input type="radio" name="margin" checked&gt; Profit&lt;/label&gt;
+  &lt;label class="segmented-option"&gt;&lt;input type="radio" name="margin"&gt; Markup&lt;/label&gt;
+&lt;/div&gt;</code>
+  </section>
+</main>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

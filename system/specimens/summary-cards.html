@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Summary cards · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Summary cards</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">A row of cards above a list: one per status, plus All, and one insight card. A status card is a button that filters the list to that status; it stays pressed in while it does. The insight card is information, not a filter. Status cards wear the status's mark (see Badge), so the shape says the status and colour only backs it up.</p>
+
+  <section class="spec-section">
+    <h2>Status cards and the insight card</h2>
+    <p>Pending is pressed: the list shows pending jobs only. Pressing it again, or All, clears it.</p>
+    <div class="spec-panel" data-surface="canvas">
+      <div class="slice-row" style="--_slices:4" role="group" aria-label="Filter by status">
+        <button class="slice" type="button" aria-pressed="false"><span class="slice-head"><span class="slice-label">All jobs</span><span class="slice-count">132</span></span><span class="slice-value">$1,284,906</span></button>
+        <button class="slice" type="button" aria-pressed="true"><span class="slice-head"><span class="slice-label"><span class="mark" data-mark="quarter" style="--_dot:var(--color-status-pending-mark)"></span>Pending</span><span class="slice-count">33</span></span><span class="slice-value">$318,420</span></button>
+        <button class="slice" type="button" aria-pressed="false"><span class="slice-head"><span class="slice-label"><span class="mark" data-mark="half" style="--_dot:var(--color-status-booked-dot)"></span>Booked</span><span class="slice-count">31</span></span><span class="slice-value">$402,115</span></button>
+        <button class="slice" type="button" aria-pressed="false" data-empty><span class="slice-head"><span class="slice-label"><span class="mark" data-mark="three" style="--_dot:var(--color-status-in-progress-mark)"></span>In progress</span><span class="slice-count">0</span></span><span class="slice-value">$0</span></button>
+        <div class="slice slice-insight" role="group" aria-labelledby="ins-label">
+          <div class="insight-primary">
+            <span class="slice-head"><span class="slice-label" id="ins-label">Win rate</span><button type="button" class="info-button" aria-label="How win rate is worked out"><i data-icon="circle-help" data-size="14"></i></button></span>
+            <span class="insight-main"><span class="slice-value">73%</span><span class="insight-counts">62 of 85 decided</span></span>
+            <div class="split-bar" role="img" aria-label="31 booked, 31 in progress or done, 23 declined"><span style="flex:31;background:var(--color-status-booked-dot)"></span><span style="flex:31;background:var(--color-status-in-progress-dot)"></span><span style="flex:23;background:var(--color-feedback-danger-accent)"></span></div>
+          </div>
+          <div class="insight-secondary"><span class="slice-label">Average won job</span><span class="insight-second-value">$14,760</span><span class="insight-sub">from 62 jobs</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Anatomy</h2>
+    <table class="spec-table">
+      <thead><tr><th>Part</th><th>Class</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Row</td><td class="spec-label">.slice-row</td><td>Equal status columns, the insight twice as wide (set <code>--_slices</code> to the number of status cards). Too narrow, and it scrolls sideways rather than wrapping.</td></tr>
+        <tr><td>Status card</td><td class="spec-label">button.slice[aria-pressed]</td><td>Label with its mark, a count top right, a figure below (Space Grotesk 20). <code>data-empty</code> greys the figure.</td></tr>
+        <tr><td>Insight card</td><td class="spec-label">.slice.slice-insight</td><td>A rate, the counts behind it, its parts as a split bar, then one more figure. The (?) explains it in the screen's own words (D27).</td></tr>
+        <tr><td>Body</td><td class="spec-label">card.css</td><td>The cards' quiet body: a top line, a darker bottom edge, two shadows tinted with the page. Status cards lift 1px on hover and sink when pressed; a pressed one stays in.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section class="spec-section">
+    <h2>Rules</h2>
+    <ul class="spec-stack" style="max-width:70ch;padding-left:var(--space-5)">
+      <li>One status card per status a person filters by, in the list's lifecycle order, after All. Cards that aren't statuses become saved views (L-summary).</li>
+      <li>At most one insight card, and only with a figure people act on. Its explanation uses the words on screen.</li>
+      <li>Phones: the insight card leads, so the overview is in the first screen; the row scrolls sideways.</li>
+    </ul>
+  </section>
+</main>
+<script src="../../shared/icons.js?v=8aa38bbc"></script>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

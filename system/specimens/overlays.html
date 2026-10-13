@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tooltip, menu and dialog · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Tooltip, menu and dialog</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">Overlays sit on the platform: tooltips are CSS only, menus use the <code>popover</code> attribute, dialogs use <code>&lt;dialog&gt;</code>. That gives Escape to close, focus handling and top-layer stacking for free, fixing the as-is overlays where Escape was ignored and focus fell to the page. Contracts: docs/interactions.md.</p>
+
+  <section class="spec-section">
+    <h2>Tooltip</h2>
+    <p>Hover (150ms delay) or keyboard focus. For icon-only buttons the tooltip is the accessible name, via aria-labelledby.</p>
+    <div class="spec-panel">
+      <div class="spec-row" style="gap:var(--space-10);padding:var(--space-8) 0">
+        <span class="tooltip-anchor">
+          <button class="button" data-variant="secondary" data-icon-only aria-labelledby="tip1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+          <span class="tooltip" role="tooltip" id="tip1">Columns and filters</span>
+        </span>
+        <span class="tooltip-anchor">
+          <button class="button" data-variant="ghost" data-icon-only aria-labelledby="tip2"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.5M13 3v2.5h-2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <span class="tooltip" role="tooltip" id="tip2" data-side="bottom">Refresh</span>
+        </span>
+        <span class="tooltip-anchor">
+          <button class="button" data-variant="ghost" data-icon-only aria-labelledby="tip3">?</button>
+          <span class="tooltip" role="tooltip" id="tip3" data-side="right" data-state="open">Pinned open for this page</span>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Menu</h2>
+    <p>Click the button. Arrow keys move, Escape or a click outside closes and focus returns to the button.</p>
+    <div class="spec-panel">
+      <div class="spec-row" style="align-items:flex-start;gap:var(--space-10)">
+        <div>
+          <button class="button" data-variant="secondary" popovertarget="m-company" aria-haspopup="menu" aria-expanded="false">Attachment Hippo inc
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <div class="menu" id="m-company" popover role="menu" aria-label="Company">
+            <button class="menu-item" role="menuitem">Switch company</button>
+            <button class="menu-item" role="menuitem">Company settings</button>
+            <hr class="menu-separator">
+            <button class="menu-item" role="menuitem" data-tone="danger">Log out</button>
+          </div>
+        </div>
+        <div>
+          <p class="spec-note" style="margin-bottom:var(--space-2)">Static, for review:</p>
+          <div class="menu" data-state="open" role="menu" aria-label="Avatar menu (static)">
+            <button class="menu-item" role="menuitem">Edit profile</button>
+            <button class="menu-item" role="menuitem" data-state="hover">Manage users</button>
+            <button class="menu-item" role="menuitemradio" aria-checked="true">Dark theme</button>
+            <hr class="menu-separator">
+            <button class="menu-item" role="menuitem" data-tone="danger">Log out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Dialog</h2>
+    <p>Centred modal for forms and filters; sheet for long pickers (bottom sheet on phones); workspace for the job modal. Escape closes all of them; clicking the backdrop closes the sheet (closedby="any").</p>
+    <div class="spec-panel">
+      <div class="spec-row">
+        <button class="button" data-variant="secondary" data-open-dialog="d-filters">Open filters dialog</button>
+        <button class="button" data-variant="secondary" data-open-dialog="d-picker">Open picker sheet</button>
+        <button class="button" data-variant="secondary" data-open-dialog="d-confirm">Open confirm</button>
+        <button class="button" data-variant="secondary" data-open-dialog="d-work">Open workspace</button>
+      </div>
+    </div>
+  </section>
+
+  <dialog class="dialog" data-size="lg" id="d-filters" aria-labelledby="d-filters-t">
+    <header class="dialog-header"><h2 id="d-filters-t">Columns and filters</h2>
+      <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close>×</button></header>
+    <div class="dialog-body">
+      <div class="spec-stack">
+        <label class="choice"><input type="checkbox" class="checkbox" checked> Status</label>
+        <label class="choice"><input type="checkbox" class="checkbox"> Sent</label>
+        <label class="choice"><input type="checkbox" class="checkbox"> Total cost</label>
+      </div>
+    </div>
+    <footer class="dialog-footer"><button class="button" data-variant="ghost">Reset all</button><button class="button" data-close>Apply</button></footer>
+  </dialog>
+
+  <dialog class="dialog" data-variant="sheet" id="d-picker" aria-labelledby="d-picker-t" closedby="any">
+    <div class="dialog-handle" aria-hidden="true"></div>
+    <header class="dialog-header"><h2 id="d-picker-t">Company type</h2>
+      <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close>×</button></header>
+    <div class="dialog-body">
+      <div class="field" style="margin-bottom:var(--space-4)"><label class="field-label visually-hidden" for="pk">Search types</label><input class="input" id="pk" type="search" placeholder="Search types"></div>
+      <fieldset style="border:0;padding:0;margin:0" class="spec-stack">
+        <legend class="visually-hidden">Company type</legend>
+        <label class="choice"><input type="radio" class="radio" name="ct"> Appliance installer</label>
+        <label class="choice"><input type="radio" class="radio" name="ct" checked> Drywall and insulation</label>
+        <label class="choice"><input type="radio" class="radio" name="ct"> Flooring</label>
+        <label class="choice"><input type="radio" class="radio" name="ct"> Waste disposal</label>
+      </fieldset>
+    </div>
+    <footer class="dialog-footer"><button class="button" data-variant="secondary">Add a new type</button><button class="button" data-close>Done</button></footer>
+  </dialog>
+
+  <dialog class="dialog" data-size="sm" id="d-confirm" aria-labelledby="d-confirm-t" aria-describedby="d-confirm-d">
+    <header class="dialog-header"><h2 id="d-confirm-t">Archive this job?</h2></header>
+    <div class="dialog-body"><p id="d-confirm-d">It moves out of your pipeline. You can restore it from Archived.</p></div>
+    <footer class="dialog-footer"><button class="button" data-variant="ghost" data-close autofocus>Keep job</button><button class="button" data-variant="danger" data-close>Archive job</button></footer>
+  </dialog>
+
+  <dialog class="dialog" data-variant="workspace" id="d-work" aria-labelledby="d-work-t">
+    <header class="dialog-header"><span class="avatar" data-color="2" data-size="sm" aria-hidden="true">MK</span><h2 id="d-work-t">Mykola Khvylovy · New estimate</h2>
+      <span class="badge" data-status="pending">Pending</span>
+      <button class="button" data-variant="brand" data-size="sm">Preview and send</button>
+      <button class="button" data-variant="ghost" data-icon-only aria-label="Close job" data-close style="--_fg:var(--color-content-on-chrome-muted);--_fg-hover:var(--color-content-on-chrome);--_bg-hover:var(--color-surface-chrome-hover)">×</button></header>
+    <div class="dialog-body">
+      <nav class="sidebar" aria-label="Job" style="position:static;block-size:auto;inline-size:15rem;translate:none;box-shadow:none">
+        <a class="sidebar-item" href="#">Overview</a><a class="sidebar-item" href="#" aria-current="page">Estimate <span class="badge" data-count>5</span></a><a class="sidebar-item" href="#">Takeoff</a><a class="sidebar-item" href="#">Proposal</a>
+      </nav>
+      <div style="flex:1;padding:var(--space-6)"><h3>Estimate</h3><p class="text-secondary">The spreadsheet goes here.</p></div>
+    </div>
+  </dialog>
+</main>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

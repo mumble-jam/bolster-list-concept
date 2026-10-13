@@ -962,7 +962,6 @@
     }
     if (t.id === "cc-recipe") { const u = new URL(location.href); t.checked ? u.searchParams.set("from", "description") : u.searchParams.delete("from"); location.href = u.href; return; }
     if (t.id === "cc-cards") { tactile(t.checked); try { localStorage.setItem("bolster-concepts:tactile", t.checked ? "on" : "off"); } catch {} }
-    if (t.id === "cc-canvas") { document.documentElement.dataset.canvas = t.value; try { localStorage.setItem("bolster-concepts:canvas", t.value); } catch {} }
   });
 
   document.addEventListener("submit", (e) => {
@@ -1266,10 +1265,9 @@ ${JSON.stringify(v)}`;
         "A white top line barely shows on a white card but carries the edge in dark, where shadows hardly read; so each theme has its own, and dark scales the shadows up."],
       ["Cards you can press", [["lift", "Hover lift", 0, 4, 0.5, "px"], ["hoverK", "Hover shadow ×", 1, 3, 0.1, ""], ["sink", "Press sinks", 0, 3, 0.5, "px"], ["pressIn", "Press, inner shadow", 0, 0.3, 0.01, ""], ["onIn", "Selected, inner shadow", 0, 0.3, 0.01, ""], ["onK", "Selected, shadow ×", 0, 1, 0.05, ""], ["ms", "Duration", 0, 400, 10, "ms"]],
         "Only the status cards move, being buttons. Hover lifts a pixel or two; a press lands at once and eases back; a selected filter stays pressed in, a toggle that's on. Reduced motion keeps them still."],
-      ["Apply to", [["slices", "Status cards and the insight", "check"], ["table", "Table card", "check"], ["record", "Record panel", "check"]]],
     ],
     def: { radius: 12, edge: 15, lip: 0.05, sheen: 0.04, shade: 0.015, depth: 64, sc: "#3b3320", cy: 1, cb: 2, ca: 0.07, ay: 4, ab: 10, aa: 0.045, lineL: 0.8, lineD: 0.07, darkK: 2.5,
-      lift: 1, hoverK: 1.6, sink: 1, pressIn: 0.1, onIn: 0.07, onK: 0.3, ms: 150, slices: true, table: true, record: true },
+      lift: 1, hoverK: 1.6, sink: 1, pressIn: 0.1, onIn: 0.07, onK: 0.3, ms: 150 },
     presets: {
       tactile: { name: "Tactile (default)" },
       paper: { name: "Paper: barely there", edge: 8, lip: 0.03, sheen: 0, shade: 0, ca: 0.05, cb: 1, ay: 2, ab: 4, aa: 0.03, lineL: 0.6, lineD: 0.05, lift: 0.5, hoverK: 1.4, sink: 0.5, pressIn: 0.06, onIn: 0.05, onK: 0.4 },
@@ -1282,21 +1280,20 @@ ${JSON.stringify(v)}`;
         "--card-cy": px("cy"), "--card-cb": px("cb"), "--card-ca": v.ca, "--card-ay": px("ay"), "--card-ab": px("ab"), "--card-aa": v.aa,
         "--card-line-l": v.lineL, "--card-line-d": v.lineD, "--card-dark-k": v.darkK,
         "--card-lift": px("lift"), "--card-hover-k": v.hoverK, "--card-sink": px("sink"), "--card-press-in": v.pressIn, "--card-on-in": v.onIn, "--card-on-k": v.onK, "--card-ms": `${v.ms}ms` }).forEach(([k, x]) => root.setProperty(k, x));
-      // the shadow follows the canvas (cement on warm, black on cool) until a colour is picked
+      // the shadow is the page's tint (cement in light) until a colour is picked
       if (v.sc === def.sc) root.removeProperty("--card-shadow-l"); else root.setProperty("--card-shadow-l", v.sc);
-      if (html.hasAttribute("data-tactile")) html.dataset.tactile = ["slices", "table", "record"].filter((k) => v[k]).join(" ");
     },
   });
   const tactile = (on) => {
     const html = document.documentElement;
-    if (on) html.dataset.tactile = ["slices", "table", "record"].filter((k) => cards.v[k]).join(" "); else html.removeAttribute("data-tactile");
+    // the system draws cards with a body (card.css); off sets data-cards="flat", which it honours
+    if (on) html.removeAttribute("data-cards"); else html.dataset.cards = "flat";
     $("#cc-cards").checked = on;
     $("#cc-recipe").checked = new URLSearchParams(location.search).get("from") === "description";
     $('[data-tune="cards"]').hidden = !on;
     if (!on) cards.close();
   };
 
-  $("#cc-canvas").value = document.documentElement.dataset.canvas || "paper";
   // the page grid: on unless it was turned off in this browser
   {
     let on = true;

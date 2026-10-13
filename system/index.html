@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolster design system</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimens/specimen.css?v=8aa38bbc">
+<style>
+  .cat-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
+  .cat-card .card-body { display: grid; gap: var(--space-3); }
+  .cat-preview { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); min-height: var(--space-12); pointer-events: none; }
+  .cat-files { font-family: var(--font-mono); font-size: var(--text-xxs); color: var(--color-content-tertiary); }
+</style>
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <h1>Bolster design system</h1>
+  <a href="../index.html">List concept</a>
+  <a href="specimens/list-page.html">List page</a>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">The to-be system, as plain CSS. Start from <code>bolster.css</code> (everything) or import files one by one. Decisions behind each value are in docs/decisions.md; interaction contracts in docs/interactions.md.</p>
+  <div class="spec-panel" data-surface="canvas" style="display:grid;gap:var(--space-2);max-inline-size:70ch">
+    <p><span class="badge" data-tone="info">Status quo · October 2026</span></p>
+    <p>This is the baseline to build on: warm in light (cement neutrals on a paper canvas), cool in dark (Bolster's greys), and the list page as the first page type made from it. It may still change a lot; until it does, new work starts here, and anything that disagrees with it is a change to make here first (D33).</p>
+  </div>
+
+  <section class="spec-section">
+    <h2>Foundations</h2>
+    <div class="cat-grid">
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/tokens.html">Tokens</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="avatar" data-color="1">Aa</span><span class="badge" data-status="pending">Colour</span><span class="badge" data-tone="info">Type</span><span class="badge">4px grid</span></div>
+        <p class="text-secondary">Colour (light and dark), type roles, spacing, radius, depth, layers, motion.</p><p class="cat-files">tokens.css · base.css · utilities.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/shell.html">App shell</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="badge" data-fill="solid">Top bar</span><span class="badge" data-fill="solid">Rail</span><span class="badge">Sidebar</span><span class="badge">Bottom bar</span></div>
+        <p class="text-secondary">Top bar, rail, section sidebar, page header, action bar, bottom tab bar, at every breakpoint.</p><p class="cat-files">components/shell.css</p></div></section>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Page types</h2>
+    <div class="cat-grid">
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/list-page.html">List page</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="badge" data-status="pending" data-mark="quarter">Pending</span><span class="badge" data-status="booked" data-mark="half">Booked</span><span class="badge">Table card</span></div>
+        <p class="text-secondary">Jobs, invoices, customers, the catalog: the page, its parts and behaviour, live at desktop and phone width.</p><p class="cat-files">patterns/list-page.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/list-recipe.html">List recipe</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="badge" data-tone="success">Rules</span><span class="badge">Column types</span><span class="badge">Description</span></div>
+        <p class="text-secondary">The rules every list follows and the description Claude fills from a screenshot and a short survey.</p><p class="cat-files">recipes/list · rules.json · schema.json · check.mjs</p></div></section>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>List page parts</h2>
+    <div class="cat-grid">
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/summary-cards.html">Summary cards</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="badge" data-status="in-progress" data-mark="three">In progress</span><span class="badge">Win rate 73%</span></div>
+        <p class="text-secondary">Status cards that filter, and one insight card.</p><p class="cat-files">components/summary-cards.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/table-card.html">Table card</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="chip" data-active><span class="chip-main"><span class="chip-field">Status:</span><span class="chip-value">Pending</span></span></span><span class="chip"><span class="chip-main">+ Owner</span></span></div>
+        <p class="text-secondary">The header (filter, search, dates, display), chips, the table, phone rows with four corners.</p><p class="cat-files">toolbar.css · chip.css · data-table.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/record.html">Record</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="badge" data-status="booked" data-mark="half">Booked</span><span class="badge">Timeline</span><span class="badge">Actions</span></div>
+        <p class="text-secondary">One row's details beside the list, or a side sheet.</p><p class="cat-files">components/record.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/floating-bar.html">Floating bar</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="badge" data-fill="solid">2 selected · Archive · Delete</span></div>
+        <p class="text-secondary">Bulk actions for ticked rows; select mode on phones.</p><p class="cat-files">components/floating-bar.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/popover.html">Popover</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="badge">Filter options</span><span class="badge">Display settings</span><span class="badge">Bottom sheet</span></div>
+        <p class="text-secondary">Menus and panels under their trigger; bottom sheets on phones.</p><p class="cat-files">components/popover.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/states.html">States</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="badge">Loading</span><span class="badge">Empty</span><span class="badge">No results</span><span class="badge" data-tone="danger">Error</span></div>
+        <p class="text-secondary">What a list shows when it has nothing to show.</p><p class="cat-files">components/states.css</p></div></section>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Components</h2>
+    <div class="cat-grid">
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/button.html">Button</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="button" data-size="sm">Primary</span><span class="button" data-size="sm" data-variant="brand">Brand</span><span class="button" data-size="sm" data-variant="secondary">Secondary</span></div>
+        <p class="text-secondary">Five roles with a body that lifts and sinks, a quiet danger, four sizes, loading, icon-only.</p><p class="cat-files">components/button.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/badge.html">Badge</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="badge" data-status="booked">Booked</span><span class="badge" data-status="pending">Pending</span><span class="badge" data-tone="danger">Overdue</span></div>
+        <p class="text-secondary">Job status with status marks, feedback tones, counts.</p><p class="cat-files">components/badge.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/field.html">Field</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="input" style="display:flex;align-items:center;inline-size:12rem;color:var(--color-content-tertiary)">Lakeside Drywall</span></div>
+        <p class="text-secondary">Text, text area, native select, money and search inputs, with label and helper.</p><p class="cat-files">components/field.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/choice.html">Checkbox, radio, toggle</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><input type="checkbox" class="checkbox" checked tabindex="-1" aria-hidden="true"><input type="radio" class="radio" checked tabindex="-1" aria-hidden="true"><input type="checkbox" role="switch" class="toggle" checked tabindex="-1" aria-hidden="true"></div>
+        <p class="text-secondary">Native inputs, one "on" colour.</p><p class="cat-files">components/choice.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/segmented-control.html">Segmented control</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="segmented"><span class="segmented-option" style="background:var(--color-surface-raised);color:var(--color-content-primary);box-shadow:var(--shadow-raised)">Profit</span><span class="segmented-option">Markup</span></span></div>
+        <p class="text-secondary">Modes and views, as native radios.</p><p class="cat-files">components/segmented-control.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/tabs.html">Tabs</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="tabs" style="border:0"><span class="tab" aria-selected="true">Overview</span><span class="tab">Estimate</span></span></div>
+        <p class="text-secondary">Panels of one page, arrow-key navigation.</p><p class="cat-files">components/tabs.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/overlays.html">Tooltip, menu, dialog</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="tooltip" style="position:static;opacity:1;visibility:visible;translate:none">Tooltip</span><span class="badge">Menu</span><span class="badge">Dialog</span><span class="badge">Sheet</span></div>
+        <p class="text-secondary">popover and &lt;dialog&gt;: Escape, focus and stacking from the platform.</p><p class="cat-files">tooltip.css · menu.css · dialog.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/data.html">Data table, cards, avatars</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="avatar" data-color="2">MK</span><span class="avatar" data-color="3">DC</span><span class="badge" data-status="in-progress">In progress</span></div>
+        <p class="text-secondary">Keyboard-reachable rows, cards with a body, avatars; the first draft's filter cards.</p><p class="cat-files">data-table.css · card.css · avatar.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/toast.html">Toast</a></h3></header>
+        <div class="card-body"><div class="cat-preview"><span class="badge" data-tone="success" data-fill="solid">Proposal sent</span></div>
+        <p class="text-secondary">One live region; errors stay, others leave after 5 seconds.</p><p class="cat-files">components/toast.css</p></div></section>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>From the audit to here</h2>
+    <div class="spec-panel">
+      <table class="spec-table">
+        <thead><tr><th>As-is (audit/components)</th><th>To-be</th></tr></thead>
+        <tbody>
+          <tr><td>Button: 8 severities, 364 instances, 257 with local overrides, no focus ring</td><td><a href="specimens/button.html">Button</a>: 6 roles, 4 sizes, visible focus</td></tr>
+          <tr><td>Clickable surfaces: filter cards, action rows, onboarding cards</td><td><a href="specimens/summary-cards.html">Summary cards</a> on lists, <a href="specimens/data.html">linked cards</a></td></tr>
+          <tr><td>Navigation: rail, section sidebar, top bar, bottom bar</td><td><a href="specimens/shell.html">App shell</a></td></tr>
+          <tr><td>Badge: status pills, tags, counts</td><td><a href="specimens/badge.html">Badge</a> with status tokens</td></tr>
+          <tr><td>Data list row: div rows, double-click to open</td><td><a href="specimens/table-card.html">Table card</a> with row links, a record beside the list, rows with four corners on phones</td></tr>
+          <tr><td>Field: four search designs, 40/48px mix</td><td><a href="specimens/field.html">Field</a>, one frame, three sizes</td></tr>
+          <tr><td>Select: tertiary button + bottom-right sheet</td><td>native select, or the <a href="specimens/overlays.html">picker sheet</a> dialog</td></tr>
+          <tr><td>Segmented control (SelectButton)</td><td><a href="specimens/segmented-control.html">Segmented control</a></td></tr>
+          <tr><td>Checkbox, radio, toggle: three "on" colours, no focus</td><td><a href="specimens/choice.html">Choice controls</a></td></tr>
+          <tr><td>Modal: the job workspace</td><td><a href="specimens/overlays.html">Dialog, workspace variant</a></td></tr>
+          <tr><td>Avatar: generated colours, one failing contrast</td><td><a href="specimens/data.html">Avatar</a>, 8 AA colours</td></tr>
+          <tr><td>Toast: persistent error, misspelled copy</td><td><a href="specimens/toast.html">Toast</a></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<script src="../shared/icons.js?v=8aa38bbc"></script>
+<script src="specimens/specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

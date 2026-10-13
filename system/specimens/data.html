@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data table, cards and avatars · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Data table, cards and avatars</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">Lists are real tables. Each row's name is a link stretched across the row: one click, Enter or a screen reader's link list opens it (as-is rows only opened on double click and weren't reachable by keyboard). Selecting is a checkbox; the bulk bar appears when anything is selected.</p>
+
+  <section class="spec-section">
+    <h2>Filter cards</h2>
+    <p>The first draft, for pages that aren't lists yet. On list pages, <a href="summary-cards.html">summary cards</a> replace them: a status card can be pressed again to clear, and the insight card carries a figure. One tab stop; arrow keys switch.</p>
+    <div class="spec-panel" data-surface="canvas">
+      <div class="filter-cards" role="radiogroup" aria-label="Filter proposals">
+        <label class="filter-card"><input type="radio" name="fc" checked><span class="filter-card-label">All proposals</span><span class="filter-card-meta">$3,104,769.30</span><span class="filter-card-count">20</span></label>
+        <label class="filter-card"><input type="radio" name="fc"><span class="filter-card-label">Pending</span><span class="filter-card-meta">$63,070.82</span><span class="filter-card-count">15</span></label>
+        <label class="filter-card" data-state="hover"><input type="radio" name="fc"><span class="filter-card-label">Unsent</span><span class="filter-card-meta">$63,070.82</span><span class="filter-card-count">15</span></label>
+        <label class="filter-card"><input type="radio" name="fc"><span class="filter-card-label">Change orders</span><span class="filter-card-meta">$0.00</span><span class="filter-card-count">0</span></label>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Data table</h2>
+    <p>The table on its own. On a list page it sits in the <a href="table-card.html">table card</a>, which adds the header, pinned columns, sideways scroll and phone rows; bulk actions move to the <a href="floating-bar.html">floating bar</a>.</p>
+    <div class="spec-panel" style="padding:0">
+      <div style="padding:var(--space-3)"><div class="bulk-bar" role="toolbar" aria-label="Bulk actions"><span class="bulk-bar-count">1 selected</span><button class="button" data-variant="ghost" data-size="sm" style="--_fg:var(--color-content-inverse)">Send</button><button class="button" data-variant="ghost" data-size="sm" style="--_fg:var(--color-content-inverse)">Sign and book</button><button class="button" data-variant="ghost" data-size="sm" style="--_fg:var(--color-content-inverse)">Archive</button></div></div>
+      <table class="data-table">
+        <thead><tr>
+          <th class="data-table-select"><input type="checkbox" class="checkbox" aria-label="Select all" data-indeterminate></th>
+          <th>Job</th><th data-hide-below="md">Status</th><th data-numeric>Total price</th>
+          <th data-hide-below="lg" aria-sort="descending"><button class="data-table-sort">Last modified</button></th><th data-hide-below="lg">Owner</th></tr></thead>
+        <tbody>
+          <tr><td class="data-table-select"><input type="checkbox" class="checkbox" aria-label="Select Mykola • Job"></td>
+            <td><div class="cluster" style="--cluster-gap:var(--space-3);flex-wrap:nowrap"><span class="avatar" data-color="2" aria-hidden="true">MK</span><div><a class="data-table-link" href="#">Mykola • Job</a><div class="text-caption">$28,729</div></div></div></td>
+            <td data-hide-below="md"><span class="badge" data-status="booked">Booked</span></td><td data-numeric>$28,729.22</td><td data-hide-below="lg" class="text-secondary">15 Sep 2026, 3:59pm</td>
+            <td data-hide-below="lg"><div class="cluster"><span class="avatar" data-size="sm" data-color="1" aria-hidden="true">HM</span>Hello Mublejam</div></td></tr>
+          <tr><td class="data-table-select"><input type="checkbox" class="checkbox" aria-label="Select New estimate" checked></td>
+            <td><div class="cluster" style="--cluster-gap:var(--space-3);flex-wrap:nowrap"><span class="avatar" data-color="2" aria-hidden="true">MK</span><div><a class="data-table-link" href="#">New estimate</a><div class="text-caption">Mykola Khvylovy</div></div></div></td>
+            <td data-hide-below="md"><span class="badge" data-status="pending">Pending</span></td><td data-numeric>$833.69</td><td data-hide-below="lg" class="text-secondary">15 Sep 2026, 1:53pm</td>
+            <td data-hide-below="lg"><div class="cluster"><span class="avatar" data-size="sm" data-color="1" aria-hidden="true">HM</span>Hello Mublejam</div></td></tr>
+          <tr data-state="hover"><td class="data-table-select"><input type="checkbox" class="checkbox" aria-label="Select Dan • New estimate"></td>
+            <td><div class="cluster" style="--cluster-gap:var(--space-3);flex-wrap:nowrap"><span class="avatar" data-color="3" aria-hidden="true">DC</span><div><a class="data-table-link" href="#">Dan • New estimate with a long name that wraps</a><div class="text-caption">$2,973,344</div></div></div></td>
+            <td data-hide-below="md"><span class="badge" data-status="in-progress">In progress</span></td><td data-numeric>$2,973,344.19</td><td data-hide-below="lg" class="text-secondary">8 Sep 2026, 4:40pm</td>
+            <td data-hide-below="lg"><div class="cluster"><span class="avatar" data-size="sm" data-color="6" aria-hidden="true">DC</span>Dan Chong</div></td></tr>
+          <tr><td class="data-table-select"><input type="checkbox" class="checkbox" aria-label="Select New estimate draft"></td>
+            <td><div class="cluster" style="--cluster-gap:var(--space-3);flex-wrap:nowrap"><span class="avatar" data-color="8" aria-hidden="true">NE</span><div><a class="data-table-link" href="#">New estimate</a><div class="text-caption">$0</div></div></div></td>
+            <td data-hide-below="md"><span class="badge" data-status="draft">Draft</span></td><td data-numeric>$0.00</td><td data-hide-below="lg" class="text-secondary">24 Aug 2026, 9:52pm</td><td data-hide-below="lg" class="text-tertiary">Unassigned</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="spec-note">Row 2 is selected, row 3 shows hover. Resize the window: status hides below 768px, date and owner below 1024px.</p>
+  </section>
+
+  <section class="spec-section">
+    <h2>Cards</h2>
+    <div class="spec-panel" data-surface="canvas">
+      <div class="spec-grid">
+        <section class="card"><header class="card-header"><h3>Recommended actions</h3><button class="button" data-variant="ghost" data-size="sm">Go to pipeline</button></header><div class="card-body text-secondary">Default: hairline border.</div></section>
+        <section class="card" data-elevation="raised"><header class="card-header"><h3>Pipeline</h3></header><div class="card-body text-secondary">Raised: shadow, no border.</div></section>
+        <section class="card"><header class="card-header"><h3><a class="card-link" href="#">General company settings</a></h3></header><div class="card-body text-secondary">Linked: the whole card opens it, with one focus ring.</div></section>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Avatars</h2>
+    <p>Eight colours, all with white initials above 4.5:1 (as-is generated colours included a bright green that failed). Pick by a stable hash of the person's id.</p>
+    <div class="spec-panel">
+      <div class="spec-row">
+        <span class="avatar" data-color="1" role="img" aria-label="Hello Mublejam">HM</span><span class="avatar" data-color="2">MK</span><span class="avatar" data-color="3">DC</span><span class="avatar" data-color="4">LK</span><span class="avatar" data-color="5">AH</span><span class="avatar" data-color="6">VS</span><span class="avatar" data-color="7">GO</span><span class="avatar" data-color="8">LL</span>
+      </div>
+      <div class="spec-row" style="margin-top:var(--space-4)"><span class="avatar" data-size="sm" data-color="2">MK</span><span class="avatar" data-color="2">MK</span><span class="avatar" data-size="lg" data-color="2">MK</span><span class="spec-note">24 · 32 · 40</span></div>
+    </div>
+  </section>
+</main>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

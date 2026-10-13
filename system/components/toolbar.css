@@ -1,0 +1,72 @@
+/* Table card header (toolbar): find and narrow a list, inside the table card.
+   <div class="list-toolbar" role="search" aria-label="Search and filter">
+     <div class="list-bar">
+       <button class="field-button add-filter" aria-haspopup="menu"><svg…/><span>Add filter</span></button>
+       <label class="list-search"><svg…/><input type="search" aria-label="Search" placeholder="Search"></label>
+       <button class="field-button date-range" aria-haspopup="dialog"><svg…/><span>All time</span></button>
+       <span class="list-bar-sep" aria-hidden="true"></span>
+       <button class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Display settings">…</button>
+     </div>
+     <div class="list-chips"><p class="result-count"><strong>12</strong> of 133 jobs</p><div class="filters">…chips…</div></div>
+   </div>
+   Sticks under the page header (--list-toolbar-top). Filters as chips: chip.css. As in Shopify (D19, D21) */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  /* the table card's header, as in Shopify: add filter and a bare search field on the left, the period, a rule
+     and display on the right. A second row holds the count and chips once something narrows the list. It
+     sticks under the page header; the table header sticks under it. */
+  .list-toolbar {
+    position: sticky; inset-block-start: var(--list-toolbar-top, 0); z-index: calc(var(--z-raised) + 1);
+    display: grid; grid-template-columns: minmax(0, 1fr);
+    background: var(--color-surface-default);
+    border-block-end: var(--border-width-default) solid var(--color-line-card);
+  }
+  .list-toolbar[hidden] { display: none; }
+  .list-bar { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3); }
+  .list-search {
+    flex: 1; min-inline-size: 0; display: flex; align-items: center; gap: var(--space-2);
+    block-size: var(--control-height-sm); padding-inline: var(--space-2); border-radius: var(--radius-md);
+    color: var(--color-content-secondary); cursor: text;
+  }
+  /* header icons are sized by height, as Font Awesome draws them (1em tall, own width), so a wide
+     glyph isn't squeezed into a square and drawn smaller than the rest */
+  .list-search svg, .field-button svg { inline-size: auto; block-size: 1rem; flex: none; }
+  .list-search input {
+    flex: 1; min-inline-size: 0; padding: 0; border: 0; background: none; outline: none;
+    color: var(--color-content-primary); font: inherit; font-size: var(--text-sm); line-height: var(--leading-sm);
+  }
+  .list-search input::placeholder { color: var(--color-content-tertiary); }
+  .list-search:has(input:focus-visible) { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -1px; }
+  @media (hover: hover) { .list-search:hover { background: var(--color-surface-hover); } }
+  .list-search:has(input:disabled) { opacity: 0.5; cursor: default; }
+  .list-bar-sep { flex: none; align-self: stretch; inline-size: var(--border-width-default); margin-block: var(--space-1); background: var(--color-line-card); }
+  .list-chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); padding: 0 var(--space-3) var(--space-3); }
+  .list-chips[hidden] { display: none; }
+  .filters { display: contents; }
+  .result-count { margin-inline-end: var(--space-2); font-size: var(--text-sm); color: var(--color-content-secondary); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .result-count strong { color: var(--color-content-primary); font-weight: var(--font-weight-medium); }
+
+  /* add filter and the date range (the list's own date filter) share one field-like button */
+  .field-button {
+    display: inline-flex; align-items: center; gap: var(--space-2); flex: none;
+    block-size: var(--control-height-sm); padding: 0 var(--space-3);
+    border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-md);
+    background: var(--color-surface-default); color: var(--color-content-primary);
+    font: inherit; font-size: var(--text-sm); white-space: nowrap; cursor: pointer;
+  }
+  .field-button[hidden] { display: none; }
+  .field-button svg { color: var(--color-content-secondary); }
+  @media (hover: hover) { .field-button:hover:not(:disabled) { border-color: var(--color-line-strong); } }
+  .field-button[aria-expanded="true"] { border-color: var(--color-action-accent); }
+  .field-button:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
+  .field-button:disabled { opacity: 0.5; cursor: default; }
+
+  @media (max-width: 767px) {
+    .add-filter { inline-size: var(--control-height-sm); padding: 0; justify-content: center; gap: 0; }
+    .add-filter span { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  }
+  /* the search field's hover sits on white, like a menu's: a step stronger than a row's */
+  .list-toolbar { --color-surface-hover: var(--color-surface-hover-control); }
+}

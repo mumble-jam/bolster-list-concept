@@ -103,3 +103,7 @@ document.addEventListener("click", (e) => {
   const s = document.querySelector(".sidebar");
   s?.toggleAttribute("data-open");
 });
+
+// Icons: <i data-icon="filter" data-size="16"></i> becomes the Font Awesome glyph, when the page loads
+// the concepts' icon set (../../concepts/shared/icons.js). Sized by height, as Font Awesome draws them.
+if (window.BolsterIcons) document.querySelectorAll("i[data-icon]").forEach((i) => (i.outerHTML = window.BolsterIcons(i.dataset.icon, +(i.dataset.size || 16))));

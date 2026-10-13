@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Record · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>.spec-panel .detail.card { position: static; max-block-size: none; inline-size: 24rem; max-inline-size: 100%; }</style>
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Record</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">One row's details, without leaving the list (a peek, D30). From 1280 wide it sits beside the list as a card that sticks under the bars, and the list keeps its name, status and amount columns; below that it's a sheet from the side, full width on phones (<code>dialog.peek</code>). It reads top to bottom: status, the amount, a timeline, two actions and More, the details, then the document.</p>
+
+  <section class="spec-section">
+    <h2>A booked job</h2>
+    <div class="spec-panel" data-surface="canvas">
+      <section class="card detail" aria-labelledby="r-title">
+        <header class="detail-head">
+          <h2 id="r-title">Ingrid Ferreira · Blown-in insulation</h2>
+          <button type="button" class="button" data-variant="ghost" data-size="sm">Open job<i data-icon="m-external" data-size="12"></i></button>
+          <span class="detail-sep" aria-hidden="true"></span>
+          <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close"><i data-icon="xmark"></i></button>
+        </header>
+        <div class="detail-scroll">
+          <div class="detail-section detail-hero">
+            <span class="badge" data-status="booked" data-mark="half">Booked</span>
+            <p class="detail-amount">$14,930<span class="detail-cents">.05</span></p>
+            <p class="detail-sub">EST-2044 · 732 Elm Ave, Maple Grove</p>
+            <ol class="timeline">
+              <li data-line="solid"><span class="tl-dot mark" data-mark="dashed" style="--_dot:var(--color-status-draft-mark)"></span><div><p class="tl-what">Estimate created</p><p class="tl-meta">2 Oct · Dana Okafor</p></div></li>
+              <li data-line="solid"><span class="tl-dot mark" data-mark="quarter" style="--_dot:var(--color-status-pending-mark)"></span><div><p class="tl-what">Sent to Ingrid</p><p class="tl-meta">3 Oct</p></div></li>
+              <li data-line="dashed"><span class="tl-dot mark" data-mark="half" style="--_dot:var(--color-status-booked-dot)"></span><div><p class="tl-what">Signed and booked</p><p class="tl-meta">Yesterday</p></div></li>
+              <li data-next data-line="none"><span class="tl-dot" data-next></span><div><p class="tl-what">Start the work</p><p class="tl-meta">Next step</p></div></li>
+            </ol>
+            <div class="detail-actions"><button type="button" class="button" data-variant="secondary"><i data-icon="m-pen" data-size="14"></i>Edit</button><button type="button" class="button" data-variant="secondary"><i data-icon="m-file-invoice" data-size="14"></i>Invoice this project</button><button type="button" class="button" data-variant="secondary">More<i data-icon="chevron-down" data-size="14"></i></button></div>
+          </div>
+          <dl class="detail-section detail-fields">
+            <div><dt>Owner</dt><dd><span class="cell-person"><span class="avatar" data-size="sm" data-color="3">DO</span>Dana Okafor</span></dd></div>
+            <div><dt>Source</dt><dd>Referral</dd></div>
+            <div><dt>Created</dt><dd>2 Oct 2026</dd></div>
+          </dl>
+          <div class="detail-section detail-doc"><div class="detail-doc-head"><span>Estimate</span><button type="button" class="link-button">View estimate<i data-icon="m-external" data-size="12"></i></button></div><button type="button" class="detail-file"><i data-icon="m-file" data-size="14"></i><span>EST-2044.pdf</span><i data-icon="m-download" data-size="14"></i></button></div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Rules</h2>
+    <ul class="spec-stack" style="max-width:70ch;padding-left:var(--space-5)">
+      <li>A list either peeks or opens the record itself on a row click; it says which (D30, L-row-click).</li>
+      <li>The timeline runs oldest first: a solid line through what happened, a dashed one to the next step (a hollow ring). Job events wear the status mark they moved the job to.</li>
+      <li>Two actions and More on one line; when both don't fit, the second moves into More.</li>
+    </ul>
+  </section>
+</main>
+<script src="../../shared/icons.js?v=8aa38bbc"></script>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+/* Floating bar: bulk actions for the selected rows, stuck to the bottom of the screen.
+   <div class="floating-bar" role="toolbar" aria-label="Bulk actions for 2 selected">
+     <span class="floating-bar-count">2 selected</span><button class="floating-bar-link">Select all 133</button>
+     <span class="floating-bar-sep"></span><span class="floating-bar-actions">…ghost buttons…</span>
+     <button class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Clear selection">×</button>
+   </div>
+   Count first, select all, the actions, the risky ones last after a rule, clear. On phones it takes the
+   floating Create's place. D17, I6 */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  /* ---------- floating bar: rows stay put while you select; it sticks to the bottom of the screen.
+     Written to replace the other situational bars (save changes, compare, move) later. ---------- */
+  .floating-bar {
+    position: sticky; inset-block-end: var(--space-6); z-index: var(--z-sticky);
+    justify-self: center;
+    display: flex; align-items: center; gap: var(--space-1);
+    max-inline-size: 100%; min-block-size: var(--control-height-lg);
+    margin-block-start: var(--space-2);
+    padding: var(--space-1) var(--space-1) var(--space-1) var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-inverse); color: var(--color-content-inverse);
+    box-shadow: var(--shadow-overlay);
+    font-size: var(--text-sm);
+  }
+  .floating-bar[hidden] { display: none; }
+  .floating-bar .button[data-variant="ghost"] { --_fg: var(--color-content-inverse); --_fg-hover: var(--color-content-inverse); --_bg-hover: var(--color-surface-inverse-hover); --_bg-active: var(--color-surface-inverse-active); flex: none; }
+  .floating-bar-count { flex: none; padding-inline-end: var(--space-2); font-weight: var(--font-weight-medium); white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .floating-bar-link { flex: none; padding: 0 var(--space-2); white-space: nowrap; }
+  .floating-bar-link { block-size: var(--control-height-sm); border: 0; border-radius: var(--radius-sm); background: none; color: inherit; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  @media (hover: hover) { .floating-bar-link:hover { background: var(--color-surface-inverse-hover); } }
+  .floating-bar :focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
+  .floating-bar-sep { flex: none; inline-size: var(--border-width-default); block-size: var(--space-5); margin-inline: var(--space-1); background: currentColor; opacity: 0.25; }
+  .floating-bar-actions { display: flex; align-items: center; gap: var(--space-1); min-inline-size: 0; overflow-x: auto; scrollbar-width: none; }
+  @media (max-width: 767px) {
+    /* phones: count, select all and clear on one line; the actions get their own scrolling row */
+    .floating-bar { justify-self: stretch; flex-wrap: wrap; row-gap: 0; inset-block-end: calc(var(--shell-bottom-bar-height) + var(--space-3)); padding-block: var(--space-1) var(--space-2); }
+    .floating-bar-sep { display: none; }
+    .floating-bar-actions { order: 3; flex-basis: 100%; margin-inline-start: calc(var(--space-3) * -1); }
+    .floating-bar [data-clear-selection] { margin-inline-start: auto; }
+  }
+  /* danger flips with the inverse bar: red 300 on the dark bar, red 700 on the light one */
+  .floating-bar .button[data-variant="ghost"][data-tone="danger"] {
+    --_fg: var(--color-feedback-danger-on-inverse); --_fg-hover: var(--color-content-on-accent);
+    --_bg-hover: var(--color-action-danger); --_bg-active: var(--color-action-danger-hover);
+  }
+}

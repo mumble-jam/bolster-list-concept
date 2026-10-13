@@ -112,10 +112,10 @@
   // =====================================================================
   const EST_STATUS = {
     // shape marks fill a quarter at a time with how far a job has got; a slash for the client saying no
-    draft: { label: "Draft", attr: 'data-status="draft"', dot: "var(--status-draft-mark)", mark: "dashed" },
-    pending: { label: "Pending", attr: 'data-status="pending"', dot: "var(--status-pending-mark)", mark: "quarter" },
+    draft: { label: "Draft", attr: 'data-status="draft"', dot: "var(--color-status-draft-mark)", mark: "dashed" },
+    pending: { label: "Pending", attr: 'data-status="pending"', dot: "var(--color-status-pending-mark)", mark: "quarter" },
     booked: { label: "Booked", attr: 'data-status="booked"', dot: "var(--color-status-booked-dot)", mark: "half" },
-    "in-progress": { label: "In progress", attr: 'data-status="in-progress"', dot: "var(--status-in-progress-mark)", mark: "three" },
+    "in-progress": { label: "In progress", attr: 'data-status="in-progress"', dot: "var(--color-status-in-progress-mark)", mark: "three" },
     declined: { label: "Declined", attr: 'data-tone="danger"', dot: "var(--color-feedback-danger-accent)", mark: "slash" },
   };
   const WON = new Set(["booked", "in-progress"]);

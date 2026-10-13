@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Badge · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Badge</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">Small, static labels. Job status has its own token set (D12), so every status reads the same everywhere; "Booked" moves off Tailwind's lime onto Bolster green, and in progress is blue. Status badges always carry a dot, so colour is never the only cue.</p>
+
+  <section class="spec-section">
+    <h2>Job status</h2>
+    <div class="spec-panel">
+      <div class="spec-row">
+        <span class="badge" data-status="lead">Lead</span>
+        <span class="badge" data-status="draft">Draft</span>
+        <span class="badge" data-status="pending">Pending</span>
+        <span class="badge" data-status="booked">Booked</span>
+        <span class="badge" data-status="in-progress">In progress</span>
+        <span class="badge" data-status="active">Active</span>
+        <span class="badge" data-status="outstanding">Outstanding</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Status marks</h2>
+    <p>On list pages a status wears a shape as well as a colour (D28), so the shape says the status and colour only backs it up. Jobs fill a quarter at a time as they move on; a slash is the client saying no. Once the shape carries meaning it's a graphic that must reach 3:1, so draft, pending and in progress have their own darker mark colours.</p>
+    <div class="spec-panel">
+      <div class="spec-row">
+        <span class="badge" data-status="draft" data-mark="dashed">Draft</span>
+        <span class="badge" data-status="pending" data-mark="quarter">Pending</span>
+        <span class="badge" data-status="booked" data-mark="half">Booked</span>
+        <span class="badge" data-status="in-progress" data-mark="three">In progress</span>
+        <span class="badge" data-tone="success" data-mark="full">Paid</span>
+        <span class="badge" data-tone="danger" data-mark="slash">Declined</span>
+        <span class="badge" data-status="lead" data-mark="empty">Lead</span>
+      </div>
+      <table class="spec-table" style="margin-block-start:var(--space-4)">
+        <thead><tr><th>Mark</th><th>data-mark</th><th>Means</th></tr></thead>
+        <tbody>
+          <tr><td><span class="mark" data-mark="empty" style="--_dot:var(--color-content-secondary)"></span></td><td class="spec-label">empty</td><td>Not started (a lead)</td></tr>
+          <tr><td><span class="mark" data-mark="dashed" style="--_dot:var(--color-status-draft-mark)"></span></td><td class="spec-label">dashed</td><td>Not sent yet</td></tr>
+          <tr><td><span class="mark" data-mark="quarter" style="--_dot:var(--color-status-pending-mark)"></span></td><td class="spec-label">quarter</td><td>With the client</td></tr>
+          <tr><td><span class="mark" data-mark="half" style="--_dot:var(--color-status-booked-dot)"></span></td><td class="spec-label">half</td><td>Signed</td></tr>
+          <tr><td><span class="mark" data-mark="three" style="--_dot:var(--color-status-in-progress-mark)"></span></td><td class="spec-label">three</td><td>Work underway</td></tr>
+          <tr><td><span class="mark" data-mark="full" style="--_dot:var(--color-status-booked-dot)"></span></td><td class="spec-label">full</td><td>Closed, paid</td></tr>
+          <tr><td><span class="mark" data-mark="slash" style="--_dot:var(--color-feedback-danger-accent)"></span></td><td class="spec-label">slash</td><td>Declined, lost</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Feedback tones</h2>
+    <div class="spec-panel">
+      <table class="spec-table">
+        <thead><tr><th>Fill</th><th>Neutral</th><th>Success</th><th>Warning</th><th>Danger</th><th>Info</th></tr></thead>
+        <tbody>
+          <tr><td class="spec-label">subtle</td><td><span class="badge">Not connected</span></td><td><span class="badge" data-tone="success">Paid</span></td><td><span class="badge" data-tone="warning">Due soon</span></td><td><span class="badge" data-tone="danger">Overdue</span></td><td><span class="badge" data-tone="info">New</span></td></tr>
+          <tr><td class="spec-label">solid</td><td><span class="badge" data-fill="solid">Not connected</span></td><td><span class="badge" data-tone="success" data-fill="solid">Paid</span></td><td><span class="badge" data-tone="warning" data-fill="solid">Due soon</span></td><td><span class="badge" data-tone="danger" data-fill="solid">Overdue</span></td><td><span class="badge" data-tone="info" data-fill="solid">New</span></td></tr>
+          <tr><td class="spec-label">square</td><td><span class="badge" data-shape="square">Admin</span></td><td><span class="badge" data-tone="success" data-shape="square">Verified</span></td><td></td><td></td><td><span class="badge" data-tone="info" data-shape="square">Beta</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Count</h2>
+    <div class="spec-panel"><div class="spec-row"><span class="badge" data-count>5</span><span class="badge" data-count>12</span><span class="badge" data-count>99+</span></div></div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Rules</h2>
+    <ul class="spec-stack" style="max-width:70ch;padding-left:var(--space-5)">
+      <li>One or two words, sentence case, no punctuation.</li>
+      <li>Status comes from data-status only; don't pick a tone that "looks right".</li>
+      <li>Badges aren't buttons. A filter chip that toggles is a segmented control or a filter card.</li>
+    </ul>
+<code class="spec-code">&lt;span class="badge" data-status="booked"&gt;Booked&lt;/span&gt;
+&lt;span class="badge" data-tone="danger"&gt;Overdue&lt;/span&gt;
+&lt;span class="badge" data-count&gt;5&lt;/span&gt;</code>
+  </section>
+</main>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

@@ -12,7 +12,10 @@
        <td data-numeric>$28,729.22</td>
      </tr></tbody>
    </table>
-   Bulk actions: <div class="bulk-bar" role="toolbar" aria-label="1 selected">…</div> shown above the table when any row is selected. */
+   Bulk actions: <div class="bulk-bar" role="toolbar" aria-label="1 selected">…</div> shown above the table when any row is selected. 
+   In a list page the table sits in a table card (.card.list-panel): pinned checkbox and name, sideways
+   scroll, a header that follows the page, cells that never size their column, and on phones rows
+   that become items with four corners (slots: data-m="title|sub|trail|badge|over|where", D32). */
 
 @layer tokens, base, components, utilities;
 
@@ -84,4 +87,149 @@
     font-weight: var(--font-weight-medium);
   }
   :where(.bulk-bar) > :where(.bulk-bar-count) { margin-inline-end: auto; }
+
+
+  /* ---------- the table card: a card that holds only data ---------- */
+  /* ---------- the card holds only data ---------- */
+  .list-panel { overflow: clip; border-color: var(--color-line-card); box-shadow: none; }
+  .list-panel .data-table th { background: var(--color-surface-header); }
+  .list-panel[hidden] { display: none; }
+
+  /* ---------- table: sideways scroll ----------
+     A column never gets narrower than its set width (the header's --_w); when they don't all fit,
+     the table scrolls sideways in its card. The checkbox and name stay pinned on the left, a rule
+     marks their edge once you've scrolled, and the right edge fades while there's more. The card is
+     the scroller, so the header can't stick to the page by itself: it's moved down by the distance
+     the table's top has scrolled under the bars (--_table-top from script), up to the table's end.
+     --_stick is where it rests (under the bars, or the very top while they're hidden); registered,
+     so it slides with them. */
+  @property --_stick { syntax: "<length>"; inherits: true; initial-value: 0px; }
+  .data-table th > .data-table-sort { min-inline-size: calc(var(--_w, 0px) - var(--space-6)); }
+  @media (min-width: 768px) {
+    .list-panel .table-wrap { overflow-x: auto; overscroll-behavior-x: contain; scroll-padding-inline-start: var(--_pin-w, 0px); }
+    .list-panel .table-wrap[data-more] { mask-image: linear-gradient(to left, transparent, #000 var(--space-8)); }
+    .list-panel .data-table thead {
+      --_stick: var(--list-head-top, 0px);
+      position: relative; z-index: 3;
+      translate: 0 clamp(0px, calc(var(--_stick) - var(--_table-top, 0px)), var(--_room, 0px));
+      transition: --_stick 300ms var(--ease-out);
+    }
+    :root[data-chrome-hidden] .list-panel .data-table thead { --_stick: 0px; }
+    .list-panel .data-table th { position: relative; inset-block-start: auto; }
+    /* pinned: the checkbox and the name, on the row's own colour */
+    .list-panel .data-table tbody tr { --_row-bg: var(--color-surface-default); }
+    @media (hover: hover) { .list-panel .data-table tbody tr:hover { --_row-bg: var(--color-surface-hover); } }
+    .list-panel .data-table tbody tr:is([data-selected], :has(.data-table-select :checked)) { --_row-bg: var(--color-surface-selected); }
+    .list-panel .data-table tbody tr[data-open] { --_row-bg: var(--color-surface-current); }
+    .list-panel .data-table tbody tr[data-id] { cursor: pointer; }
+    /* above the cells that scroll under them, and above the controls in those cells (z 1) */
+    .list-panel .data-table :is(th, td):is(.data-table-select, [data-primary]) { position: sticky; z-index: 2; }
+    .list-panel .data-table thead :is(.data-table-select, [data-primary]) { z-index: calc(var(--z-raised) + 1); }
+    .list-panel .data-table :is(th, td).data-table-select { inset-inline-start: 0; }
+    .list-panel .data-table :is(th, td)[data-primary] { inset-inline-start: var(--_sel-w, 0px); }
+    /* the pinned cells paint their own background over the row's, so they fade with the row's timing,
+       or they'd lead and the rest of the row would follow */
+    .list-panel .data-table tbody td:is(.data-table-select, [data-primary]) { background: var(--_row-bg); transition: background-color var(--duration-fast) var(--ease-standard); }
+    .list-panel .table-wrap[data-scrolled] .data-table [data-primary] { box-shadow: inset -1px 0 0 var(--color-line-default); }
+    .group-head { position: sticky; inset-inline-start: var(--space-4); display: inline-flex; align-items: center; }
+  }
+  .data-table tbody tr[data-selected] td { background: var(--color-surface-selected); }
+  @media (hover: hover) and (min-width: 768px) {
+    .data-table tbody .row-actions .button { opacity: 0; transition: opacity var(--duration-fast) var(--ease-standard); }
+    .data-table tbody tr:is(:hover, :focus-within) .row-actions .button, .data-table .row-actions .button[aria-expanded="true"] { opacity: 1; }
+  }
+  .data-table th:first-child, .data-table td:first-child { padding-inline-start: var(--space-4); }
+  .data-table th:last-child, .data-table td:last-child { padding-inline-end: var(--space-3); }
+  .data-table[data-density="compact"] td { block-size: var(--control-height-md); padding-block: var(--space-1); }
+  .data-table[data-density="compact"] .cell-sub { display: none; }
+  /* column widths come from the headers alone (w in the list config), never from the rows on
+     screen, so sorting or loading more can't resize a column. A cell's content has no width of
+     its own; when the columns don't all fit they narrow together and long values end in "…" */
+  @media (min-width: 768px) {
+    .data-table .cell { contain: inline-size; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+    .data-table .cell > div { overflow: hidden; text-overflow: ellipsis; }
+    .data-table .cell:has(> .cell-main) { min-inline-size: 12rem; }
+  }
+  .data-table .cell-main { display: flex; align-items: center; gap: var(--space-3); min-inline-size: 12rem; }
+  .data-table .cell-main > div { min-inline-size: 0; }
+  .data-table .cell-sub { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .data-table .data-table-link { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .data-table .cell-person { display: flex; align-items: center; gap: var(--space-2); white-space: nowrap; }
+  .data-table .cell-muted { color: var(--color-content-secondary); white-space: nowrap; }
+  .data-table .cell-danger { color: var(--color-feedback-danger-content); white-space: nowrap; }
+  .data-table .row-actions { inline-size: var(--space-10); text-align: end; }
+  .data-table th[aria-sort] .data-table-sort { color: var(--color-content-primary); }
+  /* right-aligned headers take the arrow on the left, so the label doesn't shift when it appears */
+  .data-table th[data-numeric] .data-table-sort { flex-direction: row-reverse; }
+  /* every header keeps room for the arrow, so sorting never changes a header's width; on hover the
+     arrow hints that the column sorts */
+  .data-table th:not([aria-sort]) .data-table-sort::after { content: "↓"; visibility: hidden; color: var(--color-content-tertiary); }
+  @media (hover: hover) { .data-table th:not([aria-sort]) .data-table-sort:hover::after { visibility: visible; } }
+  .data-table th .data-table-sort:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
+  .data-table .group-row td { block-size: auto; padding-block: var(--space-2); background: var(--color-surface-group); border-block-end-color: var(--color-line-default); }
+  .group-toggle { display: inline-flex; align-items: center; gap: var(--space-2); padding: 0; border: 0; background: none; color: var(--color-content-primary); font: inherit; font-weight: var(--font-weight-medium); cursor: pointer; }
+  .group-toggle svg { inline-size: 1rem; block-size: 1rem; transition: rotate var(--duration-fast) var(--ease-standard); }
+  .group-toggle[aria-expanded="false"] svg { rotate: -90deg; }
+  .group-meta { margin-inline-start: var(--space-3); font-size: var(--text-xs); color: var(--color-content-secondary); font-variant-numeric: tabular-nums; }
+
+  /* ---------- footer: the range, and more rows (they also load as you scroll) ---------- */
+  .list-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-block-start: var(--border-width-default) solid var(--color-line-subtle); font-size: var(--text-sm); color: var(--color-content-secondary); }
+  .list-foot:empty { display: none; }
+  .list-foot-range { font-variant-numeric: tabular-nums; }
+
+  /* search hits: the matched letters on Bolster's highlighter yellow; the text keeps its colour */
+  ::highlight(search-hit) { background-color: var(--color-highlight-search); }
+
+  /* ---------- phones: rows become items with four corners (L-phone-row, D32) ----------
+     The id and a date on a quiet overline top left, the key figure top right, the name across the full
+     width (16 px, wrapping to two lines, never cut on the first), then where (address, job or unit)
+     bottom left and the status bottom right. No checkbox column: selecting is a mode, and while it's
+     on the boxes slide in from the left. A list without its own overline puts its date (sub) there. */
+  @property --_pick-w { syntax: "<length>"; inherits: true; initial-value: 0px; }
+  @media (min-width: 768px) {
+    .data-table td.row-phone { display: none; }
+  }
+  @media (max-width: 767px) {
+    .data-table thead { display: none; }
+    .data-table, .data-table tbody { display: block; }
+    .data-table tbody tr {
+      display: grid; grid-template-columns: var(--_pick-w) minmax(0, 1fr) auto;
+      grid-template-areas: "sel over trail" "sel title title" "sel where badge";
+      align-items: center; column-gap: 0; row-gap: var(--space-1);
+      padding: var(--space-3) var(--space-4);
+      border-block-end: var(--border-width-default) solid var(--color-line-subtle);
+      -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
+      transition: --_pick-w 200ms var(--ease-out);
+    }
+    .list-page[data-selecting] .data-table tbody tr { --_pick-w: 2.25rem; }
+    .data-table tbody td { display: none; block-size: auto; padding: 0; border: 0; }
+    .data-table tbody td[data-m] { display: block; min-inline-size: 0; }
+    .data-table td.data-table-select { display: flex; align-items: center; grid-area: sel; align-self: stretch; overflow: hidden; visibility: hidden; padding: 0; }
+    .list-page[data-selecting] .data-table td.data-table-select { visibility: visible; }
+    .data-table td[data-m="over"], .data-table tr:not(:has(td[data-m="over"])) td[data-m="sub"] { grid-area: over; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .data-table tr:has(td[data-m="over"]) td[data-m="sub"] { display: none; }
+    .data-table td[data-m="title"] { grid-area: title; }
+    .data-table td[data-m="title"] .cell-main { min-inline-size: 0; }
+    .data-table td[data-m="title"] .data-table-link {
+      display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; white-space: normal; overflow: hidden;
+      font-size: var(--text-base); line-height: calc(var(--leading-sm) + var(--space-0-5)); overflow-wrap: anywhere;
+    }
+    .data-table tr:has(td[data-m="where"]) td[data-m="title"] .cell-sub { display: none; }
+    .data-table td[data-m="title"] .cell-sub { font-size: var(--text-sm); line-height: var(--leading-sm); }
+    .data-table td[data-m="where"] { grid-area: where; font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .data-table td[data-m="trail"] { grid-area: trail; padding-inline-start: var(--space-3); text-align: end; font-size: var(--text-base); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; }
+    .data-table td[data-m="badge"] { grid-area: badge; justify-self: end; padding-inline-start: var(--space-3); }
+    .data-table td.row-actions { display: none; }
+    .data-table .cell-main .avatar { display: none; }
+    /* a ticked or opened row tints as a whole, not cell by cell */
+    .data-table tbody tr[data-selected] { background: var(--color-surface-selected); }
+    .data-table tbody tr:is([data-selected], [data-open]) td { background: none; box-shadow: none; }
+    .data-table tbody tr.group-row { display: block; padding: 0; }
+    .data-table .group-row td { display: block; padding: var(--space-2) var(--space-4); }
+  }
+  @media (max-width: 767px) and (prefers-reduced-motion: reduce) { .data-table tbody tr { transition: none; } }
+
+  /* the row whose record is open */
+  .data-table tbody tr[data-open] td { background: var(--color-surface-current); }
+  .data-table tbody tr[data-open] td:first-child { box-shadow: inset 3px 0 0 var(--color-action-accent); }
 }

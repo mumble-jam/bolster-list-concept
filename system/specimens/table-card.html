@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Table card · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>
+  /* specimen only: the toolbar and footer don't stick here, and the phone frame */
+  .spec-panel .list-toolbar { position: static; }
+  .phone { inline-size: 375px; block-size: 720px; max-inline-size: 100%; border: 1px solid var(--color-line-default); border-radius: var(--radius-xl); }
+</style>
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Table card</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">The list itself: a card that holds only data. Its header finds and narrows (add filter, search, the date range, display settings); a second row holds the count and the filter chips once something is set. Then the table, then a footer with the range and more rows. Rows open with one click (D30); "···" acts.</p>
+
+  <section class="spec-section">
+    <h2>Desktop</h2>
+    <p>Sorted by last activity. One row ticked (blue), one open beside the list (cement, with the accent edge).</p>
+    <div class="spec-panel" data-surface="canvas" style="padding:var(--space-4)">
+      <section class="card list-panel">
+        <div class="list-toolbar" role="search" aria-label="Search and filter">
+          <div class="list-bar">
+            <button type="button" class="field-button add-filter"><i data-icon="filter"></i><span>Add filter</span></button>
+            <label class="list-search"><i data-icon="search"></i><input type="search" aria-label="Search" placeholder="Search"></label>
+            <button type="button" class="field-button date-range"><i data-icon="calendar"></i><span>Last 90 days</span></button>
+            <span class="list-bar-sep" aria-hidden="true"></span>
+            <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Display settings"><i data-icon="display-settings"></i></button>
+          </div>
+          <div class="list-chips">
+            <p class="result-count"><strong>64</strong> of 132 jobs</p>
+            <div class="filters">
+              <span class="chip" data-active><button type="button" class="chip-main"><span class="chip-field">Status:</span><span class="chip-value">Pending, Booked</span></button><button type="button" class="chip-remove" aria-label="Remove status filter"><i data-icon="xmark" data-size="14"></i></button></span>
+              <span class="chip"><button type="button" class="chip-main"><i data-icon="circle-plus" data-size="14"></i>Owner</button></span>
+              <span class="chip"><button type="button" class="chip-main"><i data-icon="circle-plus" data-size="14"></i>City</button></span>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead><tr>
+              <th class="data-table-select"><input type="checkbox" class="checkbox" aria-label="Select all" data-indeterminate></th>
+              <th data-primary><button type="button" class="data-table-sort">Job</button></th>
+              <th style="inline-size:6.5rem"><button type="button" class="data-table-sort">Status</button></th>
+              <th style="inline-size:12.5rem" data-hide-below="lg"><button type="button" class="data-table-sort">Owner</button></th>
+              <th style="inline-size:7rem" aria-sort="descending"><button type="button" class="data-table-sort">Last activity</button></th>
+              <th style="inline-size:7.5rem" data-numeric><button type="button" class="data-table-sort">Total</button></th>
+              <th class="row-actions"><span class="visually-hidden">Actions</span></th>
+            </tr></thead>
+            <tbody>
+              <tr data-open aria-current="true"><td class="data-table-select"><input type="checkbox" class="checkbox" aria-label="Select Jamie Sorensen · Skim coat"></td><td data-primary><div class="cell"><div class="cell-main"><span class="avatar" data-color="2" aria-hidden="true">JS</span><div><a class="data-table-link" href="#">Jamie Sorensen · Skim coat</a><div class="cell-sub">EST-2136 · 464 Pine Ct, Maple Grove</div></div></div></div></td><td><div class="cell"><span class="badge" data-status="draft" data-mark="dashed">Draft</span></div></td><td data-hide-below="lg"><div class="cell"><span class="cell-person"><span class="avatar" data-size="sm" data-color="1">HM</span>Hana Morales (you)</span></div></td><td><div class="cell"><span class="cell-muted">Today</span></div></td><td data-numeric><div class="cell"><span class="text-tertiary">No price yet</span></div></td><td class="row-actions"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions"><i data-icon="ellipsis"></i></button></td></tr>
+              <tr data-selected><td class="data-table-select"><input type="checkbox" class="checkbox" checked aria-label="Select Ingrid Ferreira · Blown-in insulation"></td><td data-primary><div class="cell"><div class="cell-main"><span class="avatar" data-color="5" aria-hidden="true">IF</span><div><a class="data-table-link" href="#">Ingrid Ferreira · Blown-in insulation</a><div class="cell-sub">EST-2044 · 732 Elm Ave, Maple Grove</div></div></div></div></td><td><div class="cell"><span class="badge" data-status="booked" data-mark="half">Booked</span></div></td><td data-hide-below="lg"><div class="cell"><span class="cell-person"><span class="avatar" data-size="sm" data-color="3">DO</span>Dana Okafor</span></div></td><td><div class="cell"><span class="cell-muted">Yesterday</span></div></td><td data-numeric><div class="cell">$14,930.05</div></td><td class="row-actions"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions"><i data-icon="ellipsis"></i></button></td></tr>
+              <tr><td class="data-table-select"><input type="checkbox" class="checkbox" aria-label="Select Reese Ashby · Popcorn ceiling removal"></td><td data-primary><div class="cell"><div class="cell-main"><span class="avatar" data-color="4" aria-hidden="true">RA</span><div><a class="data-table-link" href="#">Reese Ashby · Popcorn ceiling removal</a><div class="cell-sub">EST-2045 · 30 Pine Ct, Maple Grove</div></div></div></div></td><td><div class="cell"><span class="badge" data-tone="danger" data-mark="slash">Declined</span></div></td><td data-hide-below="lg"><div class="cell"><span class="cell-person"><span class="avatar" data-size="sm" data-color="1">HM</span>Hana Morales (you)</span></div></td><td><div class="cell"><span class="cell-muted">2 days ago</span></div></td><td data-numeric><div class="cell">$10,821.37</div></td><td class="row-actions"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions"><i data-icon="ellipsis"></i></button></td></tr>
+              <tr><td class="data-table-select"><input type="checkbox" class="checkbox" aria-label="Select Alex Galloway · Fire-rated walls"></td><td data-primary><div class="cell"><div class="cell-main"><span class="avatar" data-color="6" aria-hidden="true">AG</span><div><a class="data-table-link" href="#">Alex Galloway · Fire-rated walls</a><div class="cell-sub">EST-2128 · 650 Orchard Ln, Cedar Falls</div></div></div></div></td><td><div class="cell"><span class="badge" data-status="pending" data-mark="quarter">Pending</span></div></td><td data-hide-below="lg"><div class="cell"><span class="cell-person"><span class="avatar" data-size="sm" data-color="7">TC</span>Taylor Calloway</span></div></td><td><div class="cell"><span class="cell-muted">5 days ago</span></div></td><td data-numeric><div class="cell">$7,485.47</div></td><td class="row-actions"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Actions"><i data-icon="ellipsis"></i></button></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="list-foot"><span class="list-foot-range">Showing 1–4 of 64</span><button type="button" class="button" data-variant="secondary" data-size="sm">Load 25 more</button></div>
+      </section>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Phones: rows with four corners</h2>
+    <p>Below 768 a row becomes an item (D32): the number and a date on a quiet overline, the amount top right, the name across the full width at 16px (it wraps to two lines rather than being cut), then where and the status. No checkbox column: Select, or a long press, starts selecting. This frame is the live list page.</p>
+    <iframe class="phone" src="../../index.html#jobs" title="The jobs list at phone width" loading="lazy"></iframe>
+  </section>
+
+  <section class="spec-section">
+    <h2>Anatomy</h2>
+    <table class="spec-table">
+      <thead><tr><th>Part</th><th>Class</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Card</td><td class="spec-label">.card.list-panel</td><td>Holds only data; clips its corners.</td></tr>
+        <tr><td>Header</td><td class="spec-label">.list-toolbar</td><td>Sticks under the page header. Add filter, a bare search field, the date range, a rule, display settings (toolbar.css).</td></tr>
+        <tr><td>Chips</td><td class="spec-label">.chip[data-active]</td><td>Unset: dashed with a plus. Set: solid, the field and its value, and a separate remove button (chip.css).</td></tr>
+        <tr><td>Columns</td><td class="spec-label">th[style=inline-size]</td><td>Widths come from the headers, never the rows, so sorting or loading never moves a column. Every header keeps room for its sort arrow.</td></tr>
+        <tr><td>Name cell</td><td class="spec-label">.cell-main</td><td>An avatar, the name (a link over the whole row), the detail line. Words a person recognises first; codes on the detail line (L-name-first).</td></tr>
+        <tr><td>Phone slots</td><td class="spec-label">td[data-m]</td><td><code>title</code>, <code>trail</code> (the key figure), <code>badge</code>, <code>sub</code> (a date), and the phone-only <code>over</code> and <code>where</code> cells.</td></tr>
+        <tr><td>Footer</td><td class="spec-label">.list-foot</td><td>The range shown and more rows; they also load as you scroll.</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+<script src="../../shared/icons.js?v=8aa38bbc"></script>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

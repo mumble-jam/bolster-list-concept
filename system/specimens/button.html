@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Button · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Button</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">One button component, named by role (D4). Primary is Bolster's black button with highlighter text; brand is the yellow call to action for the one step that moves a job forward ("Preview and send"). Blue is not a button colour: it's for links, focus and selection. Every state has a visible focus ring (D8). Primary, brand, danger and secondary have a body: an edge, a light line along the top, a shadow; hover lifts 1px and a press sinks at once, then eases back. Ghost is for places that already say "button" (toolbars, rows, bars, Close). Every button has 8px corners (D33).</p>
+
+  <section class="spec-section">
+    <h2>Roles and states</h2>
+    <p>Hover, active and focus are pinned with <code>data-state</code> for this page only. Use one primary per view; secondary for everything else, ghost inside toolbars and rows. Tertiary is gone: secondary covers it.</p>
+    <div class="spec-panel">
+      <table class="spec-table">
+        <thead><tr><th>Role</th><th>Default</th><th>Hover</th><th>Active</th><th>Keyboard focus</th><th>Disabled</th><th>Loading</th></tr></thead>
+        <tbody>
+          <tr><td class="spec-label">primary</td>
+            <td><button class="button">Create job</button></td>
+            <td><button class="button" data-state="hover">Create job</button></td>
+            <td><button class="button" data-state="active">Create job</button></td>
+            <td><button class="button" data-state="focus">Create job</button></td>
+            <td><button class="button" disabled>Create job</button></td>
+            <td><button class="button" aria-busy="true">Creating…</button></td></tr>
+          <tr><td class="spec-label">brand</td>
+            <td><button class="button" data-variant="brand">Preview and send</button></td>
+            <td><button class="button" data-variant="brand" data-state="hover">Preview and send</button></td>
+            <td><button class="button" data-variant="brand" data-state="active">Preview and send</button></td>
+            <td><button class="button" data-variant="brand" data-state="focus">Preview and send</button></td>
+            <td><button class="button" data-variant="brand" disabled>Preview and send</button></td>
+            <td><button class="button" data-variant="brand" aria-busy="true">Sending…</button></td></tr>
+          <tr><td class="spec-label">secondary</td>
+            <td><button class="button" data-variant="secondary">Customize</button></td>
+            <td><button class="button" data-variant="secondary" data-state="hover">Customize</button></td>
+            <td><button class="button" data-variant="secondary" data-state="active">Customize</button></td>
+            <td><button class="button" data-variant="secondary" data-state="focus">Customize</button></td>
+            <td><button class="button" data-variant="secondary" disabled>Customize</button></td>
+            <td><button class="button" data-variant="secondary" aria-busy="true">Saving…</button></td></tr>
+          <tr><td class="spec-label">ghost</td>
+            <td><button class="button" data-variant="ghost">View all tasks</button></td>
+            <td><button class="button" data-variant="ghost" data-state="hover">View all tasks</button></td>
+            <td><button class="button" data-variant="ghost" data-state="active">View all tasks</button></td>
+            <td><button class="button" data-variant="ghost" data-state="focus">View all tasks</button></td>
+            <td><button class="button" data-variant="ghost" disabled>View all tasks</button></td>
+            <td><button class="button" data-variant="ghost" aria-busy="true">Loading…</button></td></tr>
+          <tr><td class="spec-label">ghost · danger</td>
+            <td><button class="button" data-variant="ghost" data-tone="danger">Delete</button></td>
+            <td><button class="button" data-variant="ghost" data-tone="danger" data-state="hover">Delete</button></td>
+            <td><button class="button" data-variant="ghost" data-tone="danger" data-state="active">Delete</button></td>
+            <td><button class="button" data-variant="ghost" data-tone="danger" data-state="focus">Delete</button></td>
+            <td><button class="button" data-variant="ghost" data-tone="danger" disabled>Delete</button></td>
+            <td></td></tr>
+          <tr><td class="spec-label">danger</td>
+            <td><button class="button" data-variant="danger">Archive job</button></td>
+            <td><button class="button" data-variant="danger" data-state="hover">Archive job</button></td>
+            <td><button class="button" data-variant="danger" data-state="active">Archive job</button></td>
+            <td><button class="button" data-variant="danger" data-state="focus">Archive job</button></td>
+            <td><button class="button" data-variant="danger" disabled>Archive job</button></td>
+            <td><button class="button" data-variant="danger" aria-busy="true">Archiving…</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Sizes</h2>
+    <p>Heights follow the control scale: 32, 40 (default), 48, 56. Small buttons get a 44px touch area on coarse pointers without drawing bigger.</p>
+    <div class="spec-panel">
+      <table class="spec-table">
+        <thead><tr><th>Size</th><th>Primary</th><th>Secondary</th><th>Icon only</th><th>Use</th></tr></thead>
+        <tbody>
+          <tr><td class="spec-label">sm · 32</td><td><button class="button" data-size="sm">Save</button></td><td><button class="button" data-variant="secondary" data-size="sm">Go to pipeline</button></td><td><button class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Refresh"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.5M13 3v2.5h-2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></td><td class="spec-note">tables, dense toolbars</td></tr>
+          <tr><td class="spec-label">md · 40</td><td><button class="button">Save</button></td><td><button class="button" data-variant="secondary">Everyone <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button></td><td><button class="button" data-icon-only aria-label="Create"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></td><td class="spec-note">default: toolbars, forms</td></tr>
+          <tr><td class="spec-label">lg · 48</td><td><button class="button" data-size="lg">Save</button></td><td><button class="button" data-variant="secondary" data-size="lg">Customize</button></td><td><button class="button" data-size="lg" data-icon-only aria-label="Create"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></button></td><td class="spec-note">touch, mobile primary</td></tr>
+          <tr><td class="spec-label">xl · 56</td><td><button class="button" data-size="xl" data-variant="brand">Clock in</button></td><td><button class="button" data-variant="secondary" data-size="xl">Past jobs</button></td><td></td><td class="spec-note">field app hero actions</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>On the dark top bar</h2>
+    <div class="spec-panel" data-surface="chrome">
+      <div class="top-bar" style="position:static;border:0;padding:0">
+        <button class="button" data-variant="ghost">Attachment Hippo inc</button>
+        <button class="button" data-variant="ghost" data-icon-only aria-label="Help"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6.5 6.3a1.6 1.6 0 1 1 2.2 1.5c-.5.2-.7.6-.7 1.1M8 11.2v.1" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
+        <button class="button" data-variant="brand" data-size="sm">Upgrade</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Rules</h2>
+    <ul class="spec-stack" style="max-width:70ch;padding-left:var(--space-5)">
+      <li>Labels start with a verb, sentence case, no trailing punctuation: "Create job", not "New" or "CREATE".</li>
+      <li>Icon-only buttons need an <code>aria-label</code>, and a tooltip if the icon isn't universal.</li>
+      <li>Don't override a button's height, radius or colours locally. If a variant is missing, add it here (the audit found 257 of 364 buttons with local overrides).</li>
+      <li>Show an action only when it applies. A disabled button needs a reason nearby.</li>
+      <li>A row or card that opens something is a link, not a button: see Data table and Card.</li>
+      <li>Red is for what can't be undone. Where Delete is one action of several it's a quiet danger (red text, fills red when pointed at); the filled red danger is only the confirmation's final button.</li>
+    </ul>
+  </section>
+
+  <section class="spec-section">
+    <h2>Markup</h2>
+<code class="spec-code">&lt;button class="button"&gt;Create job&lt;/button&gt;
+&lt;button class="button" data-variant="secondary" data-size="sm"&gt;Go to pipeline&lt;/button&gt;
+&lt;button class="button" data-variant="ghost" data-icon-only aria-label="Refresh"&gt;&lt;svg …/&gt;&lt;/button&gt;
+&lt;a class="button" data-variant="secondary" href="/jobs"&gt;View jobs&lt;/a&gt;
+&lt;button class="button" data-variant="ghost" data-tone="danger"&gt;Delete&lt;/button&gt;
+&lt;button class="button" aria-busy="true"&gt;Saving…&lt;/button&gt;</code>
+  </section>
+</main>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

@@ -164,19 +164,25 @@
        Semantic tokens. Colours use light-dark(light, dark): the
        active color-scheme picks the value (D14). Set data-theme
        on <html> to force light or dark; default follows the OS.
+       Light is warm: cement neutrals on a paper canvas, white cards.
+       Dark is cool: Bolster's pitch-black greys (D33).
        ============================================================ */
 
     /* ---------- surface (backgrounds) ---------- */
-    --color-surface-canvas: light-dark(var(--color-cool-gray-100), var(--color-pitch-black-950));
+    --color-surface-canvas: light-dark(var(--color-cement-200), var(--color-pitch-black-950));
     --color-surface-default: light-dark(var(--color-flame-white), var(--color-pitch-black-night-900));
     --color-surface-raised: light-dark(var(--color-flame-white), var(--color-pitch-black-900));
-    --color-surface-sunken: light-dark(var(--color-cool-gray-200), var(--color-pitch-black-night-950));
-    --color-surface-hover: light-dark(var(--color-cool-gray-100), var(--color-pitch-black-900));
+    --color-surface-sunken: light-dark(var(--color-cement-400), var(--color-pitch-black-night-950));
+    --color-surface-hover: light-dark(var(--color-cement-200), var(--color-pitch-black-900));
+    /* hover inside menus, popovers and the table card's header: a step stronger, since it sits on white */
+    --color-surface-hover-control: light-dark(var(--color-cement-300), var(--color-pitch-black-900));
+    /* the row whose record is open beside the list */
+    --color-surface-current: light-dark(var(--color-cement-300), var(--color-pitch-black-900));
     --color-surface-selected: light-dark(
       color-mix(in srgb, var(--color-blue-print-100) 50%, var(--color-flame-white)),
       color-mix(in srgb, var(--color-blue-print-700) 35%, var(--color-pitch-black-night-900))
     );
-    --color-surface-disabled: light-dark(var(--color-pitch-black-200), var(--color-pitch-black-800));
+    --color-surface-disabled: light-dark(color-mix(in srgb, var(--color-cement-500) 50%, var(--color-pitch-black-200)), var(--color-pitch-black-800));
     --color-surface-inverse: light-dark(var(--color-pitch-black-950), var(--color-pitch-black-100));
     --color-surface-inverse-hover: light-dark(var(--color-pitch-black-800), var(--color-pitch-black-200));
     --color-surface-inverse-active: light-dark(var(--color-pitch-black-900), var(--color-pitch-black-300));
@@ -184,16 +190,16 @@
     --color-surface-chrome-hover: color-mix(in srgb, var(--color-flame-white) 8%, transparent);
     --color-surface-chrome-selected: var(--color-pitch-black-700);
     --color-surface-chrome-field: color-mix(in srgb, var(--color-flame-white) 10%, transparent);
-    --color-surface-sidebar: light-dark(var(--color-cement-100), var(--color-cement-night-900));
-    --color-surface-sidebar-hover: light-dark(var(--color-cement-200), var(--color-cement-night-800));
+    --color-surface-sidebar: light-dark(var(--color-cement-100), var(--color-pitch-black-950));
+    --color-surface-sidebar-hover: light-dark(var(--color-cement-200), color-mix(in srgb, var(--color-pitch-black-950) 50%, var(--color-pitch-black-900)));
     --color-surface-group: light-dark(var(--color-cement-100), var(--color-cement-night-900));
-    --color-surface-header: light-dark(var(--color-pitch-black-100), var(--color-pitch-black-900));
+    --color-surface-header: light-dark(var(--color-cement-400), var(--color-pitch-black-900));
     --color-surface-tooltip: light-dark(var(--color-pitch-black-700), var(--color-pitch-black-200));
-    --color-surface-tint: light-dark(var(--color-pitch-black-100), var(--color-pitch-black-900));
-    --color-surface-tint-hover: light-dark(var(--color-pitch-black-200), var(--color-pitch-black-800));
-    --color-surface-tint-active: light-dark(var(--color-pitch-black-300), var(--color-pitch-black-700));
+    --color-surface-tint: light-dark(var(--color-cement-400), var(--color-pitch-black-900));
+    --color-surface-tint-hover: light-dark(color-mix(in srgb, var(--color-cement-500) 50%, var(--color-pitch-black-200)), var(--color-pitch-black-800));
+    --color-surface-tint-active: light-dark(color-mix(in srgb, var(--color-cement-700) 45%, var(--color-pitch-black-200)), var(--color-pitch-black-700));
     --color-surface-scrim: light-dark(
-      color-mix(in srgb, var(--color-black) 55%, transparent),
+      color-mix(in srgb, var(--color-cement-950) 45%, transparent),
       color-mix(in srgb, #000 65%, transparent)
     );
 
@@ -209,16 +215,22 @@
     --color-content-on-brand: var(--color-black);
     --color-content-on-primary: light-dark(var(--color-level-yellow), var(--color-black));
     --color-content-link: light-dark(var(--color-blue-print-600), var(--color-blue-print-300));
+    /* search hits: the matched letters on Bolster's highlighter yellow */
+    --color-highlight-search: light-dark(var(--color-yellow-300), color-mix(in srgb, var(--color-yellow-700) 40%, transparent));
+    /* section labels in menus */
+    --color-content-section: light-dark(var(--color-cement-900), var(--color-pitch-black-300));
 
     /* ---------- line (borders and dividers) ---------- */
-    --color-line-subtle: light-dark(var(--color-cool-gray-200), var(--color-pitch-black-900));
-    --color-line-default: light-dark(var(--color-cool-gray-300), var(--color-pitch-black-800));
-    --color-line-strong: light-dark(var(--color-cool-gray-500), var(--color-pitch-black-600));
+    --color-line-subtle: light-dark(var(--color-cement-400), var(--color-pitch-black-900));
+    --color-line-default: light-dark(color-mix(in srgb, var(--color-cement-500) 50%, var(--color-pitch-black-200)), var(--color-pitch-black-800));
+    --color-line-strong: light-dark(color-mix(in srgb, var(--color-cement-700) 50%, var(--color-pitch-black-300)), var(--color-pitch-black-600));
+    /* the edge of cards, menus and popovers */
+    --color-line-card: light-dark(var(--color-cement-400), var(--color-pitch-black-800));
     --color-line-input: light-dark(var(--color-pitch-black-500), var(--color-pitch-black-500));
     --color-line-input-hover: light-dark(var(--color-pitch-black-700), var(--color-pitch-black-300));
     --color-line-focus: light-dark(var(--color-blue-print-500), var(--color-blue-print-300));
     --color-line-chrome: var(--color-pitch-black-800);
-    --color-line-sidebar: light-dark(var(--color-cement-400), var(--color-cement-night-700));
+    --color-line-sidebar: light-dark(var(--color-cement-400), var(--color-pitch-black-900));
 
     /* ---------- action ---------- */
     /* Primary is Bolster's black button with highlighter text (D4); in dark it flips to yellow. */
@@ -233,12 +245,18 @@
       var(--color-blue-print-100),
       color-mix(in srgb, var(--color-blue-print-700) 35%, var(--color-pitch-black-night-900))
     );
+    /* secondary and ghost buttons (D33): a cement body in light, the greys in dark */
+    --color-action-secondary-edge: light-dark(var(--color-cement-700), var(--color-pitch-black-800));
+    --color-action-secondary-edge-bottom: light-dark(var(--color-cement-800), color-mix(in oklab, var(--color-pitch-black-800), black 35%));
+    --color-action-secondary-hover: light-dark(var(--color-cement-100), var(--color-pitch-black-900));
+    --color-action-ghost-hover: light-dark(var(--color-cement-500), var(--color-pitch-black-800));
+    --color-action-ghost-active: light-dark(color-mix(in srgb, var(--color-cement-500), var(--color-cement-700)), var(--color-pitch-black-700));
     --color-action-danger: light-dark(var(--color-deep-red-600), var(--color-deep-red-600));
     --color-action-danger-hover: light-dark(var(--color-deep-red-700), var(--color-deep-red-700));
 
     /* ---------- feedback ---------- */
-    --color-feedback-neutral-surface: light-dark(var(--color-cool-gray-200), var(--color-pitch-black-900));
-    --color-feedback-neutral-content: light-dark(var(--color-cool-gray-800), var(--color-pitch-black-200));
+    --color-feedback-neutral-surface: light-dark(var(--color-cement-400), var(--color-pitch-black-900));
+    --color-feedback-neutral-content: light-dark(var(--color-cement-950), var(--color-pitch-black-200));
     --color-feedback-success-surface: light-dark(var(--color-matcha-100), color-mix(in srgb, var(--color-matcha-900) 60%, var(--color-pitch-black-night-900)));
     --color-feedback-success-content: light-dark(var(--color-matcha-800), var(--color-matcha-300));
     --color-feedback-warning-surface: light-dark(var(--color-orange-100), color-mix(in srgb, var(--color-orange-900) 60%, var(--color-pitch-black-night-900)));
@@ -248,6 +266,8 @@
     --color-feedback-danger-solid: light-dark(var(--color-deep-red-600), var(--color-deep-red-700));
     --color-feedback-info-surface: light-dark(var(--color-blue-100), color-mix(in srgb, var(--color-blue-900) 60%, var(--color-pitch-black-night-900)));
     --color-feedback-info-content: light-dark(var(--color-blue-800), var(--color-blue-300));
+    /* danger text on the inverse floating bar: it flips with the bar */
+    --color-feedback-danger-on-inverse: light-dark(var(--color-deep-red-300), var(--color-deep-red-700));
     /* accents: a stripe or icon on a dark toast */
     --color-feedback-success-accent: var(--color-matcha-500);
     --color-feedback-warning-accent: var(--color-yellow-700);
@@ -258,7 +278,7 @@
     --color-status-lead-surface: light-dark(var(--color-deep-red-100), color-mix(in srgb, var(--color-deep-red-900) 55%, var(--color-pitch-black-night-900)));
     --color-status-lead-content: light-dark(var(--color-deep-red-800), var(--color-deep-red-200));
     --color-status-lead-dot: var(--color-deep-red-500);
-    --color-status-draft-surface: light-dark(var(--color-pitch-black-100), var(--color-pitch-black-900));
+    --color-status-draft-surface: light-dark(var(--color-cement-400), var(--color-pitch-black-900));
     --color-status-draft-content: light-dark(var(--color-pitch-black-700), var(--color-pitch-black-300));
     --color-status-draft-dot: var(--color-pitch-black-400);
     --color-status-pending-surface: light-dark(var(--color-yellow-100), color-mix(in srgb, var(--color-yellow-900) 55%, var(--color-pitch-black-night-900)));
@@ -267,15 +287,23 @@
     --color-status-booked-surface: light-dark(var(--color-green-100), color-mix(in srgb, var(--color-green-900) 55%, var(--color-pitch-black-night-900)));
     --color-status-booked-content: light-dark(var(--color-green-800), var(--color-green-300));
     --color-status-booked-dot: var(--color-green-500);
-    --color-status-in-progress-surface: light-dark(var(--color-matcha-100), color-mix(in srgb, var(--color-matcha-900) 55%, var(--color-pitch-black-night-900)));
-    --color-status-in-progress-content: light-dark(var(--color-matcha-900), var(--color-matcha-300));
-    --color-status-in-progress-dot: var(--color-matcha-500);
+    /* in progress is blue (the blue family; blue print means selection and focus), so it doesn't read as a
+       second shade of booked's green */
+    --color-status-in-progress-surface: light-dark(var(--color-blue-100), color-mix(in srgb, var(--color-blue-900) 55%, var(--color-pitch-black-night-900)));
+    --color-status-in-progress-content: light-dark(var(--color-blue-800), var(--color-blue-300));
+    --color-status-in-progress-dot: var(--color-blue-500);
     --color-status-active-surface: light-dark(var(--color-blue-print-100), color-mix(in srgb, var(--color-blue-print-900) 55%, var(--color-pitch-black-night-900)));
     --color-status-active-content: light-dark(var(--color-blue-print-800), var(--color-blue-print-200));
     --color-status-active-dot: var(--color-blue-print-500);
     --color-status-outstanding-surface: light-dark(var(--color-orange-100), color-mix(in srgb, var(--color-orange-900) 55%, var(--color-pitch-black-night-900)));
     --color-status-outstanding-content: light-dark(var(--color-orange-900), var(--color-orange-300));
     --color-status-outstanding-dot: var(--color-orange-600);
+
+    /* status marks: once the shape carries the status (badge.css), it's a graphic that must reach 3:1.
+       Draft and pending dots don't, so their marks go a step darker; in progress's mark is blue 600 */
+    --color-status-draft-mark: light-dark(var(--color-pitch-black-500), var(--color-pitch-black-400));
+    --color-status-pending-mark: light-dark(color-mix(in oklab, var(--color-yellow-800), var(--color-yellow-900) 35%), var(--color-yellow-700));
+    --color-status-in-progress-mark: light-dark(var(--color-blue-600), var(--color-blue-400));
 
     /* ---------- control ---------- */
     --color-control-on: light-dark(var(--color-black), var(--color-level-yellow));
@@ -381,6 +409,10 @@
     /* ---------- Depth ---------- */
     --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.06), 0 1px 3px rgb(0 0 0 / 0.08);
     --shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.1), 0 12px 32px rgb(0 0 0 / 0.12);
+    /* menus and popovers: tinted with the page in light */
+    --shadow-popover: 0 2px 6px color-mix(in srgb, var(--color-cement-950) 8%, transparent), 0 12px 32px color-mix(in srgb, var(--color-cement-950) 14%, transparent);
+    /* the colour shadows are mixed from (cards, secondary buttons): cement in light, black in dark */
+    --color-shadow-tint: light-dark(var(--color-cement-950), #000);
 
     /* ---------- Layers (D9) ---------- */
     --z-base: 0;
@@ -411,11 +443,13 @@
     :root:not([data-theme="light"]) {
       --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.4);
       --shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.5);
+      --shadow-popover: var(--shadow-overlay);
     }
   }
   :root[data-theme="dark"] {
     --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.4);
     --shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.5);
+    --shadow-popover: var(--shadow-overlay);
   }
 
 }

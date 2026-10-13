@@ -46,6 +46,11 @@ body { padding: 0; }
 /* ---------- forced states, for showing hover/active/focus without a mouse ---------- */
 .button[data-state="hover"] { --_bg-state: var(--_bg-hover); --_fg-state: var(--_fg-hover); --_border-state: var(--_border-hover); }
 .button[data-state="active"] { --_bg-state: var(--_bg-active); --_fg-state: var(--_fg-hover); --_border-state: var(--_border-hover); }
+/* the CTAs' and secondary's body: hover lifts and brightens, a press sinks (button.css) */
+.button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"], [data-variant="danger"])[data-state="hover"] { --_sa: calc(var(--_sheen) + 0.06); --_lift: -1px; --_sk: 1.5; }
+.button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"], [data-variant="danger"])[data-state="active"] { --_sa: 0; --_da: 0.02; --_pa: 0.12; --_lift: 1px; --_sk: 0.3; }
+.button[data-variant="secondary"][data-state="hover"] { --_sk: 1.4; --_lift: -1px; }
+.button[data-variant="secondary"][data-state="active"] { --_sk: 0.3; --_pa: 0.08; --_lift: 1px; }
 [data-state="focus"] { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: var(--focus-ring-offset); }
 .input[data-state="hover"], .input-group[data-state="hover"] { --_border: var(--color-line-input-hover); }
 .input[data-state="focus"], .input-group[data-state="focus"] { --_border: var(--color-line-focus); box-shadow: 0 0 0 1px var(--color-line-focus); outline: none; }

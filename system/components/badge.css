@@ -3,7 +3,10 @@
    Job status:     <span class="badge" data-status="lead|draft|pending|booked|in-progress|active|outstanding">Pending</span>
    Status badges always show a dot, so colour is never the only cue besides the word.
    Count:          <span class="badge" data-count>5</span>
-   Square chrome tag: data-shape="square". See docs/decisions.md D12. */
+   Square chrome tag: data-shape="square". See docs/decisions.md D12. 
+   Status marks: <span class="badge" data-status="pending" data-mark="quarter">Pending</span> draws the
+   status as a shape (a job's progress a quarter at a time), or <span class="mark" data-mark="half"
+   style="--_dot:…"></span> alone, beside a label. D28. */
 
 @layer tokens, base, components, utilities;
 
@@ -61,4 +64,39 @@
   }
 
   :where(.badge[data-shape="square"]) { border-radius: var(--radius-sm); }
+
+  /* ---------- status marks: the shape says the status, the colour only backs it up ----------
+     Drawn on a 12px grid: a 1.5px ring of radius 5, so they stay crisp at 12 (table badge, beside
+     12px text) and 14 (slice card, beside 14px text). Masks, so each mark takes its status colour. */
+  :root {
+    --mark-empty: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><circle cx='6' cy='6' r='5' fill='none' stroke='%23000' stroke-width='1.5'/></svg>");
+    /* jobs fill a quarter at a time as they move on: dashed (not sent), a quarter (with the client), a half
+       (signed), three quarters (work underway), full (closed); a slash for the client saying no */
+    --mark-dashed: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><circle cx='6' cy='6' r='5' fill='none' stroke='%23000' stroke-width='1.5' stroke-dasharray='3.14 2.1' transform='rotate(-75 6 6)'/></svg>");
+    --mark-quarter: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><circle cx='6' cy='6' r='5' fill='none' stroke='%23000' stroke-width='1.5'/><path d='M6 6V1a5 5 0 0 1 5 5z'/></svg>");
+    --mark-three: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><circle cx='6' cy='6' r='5' fill='none' stroke='%23000' stroke-width='1.5'/><path d='M6 6V1a5 5 0 1 1-5 5z'/></svg>");
+    --mark-half: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><circle cx='6' cy='6' r='5' fill='none' stroke='%23000' stroke-width='1.5'/><path d='M6 1a5 5 0 0 1 0 10z'/></svg>");
+    --mark-full: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><circle cx='6' cy='6' r='5.75'/></svg>");
+    --mark-slash: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'><circle cx='6' cy='6' r='5' fill='none' stroke='%23000' stroke-width='1.5'/><path d='M2.5 9.5 9.5 2.5' stroke='%23000' stroke-width='1.5'/></svg>");
+  }
+  .badge[data-status="in-progress"][data-mark] { --_dot: var(--color-status-in-progress-mark); }
+  .badge[data-status="draft"][data-mark] { --_dot: var(--color-status-draft-mark); }
+  .badge[data-status="pending"][data-mark] { --_dot: var(--color-status-pending-mark); }
+  .badge[data-tone="danger"][data-mark] { --_dot: var(--color-feedback-danger-accent); }
+  .mark, .badge[data-mark]::before {
+    flex: none; inline-size: 0.75rem; block-size: 0.75rem;
+    background: var(--_dot); border-radius: 0;
+    mask: var(--_mark) center / contain no-repeat;
+  }
+  .slice-label .mark { inline-size: 0.875rem; block-size: 0.875rem; }
+  /* in a 20px pill with 4px start padding, a 12px mark sits concentric with the pill's rounded end */
+  .badge[data-mark] { padding-inline-start: var(--space-1); }
+  .badge[data-mark]::before { content: ""; }
+  [data-mark="empty"] { --_mark: var(--mark-empty); }
+  [data-mark="dashed"] { --_mark: var(--mark-dashed); }
+  [data-mark="quarter"] { --_mark: var(--mark-quarter); }
+  [data-mark="three"] { --_mark: var(--mark-three); }
+  [data-mark="half"] { --_mark: var(--mark-half); }
+  [data-mark="full"] { --_mark: var(--mark-full); }
+  [data-mark="slash"] { --_mark: var(--mark-slash); }
 }

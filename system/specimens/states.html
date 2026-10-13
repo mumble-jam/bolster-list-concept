@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>States · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>States</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">Every list designs four states besides the normal one: loading, empty (no records yet), no results (filters exclude everything) and error. They sit inside the table card, so the page keeps its shape.</p>
+
+  <section class="spec-section">
+    <h2>Empty: no records yet</h2>
+    <div class="spec-panel"><div class="state"><span class="state-icon"><i data-icon="inbox" data-size="24"></i></span><h3>No jobs yet</h3><p>Jobs you create, or estimates people accept, show up here.</p><div class="state-actions"><button class="button">Create job</button></div></div></div>
+  </section>
+
+  <section class="spec-section">
+    <h2>No results</h2>
+    <p>Says what's excluding everything, in the screen's words, and offers to undo it.</p>
+    <div class="spec-panel"><div class="state"><span class="state-icon"><i data-icon="search" data-size="24"></i></span><h3>No jobs match</h3><p>Nothing matches Status: Declined, search “skim”. Remove a filter or try a different search.</p><div class="state-actions"><button class="button" data-variant="secondary">Clear all filters</button><button class="button" data-variant="secondary">Clear search</button></div></div></div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Error</h2>
+    <div class="spec-panel" style="padding:var(--space-1) 0 var(--space-3)"><div class="banner" role="alert"><i data-icon="triangle-exclamation"></i><p>Jobs didn't load. Check your connection and try again.</p><button class="button" data-variant="secondary" data-size="sm">Try again</button></div></div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Loading</h2>
+    <p>Skeleton rows in the columns' own widths, so nothing moves when the data arrives. They shimmer unless reduced motion is on.</p>
+    <div class="spec-panel" style="display:grid;gap:var(--space-4)">
+      <span class="skeleton" style="inline-size:70%"></span>
+      <span class="skeleton" style="inline-size:50%"></span>
+      <span class="skeleton" style="inline-size:62%"></span>
+    </div>
+  </section>
+</main>
+<script src="../../shared/icons.js?v=8aa38bbc"></script>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

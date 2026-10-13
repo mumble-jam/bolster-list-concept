@@ -1,0 +1,93 @@
+/* List page: the page that lists one kind of record (jobs, invoices, customers, the catalog).
+   page header (title, view menu, Export, Create) → summary cards → the table card (toolbar, chips,
+   table, footer) with the record beside it → the floating bar. Scrolling (option D): the title scrolls
+   away; once you're into the list, scrolling down hides the top bar and the card header and scrolling
+   up brings them back (script sets data-chrome-hidden on the root). Phones: Create floats bottom right
+   (data-float), Select sits in the page header (data-phone-only). Built from components/; the live
+   example is concepts/data-list/. D19–D32, I6 */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  /* ---------- page title with the view menu ---------- */
+  .page-title { flex: 1; min-inline-size: 0; display: flex; align-items: center; gap: var(--space-2); }
+  .page-title h1 { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .view-button { gap: var(--space-1); color: var(--color-content-secondary); }
+  .view-dirty { font-size: var(--text-xs); color: var(--color-content-tertiary); white-space: nowrap; }
+  @media (max-width: 767px) {
+    .page-header-actions .button[data-hide-phone] { display: none; }
+    /* Create floats and Export goes, so the title shares its line with Select, which sits at the end */
+    .page-header-actions { flex: none; margin-inline-start: auto; }
+  }
+
+  /* ---------- page: toolbar, slices, table card, floating bar ---------- */
+  .list-page { display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; gap: var(--space-4); }
+  .view-dirty .link-button { padding: 0; border: 0; background: none; color: var(--color-content-link); font: inherit; cursor: pointer; }
+  @media (hover: hover) { .view-dirty .link-button:hover { text-decoration: underline; text-underline-offset: 3px; } }
+  .view-dirty .link-button:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
+
+  /* ---------- scrolling: D, back on scroll up ----------
+     The page title scrolls away. Scrolling down mid-list hides the top bar and the card header (only the
+     column header stays, at the very top); scrolling up a little brings them back, sliding in 300 ms.
+     The rail and sidebar take the top bar's place while it's away. Focus is never left under a bar. */
+  .page-header { position: relative; inset-block-start: auto; }
+  .top-bar, .list-toolbar { transition: translate 300ms var(--ease-out); }
+  /* (the rail keeps its own width and shadow animations; the tablet sidebar keeps its slide) */
+  .rail { transition: inline-size var(--duration-medium) var(--ease-out), box-shadow var(--duration-medium) var(--ease-out), inset-block-start 300ms var(--ease-out), block-size 300ms var(--ease-out); }
+  @media (min-width: 1024px) { .sidebar { transition: inset-block-start 300ms var(--ease-out), block-size 300ms var(--ease-out); } }
+  :root[data-chrome-hidden] .top-bar { translate: 0 -100%; }
+  :root[data-chrome-hidden] .list-toolbar { translate: 0 calc(-100% - var(--list-toolbar-top, 0px)); }
+  /* the overlay menu on narrower screens takes the top bar's place while it's away */
+  @media (max-width: 1023px) { :root[data-chrome-hidden] .sidebar { inset-block-start: 0; } }
+  @media (min-width: 1024px) {
+    :root[data-chrome-hidden] :is(.app-shell[data-rail-pinned] > .rail, .sidebar) { inset-block-start: 0; block-size: 100dvh; }
+    /* trying out: with the rail collapsed, the logo stays above it while the rest of the top bar
+       slides away, so the left column reads as one dark strip (pinned, the rail still rises) */
+    .bs-logo { background: var(--color-surface-chrome); transition: translate 300ms var(--ease-out), border-color 300ms var(--ease-out); }
+    :root[data-chrome-hidden] .app-shell:not([data-rail-pinned]) .bs-logo {
+      translate: 0 var(--shell-top-bar-height);
+      border-inline-end-color: transparent;
+      box-shadow: 0 1px 0 var(--color-surface-chrome);
+    }
+  }
+  @media (min-width: 768px) and (max-width: 1023px) { :root[data-chrome-hidden] .rail { inset-block-start: 0; block-size: 100dvh; } }
+  :root { scroll-padding-block-start: calc(var(--list-head-top, 0px) + var(--space-2)); }
+  @media (prefers-reduced-motion: reduce) { .top-bar, .list-toolbar, .list-panel .data-table thead, .rail, .sidebar, .bs-logo { transition: none; } }
+
+  /* ---------- the record: beside the list from 1280 up, a side sheet below that ----------
+     As in Mercury: the list keeps its title, status and amount columns and the opened row stays
+     marked; the record is a card that sticks under the bars and scrolls on its own */
+  .list-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); align-items: start; }
+  @media (min-width: 1280px) {
+    .list-split[data-open] { grid-template-columns: minmax(0, 1fr) 24rem; }
+    .list-split[data-open] .data-table :is(th, td):not([data-m], .data-table-select, .row-actions) { display: none; }
+  }
+  /* below 1440 the list keeps only name, status and amount beside the record */
+  @media (min-width: 1280px) and (max-width: 1439px) {
+    .list-split[data-open] { grid-template-columns: minmax(0, 1fr) 22rem; }
+    .list-split[data-open] .data-table :is(th, td)[data-m="sub"] { display: none; }
+  }
+
+  /* ---------- phones: Create floats ----------
+     The top bar and page header stay; Create leaves the page header and becomes a labelled button above
+     the tab bar, bottom right, in thumb reach. It shrinks to + while you scroll down (the chrome slides
+     away) and steps aside while rows are ticked: the bulk bar takes the spot, one thing at the bottom */
+  @media (max-width: 767px) {
+    [data-float] {
+      position: fixed; z-index: var(--z-sticky);
+      inset-inline-end: var(--space-4); inset-block-end: calc(var(--shell-bottom-bar-height) + var(--space-4));
+      block-size: 3rem; padding-inline: var(--space-4) var(--space-5); gap: var(--space-2);
+      border-radius: var(--radius-lg); font-size: var(--text-base);
+      filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.18));
+      transition-property: --_sa, --_sk, --_pa, --_da, translate, padding, inline-size, block-size, font-size, background-color, border-color, color;
+    }
+    [data-float]::before { content: "+"; font-size: 1.375rem; line-height: 1; font-weight: var(--font-weight-regular); }
+    :root[data-chrome-hidden] [data-float] { padding-inline: 0; inline-size: 3.5rem; block-size: 3.5rem; font-size: 0; gap: 0; }
+    :root[data-chrome-hidden] [data-float]::before { font-size: 1.75rem; }
+    :root:has(.floating-bar:not([hidden])) [data-float] { display: none; }
+    /* room after the last row, so the floating button never sits on it */
+    .app-content.list-page { padding-block-end: calc(var(--space-4) + 4.5rem); }
+  }
+  /* phones only (Select: selecting is a mode there) */
+  @media (min-width: 768px) { [data-phone-only] { display: none; } }
+}

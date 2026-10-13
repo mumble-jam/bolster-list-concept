@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Floating bar · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>.spec-panel .floating-bar { position: static; margin: 0; }</style>
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Floating bar</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">Bulk actions for the rows you've ticked. It floats at the bottom of the screen, so the rows stay where they are while you select. Count first, then select all (or unselect all), the actions, the risky ones last after a rule, and clear. Inverse: dark in light, light in dark. Written to replace the other situational bars later (save changes, compare, move).</p>
+
+  <section class="spec-section">
+    <h2>Two jobs selected</h2>
+    <div class="spec-panel" data-surface="canvas">
+      <div class="floating-bar" role="toolbar" aria-label="Bulk actions for 2 selected">
+        <span class="floating-bar-count">2 selected</span><button type="button" class="floating-bar-link">Select all 132</button>
+        <span class="floating-bar-sep" aria-hidden="true"></span>
+        <span class="floating-bar-actions"><button type="button" class="button" data-variant="ghost" data-size="sm">Change status<i data-icon="chevron-down" data-size="14"></i></button><button type="button" class="button" data-variant="ghost" data-size="sm">Download</button><span class="floating-bar-sep" aria-hidden="true"></span><button type="button" class="button" data-variant="ghost" data-size="sm">Archive</button><button type="button" class="button" data-variant="ghost" data-size="sm" data-tone="danger">Delete</button></span>
+        <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Clear selection"><i data-icon="xmark"></i></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Phones: select mode, nothing ticked yet</h2>
+    <p>Selecting is a mode on phones (I6): Select in the page header, or a long press on a row. While it's on, the bar takes the floating Create's place, even before anything is ticked.</p>
+    <div class="spec-panel" data-surface="canvas" style="max-inline-size:375px">
+      <div class="floating-bar" role="toolbar" aria-label="Select mode">
+        <span class="floating-bar-count">Tap jobs to select</span><button type="button" class="floating-bar-link">Select all 132</button>
+        <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Stop selecting"><i data-icon="xmark"></i></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Rules</h2>
+    <ul class="spec-stack" style="max-width:70ch;padding-left:var(--space-5)">
+      <li>Only where the list has bulk actions (L-selection); never invent them.</li>
+      <li>Red is for what can't be undone: Delete. Archive and Delete confirm first; the confirmation's final button is the only filled red.</li>
+      <li>Actions that depend on what's selected (one job vs several) change with the selection; menus (Change status, More) open from the bar.</li>
+    </ul>
+  </section>
+</main>
+<script src="../../shared/icons.js?v=8aa38bbc"></script>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

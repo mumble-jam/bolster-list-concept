@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>App shell · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<div class="app-shell">
+  <header class="top-bar">
+    <a href="../index.html" class="button" data-variant="ghost" data-size="sm">← Catalog</a>
+    <button class="button" data-variant="ghost" data-icon-only aria-label="Open section menu" data-toggle-sidebar><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+    <button class="top-bar-search" type="button"><svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span>Search customers, jobs, invoices…</span><kbd>⌘K</kbd></button>
+    <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+    <span class="avatar" data-color="1" role="img" aria-label="Hello Mublejam">HM</span>
+  </header>
+
+  <nav class="rail" aria-label="Main">
+    <a class="rail-item" href="#"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 10l3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="rail-label">Dashboard</span></a>
+    <a class="rail-item" href="#" aria-current="page"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 16l6-11 6 11M7 11h6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="rail-label">Jobs</span></a>
+    <a class="rail-item" href="#" data-state="hover"><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="3" y="6" width="14" height="9" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="10.5" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/></svg><span class="rail-label">Financial</span></a>
+    <a class="rail-item" href="#"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M3 16c.8-2.6 2.7-4 5-4s4.2 1.4 5 4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="rail-label">Customers</span></a>
+    <span class="rail-spacer"></span>
+    <a class="rail-item" href="#"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="2.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5 5l1.4 1.4M13.6 13.6L15 15M5 15l1.4-1.4M13.6 6.4L15 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><span class="rail-label">Settings</span></a>
+    <hr class="rail-separator">
+    <button class="rail-item" type="button" aria-pressed="false" data-rail-pin><svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="2.5" width="15" height="15" rx="2" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M7 2.5v15M10.5 7.5l2.5 2.5-2.5 2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="rail-label">Pin sidebar</span></button>
+  </nav>
+
+  <nav class="sidebar" aria-label="Jobs">
+    <h2 class="sidebar-title">Jobs</h2>
+    <a class="sidebar-item" href="#">Pipeline</a>
+    <a class="sidebar-item" href="#" aria-current="page">Job list <span class="badge" data-count>20</span></a>
+    <div class="sidebar-group">Work</div>
+    <a class="sidebar-item" href="#" data-state="hover">Tasks</a>
+    <a class="sidebar-item" href="#">Timeline</a>
+    <a class="sidebar-item" href="#">Calendar</a>
+    <div class="sidebar-group">Purchasing</div>
+    <a class="sidebar-item" href="#">Vendor orders</a>
+    <a class="sidebar-item" href="#">Expenses</a>
+  </nav>
+
+  <main class="app-main">
+    <header class="page-header">
+      <h1>Pending jobs</h1>
+      <div class="page-header-actions">
+        <div class="input-group" style="inline-size:16rem"><span class="input-adornment"><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.5" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></span><input class="input" type="search" placeholder="Search this table" aria-label="Search this table"></div>
+        <button class="button">Create job</button>
+      </div>
+    </header>
+    <div class="app-content">
+      <p class="spec-intro" style="margin-bottom:var(--space-6)">The shell at every width (D15): rail and sidebar from 1024px; between 768 and 1023 the sidebar becomes an overlay opened from the top bar, so content keeps its width (the as-is sidebar squeezed forms to 488px at 768); below 768 the rail gives way to a bottom tab bar. Rail items get names from tooltips instead of a 1-second hover expansion. Resize the window to see each.</p>
+      <div class="filter-cards" role="radiogroup" aria-label="Filter proposals" style="margin-bottom:var(--space-4)">
+        <label class="filter-card"><input type="radio" name="fc" checked><span class="filter-card-label">All proposals</span><span class="filter-card-meta">$3,104,769.30</span><span class="filter-card-count">20</span></label>
+        <label class="filter-card"><input type="radio" name="fc"><span class="filter-card-label">Pending</span><span class="filter-card-meta">$63,070.82</span><span class="filter-card-count">15</span></label>
+      </div>
+      <div class="card" style="min-block-size:24rem"><div class="card-body text-secondary" style="padding-top:var(--space-5)">List content…</div></div>
+    </div>
+    <div class="action-bar"><span class="text-secondary" style="flex:1">Estimated price <strong class="text-amount text-primary">$833.69</strong></span><button class="button" data-variant="ghost">Decline</button><button class="button" data-variant="brand">Approve</button></div>
+  </main>
+
+  <nav class="bottom-bar" aria-label="Main">
+    <a class="bottom-bar-item" href="#"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Dashboard</a>
+    <a class="bottom-bar-item" href="#" aria-current="page"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 16l6-11 6 11M7 11h6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Jobs</a>
+    <a class="bottom-bar-item" href="#"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>Customers</a>
+    <a class="bottom-bar-item" href="#"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h.01M10 10h.01M16 10h.01" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>More</a>
+  </nav>
+</div>
+<div class="toast-region" aria-live="polite"></div>
+<script src="specimen.js?v=8aa38bbc"></script>
+<script>
+{
+  // Rail (D25): widens over the page on hover after a short pause; the pin keeps it wide.
+  const shell = document.querySelector(".app-shell"), rail = shell.querySelector(".rail"), pin = rail.querySelector("[data-rail-pin]");
+  let timer;
+  const expand = (on, delay) => { clearTimeout(timer); timer = setTimeout(() => rail.toggleAttribute("data-expanded", on && !shell.hasAttribute("data-rail-pinned")), delay); };
+  rail.addEventListener("pointerenter", (e) => e.pointerType === "mouse" && expand(true, 150));
+  rail.addEventListener("pointerleave", () => expand(false, 100));
+  pin.addEventListener("click", () => {
+    const on = shell.toggleAttribute("data-rail-pinned");
+    pin.setAttribute("aria-pressed", on);
+    pin.querySelector(".rail-label").textContent = on ? "Unpin sidebar" : "Pin sidebar";
+    expand(false, 0);
+  });
+}
+</script>
+</body>
+</html>

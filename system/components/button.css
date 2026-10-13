@@ -1,9 +1,12 @@
 /* Button
-   <button class="button" data-variant="primary|brand|secondary|tertiary|ghost|danger"
+   <button class="button" data-variant="primary|brand|secondary|ghost|danger" [data-tone="danger"]
            data-size="sm|md|lg|xl">Label</button>
    Defaults: primary, md. Icon-only: data-icon-only + aria-label.
    Loading: aria-busy="true" (keep the label; it can say "Saving…").
-   Full width: data-block. Works on <a> too. See docs/decisions.md D4, D5. */
+   Full width: data-block. Works on <a> too. See docs/decisions.md D4, D5. 
+   The CTAs (primary, brand, danger) and secondary have a body: an edge, a light top line, a shadow;
+   hover lifts 1px, a press sinks at once and eases back. Ghost and a quiet danger for toolbars and
+   rows. Every button has 8px corners (D33). */
 
 @layer tokens, base, components, utilities;
 
@@ -67,14 +70,6 @@
     --_fg-hover: var(--color-content-primary);
     --_border-hover: var(--color-content-primary);
     --_bg-active: var(--color-surface-tint-hover);
-  }
-  :where(.button[data-variant="tertiary"]) {
-    --_bg: var(--color-surface-tint);
-    --_fg: var(--color-content-primary);
-    --_bg-hover: var(--color-surface-tint-hover);
-    --_fg-hover: var(--color-content-primary);
-    --_border-hover: transparent;
-    --_bg-active: var(--color-surface-tint-active);
   }
   :where(.button[data-variant="ghost"]) {
     --_bg: transparent;
@@ -144,5 +139,94 @@
   @media (pointer: coarse) {
     :where(.button[data-size="sm"]) { position: relative; }
     :where(.button[data-size="sm"])::after { content: ""; position: absolute; inset: -6px 0; }
+  }
+
+  /* ---------- tactile CTAs (settings from the button tuner, "Claude-like" edited) ----------
+     Primary (yellow on black; black on yellow in dark) and brand (black on yellow) get a body: an edge, a light
+     line along the top and a darker one along the bottom, a sheen, a contact and an ambient shadow. Hover lifts
+     1px and brightens; press sinks 1px at once and eases back. Numbers that differ by fill are set per fill;
+     yellow is the default (brand everywhere, primary in dark), black is primary in light. */
+  /* every button takes 8px corners, so the CTAs don't stand apart from the buttons beside them */
+  .button { border-radius: var(--radius-md); }
+  @property --_sa { syntax: "<number>"; inherits: true; initial-value: 0; }
+  @property --_sk { syntax: "<number>"; inherits: true; initial-value: 1; }
+  @property --_pa { syntax: "<number>"; inherits: true; initial-value: 0; }
+  @property --_da { syntax: "<number>"; inherits: true; initial-value: 0; }
+  .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"], [data-variant="danger"]) {
+    /* yellow fill */
+    --_edge: color-mix(in oklab, var(--_bg), black 10%);
+    --_line: 0.21; --_sheen: 0.24; --_lip: 0.08;
+    /* shadows fade on near-black, so dark doubles them and more */
+    --_shadow-k: 1;
+    /* state inputs: sheen, shadow scale, inner (press) shadow, darken, lift */
+    --_sa: var(--_sheen); --_sk: 1; --_pa: 0; --_da: 0; --_lift: 0px;
+    --_border: var(--_edge); --_border-hover: var(--_edge); --_bg-hover: var(--_bg); --_fg-hover: var(--_fg); --_bg-active: var(--_bg);
+    background-image: linear-gradient(rgb(0 0 0 / var(--_da)), rgb(0 0 0 / var(--_da))), linear-gradient(rgb(255 255 255 / var(--_sa)), transparent);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / calc(var(--_line) * (1 - var(--_pa) * 3))),
+      inset 0 -1px 0 rgb(0 0 0 / var(--_lip)),
+      inset 0 1px 3px rgb(0 0 0 / var(--_pa)),
+      0 1px 3px rgb(0 0 0 / calc(0.09 * var(--_shadow-k) * var(--_sk))),
+      0 6px 5px rgb(0 0 0 / calc(0.09 * var(--_shadow-k) * var(--_sk)));
+    translate: 0 var(--_lift);
+    transition-property: --_sa, --_sk, --_pa, --_da, translate, background-color, border-color, color;
+    transition-duration: 150ms;
+    transition-timing-function: var(--ease-out);
+  }
+  /* black fill (primary in light): black can't get darker, so the edge is lighter and the lines do the work */
+  .button:is(:not([data-variant]), [data-variant="primary"]) {
+    --_edge: light-dark(color-mix(in oklab, var(--_bg), white 25%), color-mix(in oklab, var(--_bg), black 10%));
+    --_line: 0.3; --_sheen: 0.16; --_lip: 0.3;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"], [data-variant="danger"]) { --_line: 0.21; --_sheen: 0.24; --_lip: 0.08; --_shadow-k: 2.5; }
+  }
+  :root[data-theme="dark"] .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"], [data-variant="danger"]) { --_line: 0.21; --_sheen: 0.24; --_lip: 0.08; --_shadow-k: 2.5; }
+  @media (hover: hover) {
+    .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"], [data-variant="danger"]):hover:not(:disabled, [aria-disabled="true"], [aria-busy="true"]) { --_sa: calc(var(--_sheen) + 0.06); --_lift: -1px; --_sk: 1.5; }
+  }
+  /* press lands at once (30ms); only the release eases */
+  .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"], [data-variant="danger"]):active:not(:disabled, [aria-disabled="true"]) {
+    --_sa: 0; --_da: 0.02; --_pa: 0.12; --_lift: 1px; --_sk: 0.3;
+    transition-duration: 30ms;
+  }
+  .button:is(:not([data-variant]), [data-variant="primary"], [data-variant="brand"], [data-variant="danger"]):is(:disabled, [aria-disabled="true"]) { --_border: transparent; background-image: none; box-shadow: none; }
+  @media (prefers-reduced-motion: reduce) { .button { --_lift: 0px !important; } }
+
+  /* ---------- secondary, ghost and danger (from the buttons research board, 10 Oct) ----------
+     Secondary sits a clear step below the black primary: white with the CTAs' body, quieter (a cement
+     edge, a darker bottom edge, a white top line, a small warm shadow; lifts 1px on hover, sinks on press).
+     Tertiary is gone: secondary covers the record's actions. Ghost is for places that already say “button”
+     (toolbars, rows, bars, Close) and gets a hover you can see. Danger has three weights: red text in menus,
+     a quiet danger (red text, fills red when pointed at) where Delete is one action of several, and the
+     filled red, with the primary's body, only on the confirmation's final button. Red means can't be undone. */
+  :root { --_sec-line: 0.8; }
+  /* in dark a white top line shows at a whisper, and carries the edge */
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --_sec-line: 0.06; } }
+  :root[data-theme="dark"] { --_sec-line: 0.06; }
+  .button[data-variant="secondary"] {
+    --_sk: 1; --_pa: 0; --_lift: 0px;
+    --_bg: var(--color-surface-default); --_bg-hover: var(--color-action-secondary-hover); --_bg-active: var(--color-action-secondary-hover);
+    --_fg: var(--color-content-primary); --_fg-hover: var(--color-content-primary);
+    --_border: var(--color-action-secondary-edge); --_border-hover: var(--color-action-secondary-edge);
+    border-block-end-color: var(--color-action-secondary-edge-bottom);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / calc(var(--_sec-line) * (1 - var(--_pa) * 8))),
+      inset 0 1px 3px rgb(0 0 0 / var(--_pa)),
+      0 1px 2px rgb(from var(--color-shadow-tint) r g b / calc(0.08 * var(--_sk))),
+      0 4px 8px rgb(from var(--color-shadow-tint) r g b / max(0, calc((var(--_sk) - 1) * 0.15)));
+    translate: 0 var(--_lift);
+    transition-property: --_sk, --_pa, translate, background-color, border-color, color;
+    transition-duration: 150ms; transition-timing-function: var(--ease-out);
+  }
+  @media (hover: hover) { .button[data-variant="secondary"]:hover:not(:disabled, [aria-disabled="true"], [aria-busy="true"]) { --_sk: 1.4; --_lift: -1px; } }
+  .button[data-variant="secondary"]:active:not(:disabled, [aria-disabled="true"]) { --_sk: 0.3; --_pa: 0.08; --_lift: 1px; transition-duration: 30ms; }
+  .button[data-variant="secondary"]:is(:disabled, [aria-disabled="true"]) { box-shadow: none; translate: none; border-block-end-color: var(--color-surface-disabled); }
+  @media (prefers-reduced-motion: reduce) { .button[data-variant="secondary"] { --_lift: 0px !important; } }
+  .button[data-variant="ghost"] { --_bg-hover: var(--color-action-ghost-hover); --_bg-active: var(--color-action-ghost-active); }
+  /* quiet danger: looks like its neighbours with red text; fills red only when pointed at */
+  .button[data-variant="ghost"][data-tone="danger"] {
+    --_fg: var(--color-feedback-danger-content); --_fg-hover: var(--color-content-on-accent);
+    --_bg-hover: var(--color-action-danger); --_bg-active: var(--color-action-danger-hover);
   }
 }

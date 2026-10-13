@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Checkbox, radio and toggle · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Checkbox, radio and toggle</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">Native inputs, restyled: keyboard, forms and screen readers work without JS. One "on" colour (black; yellow in dark) instead of the three the product uses today. Each sits in a label that's the hit area; on touch it grows to 44px.</p>
+
+  <section class="spec-section">
+    <h2>Checkbox</h2>
+    <div class="spec-panel">
+      <table class="spec-table">
+        <thead><tr><th></th><th>Default</th><th>Hover</th><th>Focus</th><th>Disabled</th></tr></thead>
+        <tbody>
+          <tr><td class="spec-label">off</td><td><label class="choice"><input type="checkbox" class="checkbox"> Always build from scratch</label></td><td><label class="choice"><input type="checkbox" class="checkbox" data-state="hover"> Hover</label></td><td><label class="choice"><input type="checkbox" class="checkbox" data-state="focus"> Focus</label></td><td><label class="choice"><input type="checkbox" class="checkbox" disabled> Disabled</label></td></tr>
+          <tr><td class="spec-label">on</td><td><label class="choice"><input type="checkbox" class="checkbox" checked> Always build from scratch</label></td><td></td><td><label class="choice"><input type="checkbox" class="checkbox" checked data-state="focus"> Focus</label></td><td><label class="choice"><input type="checkbox" class="checkbox" checked disabled> Disabled</label></td></tr>
+          <tr><td class="spec-label">mixed</td><td><label class="choice"><input type="checkbox" class="checkbox" data-indeterminate aria-label="Select all rows"> Select all (some selected)</label></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Radio</h2>
+    <div class="spec-panel">
+      <fieldset style="border:0;padding:0;margin:0" class="spec-stack">
+        <legend class="field-label" style="margin-bottom:var(--space-2)">Template search mode</legend>
+        <label class="choice"><input type="radio" class="radio" name="mode" checked> Always build from scratch</label>
+        <label class="choice"><input type="radio" class="radio" name="mode"> Search existing templates first</label>
+        <label class="choice"><input type="radio" class="radio" name="mode" disabled> Copy the last job (coming soon)</label>
+      </fieldset>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Toggle</h2>
+    <p>For settings that apply immediately. If the change needs a Save button, use a checkbox.</p>
+    <div class="spec-panel">
+      <div class="spec-stack">
+        <label class="choice"><input type="checkbox" role="switch" class="toggle" checked> Show getting started in navigation</label>
+        <label class="choice"><input type="checkbox" role="switch" class="toggle"> Let users see public items in the quote view</label>
+        <label class="choice"><input type="checkbox" role="switch" class="toggle" data-state="focus"> Focus</label>
+        <label class="choice"><input type="checkbox" role="switch" class="toggle" disabled checked> Disabled</label>
+      </div>
+    </div>
+<code class="spec-code">&lt;label class="choice"&gt;&lt;input type="checkbox" class="checkbox"&gt; Always build from scratch&lt;/label&gt;
+&lt;label class="choice"&gt;&lt;input type="radio" class="radio" name="mode"&gt; Profit&lt;/label&gt;
+&lt;label class="choice"&gt;&lt;input type="checkbox" role="switch" class="toggle"&gt; Show getting started&lt;/label&gt;</code>
+  </section>
+</main>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>

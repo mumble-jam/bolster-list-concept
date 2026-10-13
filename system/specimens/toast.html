@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Toast · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=8aa38bbc">
+<link rel="stylesheet" href="specimen.css?v=8aa38bbc">
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Toast</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">Short feedback after an action, in one live region. Success and info leave after 5 seconds, paused while hovered or focused; errors stay until dismissed and are announced assertively. On phones they sit above the bottom tab bar.</p>
+  <section class="spec-section">
+    <h2>Try it</h2>
+    <div class="spec-panel"><div class="spec-row">
+      <button class="button" data-variant="secondary" data-toast="success" data-message="Proposal sent to Mykola Khvylovy">Success</button>
+      <button class="button" data-variant="secondary" data-toast="info" data-message="Product update available. Refresh to get it.">Info</button>
+      <button class="button" data-variant="secondary" data-toast="warning" data-message="Two items have no price yet">Warning</button>
+      <button class="button" data-variant="secondary" data-toast="danger" data-message="That job is private. Ask its owner to share it.">Error</button>
+    </div></div>
+  </section>
+  <section class="spec-section">
+    <h2>Static</h2>
+    <div class="spec-panel" data-surface="canvas"><div class="spec-stack">
+      <div class="toast" data-tone="success" role="status" style="animation:none"><span class="toast-message">Proposal sent to Mykola Khvylovy</span><button class="toast-action">Undo</button><button class="toast-close" aria-label="Dismiss">×</button></div>
+      <div class="toast" data-tone="danger" role="alert" style="animation:none"><span class="toast-message">That job is private. Ask its owner to share it.</span><button class="toast-close" aria-label="Dismiss">×</button></div>
+    </div></div>
+    <p class="spec-note">Copy: say what happened and what to do next, in plain words. The as-is error reads "That is a private object. There is no publicly accessable version of that object."</p>
+  </section>
+</main>
+<div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
+<script src="specimen.js?v=8aa38bbc"></script>
+</body>
+</html>
