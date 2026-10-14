@@ -27,8 +27,9 @@
   .detail-head h2 { flex: 1; min-inline-size: 0; margin: 0; padding-block: calc((var(--control-height-sm) - var(--leading-sm)) / 2); font-family: var(--font-sans); font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-regular); color: var(--color-content-secondary); overflow-wrap: anywhere; text-wrap: pretty; }
   .detail-head h2:focus { outline: none; }
   .detail-head h2:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
-  /* touch screens: Safari counts focus moved there after a tap as visible; nobody tabbed, so no ring */
-  @media (hover: none) { .detail-head h2:focus-visible { outline: none; } }
+  /* opened with a click or tap: Safari counts the script's focus as visible anyway, so the opener marks
+     the heading data-quiet-focus and it gets no ring; opened from the keyboard, it keeps one */
+  .detail-head h2[data-quiet-focus]:focus-visible { outline: none; }
   .detail-head .button svg, .detail-doc-head svg { color: var(--color-content-secondary); }
   .detail-scroll { overflow: auto; overscroll-behavior: contain; }
   .detail-section { margin: 0; padding: var(--space-5); }

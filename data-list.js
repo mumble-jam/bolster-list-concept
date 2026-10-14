@@ -1109,7 +1109,14 @@
     if (row.scrollWidth > row.clientWidth + 1) acts.slice(1).forEach((b) => (b.hidden = true));
   }
   const refit = new ResizeObserver((es) => es.forEach((e) => fitActions(e.target)));
-  function openPeek(id) {
+  // the record's heading takes focus, with a ring only when it was opened from the keyboard: Safari
+  // counts a script's focus after a click as visible (Chrome doesn't), so a click marks it quiet
+  function focusTitle(d, byKey, opts = {}) {
+    const h = $("#detail-title", d);
+    h.toggleAttribute("data-quiet-focus", !byKey);
+    h.focus({ ...opts, focusVisible: byKey });
+  }
+  function openPeek(id, { byKey = false } = {}) {
     if (!cfg.rows.some((r) => r.id === id)) return;
     // D30: this list's rows open the record itself, which the concept doesn't build
     if (cfg.rowClick === "open") { toast(`Rows here open the ${cfg.noun[0]} itself (D30); the record isn't part of this concept.`); return; }
@@ -1126,7 +1133,7 @@
       $("#list-split").toggleAttribute("data-open", true);
       // measured once the split view is open, so the card has its width
       fitActions(d); refit.observe(d);
-      $("#detail-title", d).focus({ preventScroll: true });
+      focusTitle(d, byKey, { preventScroll: true });
     } else {
       $("#detail").hidden = true;
       $("#detail").innerHTML = "";
@@ -1135,7 +1142,7 @@
       d.innerHTML = detailHtml(id);
       if (!d.open) d.showModal();
       fitActions(d); refit.observe(d);
-      $("#detail-title", d).focus();
+      focusTitle(d, byKey);
     }
   }
   function closeDetail({ focus = true } = {}) {
@@ -1259,7 +1266,7 @@
     }
     if ((el = q("[data-row-menu]"))) return openPop("row", el.dataset.rowMenu, el);
     if ((el = q("[data-bulk-menu]"))) return openPop("bulk", el.dataset.bulkMenu, el);
-    if ((el = q("[data-peek]"))) { e.preventDefault(); openPeek(el.dataset.peek); return; }
+    if ((el = q("[data-peek]"))) { e.preventDefault(); openPeek(el.dataset.peek, { byKey: e.detail === 0 }); return; }
     if (q("[data-detail-close]")) return closeDetail();
     if ((el = q("[data-tl-more]"))) { const ol = el.closest(".timeline"); $$("[data-fold]", ol).forEach((li) => (li.hidden = false)); const first = $("[data-fold]", ol); el.closest("li").remove(); first?.setAttribute("tabindex", "-1"); first?.focus({ preventScroll: true }); return; }
     if (q("[data-select-done]")) { unpick(); $("#select-mode")?.focus({ preventScroll: true }); return; }
@@ -1434,7 +1441,7 @@
       return;
     }
     if (e.target.closest("a, button, input, label, select")) return;
-    openPeek(tr.dataset.id);
+    openPeek(tr.dataset.id, { byKey: e.detail === 0 });
   });
   // phones: hold a row to start selecting with it ticked (as in Mail, Files, Gmail); moving cancels, so scrolls don't
   let press = null, pressedAt = 0;
