@@ -71,7 +71,7 @@
   function passes(f, row) {
     const val = st.filters[f.key];
     const x = f.get(row);
-    if (f.type === "enum") return val.includes(x);
+    if (f.type === "enum") return Array.isArray(x) ? x.some((v) => val.includes(v)) : val.includes(x);
     if (f.type === "single") return f.options.find((o) => o.value === val)?.test(x) ?? true;
     if (f.type === "date") return inSpan(val, x);
     if (f.type === "range") { const v = x * (f.scale || 1); return (val.min == null || v >= val.min) && (val.max == null || v <= val.max); }
@@ -996,7 +996,7 @@
         // a long list of records gets a find box (L-types: records are searchable)
         const find = f.searchable || f.options.length > 12 ? `<div class="pop-find"><input class="input" data-size="sm" type="search" data-opt-find placeholder="Find ${esc(f.label.toLowerCase())}" aria-label="Find ${esc(f.label.toLowerCase())}" autocomplete="off"></div>` : "";
         pop.innerHTML = `${head}${find}<div class="pop-body" role="group" aria-label="${esc(f.label)}">${f.options.map((o) => {
-          const n = base.filter((x) => f.get(x) === o.value).length;
+          const n = base.filter((x) => { const v = f.get(x); return Array.isArray(v) ? v.includes(o.value) : v === o.value; }).length;
           return `<label class="option"><input type="checkbox" class="checkbox" data-opt="${esc(o.value)}" data-focus-key="${esc(o.value)}"${val?.includes(o.value) ? " checked" : ""}><span class="option-label">${o.html || esc(o.label)}</span><span class="option-count">${n}</span></label>`;
         }).join("")}</div>`;
       } else if (f.type === "single") {

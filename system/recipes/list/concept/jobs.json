@@ -114,7 +114,8 @@
         "label": "Declined",
         "stage": "lost"
       }
-    ]
+    ],
+    "marks": true
   },
   "summary": {
     "all": {

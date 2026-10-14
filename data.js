@@ -90,8 +90,11 @@
   // ---------- shared renderers ----------
   const avatar = (p, size) => `<span class="avatar"${size ? ` data-size="${size}"` : ""} data-color="${p.color}" aria-hidden="true">${esc(p.initials)}</span>`;
   const person = (p) => `<span class="cell-person">${avatar(p, "sm")}${esc(p.me ? `${p.name} (you)` : p.name)}</span>`;
-  const main = (id, title, sub, who) =>
-    `<div class="cell-main">${who ? avatar(who) : ""}<div><a class="data-table-link" href="#${id}" data-peek="${id}">${esc(title)}</a>${sub ? `<div class="cell-sub">${esc(sub)}</div>` : ""}</div></div>`;
+  // the name cell: an avatar, the title (after any kinds icons, L-types) and the detail line
+  const main = (id, title, sub, who, lead = "") => {
+    const link = `<a class="data-table-link" href="#${id}" data-peek="${id}">${esc(title)}</a>`;
+    return `<div class="cell-main">${who ? avatar(who) : ""}<div>${lead ? `<div class="cell-title">${lead}${link}</div>` : link}${sub ? `<div class="cell-sub">${esc(sub)}</div>` : ""}</div></div>`;
+  };
   const ownerFilter = (get) => ({
     key: "owner", label: "Owner", type: "enum", pinned: true, get,
     options: OWNERS.map((o) => ({ value: o.id, label: o.me ? `${o.name} (you)` : o.name, html: `${avatar(o, "sm")}${esc(o.me ? `${o.name} (you)` : o.name)}` })),

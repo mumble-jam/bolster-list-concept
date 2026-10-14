@@ -61,6 +61,7 @@ window.BDS_RECIPE = (() => {
         case "address": return /city/.test(k) ? row._client.city : row._client.address;
         case "contact": return { email: emailOf(row._client), phone: `(555) ${int(200, 899)}-${String(int(0, 9999)).padStart(4, "0")}` };
         case "flags": return r() < 0.45 ? [] : FLAGS.filter(() => r() < 0.5).slice(0, 3);
+        case "kinds": { const vs = (f.values || []).map((v) => v.value); const some = vs.filter(() => r() < 0.45); return some.length ? some : [pick(vs)]; }
         case "category": return row._item && /category/.test(k) ? row._item.cat : /source/.test(k) ? pick(SOURCES) : /vendor|supplier/.test(k) ? pick(VENDORS) : /category/.test(k) ? pick(Object.keys(CATALOG)) : /work|trade/.test(k) ? pick(TRADES) : /contain|kind/.test(k) ? pick(["Materials", "Labour", "Materials and labour"]) : `${f.label || cap(f.key)} ${"ABC"[int(0, 2)]}`;
         case "name":
           if (/number|code|^id$/.test(k)) return `${(n.one.slice(0, 3) || "rec").toUpperCase()}-${1040 + i}`;
@@ -74,6 +75,9 @@ window.BDS_RECIPE = (() => {
 
   // ---------- how each type reads (rules.json → types) ----------
   const shortDate = (d) => (Math.abs(ageDays(d)) < 7 ? fmt.ago(d) : fmt.date(d));
+  // a kinds value in words, from its column's values (“Materials, Labour”)
+  const kindsText = (c, v) => (v || []).map((k) => c.values?.find((o) => o.value === k)?.label || k).join(", ");
+  const kindsIcons = (c, v) => (v?.length ? `<span class="cell-kinds" role="img" aria-label="${esc(kindsText(c, v))}">${v.map((k) => { const o = c.values?.find((x) => x.value === k); return o ? `<span title="${esc(o.label)}">${window.BolsterIcons(o.icon, 14)}</span>` : ""; }).join("")}</span>` : "");
   const text = (v) => {
     if (v == null || v === "") return "";
     if (v instanceof Date) return shortDate(v);
@@ -119,7 +123,10 @@ window.BDS_RECIPE = (() => {
     const statusCol = d.status?.column;
     const stored = (d.status?.values || []).filter((v) => !v.derived);
     const order = (d.status?.values || []).map((v) => v.value);
-    const statusMap = Object.fromEntries((d.status?.values || []).map((v) => [v.value, { label: v.label, ...STAGE[v.stage] }]));
+    // the status shapes (dashed, quarter, half…) are the job list's own (D49): elsewhere a stage is its
+    // colour, a dot on its card and a plain tinted badge
+    const shapes = d.status?.marks === true && d.nav === "job-list";
+    const statusMap = Object.fromEntries((d.status?.values || []).map((v) => { const { mark, ...look } = STAGE[v.stage]; return [v.value, { label: v.label, ...look, ...(shapes && mark ? { mark } : {}) }]; }));
 
     // ---------- rows ----------
     const gen = sample(r, n);
@@ -142,11 +149,13 @@ window.BDS_RECIPE = (() => {
     const figure = d.columns.find((c) => c.priority === 2 && NUMERIC.has(c.type));
     const dates = d.columns.filter((c) => (c.type === "date" || c.type === "datetime") && !c.hidden).sort((a, b) => a.priority - b.priority);
     const empty = { statusMap };
-    const columns = d.columns.map((c) => {
+    // a kinds column has no column of its own: its icons lead the name (L-types)
+    const kindsCol = d.columns.find((c) => c.type === "kinds");
+    const columns = d.columns.filter((c) => c.type !== "kinds").map((c) => {
       const out = { key: c.key, label: c.label, hidden: !!c.hidden, sort: sortOf(c, order), dir: DESC.has(c.type) ? "desc" : "asc" };
       if (c.priority === 1) {
         out.m = "title"; out.required = true;
-        out.render = (x) => main(x.id, fill(c.title || `{${c.key}}`, x) || c.empty || `Unnamed ${n.one}`, fill(c.detail, x), c.leading === "avatar" && c.avatarFrom ? (typeof x[c.avatarFrom] === "object" ? x[c.avatarFrom] : { initials: initials(text(x[c.avatarFrom]) || "?"), color: (hash(text(x[c.avatarFrom])) % 8) + 1 }) : null);
+        out.render = (x) => main(x.id, fill(c.title || `{${c.key}}`, x) || c.empty || `Unnamed ${n.one}`, fill(c.detail, x), c.leading === "avatar" && c.avatarFrom ? (typeof x[c.avatarFrom] === "object" ? x[c.avatarFrom] : { initials: initials(text(x[c.avatarFrom]) || "?"), color: (hash(text(x[c.avatarFrom])) % 8) + 1 }) : null, kindsCol ? kindsIcons(kindsCol, x[kindsCol.key]) : "");
         out.sort = (x) => fill(c.title || `{${c.key}}`, x).toLowerCase();
         return out;
       }
@@ -180,6 +189,7 @@ window.BDS_RECIPE = (() => {
       if (c.type === "date" || c.type === "datetime") return { ...base, type: "date", get: (x) => x[c.key] };
       if (NUMERIC.has(c.type)) return { ...base, type: "range", get: (x) => x[c.key], ...(c.type === "money" ? { prefix: "$" } : c.type === "percent" ? { suffix: "%", scale: 100 } : c.unit || c.type === "duration" ? { suffix: `${c.unit || "day"}s` } : {}) };
       if (c.type === "address") return { ...base, type: "enum", get: (x) => text(x[c.key]).split(", ").pop(), options: CITIES.map((v) => ({ value: v, label: v })) };
+      if (c.type === "kinds") return { ...base, type: "enum", get: (x) => x[c.key], options: c.values.map((v) => ({ value: v.value, label: v.label, html: `${window.BolsterIcons(v.icon, 14)}${esc(v.label)}` })) };
       if (c.type === "flags") return { ...base, type: "enum", get: (x) => x[c.key][0] || "Clear", options: [...FLAGS, "Clear"].map((v) => ({ value: v, label: v })) };
       return { ...base, type: "enum", get: (x) => text(x[c.key]), options: valuesOf(c.key).map((v) => ({ value: v, label: v })), ...(c.type === "record" ? { searchable: true } : {}) };
     });
@@ -234,7 +244,7 @@ window.BDS_RECIPE = (() => {
       sub: fill(name.detail, x),
       timeline: d.record?.timeline === false ? [] : [{ what: `${cap(n.one)} created`, meta: fmt.date(dates[0] ? x[dates[0].key] : TODAY) }],
       actions: recordActions(x),
-      fields: recordFields.filter((k) => byKey[k]).map((k) => [byKey[k].label || cap(k), byKey[k].type === "person" ? person(x[k]) : byKey[k].type === "status" ? badge(statusMap[x[k]]) : esc(text(x[k]) || "–")]),
+      fields: recordFields.filter((k) => byKey[k]).map((k) => [byKey[k].label || cap(k), byKey[k].type === "person" ? person(x[k]) : byKey[k].type === "status" ? badge(statusMap[x[k]]) : byKey[k].type === "kinds" ? esc(kindsText(byKey[k], x[k]) || "–") : esc(text(x[k]) || "–")]),
       doc: d.record?.document ? { label: d.record.document, name: `${d.record.document.replace(/\s+/g, "-")}-${idKey ? text(x[idKey]) : x.id}.pdf`, view: `View ${d.record.document.toLowerCase()}` } : null,
     });
 
