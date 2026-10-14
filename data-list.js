@@ -596,7 +596,9 @@
     bar.setAttribute("aria-label", n ? `Bulk actions for ${n} selected` : "Select mode");
     const { acts, more, del } = bulkSet();
     const dis = n ? "" : " disabled";
-    const icon = (a) => { const name = typeof a === "string" ? actionIcons[a] : a.icon; return name ? ic(`m-${name}`, 14) : ""; };
+    // 14 Regular beside labels on desktop; 20 over them on phones, in Light, so the lines stay as thin (D41)
+    const glyph = (name) => (phoneMQ.matches ? ic(name, 20) : ic(`m-${name}`, 14));
+    const icon = (a) => { const name = typeof a === "string" ? actionIcons[a] : a.icon; return name ? glyph(name) : ""; };
     const label = (t) => `<span class="floating-bar-label">${esc(t)}</span>`;
     const chev = `<span class="floating-bar-chev" aria-hidden="true">${I.chev}</span>`;
     const btn = (inner, attrs) => `<button type="button" class="button" data-variant="ghost" data-size="sm"${dis} ${attrs}>${inner}</button>`;
@@ -605,7 +607,7 @@
       ? btn(icon(a) + label(a.label) + chev, menuAttrs(i))
       : btn(icon(a) + label(a), risky(a) ? `data-confirm="${esc(a)}"` : `data-concept-action="${esc(a)} ${what}"`)).join("")
       + (more.length ? btn(`<span class="floating-bar-more-icon" aria-hidden="true">${ic("ellipsis", 20)}</span>${label("More")}${chev}`, menuAttrs("more")) : "");
-    const danger = del.map((a) => btn(ic("m-trash", 14) + label(a), `data-tone="danger" data-confirm="${esc(a)}"`)).join("");
+    const danger = del.map((a) => btn(glyph("trash") + label(a), `data-tone="danger" data-confirm="${esc(a)}"`)).join("");
     bar.innerHTML = `<button type="button" class="floating-bar-count" data-clear-selection aria-label="Clear selection (${fmt.count(n)} selected)">${ic("xmark", 12)}<span aria-live="polite">${all && n > 1 ? `All ${fmt.count(n)} selected` : `${fmt.count(n)} selected`}</span></button>`
       + (all ? `<button type="button" class="floating-bar-link" data-unselect-all>Unselect all</button>` : `<button type="button" class="floating-bar-link" data-select-matching>Select all ${fmt.count(matching)}</button>`)
       + `<span class="floating-bar-sep" aria-hidden="true"></span><span class="floating-bar-actions">${actions}</span>`
@@ -1083,8 +1085,8 @@
     const p = cfg.peek(x);
     return `<header class="detail-head">
         <h2 id="detail-title" tabindex="-1">${esc(p.heading)}</h2>
-        <span class="tooltip-anchor"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-labelledby="detail-open-tip" data-concept-action="${esc(p.open)}">${ic("expand", 16)}</button><span class="tooltip" role="tooltip" id="detail-open-tip" data-side="bottom">${esc(p.open)}</span></span>
-        <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close" data-detail-close>${I.xl}</button>
+        <span class="tooltip-anchor"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-labelledby="detail-open-tip" data-concept-action="${esc(p.open)}">${ic("m-expand", 12, { optical: true })}</button><span class="tooltip" role="tooltip" id="detail-open-tip" data-side="bottom">${esc(p.open)}</span></span>
+        <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close" data-detail-close>${ic("xmark", 18, { optical: true })}</button>
       </header>
       <div class="detail-scroll">
         <div class="detail-section detail-hero">
@@ -1092,7 +1094,7 @@
           <p class="detail-amount${p.amount ? "" : " is-empty"}">${p.amount ? money(p.amount) : esc(p.empty)}</p>
           <p class="detail-sub">${esc(p.sub)}</p>
           ${timelineHtml(p.timeline)}
-          <div class="detail-actions">${p.actions.map(([l, i]) => `<button type="button" class="button" data-variant="secondary" data-concept-action="${esc(l)}">${ic(`m-${i}`, 14)}${esc(l)}</button>`).join("")}<button type="button" class="button" data-variant="secondary" data-row-menu="${x.id}" aria-haspopup="menu" aria-expanded="false">More${I.chev}</button></div>
+          <div class="detail-actions">${p.actions.map(([l, i]) => `<button type="button" class="button" data-variant="secondary" data-concept-action="${esc(l)}">${ic(`m-${i}`, 14, { optical: true })}${esc(l)}</button>`).join("")}<button type="button" class="button" data-variant="secondary" data-row-menu="${x.id}" aria-haspopup="menu" aria-expanded="false">More${I.chev}</button></div>
         </div>
         <dl class="detail-section detail-fields">${p.fields.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join("")}</dl>
         ${p.doc ? `<div class="detail-section detail-doc"><div class="detail-doc-head"><span>${esc(p.doc.label)}</span><button type="button" class="link-button" data-concept-action="${esc(p.doc.view)}">${esc(p.doc.view)}</button></div><button type="button" class="detail-file" data-concept-action="Download ${esc(p.doc.name)}">${ic("m-file", 14)}<span>${esc(p.doc.name)}</span>${ic("m-download", 14)}</button></div>` : ""}

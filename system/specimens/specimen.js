@@ -147,5 +147,6 @@ document.addEventListener("click", (e) => {
 });
 
 // Icons: <i data-icon="filter" data-size="16"></i> becomes the Font Awesome glyph, when the page loads
+// (data-optical: drawn at that size whatever the control's icon box, D41)
 // the concepts' icon set (../../concepts/shared/icons.js). Sized by height, as Font Awesome draws them.
-if (window.BolsterIcons) document.querySelectorAll("i[data-icon]").forEach((i) => (i.outerHTML = window.BolsterIcons(i.dataset.icon, +(i.dataset.size || 16))));
+if (window.BolsterIcons) document.querySelectorAll("i[data-icon]").forEach((i) => (i.outerHTML = window.BolsterIcons(i.dataset.icon, +(i.dataset.size || 16), { optical: "optical" in i.dataset })));

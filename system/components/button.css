@@ -51,7 +51,8 @@
     transition-duration: var(--duration-fast);
     transition-timing-function: var(--ease-standard);
   }
-  :where(.button) > svg { inline-size: var(--_icon); block-size: var(--_icon); }
+  /* the size sets the icon's box; an icon drawn at its optical size keeps its own (--icon-size, D41) */
+  :where(.button) > svg { inline-size: var(--icon-size, var(--_icon)); block-size: var(--icon-size, var(--_icon)); }
 
   /* ---------- variants ---------- */
   :where(.button[data-variant="brand"]) {

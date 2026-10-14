@@ -32,7 +32,7 @@
     padding: 0; border: 0; border-radius: var(--radius-full); background: none;
     color: var(--color-content-on-chrome-muted); cursor: pointer;
   }
-  .bs-icon-btn svg { inline-size: 1.25rem; block-size: 1.25rem; }
+  .bs-icon-btn svg { inline-size: var(--icon-size, 1.25rem); block-size: var(--icon-size, 1.25rem); }
   /* Bolton's head drawn at about the (?) icon's size, so the two read as a pair */
   .bs-assistant img { block-size: 1.375rem; inline-size: auto; }
   /* all three corner circles share one size: help, assistant, avatar */

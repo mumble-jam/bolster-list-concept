@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=a99face6">
-<link rel="stylesheet" href="specimen.css?v=a99face6">
+<link rel="stylesheet" href="../bolster.css?v=b476d5c2">
+<link rel="stylesheet" href="specimen.css?v=b476d5c2">
 <style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
 </head>
 <body>
@@ -102,10 +102,24 @@
   </section>
 
   <section class="spec-section">
+    <h2>Icons side by side (D41)</h2>
+    <p class="spec-intro">A button's size sets its icon's box, but glyphs fill their boxes differently: × draws 62 % of it, the expand arrows all of it. Icons that sit together match their ink and line instead. One drawn smaller goes a weight up so its line stays as thick, and keeps its own size through <code>--icon-size</code> (<code>ic(name, size, { optical: true })</code>, or <code>data-optical</code> in a specimen). <code>scripts/check-icons.js</code> measures a page.</p>
+    <div class="spec-panel">
+      <table class="spec-table">
+        <tbody>
+          <tr><td class="spec-label">same box</td><td><button class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Open job"><i data-icon="expand" data-size="16"></i></button><button class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close"><i data-icon="xmark" data-size="16"></i></button></td><td class="spec-note">both 16 Light: ink 16 and 10, so expand reads half as big again</td></tr>
+          <tr><td class="spec-label">same ink</td><td><button class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Open job"><i data-icon="m-expand" data-size="12" data-optical></i></button><button class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close"><i data-icon="xmark" data-size="18" data-optical></i></button></td><td class="spec-note">expand 12 Regular, × 18 Light: ink 12 and 11, both lines 1.1 px</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="spec-section">
     <h2>Rules</h2>
     <ul class="spec-stack" style="max-width:70ch;padding-left:var(--space-5)">
       <li>Labels start with a verb, sentence case, no trailing punctuation: "Create job", not "New" or "CREATE".</li>
       <li>Icon-only buttons need an <code>aria-label</code>, and a tooltip if the icon isn't universal.</li>
+      <li>Icons side by side match in ink and line, not in box size (D41); <code>scripts/check-icons.js</code> lists the ones that don't.</li>
       <li>Don't override a button's height, radius or colours locally. If a variant is missing, add it here (the audit found 257 of 364 buttons with local overrides).</li>
       <li>Show an action only when it applies. A disabled button needs a reason nearby.</li>
       <li>A row or card that opens something is a link, not a button: see Data table and Card.</li>
@@ -123,6 +137,7 @@
 &lt;button class="button" aria-busy="true"&gt;Saving…&lt;/button&gt;</code>
   </section>
 </main>
-<script src="specimen.js?v=a99face6"></script>
+<script src="../../shared/icons.js?v=b476d5c2"></script>
+<script src="specimen.js?v=b476d5c2"></script>
 </body>
 </html>
