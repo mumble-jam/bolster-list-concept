@@ -465,11 +465,15 @@
     let bar, more;
     if (cfg.actionsFor) ({ bar, more } = cfg.actionsFor(selectedRows()));
     else { bar = cfg.bulk; more = []; }
-    const del = bar.filter((a) => typeof a === "string" && destructive(a));
-    let acts = bar.filter((a) => !(typeof a === "string" && destructive(a)));
-    const keep = phoneMQ.matches ? 2 : narrowMQ.matches ? 1 : Infinity;
-    if (acts.length > keep) { more = [...acts.slice(keep), ...more]; acts = acts.slice(0, keep); }
-    return { acts, more, del };
+    // D36: three slots (two from 768 to 1099 wide), filled in the list's order; More holds the rest and
+    // never just one. Delete lives at the end of More; it takes a slot only when everything fits, no More
+    const isDel = (a) => typeof a === "string" && destructive(a);
+    const all = [...bar, ...more], del = all.filter(isDel), rest = all.filter((a) => !isDel(a));
+    const slots = narrowMQ.matches ? 2 : 3;
+    if (rest.length + del.length <= slots) return { acts: rest, more: [], del };
+    let k = Math.min(slots, rest.length);
+    if (rest.length - k + del.length === 1) k -= 1;
+    return { acts: rest.slice(0, k), more: [...rest.slice(k), ...del], del: [] };
   }
   function renderBulk() {
     const bar = $("#bulk-bar");
