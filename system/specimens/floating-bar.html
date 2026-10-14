@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=20471c42">
-<link rel="stylesheet" href="specimen.css?v=20471c42">
+<link rel="stylesheet" href="../bolster.css?v=0337ae5c">
+<link rel="stylesheet" href="specimen.css?v=0337ae5c">
 <style>.spec-panel .floating-bar { position: static; margin: 0; }</style>
 <style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
 </head>
@@ -41,21 +41,21 @@
 
   <section class="spec-section">
     <h2>Phones: the tab bar turns into the action bar</h2>
-    <p>Below 768 the page header shows the count with Select all and Done, and the bar sits where the tab bar was, in the chrome's own dark: the same three slots and More as on desktop, the tab bar's four places, each an icon over its label. Until something is ticked the actions wait, disabled. Try it in the live list on the <a href="list-page.html">List page</a>: tap Select, or hold a row.</p>
+    <p>Below 768 the page header shows the count with Select all and Done, and the bar sits where the tab bar was, in the chrome's own dark, with its own rule: up to two actions, More, and Delete last, each an icon over its label. When a label wouldn't fit its place, one action fewer stays and it goes into More, so the rest widen. Until something is ticked the actions wait, disabled. Try it in the live list on the <a href="list-page.html">List page</a>: tap Select, or hold a row.</p>
   </section>
 
   <section class="spec-section">
     <h2>Rules</h2>
     <ul class="spec-stack" style="max-width:70ch;padding-left:var(--space-5)">
       <li>Only where the list has bulk actions (L-selection); never invent them.</li>
-      <li>Three slots, then More (two from 768 to 1099 wide), filled in the order the list declares its actions; a menu is one slot. More never holds just one action.</li>
+      <li>Three slots, then More (two from 768 to 1099 wide), filled in the order the list declares its actions; a menu is one slot. More never holds just one action. Phones: up to two actions, More, Delete; fewer while a label wouldn't fit.</li>
       <li>Red is for what can't be undone: Delete, at the end of More, or last on the bar after a rule when everything fits. Archive and Delete confirm first; the confirmation's final button is the only filled red.</li>
       <li>The chip's × and Escape clear the selection; on phones Done does.</li>
       <li>Actions that depend on what's selected (one job vs several) change with the selection; menus (Change status, More) open from the bar.</li>
     </ul>
   </section>
 </main>
-<script src="../../shared/icons.js?v=20471c42"></script>
-<script src="specimen.js?v=20471c42"></script>
+<script src="../../shared/icons.js?v=0337ae5c"></script>
+<script src="specimen.js?v=0337ae5c"></script>
 </body>
 </html>

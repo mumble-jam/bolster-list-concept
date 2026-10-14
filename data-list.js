@@ -461,13 +461,22 @@
   // the bar's actions for what's ticked: the list's own set, with Delete pulled out to go last after a rule.
   // Room decides how many stay on the bar (D34): all from 1100 up, one below that, two on phones (with More
   // and Delete that makes four slots, the tab bar's count); the rest go to the top of More
+  // phones: how many actions keep their place on the action bar; renderBulk lowers it while a label won't fit
+  let phoneKeep = 2;
   function bulkSet() {
     let bar, more;
     if (cfg.actionsFor) ({ bar, more } = cfg.actionsFor(selectedRows()));
     else { bar = cfg.bulk; more = []; }
+    const isDel = (a) => typeof a === "string" && destructive(a);
+    // phones keep their own rule (D34, D36): up to two actions, More, then Delete in the tab bar's places;
+    // fewer actions when a label wouldn't fit, so the ones left get the room
+    if (phoneMQ.matches) {
+      let acts = bar.filter((a) => !isDel(a));
+      if (acts.length > phoneKeep) { more = [...acts.slice(phoneKeep), ...more]; acts = acts.slice(0, phoneKeep); }
+      return { acts, more, del: bar.filter(isDel) };
+    }
     // D36: three slots (two from 768 to 1099 wide), filled in the list's order; More holds the rest and
     // never just one. Delete lives at the end of More; it takes a slot only when everything fits, no More
-    const isDel = (a) => typeof a === "string" && destructive(a);
     const all = [...bar, ...more], del = all.filter(isDel), rest = all.filter((a) => !isDel(a));
     const slots = narrowMQ.matches ? 2 : 3;
     if (rest.length + del.length <= slots) return { acts: rest, more: [], del };
@@ -475,7 +484,8 @@
     if (rest.length - k + del.length === 1) k -= 1;
     return { acts: rest.slice(0, k), more: [...rest.slice(k), ...del], del: [] };
   }
-  function renderBulk() {
+  function renderBulk(keep) {
+    phoneKeep = typeof keep === "number" ? keep : 2;
     const bar = $("#bulk-bar");
     const n = st.selected.size;
     // phones have no checkbox column: selecting is a mode (Select, or a long press), and the bar stays up
@@ -510,6 +520,8 @@
       + (all ? `<button type="button" class="floating-bar-link" data-unselect-all>Unselect all</button>` : `<button type="button" class="floating-bar-link" data-select-matching>Select all ${fmt.count(matching)}</button>`)
       + `<span class="floating-bar-sep" aria-hidden="true"></span><span class="floating-bar-actions">${actions}</span>`
       + (danger ? `<span class="floating-bar-sep" aria-hidden="true"></span>${danger}` : "");
+    // phones: a label cut short means one action too many; it goes into More and the rest widen
+    if (phoneMQ.matches && phoneKeep > 0 && [...bar.querySelectorAll(".floating-bar-label")].some((l) => l.scrollWidth > l.clientWidth + 1)) renderBulk(phoneKeep - 1);
   }
   function openConfirm(action) {
     const n = st.selected.size;
