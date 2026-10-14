@@ -44,15 +44,6 @@
   .bs-company:focus-visible, .bs-icon-btn:focus-visible, .bs-avatar:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 0; }
   .bs-top-actions { display: flex; align-items: center; gap: var(--space-2); flex: none; }
   .bs-top .top-bar-search svg { inline-size: 1rem; block-size: 1rem; flex: none; }
-  /* shortcut hint: a faint keycap at the end of the search field */
-  .bs-top .top-bar-search kbd {
-    padding: var(--space-0-5) var(--space-1); opacity: 1;
-    border: var(--border-width-default) solid color-mix(in srgb, var(--color-content-on-chrome-muted) 10%, transparent);
-    border-radius: var(--radius-xs);
-    background: color-mix(in srgb, var(--color-pitch-black-200) 10%, transparent);
-    color: color-mix(in srgb, var(--color-content-on-chrome) 60%, transparent);
-    font-weight: var(--font-weight-medium); line-height: var(--leading-xs);
-  }
   .bs-hamburger { display: none; }
   #bs-company-menu, #bs-user-menu { color: var(--color-content-primary); }
 

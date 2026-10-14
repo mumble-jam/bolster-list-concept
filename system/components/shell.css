@@ -59,7 +59,15 @@
   @media (hover: hover) { :where(.top-bar-search:hover) { background: color-mix(in srgb, var(--color-surface-chrome-field), var(--color-flame-white) 6%); } }
   :where(.top-bar-search) { min-inline-size: 0; white-space: nowrap; }
   :where(.top-bar-search) > :where(span) { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
-  :where(.top-bar-search) > kbd { margin-inline-start: auto; font: inherit; font-size: var(--text-xs); opacity: 0.8; }
+  /* the shortcut, as a faint keycap at the field's end: on the field's padding, not nested in its corner
+     (D35 doesn't reach it), with a softer 4px corner of its own */
+  :where(.top-bar-search) > kbd {
+    margin-inline-start: auto; padding: var(--space-0-5) var(--space-1);
+    border: var(--border-width-default) solid color-mix(in srgb, var(--color-content-on-chrome-muted) 10%, transparent);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-chrome-field); color: var(--color-content-on-chrome-muted);
+    font: inherit; font-size: var(--text-xs); font-weight: var(--font-weight-medium); line-height: var(--leading-xs);
+  }
   :where(.top-bar .button[data-variant="ghost"]) { --_fg: var(--color-content-on-chrome-muted); --_fg-hover: var(--color-content-on-chrome); --_bg-hover: var(--color-surface-chrome-hover); --_bg-active: var(--color-surface-chrome-selected); }
 
   /* ---------- rail ---------- */

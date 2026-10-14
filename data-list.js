@@ -1019,10 +1019,13 @@
       const list = ["Open", ...bar, ...more].filter((a) => !own.includes(a));
       pop.innerHTML = `<div class="pop-body">${actionItems(list, { peek: p.key, nested: true })}</div>`;
     } else if (p.kind === "row") {
-      // from the record's More, "Open" (and the catalog's "Edit") would only reopen it
-      const folded = p.from?.closest(".detail") ? $$(".detail-actions [data-concept-action][hidden]", p.from.closest(".detail")).map((b) => b.dataset.conceptAction) : [];
-      const acts = [...folded, ...cfg.rowActions.filter((a) => !folded.includes(a) && !(p.from?.closest(".detail") && (a === "Open" || a === "Edit")))];
-      pop.innerHTML = `<div class="pop-body">${acts.map((a, i) => `${i === acts.length - 1 ? "<hr>" : ""}<button type="button" class="menu-item" role="menuitem"${i === acts.length - 1 ? ' data-tone="danger"' : ""} ${a === "Open" || a === "Edit" ? `data-peek="${p.key}"` : `data-concept-action="${esc(a)}"`}>${mi(actionIcons[a])}${esc(a)}</button>`).join("")}</div>`;
+      // from the record's More: what isn't on the card. Its buttons are left out, any folded off a narrow
+      // card come first, and "Open" (and the catalog's "Edit") would only reopen the record
+      const card = p.from?.closest(".detail");
+      const onCard = card ? $$(".detail-actions [data-concept-action]", card) : [];
+      const shown = onCard.filter((b) => !b.hidden).map((b) => b.dataset.conceptAction), folded = onCard.filter((b) => b.hidden).map((b) => b.dataset.conceptAction);
+      const acts = [...folded, ...cfg.rowActions.filter((a) => !folded.includes(a) && !shown.includes(a) && !(card && (a === "Open" || a === "Edit")))];
+      pop.innerHTML = `<div class="pop-body">${acts.map((a, i) => `${i && i === acts.length - 1 ? "<hr>" : ""}<button type="button" class="menu-item" role="menuitem"${i === acts.length - 1 ? ' data-tone="danger"' : ""} ${a === "Open" || a === "Edit" ? `data-peek="${p.key}"` : `data-concept-action="${esc(a)}"`}>${mi(actionIcons[a])}${esc(a)}</button>`).join("")}</div>`;
     }
     pop.style.inlineSize = p.kind === "row" || p.kind === "bulk" || p.kind === "add" ? "auto" : p.kind === "info" ? "16rem" : "";
   }

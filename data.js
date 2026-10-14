@@ -326,7 +326,7 @@
         heading: `Invoice to ${x.client.name}`, open: "Open invoice",
         badge: badge(INV_STATUS[x.status]), amount: fmt.money(x.status === "paid" ? x.amount : x.balance), sub: x.status === "paid" ? `${x.number} · paid in full` : x.balance < x.amount ? `${x.number} · balance of ${fmt.money(x.amount)}` : `${x.number} · ${x.job}`,
         timeline: ev,
-        actions: { draft: [["Send", "send"], ["Edit", "pen"]], outstanding: [["Remind", "bell"], ["Mark paid", "credit-card"]], overdue: [["Remind", "bell"], ["Mark paid", "credit-card"]], paid: [["Duplicate", "copy"], ["Edit", "pen"]] }[x.status],
+        actions: { draft: [["Send", "send"], ["Edit", "pen"]], outstanding: [["Send reminder", "bell"], ["Record payment", "credit-card"]], overdue: [["Send reminder", "bell"], ["Record payment", "credit-card"]], paid: [["Duplicate", "copy"], ["Edit", "pen"]] }[x.status],
         fields: [["Client", person(x.client)], ["Job", esc(x.job)], ["Issued", fmt.date(x.issued)], ["Due", fmt.date(x.due)], ["Owner", person(x.owner)]],
         doc: { label: "Invoice", name: `Invoice-${x.number}.pdf`, view: "View invoice" },
       };
