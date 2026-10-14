@@ -1,10 +1,13 @@
 /* Record: one row's details, beside the list from 1280 up (a sticky card) and a side sheet below that.
    <section class="card detail" aria-labelledby="detail-title">
-     <header class="detail-head"><h2 id="detail-title" tabindex="-1">EST-2136</h2>…open, close…</header>
+     <header class="detail-head"><h2 id="detail-title" tabindex="-1">EST-2136</h2>
+       <span class="tooltip-anchor"><button class="button" data-variant="ghost" data-size="sm" data-icon-only aria-labelledby="tip-open">…expand…</button>
+         <span class="tooltip" role="tooltip" id="tip-open" data-side="bottom">Open job</span></span>…close…</header>
      <div class="detail-scroll"><div class="detail-section detail-hero">…status, amount, timeline, actions…</div>
        <div class="detail-section"><dl class="detail-fields">…</dl></div></div>
    </section>
-   The sheet: <dialog class="dialog peek">…the same parts…</dialog>. D22, D23, I6 */
+   The sheet: <dialog class="dialog peek">…the same parts…</dialog>. D22, D23, I6
+   Open is the expand icon, not ↗: the record grows into its full view in the same tab (D40). */
 
 @layer tokens, base, components, utilities;
 
@@ -18,15 +21,15 @@
   }
   :root[data-chrome-hidden] .detail.card { --_top: var(--space-4); }
   .detail[hidden] { display: none; }
-  /* open and close sit in the card's corner, 8 in like the list bar's controls (D35) */
-  .detail-head { --_in: calc(var(--inset-card) - var(--border-width-default)); display: flex; align-items: center; gap: var(--space-1); flex: none; padding: var(--_in) var(--_in) var(--_in) var(--space-5); border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
-  .detail-head h2 { flex: 1; min-inline-size: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-sans); font-size: var(--text-sm); font-weight: var(--font-weight-regular); color: var(--color-content-secondary); }
+  /* open and close sit in the card's corner, 8 in like the list bar's controls (D35), level with the
+     name's first line; the name wraps rather than being cut short (D40) */
+  .detail-head { --_in: calc(var(--inset-card) - var(--border-width-default)); display: flex; align-items: flex-start; gap: var(--space-1); flex: none; padding: var(--_in) var(--_in) var(--_in) var(--space-5); border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
+  .detail-head h2 { flex: 1; min-inline-size: 0; margin: 0; padding-block: calc((var(--control-height-sm) - var(--leading-sm)) / 2); font-family: var(--font-sans); font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-regular); color: var(--color-content-secondary); overflow-wrap: anywhere; text-wrap: pretty; }
   .detail-head h2:focus { outline: none; }
   .detail-head h2:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; border-radius: var(--radius-xs); }
   /* touch screens: Safari counts focus moved there after a tap as visible; nobody tabbed, so no ring */
   @media (hover: none) { .detail-head h2:focus-visible { outline: none; } }
   .detail-head .button svg, .detail-doc-head svg { color: var(--color-content-secondary); }
-  .detail-sep { inline-size: var(--border-width-default); block-size: var(--space-5); margin-inline: var(--space-1); background: var(--color-line-subtle); }
   .detail-scroll { overflow: auto; overscroll-behavior: contain; }
   .detail-section { margin: 0; padding: var(--space-5); }
   .detail-section + .detail-section { border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
