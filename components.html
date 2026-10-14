@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=9166a189">
-<link rel="stylesheet" href="data-list.css?v=9166a189">
+<link rel="stylesheet" href="system/bolster.css?v=4a30cb82">
+<link rel="stylesheet" href="data-list.css?v=4a30cb82">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -109,7 +109,7 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=9166a189"></script>
+<script src="shared/icons.js?v=4a30cb82"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -167,7 +167,7 @@ const C = [
   ["Record", "Record actions", "yours", "When the second action doesn't fit beside More, show one action plus More.", "Measuring the fit and moving the second action into More."],
 
   ["Menus and overlays", "Menus", "steered", "Warm, not cold; nested menus with a check; icons, then smaller and bolder (14px Regular).", "Item height, padding, separators, shadow, hover."],
-  ["Menus and overlays", "Bottom sheets on phones", "steered", "Menus as bottom sheets on phones (9 Oct).", "Nested menus drill in with a back row; the warm scrim."],
+  ["Menus and overlays", "Bottom sheets on phones", "steered", "Menus as bottom sheets on phones (9 Oct); then nested menus showing the wrong rows (a bug) and a clear way back (14 Oct).", "Nested menus drill in, every other row goes, and a header with Back and the menu's name sits on top; the warm scrim."],
   ["Menus and overlays", "Tooltip", "steered", "A tooltip on display settings.", "Its style and placement."],
 
   ["Feedback and states", "Loading", "mine", "Never discussed.", "Skeleton rows and cards."],
@@ -260,6 +260,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=9166a189"></script>
+<script src="system/specimens/specimen.js?v=4a30cb82"></script>
 </body>
 </html>

@@ -504,7 +504,7 @@
 
   // ---------- floating bar: count first, select all, actions, the risky one last, clear ----------
   // a menu row that opens its own menu (drills in on phones)
-  const sub = (name, label, icon, value, items, cls = "") => `<div class="submenu-row${cls}"><button type="button" class="menu-item submenu-trigger" role="menuitem" data-sub="${name}" data-focus-key="sub-${name}" aria-haspopup="menu" aria-expanded="false" aria-controls="pop-sub-${name}">${mi(icon)}<span class="submenu-label">${label}</span><span class="submenu-value">${esc(value)}</span>${I.chevR}</button><div class="pop submenu" id="pop-sub-${name}" popover role="menu" aria-label="${label}"><button type="button" class="menu-item submenu-back" data-sub-back="${name}">${I.chevL}<span class="submenu-label">${label}</span></button>${items}</div></div>`;
+  const sub = (name, label, icon, value, items, cls = "") => `<div class="submenu-row${cls}"><button type="button" class="menu-item submenu-trigger" role="menuitem" data-sub="${name}" data-focus-key="sub-${name}" aria-haspopup="menu" aria-expanded="false" aria-controls="pop-sub-${name}">${mi(icon)}<span class="submenu-label">${label}</span><span class="submenu-value">${esc(value)}</span>${I.chevR}</button><div class="pop submenu" id="pop-sub-${name}" popover role="menu" aria-label="${label}"><button type="button" class="menu-item submenu-back" data-sub-back="${name}" aria-label="Back"><span class="submenu-back-to">${I.chevL}Back</span><span class="submenu-label">${label}</span><span></span></button>${items}</div></div>`;
   const risky = (a) => /^(archive|delete)/i.test(a);
   // red is for what can't be undone: Delete. Archive still confirms and sits apart, but isn't red
   const destructive = (a) => /^delete/i.test(a);
@@ -674,6 +674,7 @@
     const focusSel = document.activeElement && pop.contains(document.activeElement) && document.activeElement.dataset.focusKey;
     const subOpen = openSubName();
     fillPop();
+    markDrill();
     place();
     if (subOpen) openSub(subOpen);
     if (focusSel) pop.querySelector(`[data-focus-key="${focusSel}"]`)?.focus({ preventScroll: true });
@@ -704,6 +705,7 @@
     if (!sub) return;
     if (sheet()) { // in the sheet: drill in, with a back row on top
       pop.dataset.drill = name;
+      markDrill();
       pop.scrollTop = 0;
       if (focus) ($("[aria-checked=true]", sub) || $("[role^=menuitem]", sub))?.focus({ preventScroll: true });
       return;
@@ -714,8 +716,14 @@
     placeSub();
     if (focus) ($("[aria-checked=true]", sub) || $("[role^=menuitem]", sub))?.focus({ preventScroll: true });
   }
+  // the nested menu a phone's sheet has drilled into (kept when the sheet's contents are redrawn)
+  function markDrill() {
+    $$(".submenu[data-drilled]", pop).forEach((s) => s.removeAttribute("data-drilled"));
+    if (pop.dataset.drill) subOf(pop.dataset.drill)?.setAttribute("data-drilled", "");
+  }
   function closeSub(name) {
     if (pop.dataset.drill === name) delete pop.dataset.drill;
+    markDrill();
     const sub = subOf(name);
     if (sub?.matches(":popover-open")) sub.hidePopover();
     triggerOf(name)?.focus({ preventScroll: true });

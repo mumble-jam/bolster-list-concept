@@ -85,15 +85,23 @@
     .pop:not(.submenu):popover-open::backdrop { opacity: 1; }
     @starting-style { .pop:not(.submenu):popover-open::backdrop { opacity: 0; } }
     .pop .menu-item, .pop .option { min-block-size: var(--touch-target-min); }
-    /* drilled in: hide the rows, show the chosen menu in place */
+    /* drilled in: every other row goes, and the chosen menu shows in place with its back row on top
+       (any nested menu: the one open is marked data-drilled) */
     .pop[data-drill] .submenu-trigger { display: none; }
-    .pop[data-drill="sort"] #pop-sub-sort, .pop[data-drill="group"] #pop-sub-group,
-    .pop[data-drill="density"] #pop-sub-density, .pop[data-drill="cols"] #pop-sub-cols {
+    .pop[data-drill] .pop-body > :not(.submenu-row:has(> .submenu[data-drilled])) { display: none; }
+    .pop[data-drill] .submenu[data-drilled] {
       display: grid; position: static; inset: auto; inline-size: auto; min-inline-size: 0; max-block-size: none;
       margin: 0; padding: 0; overflow: visible; border: 0; border-radius: 0; background: none; box-shadow: none;
     }
-    .pop[data-drill] .submenu-back { display: flex; font-weight: var(--font-weight-medium); }
-    .pop[data-drill] .submenu-back > svg { color: var(--color-content-primary); }
+    /* the back row reads as a header: Back on the left, the menu's name in the middle, a rule below;
+       the whole row is the tap target */
+    .pop[data-drill] .submenu-back {
+      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+      margin-block-end: var(--space-1); border-block-end: var(--border-width-default) solid var(--color-line-subtle); border-radius: 0;
+    }
+    .pop[data-drill] .submenu-back .submenu-label { flex: none; font-weight: var(--font-weight-medium); text-align: center; }
+    .submenu-back-to { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--color-content-secondary); }
+    .submenu-back-to > svg { inline-size: 0.875rem; block-size: 0.875rem; }
   }
 
   /* menus and popovers sit on white: rows hover a step stronger, the edge is the cards', the shadow is
