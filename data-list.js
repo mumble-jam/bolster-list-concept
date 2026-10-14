@@ -39,6 +39,8 @@
     st.selected.clear(); st.picking = false;
   }
   const currentView = () => cfg.views.find((v) => v.id === st.view);
+  // First use means no records exist; a filtered list with zero matches is a different state.
+  const firstUse = () => st.mode === "empty" || (st.mode === "ready" && !cfg.rows.length);
   const norm = (filters) => JSON.stringify(Object.keys(filters).filter((k) => isSet(k, filters[k])).sort().map((k) => [k, Array.isArray(filters[k]) ? [...filters[k]].sort() : filters[k]]));
   function isDirty() {
     const v = currentView();
@@ -104,6 +106,7 @@
   function toHash() {
     const p = new URLSearchParams();
     const v = currentView();
+    if (st.mode !== "ready") p.set("state", st.mode);
     if (v.id !== cfg.views[0].id) p.set("view", v.id);
     for (const f of active()) {
       const val = st.filters[f.key];
@@ -119,6 +122,7 @@
   }
   function fromHash(query) {
     const p = new URLSearchParams(query);
+    st.mode = ["loading", "empty", "error"].includes(p.get("state")) ? p.get("state") : "ready";
     applyView(cfg.views.find((x) => x.id === p.get("view")) || cfg.views[0]);
     for (const f of cfg.filters) {
       if (!p.has(f.key)) continue;
@@ -150,6 +154,8 @@
     document.title = `${title} · Bolster`;
     $("#create").textContent = cfg.create;
     $("#create").hidden = !cfg.create;
+    $("#export").hidden = st.mode === "empty" || !cfg.rows.length;
+    document.body.toggleAttribute("data-first-use", firstUse());
     // lists built from a page description (recipe.js) say so, and say what the renderer couldn't draw
     const rn = $("#recipe-note");
     rn.hidden = !cfg.fromDescription;
@@ -159,7 +165,7 @@
   }
 
   function renderToolbar() {
-    $("#list-toolbar").hidden = st.mode === "empty";
+    $("#list-toolbar").hidden = firstUse();
     const chips = chipped().map((f) => {
       const val = st.filters[f.key];
       if (!isSet(f.key, val)) {
@@ -189,7 +195,7 @@
     const ago = (n) => new Date(+TODAY - n * 864e5);
     const label = !dv ? "All time" : /^older(\d+)$/.test(dv) ? `Before ${long(ago(+dv.slice(5)))}` : `${long(ago(+dv))} – Now`;
     const dr = $("#date-range");
-    dr.hidden = !df || st.mode === "empty";
+    dr.hidden = !df || firstUse();
     $("#date-range-label").textContent = label;
     dr.toggleAttribute("data-active", !!dv);
     if (df) dr.setAttribute("aria-label", `${df.label}: ${label}. Change`);
@@ -206,7 +212,7 @@
 
   function renderSlices() {
     const box = $("#summary");
-    box.hidden = !cfg.metrics.length || st.mode === "empty" || st.mode === "error";
+    box.hidden = !cfg.metrics.length || firstUse() || st.mode === "error";
     if (box.hidden) return;
     const row = $("#metrics");
 
@@ -315,9 +321,21 @@
     foot.innerHTML = "";
     CSS.highlights?.delete("search-hit");
 
-    if (st.mode === "empty") {
-      wrap.innerHTML = state(I.inbox, `No ${cfg.noun[1]} yet`, `${cfg.noun[1][0].toUpperCase() + cfg.noun[1].slice(1)} you create or import show up here, with totals and filters.`,
-        `<button class="button" data-concept-action="${esc(cfg.create)}">${esc(cfg.create)}</button><button class="button" data-variant="secondary" data-concept-action="Import from a spreadsheet">Import from a spreadsheet</button>`);
+    if (firstUse()) {
+      // Melio's compact setup panel: left-aligned guidance and a separate action strip.
+      // Reuse Bolster's card and buttons; keep the same creation action in the page header.
+      wrap.innerHTML = `<section class="first-use" aria-labelledby="first-use-title">
+        <div class="first-use-content">
+          <span class="state-icon" aria-hidden="true">${I.inbox}</span>
+          <div class="first-use-copy"><h2 id="first-use-title">Add your first ${esc(cfg.noun[0])}</h2>
+            <p>Start from scratch, or import your existing ${esc(cfg.noun[1])} from a spreadsheet. Once added, you can manage them here.</p>
+          </div>
+        </div>
+        <div class="first-use-actions">
+          <button type="button" class="button" data-variant="secondary" data-concept-action="Import ${esc(cfg.noun[1])}">Import ${esc(cfg.noun[1])}</button>
+          ${cfg.create ? `<button type="button" class="button" data-concept-action="${esc(cfg.create)}">${esc(cfg.create)}</button>` : ""}
+        </div>
+      </section>`;
       return;
     }
     if (st.mode === "error") {
@@ -981,7 +999,7 @@
       $("#select-page")?.focus({ preventScroll: true });
       return;
     }
-    if (t.id === "cc-state") { st.mode = t.value; st.selected.clear(); st.picking = false; render(); }
+    if (t.id === "cc-state") { st.mode = t.value; st.selected.clear(); st.picking = false; if (firstUse() && openId) closeDetail({ focus: false }); render(); }
     if (t.id === "cc-grid") {
       document.documentElement.toggleAttribute("data-grid", t.checked);
       $('[data-tune="net"]').hidden = !t.checked;

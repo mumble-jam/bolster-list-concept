@@ -3,6 +3,21 @@
    tuners, the About dialog, the recipe note) and what's still being tried (the grid on the page). */
 
 @layer concept {
+  /* First use, adapted from Melio's vendor setup panel. Bolster tokens and existing buttons
+     provide the visual treatment; the two routes are manual creation and spreadsheet import. */
+  .first-use-content { display: flex; align-items: flex-start; gap: var(--space-4); padding: var(--space-8); }
+  .first-use-content .state-icon { flex: none; }
+  .first-use-copy { display: grid; gap: var(--space-2); min-inline-size: 0; }
+  .first-use-copy h2 { font-size: var(--text-lg); line-height: var(--leading-lg); font-weight: var(--font-weight-bold); }
+  .first-use-copy p { max-inline-size: 64ch; color: var(--color-content-secondary); }
+  .first-use-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: var(--space-2); padding: var(--space-4) var(--space-8); border-block-start: var(--border-width-default) solid var(--color-line-subtle); background: var(--color-surface-tint); }
+  @media (max-width: 767px) {
+    .first-use-content { flex-direction: column; padding: var(--space-6); }
+    .first-use-actions { flex-direction: column; padding: var(--space-4) var(--space-6); }
+    /* The main action stays in the header during first use instead of floating over its duplicate. */
+    body[data-first-use] #create[data-float] { position: static; inset: auto; }
+  }
+
   /* display settings: its icon sized by height like the header's others, a 1px optical nudge, its tooltip
      flush right so the card's edge doesn't clip it; icon-only on phones */
   #view-options > svg { inline-size: auto; block-size: 1rem; flex: none; translate: 0 1px; }
