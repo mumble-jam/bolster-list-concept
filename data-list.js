@@ -408,7 +408,7 @@
     }
     if (st.mode === "error") {
       $("#banner").innerHTML = `<div class="banner" role="alert">${I.alert}<p>We couldn't load your ${cfg.noun[1]}. Check your connection, then try again.</p><button class="button" data-variant="secondary" data-size="sm" data-retry>Try again</button></div>`;
-      wrap.innerHTML = `<div style="block-size:var(--space-16)"></div>`;
+      wrap.innerHTML = "";
       return;
     }
 

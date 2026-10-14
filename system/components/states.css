@@ -15,6 +15,9 @@
   .state-icon svg { inline-size: 1.5rem; block-size: 1.5rem; }
   .banner { display: flex; align-items: center; gap: var(--space-3); margin: var(--space-3) var(--space-4) 0; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--color-feedback-danger-surface); color: var(--color-feedback-danger-content); font-size: var(--text-sm); }
   .banner p { flex: 1; }
+  /* in a card: 8 in from its edges and from the toolbar above, like the toolbar's own controls, so its
+     8px corners share the card's 16 (D35); nothing pads the card below it */
+  .card .banner { --_in: calc(var(--inset-card) - var(--border-width-default)); margin: var(--inset-card) var(--_in) var(--_in); }
 
   .skeleton { display: block; border-radius: var(--radius-sm); background: var(--color-surface-tint); block-size: var(--space-3); }
   @media (prefers-reduced-motion: no-preference) {
