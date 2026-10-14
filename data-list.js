@@ -1024,7 +1024,12 @@
       const card = p.from?.closest(".detail");
       const onCard = card ? $$(".detail-actions [data-concept-action]", card) : [];
       const shown = onCard.filter((b) => !b.hidden).map((b) => b.dataset.conceptAction), folded = onCard.filter((b) => b.hidden).map((b) => b.dataset.conceptAction);
-      const acts = [...folded, ...cfg.rowActions.filter((a) => !folded.includes(a) && !shown.includes(a) && !(card && (a === "Open" || a === "Edit")))];
+      // a row's next step (L-next-step) is its first action, after Open, unless the card already shows it
+      const nx = cfg.nextFor?.(cfg.rows.find((r) => r.id === p.key));
+      const lead = nx && !shown.includes(nx) && !folded.includes(nx) ? [nx] : [];
+      const rest = cfg.rowActions.filter((a) => a !== nx && !folded.includes(a) && !shown.includes(a) && !(card && (a === "Open" || a === "Edit")));
+      const open = rest[0] === "Open" ? [rest.shift()] : [];
+      const acts = [...open, ...lead, ...folded, ...rest];
       pop.innerHTML = `<div class="pop-body">${acts.map((a, i) => `${i && i === acts.length - 1 ? "<hr>" : ""}<button type="button" class="menu-item" role="menuitem"${i === acts.length - 1 ? ' data-tone="danger"' : ""} ${a === "Open" || a === "Edit" ? `data-peek="${p.key}"` : `data-concept-action="${esc(a)}"`}>${mi(actionIcons[a])}${esc(a)}</button>`).join("")}</div>`;
     }
     pop.style.inlineSize = p.kind === "row" || p.kind === "bulk" || p.kind === "add" ? "auto" : p.kind === "info" ? "16rem" : "";

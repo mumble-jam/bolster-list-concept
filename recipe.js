@@ -206,17 +206,19 @@ window.BDS_RECIPE = (() => {
     const label = (a) => (typeof a === "string" ? a : a.label);
     const act = (a) => (typeof a === "string" ? a : a.menu ? { label: a.label, icon: "status", items: a.menu } : a.label);
     const ICON = { Edit: "pen", Duplicate: "copy", Send: "send", "Send now": "send", "Send reminder": "bell", Message: "message", Archive: "archive", Delete: "trash", Download: "download", "Record payment": "credit-card", "Mark as paid": "credit-card", "Create job": "file-plus", "Invoice this project": "file-invoice", "Review customer": "star" };
+    // L-next-step: a row's next step leads its record and its ··· menu (rows carry no buttons)
+    const nextOf = (x) => (statusCol && d.actions?.next?.byStatus?.[x[statusCol]]) || null;
+    const lead = (x, list) => { const nx = nextOf(x); return nx ? [nx, ...list.filter((a) => label(a) !== label(nx))] : list; };
     const recordActions = (x) => {
-      const list = d.actions?.byStatus ? d.actions.byStatus[x[statusCol]]?.primary || [] : (d.actions?.row || []).filter((a) => !/^(open|edit)$/i.test(label(a)));
+      const list = lead(x, d.actions?.byStatus ? d.actions.byStatus[x[statusCol]]?.primary || [] : (d.actions?.row || []).filter((a) => !/^(open|edit)$/i.test(label(a))));
       return list.filter((a) => typeof a === "string" || !a.menu).slice(0, 2).map((a) => [label(a), ICON[label(a)] || "pen"]);
     };
     const actionsFor = d.actions?.byStatus && (
       (sel) => sel.length !== 1
         ? { bar: (d.selection.bulk || []).map(act), more: [] }
-        : { bar: (d.actions.byStatus[sel[0][statusCol]]?.primary || []).map(act), more: (d.actions.byStatus[sel[0][statusCol]]?.more || []).map(act) });
+        : { bar: lead(sel[0], d.actions.byStatus[sel[0][statusCol]]?.primary || []).map(act), more: (d.actions.byStatus[sel[0][statusCol]]?.more || []).map(act) });
     if (d.selection.enabled && !d.selection.bulk?.length) notes.push("Bulk actions are still an open question, so the bar shows none.");
     if (!d.selection.enabled) notes.push("Selection is off in the description; the concept still shows checkboxes.");
-    if (d.actions?.next) notes.push(`The “${d.actions.next.label}” column isn't drawn yet; its buttons are in each row's menu.`);
 
     // ---------- the record (peek) ----------
     const recordFields = d.record?.fields || d.columns.filter((c) => c.priority >= 4).map((c) => c.key);
@@ -253,6 +255,7 @@ window.BDS_RECIPE = (() => {
       bulk: (d.selection.bulk || []).map(label),
       rowActions: d.actions?.row ? d.actions.row.map(label) : ["Open"],
       ...(actionsFor ? { actionsFor } : {}),
+      ...(d.actions?.next ? { nextFor: (x) => (nextOf(x) ? label(nextOf(x)) : null) } : {}),
       peek,
     };
   }
