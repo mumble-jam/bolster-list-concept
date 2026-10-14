@@ -10,9 +10,9 @@
 <link rel="apple-touch-icon" href="shared/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=fe7681dd">
-<link rel="stylesheet" href="shared/shell.css?v=fe7681dd">
-<link rel="stylesheet" href="data-list.css?v=fe7681dd">
+<link rel="stylesheet" href="system/bolster.css?v=71eeccdc">
+<link rel="stylesheet" href="shared/shell.css?v=71eeccdc">
+<link rel="stylesheet" href="data-list.css?v=71eeccdc">
 </head>
 <body>
 <div class="app-shell">
@@ -20,7 +20,7 @@
     <div class="canvas-layers" aria-hidden="true"><div class="canvas-glow"></div><div class="canvas-net"></div></div>
     <header class="page-header">
       <div class="page-title">
-        <button class="button page-tool" data-variant="ghost" data-size="sm" data-icon-only data-collapse-sidebar aria-label="Hide menu"><i data-icon="panel-left" data-size="18"></i></button>
+        <button class="button page-tool" data-variant="ghost" data-size="sm" data-icon-only data-collapse-sidebar aria-label="Hide menu" data-tip="Hide menu"><i data-icon="panel-left" data-size="18"></i></button>
         <h1 id="page-title">Jobs</h1>
         <!-- phones, while selecting: the title gives way to the count (D34) -->
         <p class="select-count" id="select-count" aria-live="polite" hidden></p>
@@ -30,7 +30,7 @@
         <button class="button" data-variant="ghost" data-phone-only id="select-all" hidden>Select all</button>
         <button class="button" data-variant="ghost" data-phone-only id="select-mode">Select</button>
         <button class="button" data-variant="ghost" data-hide-phone id="export">Export</button>
-        <button class="button" data-float id="create"><span class="float-label">Create job</span></button>
+        <button class="button" data-float id="create" data-tip="Create job"><span class="float-label">Create job</span></button>
       </div>
     </header>
 
@@ -50,7 +50,7 @@
       <section class="card list-panel" aria-labelledby="page-title">
         <div class="list-toolbar" id="list-toolbar" role="search" aria-label="Search and filter">
           <div class="list-bar">
-            <button type="button" class="field-button add-filter" id="add-filter" aria-haspopup="menu" aria-expanded="false"><i data-icon="filter" data-size="16"></i><span>Add filter</span></button>
+            <button type="button" class="field-button add-filter" id="add-filter" aria-haspopup="menu" aria-expanded="false" data-tip="Add filter"><i data-icon="filter" data-size="16"></i><span>Add filter</span></button>
             <label class="list-search"><i data-icon="search" data-size="16"></i><input type="search" id="search" aria-label="Search" placeholder="Search" enterkeyhint="search" autocomplete="off"></label>
             <button type="button" class="field-button date-range" id="date-range" aria-haspopup="dialog" aria-expanded="false"><i data-icon="calendar" data-size="16"></i><span class="date-range-label" id="date-range-label">All time</span></button>
             <span class="list-bar-sep" aria-hidden="true"></span>
@@ -95,7 +95,7 @@
 
 <dialog class="dialog notes" id="notes" aria-labelledby="notes-title">
   <header class="dialog-header"><h2 id="notes-title">About this concept</h2>
-    <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close><i data-icon="xmark" data-size="16"></i></button></header>
+    <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close data-tip="Close"><i data-icon="xmark" data-size="16"></i></button></header>
   <div class="dialog-body">
     <section>
       <h3>What it fixes</h3>
@@ -178,11 +178,11 @@
 </details>
 
 <div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
-<script src="shared/icons.js?v=fe7681dd"></script>
-<script src="shared/shell.js?v=fe7681dd"></script>
-<script src="system/specimens/specimen.js?v=fe7681dd"></script>
-<script src="data.js?v=fe7681dd"></script>
-<script src="recipe.js?v=fe7681dd"></script>
+<script src="shared/icons.js?v=71eeccdc"></script>
+<script src="shared/shell.js?v=71eeccdc"></script>
+<script src="system/specimens/specimen.js?v=71eeccdc"></script>
+<script src="data.js?v=71eeccdc"></script>
+<script src="recipe.js?v=71eeccdc"></script>
 <script>
   // ?from=description builds the four lists from their page descriptions; ?d=<path> adds one more list
   // from any description. Either way data-list.js starts once the descriptions are compiled.

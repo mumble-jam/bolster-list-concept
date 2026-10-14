@@ -146,6 +146,9 @@ document.addEventListener("click", (e) => {
   s?.toggleAttribute("data-open");
 });
 
+// Tooltips for data-tip="…" (D52), on every specimen and concept page that loads this file
+if (!window.BolsterTips) document.head.append(Object.assign(document.createElement("script"), { src: new URL("../components/tooltip.js", document.currentScript.src).href }));
+
 // Icons: <i data-icon="filter" data-size="16"></i> becomes the Font Awesome glyph, when the page loads
 // (data-optical: drawn at that size whatever the control's icon box, D41)
 // the concepts' icon set (../../concepts/shared/icons.js). Sized by height, as Font Awesome draws them.

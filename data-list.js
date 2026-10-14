@@ -234,6 +234,7 @@
     $("#page-title").textContent = title;
     document.title = `${title} · Bolster`;
     $("#create .float-label").textContent = cfg.create;
+    $("#create").dataset.tip = cfg.create;
     $("#create").hidden = !cfg.create;
     $("#export").hidden = cfg.export === false; // L-ask: only where the original offers it
     // L-selection: no bulk actions, no checkboxes (nor Select, nor the long press, on phones)
@@ -254,10 +255,10 @@
         return `<span class="chip"><button type="button" class="chip-main" data-filter="${f.key}" aria-haspopup="dialog" aria-expanded="false">${I.plus}${esc(f.label)}</button></span>`;
       }
       const text = chipText(f, val);
-      return `<span class="chip" data-active><button type="button" class="chip-main" data-filter="${f.key}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(f.label)}: ${esc(text)}. Change filter"><span class="chip-field">${esc(f.label)}:</span><span class="chip-value">${esc(text)}</span></button><button type="button" class="chip-remove" data-remove="${f.key}" aria-label="Remove ${esc(f.label.toLowerCase())} filter">${I.x}</button></span>`;
+      return `<span class="chip" data-active><button type="button" class="chip-main" data-filter="${f.key}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(f.label)}: ${esc(text)}. Change filter"><span class="chip-field">${esc(f.label)}:</span><span class="chip-value">${esc(text)}</span></button><button type="button" class="chip-remove" data-remove="${f.key}" aria-label="Remove ${esc(f.label.toLowerCase())} filter" data-tip="Remove filter">${I.x}</button></span>`;
     });
     // a search becomes a chip like any filter; click it to edit the words again
-    const terms = st.terms.map((t, i) => `<span class="chip" data-active data-term><button type="button" class="chip-main" data-edit-term="${i}" aria-label="Search: ${esc(t)}. Edit"><span class="chip-field">Search:</span><span class="chip-value">“${esc(t)}”</span></button><button type="button" class="chip-remove" data-remove-term="${i}" aria-label="Remove search ${esc(t)}">${I.x}</button></span>`);
+    const terms = st.terms.map((t, i) => `<span class="chip" data-active data-term><button type="button" class="chip-main" data-edit-term="${i}" aria-label="Search: ${esc(t)}. Edit"><span class="chip-field">Search:</span><span class="chip-value">“${esc(t)}”</span></button><button type="button" class="chip-remove" data-remove-term="${i}" aria-label="Remove search ${esc(t)}" data-tip="Remove search">${I.x}</button></span>`);
     chips.unshift(...terms);
     if (active().length || st.terms.length) chips.push(`<button type="button" class="button clear-all" data-variant="ghost" data-size="sm" data-clear-all>Clear all</button>`);
     $("#filters").innerHTML = chips.join("");
@@ -342,7 +343,7 @@
     const more = (x.more || []).map((s) => `<div class="insight-secondary"><span class="slice-label">${esc(s.label)}</span><span class="insight-second-value">${s.value(scope)}</span><span class="insight-sub">${esc(s.sub(scope))}</span></div>`).join("");
     return `<div class="slice slice-insight" role="group" aria-labelledby="insight-label">
       <div class="insight-primary">
-        <span class="slice-head"><span class="slice-label" id="insight-label">${esc(x.label)}</span><button type="button" class="info-button" data-info aria-label="How ${esc(x.label.toLowerCase())} is worked out" aria-haspopup="dialog" aria-expanded="false">${I.help}</button></span>
+        <span class="slice-head"><span class="slice-label" id="insight-label">${esc(x.label)}</span><button type="button" class="info-button" data-info aria-label="How ${esc(x.label.toLowerCase())} is worked out" data-tip="How it's worked out" aria-haspopup="dialog" aria-expanded="false">${I.help}</button></span>
         <span class="insight-main"${m.empty ? " data-empty" : ""}><span class="slice-value">${m.value}</span>${m.counts ? `<span class="insight-counts">${esc(m.counts)}</span>` : ""}</span>
         ${bar}
       </div>${more}</div>`;
@@ -442,7 +443,7 @@
     const phoneCells = (x) => cfg.phone ? `<td data-m="over" class="row-phone">${cfg.phone.over(x) || ""}</td><td data-m="where" class="row-phone">${cfg.phone.where(x) || ""}</td>` : "";
     const rowHtml = (x) => {
       const name = cfg.search(x).split(" ").slice(0, 4).join(" ");
-      return `<tr data-id="${x.id}"${st.selected.has(x.id) ? " data-selected" : ""}${openId === x.id ? ' data-open aria-current="true"' : ""}><td class="data-table-select"><input type="checkbox" class="checkbox" data-select="${x.id}" aria-label="Select ${esc(name)}"${st.selected.has(x.id) ? " checked" : ""}></td>${c.map((col) => `<td data-key="${col.key}"${col.required ? " data-primary" : ""}${col.numeric ? " data-numeric" : ""}${col.hideBelow ? ` data-hide-below="${col.hideBelow}"` : ""}${col.m ? ` data-m="${col.m}"` : ""}><div class="cell">${col.render(x)}</div></td>`).join("")}<td class="row-actions"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-row-menu="${x.id}" aria-label="Actions for ${esc(name)}" aria-haspopup="menu" aria-expanded="false">${I.dots}</button></td>${phoneCells(x)}</tr>`;
+      return `<tr data-id="${x.id}"${st.selected.has(x.id) ? " data-selected" : ""}${openId === x.id ? ' data-open aria-current="true"' : ""}><td class="data-table-select"><input type="checkbox" class="checkbox" data-select="${x.id}" aria-label="Select ${esc(name)}"${st.selected.has(x.id) ? " checked" : ""}></td>${c.map((col) => `<td data-key="${col.key}"${col.required ? " data-primary" : ""}${col.numeric ? " data-numeric" : ""}${col.hideBelow ? ` data-hide-below="${col.hideBelow}"` : ""}${col.m ? ` data-m="${col.m}"` : ""}><div class="cell">${col.render(x)}</div></td>`).join("")}<td class="row-actions"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-row-menu="${x.id}" aria-label="Actions for ${esc(name)}" data-tip="More actions" aria-haspopup="menu" aria-expanded="false">${I.dots}</button></td>${phoneCells(x)}</tr>`;
     };
 
     let body = "";
@@ -859,7 +860,7 @@
       return `<div class="date-range-scroll">${Array.from({ length: 13 }, (_, i) => monthGrid(monthOf(t, i - 12), f)).join("")}</div>`;
     }
     const nextOff = pastOnly(f) && monthOf(dp.view, 1) >= monthOf(today());
-    const nav = (n, label, icon, off) => `<button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-cal-nav="${n}" aria-label="${label}"${off ? " disabled" : ""}>${ic(icon, 12)}</button>`;
+    const nav = (n, label, icon, off) => `<button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-cal-nav="${n}" aria-label="${label}" data-tip="${label}"${off ? " disabled" : ""}>${ic(icon, 12)}</button>`;
     return `<div class="date-range-months"><div class="date-range-nav">${nav(-1, "Previous month", "chevron-left")}${nav(1, "Next month", "chevron-right", nextOff)}</div>${monthGrid(dp.view, f)}${monthGrid(monthOf(dp.view, 1), f)}</div>`;
   }
   function dateFoot(f) {
@@ -890,7 +891,7 @@
       return;
     }
     if (sheet()) {
-      pop.innerHTML = `<div class="pop-head"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-date-back aria-label="Back to presets">${ic("chevron-left", 14)}</button><h3>${esc(f.label)}: custom</h3></div>
+      pop.innerHTML = `<div class="pop-head"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-date-back aria-label="Back to presets" data-tip="Back to presets">${ic("chevron-left", 14)}</button><h3>${esc(f.label)}: custom</h3></div>
         <div class="date-range-custom">${dateFields()}${months(f)}<div data-date-foot>${dateFoot(f)}</div></div>`;
       paintDays();
       // open on the month that holds the span, or this one
@@ -1075,7 +1076,7 @@
     t.className = "toast";
     t.dataset.tone = "info";
     t.setAttribute("role", "status");
-    t.innerHTML = `<span class="toast-message"></span><button class="toast-close" aria-label="Dismiss">×</button>`;
+    t.innerHTML = `<span class="toast-message"></span><button class="toast-close" aria-label="Dismiss" data-tip="Dismiss">×</button>`;
     t.querySelector(".toast-message").textContent = message;
     t.querySelector(".toast-close").onclick = () => t.remove();
     // over an open sheet or dialog: a modal one covers everything outside it, so the toasts move in
@@ -1113,7 +1114,7 @@
     return `<header class="detail-head">
         <h2 id="detail-title" tabindex="-1">${esc(p.heading)}</h2>
         <span class="tooltip-anchor"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-labelledby="detail-open-tip" data-concept-action="${esc(p.open)}">${ic("m-expand", 12, { optical: true })}</button><span class="tooltip" role="tooltip" id="detail-open-tip" data-side="bottom">${esc(p.open)}</span></span>
-        <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close" data-detail-close>${ic("xmark", 18, { optical: true })}</button>
+        <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close" data-detail-close data-tip="Close">${ic("xmark", 18, { optical: true })}</button>
       </header>
       <div class="detail-scroll">
         <div class="detail-section detail-hero">
@@ -1570,7 +1571,7 @@ ${JSON.stringify(v)}`;
           : r[2] === "check"
             ? `<div class="tuner-row" data-k="${r[0]}" data-check><label class="choice"><input type="checkbox" id="${id}-${r[0]}"> ${r[1]}</label></div>`
             : `<div class="tuner-row" data-k="${r[0]}"><label for="${id}-${r[0]}">${r[1]}</label><output id="${id}-o-${r[0]}"></output><input type="range" id="${id}-${r[0]}" min="${r[2]}" max="${r[3]}" step="${r[4]}"></div>`;
-        panel.innerHTML = `<header><span class="concept-tag">Concept</span> ${title}<button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close" data-tune-close>${I.xl}</button></header>
+        panel.innerHTML = `<header><span class="concept-tag">Concept</span> ${title}<button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close" data-tune-close data-tip="Close">${I.xl}</button></header>
           <div class="tuner-body">${presets ? `<div class="field" data-size="sm"><label class="field-label" for="${id}-preset">Start from</label><div class="select"><select class="input" id="${id}-preset" data-preset>${Object.entries(presets).map(([k, p]) => `<option value="${k}">${p.name}</option>`).join("")}<option value="" hidden>Custom</option></select></div></div>` : ""}
           ${groups.map(([t, rs, note]) => `<fieldset><legend>${t}</legend>${note ? `<p class="tuner-note">${note}</p>` : ""}${rs.map(row).join("")}</fieldset>`).join("")}</div>
           <div class="tuner-foot"><button type="button" class="button" data-size="sm" data-tune-copy>Copy settings</button><button type="button" class="button" data-variant="ghost" data-size="sm" data-tune-reset>Reset</button><span aria-live="polite"></span></div>`;

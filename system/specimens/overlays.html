@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=fe7681dd">
-<link rel="stylesheet" href="specimen.css?v=fe7681dd">
+<link rel="stylesheet" href="../bolster.css?v=71eeccdc">
+<link rel="stylesheet" href="specimen.css?v=71eeccdc">
 <style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
 </head>
 <body>
@@ -37,6 +37,16 @@
           <button class="button" data-variant="ghost" data-icon-only aria-labelledby="tip3">?</button>
           <span class="tooltip" role="tooltip" id="tip3" data-side="right" data-state="open">Pinned open for this page</span>
         </span>
+      </div>
+    </div>
+    <h3>Every icon without a label has one (D52)</h3>
+    <p>An icon that stands alone, in a control (an icon button) or in content (an icon in a table cell), always comes with a tooltip naming it. Put <code>data-tip="…"</code> on it: <code>tooltip.js</code> draws one tooltip in the top layer, so no card or table clips it, and only while the element's own label isn't showing (the phone's search, a button folded to its +). The element keeps its accessible name in <code>aria-label</code>. <code>scripts/check-tips.js</code> lists the ones that have none.</p>
+    <div class="spec-panel">
+      <div class="spec-row" style="gap:var(--space-6)">
+        <button class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="More actions" data-tip="More actions"><i data-icon="ellipsis" data-size="16"></i></button>
+        <button class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close" data-tip="Close"><i data-icon="xmark" data-size="18" data-optical></i></button>
+        <span class="cell-kinds" role="img" aria-label="Materials, Labour"><span data-tip="Materials"><i data-icon="box" data-size="14"></i></span><span data-tip="Labour"><i data-icon="hard-hat" data-size="14"></i></span></span>
+        <span class="spec-note">hover or tab to them</span>
       </div>
     </div>
   </section>
@@ -85,7 +95,7 @@
 
   <dialog class="dialog" data-size="lg" id="d-filters" aria-labelledby="d-filters-t">
     <header class="dialog-header"><h2 id="d-filters-t">Columns and filters</h2>
-      <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close>×</button></header>
+      <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close data-tip="Close">×</button></header>
     <div class="dialog-body">
       <div class="spec-stack">
         <label class="choice"><input type="checkbox" class="checkbox" checked> Status</label>
@@ -99,7 +109,7 @@
   <dialog class="dialog" data-variant="sheet" id="d-picker" aria-labelledby="d-picker-t" closedby="any">
     <div class="dialog-handle" aria-hidden="true"></div>
     <header class="dialog-header"><h2 id="d-picker-t">Company type</h2>
-      <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close>×</button></header>
+      <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close data-tip="Close">×</button></header>
     <div class="dialog-body">
       <div class="field" style="margin-bottom:var(--space-4)"><label class="field-label visually-hidden" for="pk">Search types</label><input class="input" id="pk" type="search" placeholder="Search types"></div>
       <fieldset style="border:0;padding:0;margin:0" class="spec-stack">
@@ -123,7 +133,7 @@
     <header class="dialog-header"><span class="avatar" data-color="2" data-size="sm" aria-hidden="true">MK</span><h2 id="d-work-t">Mykola Khvylovy · New estimate</h2>
       <span class="badge" data-status="pending">Pending</span>
       <button class="button" data-variant="brand" data-size="sm">Preview and send</button>
-      <button class="button" data-variant="ghost" data-icon-only aria-label="Close job" data-close style="--_fg:var(--color-content-on-chrome-muted);--_fg-hover:var(--color-content-on-chrome);--_bg-hover:var(--color-surface-chrome-hover)">×</button></header>
+      <button class="button" data-variant="ghost" data-icon-only aria-label="Close job" data-close style="--_fg:var(--color-content-on-chrome-muted);--_fg-hover:var(--color-content-on-chrome);--_bg-hover:var(--color-surface-chrome-hover)" data-tip="Close job">×</button></header>
     <div class="dialog-body">
       <nav class="sidebar" aria-label="Job" style="position:static;block-size:auto;inline-size:15rem;translate:none;box-shadow:none">
         <a class="sidebar-item" href="#">Overview</a><a class="sidebar-item" href="#" aria-current="page">Estimate <span class="badge" data-count>5</span></a><a class="sidebar-item" href="#">Takeoff</a><a class="sidebar-item" href="#">Proposal</a>
@@ -132,6 +142,6 @@
     </div>
   </dialog>
 </main>
-<script src="specimen.js?v=fe7681dd"></script>
+<script src="specimen.js?v=71eeccdc"></script>
 </body>
 </html>

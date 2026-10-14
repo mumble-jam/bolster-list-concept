@@ -5,7 +5,9 @@
    </span>
    Icon-only trigger: aria-labelledby → the tooltip is its name.
    Trigger with its own label: aria-describedby → the tooltip adds detail.
-   Never put the only copy of important information in a tooltip; they don't exist on touch. */
+   Never put the only copy of important information in a tooltip; they don't exist on touch.
+   Everywhere else, and always for an icon that stands without a label (D52): data-tip="…" on the
+   element, drawn by tooltip.js as one .tip in the top layer, so no card or table clips it. */
 
 @layer tokens, base, components, utilities;
 
@@ -43,4 +45,17 @@
     :where(.tooltip-anchor:hover) > :where(.tooltip) { opacity: 1; visibility: visible; transition-delay: 150ms, 0s; }
   }
   :where(.tooltip-anchor:has(:focus-visible)) > :where(.tooltip) { opacity: 1; visibility: visible; transition-delay: 0s; }
+
+  /* the shared tooltip (tooltip.js): the same look, in the top layer, placed by script */
+  .tip[popover] {
+    position: fixed; inset: auto; margin: 0; border: 0;
+    max-inline-size: 16rem; padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-tooltip); color: var(--color-content-inverse);
+    font-size: var(--text-xs); font-weight: var(--font-weight-medium); line-height: var(--leading-xs);
+    box-shadow: var(--shadow-overlay); pointer-events: none;
+    opacity: 0; transition: opacity var(--duration-fast) var(--ease-out), display var(--duration-fast) allow-discrete, overlay var(--duration-fast) allow-discrete;
+  }
+  .tip[popover]:popover-open { opacity: 1; }
+  @starting-style { .tip[popover]:popover-open { opacity: 0; } }
 }

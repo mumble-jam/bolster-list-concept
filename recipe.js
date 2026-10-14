@@ -13,7 +13,7 @@ window.BDS_RECIPE = (() => {
   // the first click on a header sorts the type's way (rules.json → types): biggest, newest and most
   // flagged first; names, words and the lifecycle from the top
   const DESC = new Set([...NUMERIC, "date", "datetime", "flags"]);
-  const WIDTH = { id: "6rem", money: "7rem", number: "5rem", percent: "5.5rem", count: "7rem", duration: "6rem", date: "6.5rem", datetime: "8rem", status: "7.5rem", person: "12.5rem", record: "12rem", category: "7rem", address: "11rem", contact: "14rem", text: "8rem", flags: "11rem" };
+  const WIDTH = { kinds: "5.5rem", id: "6rem", money: "7rem", number: "5rem", percent: "5.5rem", count: "7rem", duration: "6rem", date: "6.5rem", datetime: "8rem", status: "7.5rem", person: "12.5rem", record: "12rem", category: "7rem", address: "11rem", contact: "14rem", text: "8rem", flags: "11rem" };
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
   // ---------- a stage's look (rule L-status-stage): the colour and, where the system has one, the shape ----------
@@ -77,7 +77,8 @@ window.BDS_RECIPE = (() => {
   const shortDate = (d) => (Math.abs(ageDays(d)) < 7 ? fmt.ago(d) : fmt.date(d));
   // a kinds value in words, from its column's values (“Materials, Labour”)
   const kindsText = (c, v) => (v || []).map((k) => c.values?.find((o) => o.value === k)?.label || k).join(", ");
-  const kindsIcons = (c, v) => (v?.length ? `<span class="cell-kinds" role="img" aria-label="${esc(kindsText(c, v))}">${v.map((k) => { const o = c.values?.find((x) => x.value === k); return o ? `<span title="${esc(o.label)}">${window.BolsterIcons(o.icon, 14)}</span>` : ""; }).join("")}</span>` : "");
+  // each icon names itself in a tooltip (D52) and, together, for screen readers
+  const kindsIcons = (c, v) => (v?.length ? `<span class="cell-kinds" role="img" aria-label="${esc(kindsText(c, v))}">${v.map((k) => { const o = c.values?.find((x) => x.value === k); return o ? `<span data-tip="${esc(o.label)}">${window.BolsterIcons(o.icon, 14)}</span>` : ""; }).join("")}</span>` : "");
   const text = (v) => {
     if (v == null || v === "") return "";
     if (v instanceof Date) return shortDate(v);
@@ -101,6 +102,7 @@ window.BDS_RECIPE = (() => {
       case "contact": return (x) => `<div>${esc(x[c.key].email)}</div><div class="cell-sub">${esc(x[c.key].phone)}</div>`;
       case "flags": return (x) => (x[c.key].length ? `<span class="cluster" style="gap:var(--space-1)">${x[c.key].slice(0, 2).map((f) => `<span class="badge" data-tone="warning">${esc(f)}</span>`).join("")}${x[c.key].length > 2 ? `<span class="badge">+${x[c.key].length - 2}</span>` : ""}</span>` : "");
       case "id": case "address": case "category": return (x) => muted(text(x[c.key]));
+      case "kinds": return (x) => kindsIcons(c, x[c.key]);
       default: return (x) => (x[c.key] ? esc(text(x[c.key])) : none("–"));
     }
   }
@@ -109,6 +111,7 @@ window.BDS_RECIPE = (() => {
     if (NUMERIC.has(c.type)) return (x) => x[c.key] || 0;
     if (c.type === "date" || c.type === "datetime") return (x) => +x[c.key];
     if (c.type === "flags") return (x) => x[c.key].length;
+    if (c.type === "kinds") return (x) => (x[c.key] || []).join(" ");
     return (x) => text(x[c.key]).toLowerCase();
   };
   // {key} templates: a missing value drops with its separator
@@ -149,13 +152,13 @@ window.BDS_RECIPE = (() => {
     const figure = d.columns.find((c) => c.priority === 2 && NUMERIC.has(c.type));
     const dates = d.columns.filter((c) => (c.type === "date" || c.type === "datetime") && !c.hidden).sort((a, b) => a.priority - b.priority);
     const empty = { statusMap };
-    // a kinds column has no column of its own: its icons lead the name (L-types)
+    // a kinds column is a column of its own, its icons on the phone row's overline (L-types, D53)
     const kindsCol = d.columns.find((c) => c.type === "kinds");
-    const columns = d.columns.filter((c) => c.type !== "kinds").map((c) => {
+    const columns = d.columns.map((c) => {
       const out = { key: c.key, label: c.label, hidden: !!c.hidden, sort: sortOf(c, order), dir: DESC.has(c.type) ? "desc" : "asc" };
       if (c.priority === 1) {
         out.m = "title"; out.required = true;
-        out.render = (x) => main(x.id, fill(c.title || `{${c.key}}`, x) || c.empty || `Unnamed ${n.one}`, fill(c.detail, x), c.leading === "avatar" && c.avatarFrom ? (typeof x[c.avatarFrom] === "object" ? x[c.avatarFrom] : { initials: initials(text(x[c.avatarFrom]) || "?"), color: (hash(text(x[c.avatarFrom])) % 8) + 1 }) : null, kindsCol ? kindsIcons(kindsCol, x[kindsCol.key]) : "");
+        out.render = (x) => main(x.id, fill(c.title || `{${c.key}}`, x) || c.empty || `Unnamed ${n.one}`, fill(c.detail, x), c.leading === "avatar" && c.avatarFrom ? (typeof x[c.avatarFrom] === "object" ? x[c.avatarFrom] : { initials: initials(text(x[c.avatarFrom]) || "?"), color: (hash(text(x[c.avatarFrom])) % 8) + 1 }) : null);
         out.sort = (x) => fill(c.title || `{${c.key}}`, x).toLowerCase();
         return out;
       }
@@ -176,7 +179,7 @@ window.BDS_RECIPE = (() => {
     const titleT = name.title || `{${name.key}}`;
     const dateCol = dates[0] && columns.find((c) => c.key === dates[0].key);
     const phone = {
-      over: (x) => [idKey && !titleT.includes(`{${idKey}}`) ? esc(text(x[idKey])) : "", dateCol ? dateCol.render(x) : ""].filter(Boolean).join(" · "),
+      over: (x) => (kindsCol ? kindsIcons(kindsCol, x[kindsCol.key]) : "") + [idKey && !titleT.includes(`{${idKey}}`) ? esc(text(x[idKey])) : "", dateCol ? dateCol.render(x) : ""].filter(Boolean).join(" · "),
       where: (x) => esc(fill(name.detail, idKey ? { ...x, [idKey]: "" } : x)),
     };
 

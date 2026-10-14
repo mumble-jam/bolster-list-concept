@@ -208,9 +208,9 @@
      width (16 px, wrapping to two lines, never cut on the first), then where (address, job or unit)
      bottom left and the status bottom right. No checkbox column: selecting is a mode, and while it's
      on the boxes slide in from the left. A list without its own overline puts its date (sub) there. */
-  /* kinds (L-types): small icons before a row's name, one per kind it holds (materials, labour) */
-  .cell-title { display: flex; align-items: center; gap: var(--space-2); min-inline-size: 0; }
-  .cell-title .data-table-link { min-inline-size: 0; }
+  /* kinds (L-types, D53): a column of small icons, one per kind a row holds (materials, labour); on
+     phones they lead the row's overline */
+  .data-table td[data-m="over"] .cell-kinds { vertical-align: -2px; margin-inline-end: var(--space-2); }
   .cell-kinds { display: inline-flex; flex: none; gap: var(--space-1); color: var(--color-content-secondary); }
   .cell-kinds svg { display: block; inline-size: 0.875rem; block-size: 0.875rem; }
   @property --_pick-w { syntax: "<length>"; inherits: true; initial-value: 0px; }

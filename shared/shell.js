@@ -97,18 +97,18 @@ window.BolsterShell = (() => {
 
   function topBar() {
     return `<header class="top-bar bs-top">
-      <button class="bs-icon-btn bs-hamburger" type="button" data-toggle-sidebar aria-label="Open menu">${icon("menu")}</button>
-      <a class="bs-logo" href="#" data-not-built="home" aria-label="Bolster home"><img src="${ASSETS}bolster-mark.svg" alt=""></a>
+      <button class="bs-icon-btn bs-hamburger" type="button" data-toggle-sidebar aria-label="Open menu" data-tip="Menu">${icon("menu")}</button>
+      <a class="bs-logo" href="#" data-not-built="home" aria-label="Bolster home" data-tip="Home"><img src="${ASSETS}bolster-mark.svg" alt=""></a>
       <button class="bs-company" type="button" popovertarget="bs-company-menu" aria-haspopup="menu">${esc(COMPANY)}${icon("chevron-down", 16)}</button>
       <div class="menu" id="bs-company-menu" popover role="menu" aria-label="Company">
         <button class="menu-item" role="menuitem" data-not-built="switch-company">${icon("arrow-left-right", 16)}Switch company</button>
         <button class="menu-item" role="menuitem" data-not-built="company-settings">${icon("briefcase", 16)}Company settings</button>
       </div>
-      <button class="top-bar-search" type="button" data-not-built="search">${icon("search", 16)}<span>Search customers, jobs, invoices, files…</span><kbd>⌘K</kbd></button>
+      <button class="top-bar-search" type="button" data-not-built="search" data-tip="Search">${icon("search", 16)}<span>Search customers, jobs, invoices, files…</span><kbd>⌘K</kbd></button>
       <div class="bs-top-actions">
-        <button class="bs-icon-btn" type="button" aria-label="Help" data-not-built="help">${icon("circle-help", 18, { optical: true })}</button>
-        <button class="bs-icon-btn bs-assistant" type="button" aria-label="Ask Bolton" data-not-built="assistant"><img src="${ASSETS}bolton-head.svg" alt=""></button>
-        <button class="bs-avatar" type="button" popovertarget="bs-user-menu" aria-haspopup="menu" aria-label="${esc(USER.name)}"><span class="avatar" data-color="${USER.color}" aria-hidden="true">${USER.initials}</span></button>
+        <button class="bs-icon-btn" type="button" aria-label="Help" data-not-built="help" data-tip="Help">${icon("circle-help", 18, { optical: true })}</button>
+        <button class="bs-icon-btn bs-assistant" type="button" aria-label="Ask Bolton" data-not-built="assistant" data-tip="Ask Bolton"><img src="${ASSETS}bolton-head.svg" alt=""></button>
+        <button class="bs-avatar" type="button" popovertarget="bs-user-menu" aria-haspopup="menu" aria-label="${esc(USER.name)}" data-tip="Your account"><span class="avatar" data-color="${USER.color}" aria-hidden="true">${USER.initials}</span></button>
         <div class="menu" id="bs-user-menu" popover role="menu" aria-label="Account">
           <button class="menu-item" role="menuitem" data-not-built="profile">${icon("user", 16)}Edit profile</button>
           <button class="menu-item" role="menuitem" data-not-built="users">${icon("users", 16)}Manage users</button>
@@ -212,7 +212,7 @@ window.BolsterShell = (() => {
     t.className = "toast";
     t.dataset.tone = "info";
     t.setAttribute("role", "status");
-    t.innerHTML = `<span class="toast-message"></span><button class="toast-close" aria-label="Dismiss">×</button>`;
+    t.innerHTML = `<span class="toast-message"></span><button class="toast-close" aria-label="Dismiss" data-tip="Dismiss">×</button>`;
     t.querySelector(".toast-message").textContent = message;
     t.querySelector(".toast-close").onclick = () => t.remove();
     region.append(t);
