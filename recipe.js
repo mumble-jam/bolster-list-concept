@@ -222,7 +222,6 @@ window.BDS_RECIPE = (() => {
         ? { bar: (d.selection.bulk || []).map(act), more: [] }
         : { bar: lead(sel[0], d.actions.byStatus[sel[0][statusCol]]?.primary || []).map(act), more: (d.actions.byStatus[sel[0][statusCol]]?.more || []).map(act) });
     if (d.selection.enabled && !d.selection.bulk?.length) notes.push("Bulk actions are still an open question, so the bar shows none.");
-    if (!d.selection.enabled) notes.push("Selection is off in the description; the concept still shows checkboxes.");
 
     // ---------- the record (peek) ----------
     const recordFields = d.record?.fields || d.columns.filter((c) => c.priority >= 4).map((c) => c.key);
@@ -259,6 +258,7 @@ window.BDS_RECIPE = (() => {
       bulk: (d.selection.bulk || []).map(label),
       rowActions: d.actions?.row ? d.actions.row.map(label) : ["Open"],
       ...(actionsFor ? { actionsFor } : {}),
+      selectable: !!d.selection.enabled,
       ...(d.actions?.next ? { nextFor: (x) => (nextOf(x) ? label(nextOf(x)) : null) } : {}),
       peek,
     };

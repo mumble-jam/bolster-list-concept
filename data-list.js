@@ -235,6 +235,8 @@
     document.title = `${title} · Bolster`;
     $("#create .float-label").textContent = cfg.create;
     $("#create").hidden = !cfg.create;
+    // L-selection: no bulk actions, no checkboxes (nor Select, nor the long press, on phones)
+    document.body.toggleAttribute("data-no-select", cfg.selectable === false);
     // lists built from a page description (recipe.js) say so, and say what the renderer couldn't draw
     const rn = $("#recipe-note");
     rn.hidden = !cfg.fromDescription;
@@ -1472,7 +1474,7 @@
   const unpress = () => { if (press) clearTimeout(press.t); press = null; };
   tableWrap.addEventListener("pointerdown", (e) => {
     const tr = e.target.closest("tbody tr[data-id]");
-    if (!phoneMQ.matches || !tr || e.button !== 0 || st.mode !== "ready" || e.target.closest("input, button")) return;
+    if (!phoneMQ.matches || !tr || e.button !== 0 || st.mode !== "ready" || cfg.selectable === false || e.target.closest("input, button")) return;
     unpress();
     press = { x: e.clientX, y: e.clientY, t: setTimeout(() => { press = null; pressedAt = Date.now(); st.picking = true; pickRow(tr.dataset.id, true); navigator.vibrate?.(10); }, 450) };
   });
