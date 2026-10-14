@@ -531,6 +531,8 @@
     const box = tr && $("input[data-select]", tr);
     if (box) box.checked = on;
     renderBulk(); syncSelectPage();
+    // ticking a row brings the bars back, so the count is in view (D39)
+    if (phoneMQ.matches) setChrome(false);
   }
   function untick() {
     st.selected.clear();
@@ -579,6 +581,14 @@
     const sc = $("#select-count"), sa = $("#select-all");
     if (sc) { sc.hidden = !on; sc.textContent = n ? `${fmt.count(n)} selected` : `Select ${cfg.noun[1]}`; }
     if (sa) { sa.hidden = !on; sa.textContent = all ? "Unselect all" : "Select all"; sa.toggleAttribute("data-select-matching", !all); sa.toggleAttribute("data-unselect-all", all); }
+    // and the compact bar that stands in for the header once it has scrolled away (D39)
+    const sb = $("#select-bar"), sbAll = $("#select-bar-all");
+    if (sb) {
+      sb.hidden = !on;
+      $("#select-bar-count").textContent = sc?.textContent || "";
+      sbAll.textContent = all ? "Unselect all" : "Select all";
+      sbAll.toggleAttribute("data-select-matching", !all); sbAll.toggleAttribute("data-unselect-all", all);
+    }
     document.querySelector(".list-page").toggleAttribute("data-selecting", on);
     document.body.toggleAttribute("data-selecting", on);
     if (!on) { bar.innerHTML = ""; return; }
@@ -1238,9 +1248,10 @@
     if ((el = q("[data-peek]"))) { e.preventDefault(); openPeek(el.dataset.peek); return; }
     if (q("[data-detail-close]")) return closeDetail();
     if ((el = q("[data-tl-more]"))) { const ol = el.closest(".timeline"); $$("[data-fold]", ol).forEach((li) => (li.hidden = false)); const first = $("[data-fold]", ol); el.closest("li").remove(); first?.setAttribute("tabindex", "-1"); first?.focus({ preventScroll: true }); return; }
-    if ((el = q("[data-select-matching]"))) { const head = el.id === "select-all"; rowsWhere().forEach((x) => st.selected.add(x.id)); renderBody(); renderBulk(); (head ? el : $("#bulk-bar .floating-bar-link"))?.focus({ preventScroll: true }); return; }
+    if (q("[data-select-done]")) { unpick(); $("#select-mode")?.focus({ preventScroll: true }); return; }
+    if ((el = q("[data-select-matching]"))) { const head = el.id === "select-all" || !!el.closest(".select-bar"); rowsWhere().forEach((x) => st.selected.add(x.id)); renderBody(); renderBulk(); (head ? el : $("#bulk-bar .floating-bar-link"))?.focus({ preventScroll: true }); return; }
     if (q("[data-clear-selection]")) { unpick(); $("#select-page")?.focus({ preventScroll: true }); return; }
-    if ((el = q("[data-unselect-all]"))) { const head = el.id === "select-all"; untick(); (head ? el : $("#bulk-bar .floating-bar-link") || $("#select-page"))?.focus({ preventScroll: true }); return; }
+    if ((el = q("[data-unselect-all]"))) { const head = el.id === "select-all" || !!el.closest(".select-bar"); untick(); (head ? el : $("#bulk-bar .floating-bar-link") || $("#select-page"))?.focus({ preventScroll: true }); return; }
     if (q("#select-mode")) { st.picking || st.selected.size ? unpick() : ((st.picking = true), renderBulk()); return; }
     if ((el = q("[data-confirm]"))) { if (pop.contains(el)) pop.hidePopover(); return openConfirm(el.dataset.confirm); }
     if (q("#confirm-go")) {
@@ -1429,8 +1440,12 @@
   let lastY = scrollY, travel = 0;
   const setChrome = (hidden) => { if (html.hasAttribute("data-chrome-hidden") !== hidden) html.toggleAttribute("data-chrome-hidden", hidden); };
   // keep them while something up there is in use: a menu, a focused field, the sidebar overlay
-  const busy = () => !!document.querySelector(":popover-open, dialog[open], .sidebar[data-open]") || !!document.activeElement?.closest?.(".top-bar, #list-toolbar");
+  const busy = () => !!document.querySelector(":popover-open, dialog[open], .sidebar[data-open]") || !!document.activeElement?.closest?.(".top-bar, #list-toolbar, .select-bar");
+  // the page header gone under the top bar: on phones, while selecting, the compact bar stands in (D39)
+  const headOut = () => html.toggleAttribute("data-head-out", $(".page-header").getBoundingClientRect().bottom < topBar.offsetHeight);
+  headOut();
   addEventListener("scroll", () => {
+    headOut();
     const y = scrollY, dy = y - lastY;
     lastY = y;
     // only once the card header has reached the top bar; above that the page scrolls as normal

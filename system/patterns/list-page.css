@@ -116,6 +116,30 @@
     }
     body[data-selecting] .bottom-bar { visibility: hidden; }
   }
+  /* phones, while selecting, once the page header has scrolled away (D39): a compact bar takes the top
+     bar's place with the count, Select all and Done, as the action bar takes the tab bar's at the
+     bottom. It goes and comes back with the bars (down hides, up shows), and ticking a row shows it.
+     <div class="select-bar" role="toolbar" aria-label="Selection"><p class="select-bar-count">…</p>…</div> */
+  .select-bar { display: none; }
+  @media (max-width: 767px) {
+    body[data-selecting] .select-bar:not([hidden]) {
+      position: fixed; inset: 0 0 auto; z-index: calc(var(--z-shell) + 2);
+      display: flex; align-items: center; gap: var(--space-1);
+      block-size: var(--list-toolbar-top, var(--shell-top-bar-height)); padding: 0 var(--space-2) 0 var(--space-4);
+      background: var(--color-surface-chrome); color: var(--color-content-on-chrome);
+      border-block-end: var(--border-width-default) solid var(--color-line-chrome);
+      translate: 0 -100%; visibility: hidden;
+      transition: translate 300ms var(--ease-out), visibility 0s linear 300ms;
+    }
+    :root[data-head-out]:not([data-chrome-hidden]) body[data-selecting] .select-bar:not([hidden]) { translate: none; visibility: visible; transition-delay: 0s; }
+    .select-bar-count {
+      flex: 1; min-inline-size: 0; margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      font-size: var(--text-lg); line-height: var(--leading-lg); font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums;
+    }
+    .select-bar .button[data-variant="ghost"] { --_fg: var(--color-content-on-chrome); --_fg-hover: var(--color-content-on-chrome); --_bg-hover: var(--color-surface-chrome-hover); --_bg-active: var(--color-surface-chrome-hover); }
+    .select-bar [data-select-done] { font-weight: var(--font-weight-medium); }
+  }
+  @media (prefers-reduced-motion: reduce) { .select-bar { transition: none !important; } }
   /* phones only (Select: selecting is a mode there) */
   @media (min-width: 768px) { [data-phone-only] { display: none; } }
 }
