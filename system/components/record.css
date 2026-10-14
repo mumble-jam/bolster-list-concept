@@ -45,6 +45,8 @@
   .detail-actions { display: flex; gap: var(--space-2); justify-self: stretch; min-inline-size: 0; margin-block-start: var(--space-5); }
   .detail-actions .button { flex: 1 1 auto; gap: var(--space-2); min-inline-size: max-content; padding-inline: var(--space-3); white-space: nowrap; }
   .detail-actions .button[hidden] { display: none; }
+  /* a record with nothing to do in its state (paid, cancelled) has no action row at all */
+  .detail-actions:not(:has(> :not([hidden]))) { display: none; }
   .detail-actions .button svg { flex: none; }
   .detail-fields { display: grid; gap: var(--space-3); font-size: var(--text-sm); }
   .detail-fields > div { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); min-block-size: var(--space-6); }

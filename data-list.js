@@ -235,6 +235,7 @@
     document.title = `${title} · Bolster`;
     $("#create .float-label").textContent = cfg.create;
     $("#create").hidden = !cfg.create;
+    $("#export").hidden = cfg.export === false; // L-ask: only where the original offers it
     // L-selection: no bulk actions, no checkboxes (nor Select, nor the long press, on phones)
     document.body.toggleAttribute("data-no-select", cfg.selectable === false);
     // lists built from a page description (recipe.js) say so, and say what the renderer couldn't draw
@@ -516,6 +517,20 @@
   const risky = (a) => /^(archive|delete)/i.test(a);
   // red is for what can't be undone: Delete. Archive still confirms and sits apart, but isn't red
   const destructive = (a) => /^delete/i.test(a);
+  const isDanger = (a) => risky(a) || /^(void|cancel)/i.test(a) || !!cfg.danger?.includes(a);
+  // a row's menu, from the row or from its record's More (lists without per-status actions): what isn't on
+  // the card. Its buttons are left out, any folded off a narrow card come first, "Open" (and the
+  // catalog's "Edit") would only reopen the record, and the row's next step (L-next-step) comes first
+  // after Open unless the card shows it
+  function rowMenuActs(key, card) {
+    const onCard = card ? $$(".detail-actions [data-concept-action]", card) : [];
+    const shown = onCard.filter((b) => !b.hidden).map((b) => b.dataset.conceptAction), folded = onCard.filter((b) => b.hidden).map((b) => b.dataset.conceptAction);
+    const nx = cfg.nextFor?.(cfg.rows.find((r) => r.id === key));
+    const lead = nx && !shown.includes(nx) && !folded.includes(nx) ? [nx] : [];
+    const rest = cfg.rowActions.filter((a) => a !== nx && !folded.includes(a) && !shown.includes(a) && !(card && (a === "Open" || a === "Edit")));
+    const open = rest[0] === "Open" ? [rest.shift()] : [];
+    return [...open, ...lead, ...folded, ...rest];
+  }
   const selectedRows = () => cfg.rows.filter((r) => st.selected.has(r.id));
   // a list of actions as menu items: plain ones, then the menus as labelled sections, then the risky ones in
   // red after a rule. In the bulk menus the risky ones confirm and the rest name what's selected.
@@ -1030,18 +1045,11 @@
       const list = ["Open", ...bar, ...more].filter((a) => !own.includes(a));
       pop.innerHTML = `<div class="pop-body">${actionItems(list, { peek: p.key, nested: true })}</div>`;
     } else if (p.kind === "row") {
-      // from the record's More: what isn't on the card. Its buttons are left out, any folded off a narrow
-      // card come first, and "Open" (and the catalog's "Edit") would only reopen the record
-      const card = p.from?.closest(".detail");
-      const onCard = card ? $$(".detail-actions [data-concept-action]", card) : [];
-      const shown = onCard.filter((b) => !b.hidden).map((b) => b.dataset.conceptAction), folded = onCard.filter((b) => b.hidden).map((b) => b.dataset.conceptAction);
-      // a row's next step (L-next-step) is its first action, after Open, unless the card already shows it
-      const nx = cfg.nextFor?.(cfg.rows.find((r) => r.id === p.key));
-      const lead = nx && !shown.includes(nx) && !folded.includes(nx) ? [nx] : [];
-      const rest = cfg.rowActions.filter((a) => a !== nx && !folded.includes(a) && !shown.includes(a) && !(card && (a === "Open" || a === "Edit")));
-      const open = rest[0] === "Open" ? [rest.shift()] : [];
-      const acts = [...open, ...lead, ...folded, ...rest];
-      pop.innerHTML = `<div class="pop-body">${acts.map((a, i) => `${i && i === acts.length - 1 ? "<hr>" : ""}<button type="button" class="menu-item" role="menuitem"${i === acts.length - 1 ? ' data-tone="danger"' : ""} ${a === "Open" || a === "Edit" ? `data-peek="${p.key}"` : `data-concept-action="${esc(a)}"`}>${mi(actionIcons[a])}${esc(a)}</button>`).join("")}</div>`;
+      const acts = rowMenuActs(p.key, p.from?.closest(".detail"));
+      // the destructive ones go last, in red after a rule (L-risky), whatever their place in the list
+      const safe = acts.filter((a) => !isDanger(a)), danger = acts.filter(isDanger);
+      const btn = (a) => `<button type="button" class="menu-item" role="menuitem"${isDanger(a) ? ' data-tone="danger"' : ""} ${a === "Open" || a === "Edit" ? `data-peek="${p.key}"` : `data-concept-action="${esc(a)}"`}>${mi(actionIcons[a])}${esc(a)}</button>`;
+      pop.innerHTML = `<div class="pop-body">${safe.map(btn).join("")}${safe.length && danger.length ? "<hr>" : ""}${danger.map(btn).join("")}</div>`;
     }
     pop.style.inlineSize = p.kind === "row" || p.kind === "bulk" || p.kind === "add" ? "auto" : p.kind === "info" ? "16rem" : "";
   }
@@ -1125,9 +1133,11 @@
   function fitActions(d) {
     const row = $(".detail-actions", d);
     if (!row) return;
-    const acts = $$("[data-concept-action]", row);
+    const acts = $$("[data-concept-action]", row), more = $("[data-row-menu]", row);
     acts.forEach((b) => (b.hidden = false));
-    if (row.scrollWidth > row.clientWidth + 1) acts.slice(1).forEach((b) => (b.hidden = true));
+    // More only when it has something in it
+    if (more && !cfg.actionsFor) more.hidden = !rowMenuActs(more.dataset.rowMenu, d).length;
+    if (row.scrollWidth > row.clientWidth + 1) { acts.slice(1).forEach((b) => (b.hidden = true)); if (more) more.hidden = false; }
   }
   const refit = new ResizeObserver((es) => es.forEach((e) => fitActions(e.target)));
   // the record's heading takes focus, with a ring only when it was opened from the keyboard: Safari

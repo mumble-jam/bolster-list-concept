@@ -61,7 +61,7 @@ window.BDS_RECIPE = (() => {
         case "address": return /city/.test(k) ? row._client.city : row._client.address;
         case "contact": return { email: emailOf(row._client), phone: `(555) ${int(200, 899)}-${String(int(0, 9999)).padStart(4, "0")}` };
         case "flags": return r() < 0.45 ? [] : FLAGS.filter(() => r() < 0.5).slice(0, 3);
-        case "category": return row._item && /category/.test(k) ? row._item.cat : /source/.test(k) ? pick(SOURCES) : /vendor|supplier/.test(k) ? pick(VENDORS) : /category/.test(k) ? pick(Object.keys(CATALOG)) : /work|trade/.test(k) ? pick(TRADES) : `${f.label || cap(f.key)} ${"ABC"[int(0, 2)]}`;
+        case "category": return row._item && /category/.test(k) ? row._item.cat : /source/.test(k) ? pick(SOURCES) : /vendor|supplier/.test(k) ? pick(VENDORS) : /category/.test(k) ? pick(Object.keys(CATALOG)) : /work|trade/.test(k) ? pick(TRADES) : /contain|kind/.test(k) ? pick(["Materials", "Labour", "Materials and labour"]) : `${f.label || cap(f.key)} ${"ABC"[int(0, 2)]}`;
         case "name":
           if (/number|code|^id$/.test(k)) return `${(n.one.slice(0, 3) || "rec").toUpperCase()}-${1040 + i}`;
           if (/item|product|material/.test(k) || /item|product|material/.test(n.one)) { row._item = pick(ITEMS); return row._item.name; }
@@ -235,7 +235,7 @@ window.BDS_RECIPE = (() => {
       timeline: d.record?.timeline === false ? [] : [{ what: `${cap(n.one)} created`, meta: fmt.date(dates[0] ? x[dates[0].key] : TODAY) }],
       actions: recordActions(x),
       fields: recordFields.filter((k) => byKey[k]).map((k) => [byKey[k].label || cap(k), byKey[k].type === "person" ? person(x[k]) : byKey[k].type === "status" ? badge(statusMap[x[k]]) : esc(text(x[k]) || "–")]),
-      doc: d.record?.document ? { label: d.record.document, name: `${d.record.document}-${x.id}.pdf`, view: `View ${d.record.document.toLowerCase()}` } : null,
+      doc: d.record?.document ? { label: d.record.document, name: `${d.record.document.replace(/\s+/g, "-")}-${idKey ? text(x[idKey]) : x.id}.pdf`, view: `View ${d.record.document.toLowerCase()}` } : null,
     });
 
     const searchKeys = d.search.columns;
@@ -257,8 +257,10 @@ window.BDS_RECIPE = (() => {
       views,
       bulk: (d.selection.bulk || []).map(label),
       rowActions: d.actions?.row ? d.actions.row.map(label) : ["Open"],
+      danger: (d.actions?.row || []).filter((a) => typeof a === "object" && a.tone === "danger").map(label),
       ...(actionsFor ? { actionsFor } : {}),
       selectable: !!d.selection.enabled,
+      export: !!d.export,
       ...(d.actions?.next ? { nextFor: (x) => (nextOf(x) ? label(nextOf(x)) : null) } : {}),
       peek,
     };

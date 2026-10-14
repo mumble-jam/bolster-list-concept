@@ -130,6 +130,9 @@
         animation-timeline: --list-table;
         animation-range: exit-crossing calc(0px - var(--list-head-top, 0px)) exit-crossing calc(100% - var(--list-head-top, 0px) - var(--_head-h, var(--control-height-md)));
         transform: translateY(calc(var(--_stick) - var(--list-head-top, 0px)));
+        /* every cell on its own layer, so the scroll moves them all together: a cell the browser
+           leaves unlayered follows a frame late, and the header breaks into steps (Edge, Windows) */
+        will-change: translate, transform;
       }
     }
     .list-panel .data-table th { position: relative; inset-block-start: auto; }
