@@ -322,20 +322,9 @@
     CSS.highlights?.delete("search-hit");
 
     if (firstUse()) {
-      // Melio's compact setup panel: left-aligned guidance and a separate action strip.
-      // Reuse Bolster's card and buttons; keep the same creation action in the page header.
-      wrap.innerHTML = `<section class="first-use" aria-labelledby="first-use-title">
-        <div class="first-use-content">
-          <span class="state-icon" aria-hidden="true">${I.inbox}</span>
-          <div class="first-use-copy"><h2 id="first-use-title">Add your first ${esc(cfg.noun[0])}</h2>
-            <p>Start from scratch, or import your existing ${esc(cfg.noun[1])} from a spreadsheet. Once added, you can manage them here.</p>
-          </div>
-        </div>
-        <div class="first-use-actions">
-          <button type="button" class="button" data-variant="secondary" data-concept-action="Import ${esc(cfg.noun[1])}">Import ${esc(cfg.noun[1])}</button>
-          ${cfg.create ? `<button type="button" class="button" data-concept-action="${esc(cfg.create)}">${esc(cfg.create)}</button>` : ""}
-        </div>
-      </section>`;
+      // Keep the page header as the only primary action; both contextual routes are secondary.
+      wrap.innerHTML = state(I.inbox, `No ${cfg.noun[1]} yet`, `${cfg.noun[1][0].toUpperCase() + cfg.noun[1].slice(1)} you create or import show up here, with totals and filters.`,
+        `${cfg.create ? `<button type="button" class="button" data-variant="secondary" data-concept-action="${esc(cfg.create)}">${esc(cfg.create)}</button>` : ""}<button type="button" class="button" data-variant="secondary" data-concept-action="Import from a spreadsheet">Import from a spreadsheet</button>`);
       return;
     }
     if (st.mode === "error") {
