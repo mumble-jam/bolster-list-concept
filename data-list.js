@@ -1012,7 +1012,7 @@
       const colItems = opt.map((c) => item("menuitemcheckbox", !st.hidden.includes(c.key), `data-col-toggle="${c.key}" data-focus-key="c-${c.key}"`, c.label, attrIcons[c.key])).join("");
       pop.innerHTML = `<div class="pop-body">
         ${sub("sort", "Sort by", "sort", cfg.columns.find((c) => c.key === st.sort.key)?.label ?? "", sortItems, " pop-phone-only")}
-        ${sub("group", "Group by", "layers", st.group ? filterDef(st.group).label : "None", groupItems)}
+        ${cfg.groups.length ? sub("group", "Group by", "layers", st.group ? filterDef(st.group).label : "None", groupItems) : "" /* L-group: only where people group the list */}
         ${sub("density", "Row height", "line-height", st.density === "compact" ? "Compact" : "Comfortable", densityItems)}
         ${sub("cols", "Columns", "columns-3", shown === opt.length ? "All" : `${shown} of ${opt.length}`, colItems)}
       </div>`;
