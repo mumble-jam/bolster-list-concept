@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=15288494">
-<link rel="stylesheet" href="specimen.css?v=15288494">
+<link rel="stylesheet" href="../bolster.css?v=0334c5b6">
+<link rel="stylesheet" href="specimen.css?v=0334c5b6">
 <style>
   .rule-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr)); }
   .rule-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
@@ -32,7 +32,7 @@
   <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
 </header>
 <main class="spec-main">
-  <p class="spec-intro">How any list page in Bolster is described, and the rules it follows. One set of files serves two readers: this page (the back office, for people) and the <code>bolster-page</code> skill (the front office, for Claude), which turns a screenshot and a short survey into a page description. 22 rules, 16 decided and 6 proposed. Generated from <code>system/recipes/list/rules.json</code> and <code>schema.json</code> by <code>scripts/build-rules.mjs</code>; don't edit it by hand.</p>
+  <p class="spec-intro">How any list page in Bolster is described, and the rules it follows. One set of files serves two readers: this page (the back office, for people) and the <code>bolster-page</code> skill (the front office, for Claude), which turns a screenshot and a short survey into a page description. 22 rules, 18 decided and 4 proposed. Generated from <code>system/recipes/list/rules.json</code> and <code>schema.json</code> by <code>scripts/build-rules.mjs</code>; don't edit it by hand.</p>
 
   <section class="spec-section">
     <h2>How a page gets made</h2>
@@ -162,21 +162,21 @@
     </div>
   </article>
   <article class="card rule-card" id="L-sort">
-    <header class="card-header rule-head"><h3><code>L-sort</code> One default sort</h3><span class="badge" data-tone="warning">Proposed</span></header>
+    <header class="card-header rule-head"><h3><code>L-sort</code> One default sort</h3><span class="badge" data-tone="success">Decided</span></header>
     <div class="card-body rule-body">
       <p>Every list declares one default sort on a sortable column. One arrow at a time: a second arrow in an original is noise, not a second sort. People change it from the column headers; that's a view state, not a new default.</p>
       <p class="text-secondary"><b>Why:</b> The order a list opens in is a decision, not an accident of the database.</p>
       <p class="rule-survey"><b>Survey asks when the screenshot doesn't show it:</b> “Which order should the list open in?” <span class="text-secondary">Default: The column with a sort arrow, if the rows really are in that order; otherwise the latest activity, newest first, or the main date if there's no activity column.</span></p>
-      <p class="rule-meta"><span class="badge">schema</span> <span class="badge">check</span> <span class="badge">survey</span></p>
+      <p class="rule-meta"><span class="badge">schema</span> <span class="badge">check</span> <span class="badge">survey</span> <span class="text-secondary">· Product designer, 14 Oct 2026</span></p>
     </div>
   </article>
   <article class="card rule-card" id="L-filters">
-    <header class="card-header rule-head"><h3><code>L-filters</code> Filters come from columns; three at most are pinned</h3><span class="badge" data-tone="warning">Proposed</span></header>
+    <header class="card-header rule-head"><h3><code>L-filters</code> Filters come from columns; three at most are pinned</h3><span class="badge" data-tone="success">Decided</span></header>
     <div class="card-body rule-body">
-      <p>Each filter is a column, and its picker follows the column's type. At most three are pinned in the toolbar before anything is applied (usually status, owner and a date); the rest wait behind “Add filter”.</p>
-      <p class="text-secondary"><b>Why:</b> A toolbar of every filter is a form; three is what fits beside search at tablet width.</p>
+      <p>Each filter is a column, and its picker follows the column's type. The toolbar shows Add filter and the filters that are applied, never empty ones. At most three are pinned (usually status, owner and a date): they come first in Add filter's menu, the rest after them.</p>
+      <p class="text-secondary"><b>Why:</b> A toolbar of empty filters is a form; one Add filter keeps it calm, and pinning puts the filters people reach for most at the top of its menu.</p>
       
-      <p class="rule-meta"><span class="badge">check</span> <span class="text-secondary">· List page layout research, Filter value pickers research</span></p>
+      <p class="rule-meta"><span class="badge">check</span> <span class="text-secondary">· List page layout research, Filter value pickers research, Product designer, 14 Oct 2026, Add filter, then chips (concept round 2, 8 Oct 2026)</span></p>
     </div>
   </article>
   <article class="card rule-card" id="L-date-range">
@@ -308,6 +308,6 @@
     <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>File</th><th>What it is</th><th>Check</th></tr></thead><tbody><tr><td><code>concept/catalog.json</code></td><td>9 columns · no status · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/customers.json</code></td><td>9 columns · 3 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/invoices.json</code></td><td>8 columns · 4 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/jobs.json</code></td><td>8 columns · 5 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr></tbody></table></div>
   </section>
 </main>
-<script src="specimen.js?v=15288494"></script>
+<script src="specimen.js?v=0334c5b6"></script>
 </body>
 </html>

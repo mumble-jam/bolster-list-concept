@@ -286,7 +286,9 @@
     input.setAttribute("aria-label", `Search ${cfg.noun[1]}. ${cfg.searchHint}`);
     if (input.value !== st.search) input.value = st.search;
   }
-  const addable = () => cfg.filters.filter((f) => f.key !== cfg.dateKey && !chipped().includes(f) && !(f.key === cfg.cardKey && isSet(f.key, st.filters[f.key])));
+  // Add filter's menu: the pinned filters first (L-filters, at most three), then the rest in order
+  const addable = () => cfg.filters.filter((f) => f.key !== cfg.dateKey && !chipped().includes(f) && !(f.key === cfg.cardKey && isSet(f.key, st.filters[f.key])))
+    .sort((a, b) => !!b.pinned - !!a.pinned);
 
   function renderSlices() {
     const box = $("#summary");
