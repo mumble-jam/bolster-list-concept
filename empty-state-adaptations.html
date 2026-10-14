@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Empty-state adaptations · Bolster</title>
+<link rel="icon" href="shared/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="system/bolster.css?v=cba8aafa">
+<style>
+@layer concept {
+  .comparison { max-inline-size: 100rem; margin-inline: auto; padding: var(--space-8); }
+  .comparison-header { display: flex; flex-wrap: wrap; align-items: start; justify-content: space-between; gap: var(--space-4); margin-block-end: var(--space-6); }
+  .comparison-header h1 { margin-block: var(--space-2); }
+  .comparison-intro { max-inline-size: 76ch; color: var(--color-content-secondary); }
+  .eyebrow { font-size: var(--text-xs); font-weight: var(--font-weight-bold); letter-spacing: .08em; text-transform: uppercase; color: var(--color-content-tertiary); }
+  .comparison-grid { display: grid; grid-template-columns: 18rem minmax(0, 1fr); gap: var(--space-6); align-items: start; }
+  .choices { display: grid; gap: var(--space-2); }
+  .choice-card { display: grid; gap: var(--space-1); padding: var(--space-4); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-lg); background: var(--color-surface-default); text-align: start; }
+  .choice-card span { color: var(--color-content-secondary); font-size: var(--text-xs); }
+  .choice-card[aria-pressed="true"] { border-color: var(--color-action-accent); box-shadow: inset 0 0 0 1px var(--color-action-accent); background: var(--color-surface-selected); }
+  .choice-card:hover { border-color: var(--color-action-accent); }
+  .preview-column { min-inline-size: 0; }
+  .preview-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); margin-block-end: var(--space-3); }
+  .preview-tools h2 { font-size: var(--text-lg); }
+  .devices { display: flex; gap: var(--space-2); }
+  .devices [aria-pressed="true"] { border-color: var(--color-action-accent); }
+  .preview-stage { border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-xl); background: var(--color-surface-tint); overflow: hidden; margin-inline: auto; }
+  .preview-stage iframe { display: block; border: 0; transform-origin: top left; }
+  .preview-stage[data-device="phone"] { max-inline-size: 390px; }
+  .preview-note { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); margin-block: var(--space-3) var(--space-4); color: var(--color-content-tertiary); font-size: var(--text-xs); }
+  .case-details { padding: var(--space-6); display: grid; gap: var(--space-4); }
+  .case-details p { color: var(--color-content-secondary); }
+  .case-details h3 { font-size: var(--text-base); margin-block-end: var(--space-1); }
+  .shared-rules { padding: var(--space-4); margin-block-start: var(--space-4); color: var(--color-content-secondary); border-block-start: var(--border-width-default) solid var(--color-line-card); }
+  .shared-rules p + p { margin-block-start: var(--space-2); }
+  @media (max-width: 900px) {
+    .comparison { padding: var(--space-4); }
+    .comparison-grid { grid-template-columns: minmax(0, 1fr); }
+    .choices { grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); }
+    .choice-card { padding: var(--space-3); }
+  }
+}
+</style>
+</head>
+<body>
+<main class="comparison">
+  <header class="comparison-header">
+    <div><p class="eyebrow">Bolster · First-use explorations</p><h1>Five ways to start your job list</h1>
+      <p class="comparison-intro">Illustrative adaptations of the researched cases, rendered with Bolster’s actual design system and app shell. Choose a case, then compare desktop and phone layouts.</p></div>
+    <a class="button" data-variant="secondary" href="./#jobs?state=empty">Back to Job list</a>
+  </header>
+  <div class="comparison-grid">
+    <aside>
+      <div class="choices" role="group" aria-label="Choose an adaptation">
+        <button type="button" class="choice-card" data-case="square" aria-pressed="true"><strong>Square · centered row</strong><span>Create and Import together</span></button>
+        <button type="button" class="choice-card" data-case="doordash" aria-pressed="false"><strong>DoorDash · centered stack</strong><span>One focal action, alternate below</span></button>
+        <button type="button" class="choice-card" data-case="linear" aria-pressed="false"><strong>Linear · left-aligned block</strong><span>Heading and actions on one row</span></button>
+        <button type="button" class="choice-card" data-case="proton" aria-pressed="false"><strong>Proton · original buttons</strong><span>Filled Create, outlined Import</span></button>
+        <button type="button" class="choice-card" data-case="melio" aria-pressed="false"><strong>Melio · compact footer</strong><span>Left-aligned message, separate actions</span></button>
+      </div>
+      <div class="shared-rules"><p><b>Shared foundation</b><br>Bolster’s icon, wording, colours and app shell. Create in the header. Export hidden.</p><p>Four options use outlined Create and text Import. Proton compares the original filled Create and outlined Import buttons.</p></div>
+    </aside>
+    <section class="preview-column" aria-label="Adaptation preview">
+      <div class="preview-tools"><h2 id="preview-title">Square · centered row</h2>
+        <div class="devices" role="group" aria-label="Preview size"><button type="button" class="button" data-variant="secondary" data-size="sm" data-device="desktop" aria-pressed="true">Desktop</button><button type="button" class="button" data-variant="secondary" data-size="sm" data-device="phone" aria-pressed="false">Phone</button></div>
+      </div>
+      <div class="preview-stage" id="preview-stage" data-device="desktop"><iframe id="preview" title="Square adaptation of Bolster’s empty Job list" src="./#jobs?state=empty" width="1440" height="900"></iframe></div>
+      <div class="preview-note"><span id="preview-size">1440 × 900 · scaled to fit</span><a id="open-preview" href="./#jobs?state=empty" target="_blank" rel="noopener noreferrer">Open this adaptation at full size ↗</a></div>
+      <article class="card case-details" aria-live="polite">
+        <div><h3>What this borrows</h3><p id="borrows"></p></div>
+        <div><h3>When to use it</h3><p id="when"></p></div>
+        <div><h3>How it is adapted for Bolster</h3><p id="adapted"></p></div>
+        <a id="source" target="_blank" rel="noopener noreferrer">View the original Mobbin case ↗</a>
+      </article>
+    </section>
+  </div>
+</main>
+<script>
+(() => {
+  const cases = {
+    square: {
+      title: "Square · centered row", source: "2d794a56-0894-4d56-b284-af103a44bbe5",
+      borrows: "A centered empty-state explanation with creation and import visible together in one row.",
+      when: "A simple first-use list where people can start with one record or bring an existing spreadsheet. This is the current desktop baseline.",
+      adapted: "Square’s two filled buttons become an outlined Create job and a quieter Import button. Bolster keeps its primary Create in the header. On phones the actions stack to avoid wrapping."
+    },
+    doordash: {
+      title: "DoorDash · centered stack", source: "04c7b680-c2be-458e-aa72-170f30e32b8d",
+      borrows: "The centered message and outlined creation action beneath it, with a filled creation action in the page header.",
+      when: "Creation should be the most obvious route within the empty area, while import remains available as a supporting route.",
+      adapted: "The original screenshot has no Import action. This proposal adds it below Create as a text button, making a deliberate vertical hierarchy. Both contextual actions remain lower emphasis than the header."
+    },
+    linear: {
+      title: "Linear · left-aligned block", source: "3af45bee-f669-4dc7-afaf-e3fb099161f9",
+      borrows: "Linear’s left-aligned guidance, adapted into a compact horizontal panel for Bolster.",
+      when: "You want the title and starting actions on the same horizontal line, with the explanation beneath them. On phones, the actions move below the explanation to stay readable.",
+      adapted: "The icon sits beside the heading, both actions share that desktop row, and the explanation aligns beneath the heading. Reduced padding keeps the panel compact. On phones the copy and actions use the full card width. Create stays outlined here and primary only in the page header; this horizontal arrangement is a Bolster adaptation."
+    },
+    proton: {
+      title: "Proton · original buttons", source: "3fd9cc97-8d92-454b-ae50-b036275a46a9",
+      borrows: "Two stacked action rows with creation above import, suited to a constrained content width.",
+      when: "A phone or narrow panel where each route benefits from a generous, easy-to-target row. On desktop, this makes the starting options more deliberate.",
+      adapted: "Proton’s drawer footer becomes an action group beside the empty-state explanation. This option uses Bolster’s original filled dark/yellow Create job and outlined Import buttons. The header also keeps its filled Create action, so this option deliberately compares repeated primary emphasis."
+    },
+    melio: {
+      title: "Melio · compact footer", source: "33e0b07c-fbb3-4a16-97c0-68d4318c8b9c",
+      borrows: "A compact, left-aligned introduction and a separate action strip aligned to the right on desktop.",
+      when: "A shallow setup panel or a future flow with real prerequisites, selected suggestions or form content before its actions. A useful comparison, rather than the default for this empty list.",
+      adapted: "The footer contains only Create and Import. Melio’s vendor suggestions and disabled selection action are omitted because there are no job selections here. The header and contextual actions all refer to jobs; on phones the footer stacks."
+    }
+  };
+  let selected = Object.hasOwn(cases, location.hash.slice(1)) ? location.hash.slice(1) : "square";
+  let device = "desktop";
+  const frame = document.querySelector("#preview");
+  const stage = document.querySelector("#preview-stage");
+  function fit() {
+    const [w, h] = device === "phone" ? [390, 844] : [1440, 900];
+    const scale = Math.min(1, stage.clientWidth / w);
+    frame.width = w; frame.height = h;
+    frame.style.width = `${w}px`; frame.style.height = `${h}px`; frame.style.transform = `scale(${scale})`;
+    stage.style.height = `${Math.ceil(h * scale) + 2}px`;
+    document.querySelector("#preview-size").textContent = `${w} × ${h}${scale < 1 ? " · scaled to fit" : ""}`;
+  }
+  function show() {
+    const c = cases[selected];
+    document.querySelectorAll("[data-case]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.case === selected)));
+    document.querySelectorAll("button[data-device]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.device === device)));
+    for (const key of ["borrows", "when", "adapted"]) document.querySelector(`#${key}`).textContent = c[key];
+    document.querySelector("#preview-title").textContent = c.title;
+    document.querySelector("#source").href = `https://mobbin.com/screens/${c.source}`;
+    const url = `./#jobs?state=empty&empty-layout=${selected}`;
+    frame.src = url; frame.title = `${c.title} adaptation of Bolster’s empty Job list`;
+    document.querySelector("#open-preview").href = url;
+    stage.dataset.device = device;
+    history.replaceState(null, "", `#${selected}`);
+    fit();
+  }
+  document.querySelectorAll("[data-case]").forEach(b => b.addEventListener("click", () => { selected = b.dataset.case; show(); }));
+  document.querySelectorAll("button[data-device]").forEach(b => b.addEventListener("click", () => { device = b.dataset.device; show(); }));
+  new ResizeObserver(fit).observe(stage);
+  show();
+})();
+</script>
+</body>
+</html>

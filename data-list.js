@@ -17,6 +17,7 @@
   // a menu row's leading icon: 14px Regular, in a fixed-width slot so the labels line up
   const mi = (name) => (name ? `<span class="menu-icon">${ic(`m-${name}`, 14)}</span>` : "");
   const STEP = 25; // rows per load
+  const EMPTY_LAYOUTS = ["square", "doordash", "linear", "proton", "melio"];
 
   // ---------- state ----------
   let cfg;
@@ -31,7 +32,7 @@
       view: v.id, filters: clone(v.filters), added: [], terms: [], search: "",
       sort: { ...(v.sort || c.defaultSort) }, group: v.group || null,
       density: "comfortable", hidden: c.columns.filter((x) => x.hidden).map((x) => x.key),
-      limit: STEP, selected: new Set(), collapsed: new Set(), mode: "ready", picking: false,
+      limit: STEP, selected: new Set(), collapsed: new Set(), mode: "ready", picking: false, emptyLayout: "square",
     };
   }
   function applyView(v) {
@@ -107,6 +108,7 @@
     const p = new URLSearchParams();
     const v = currentView();
     if (st.mode !== "ready") p.set("state", st.mode);
+    if (firstUse() && st.emptyLayout !== "square") p.set("empty-layout", st.emptyLayout);
     if (v.id !== cfg.views[0].id) p.set("view", v.id);
     for (const f of active()) {
       const val = st.filters[f.key];
@@ -123,6 +125,7 @@
   function fromHash(query) {
     const p = new URLSearchParams(query);
     st.mode = ["loading", "empty", "error"].includes(p.get("state")) ? p.get("state") : "ready";
+    st.emptyLayout = EMPTY_LAYOUTS.includes(p.get("empty-layout")) ? p.get("empty-layout") : "square";
     applyView(cfg.views.find((x) => x.id === p.get("view")) || cfg.views[0]);
     for (const f of cfg.filters) {
       if (!p.has(f.key)) continue;
@@ -162,6 +165,8 @@
     if (cfg.fromDescription) rn.innerHTML = `<b>Built from a page description.</b> ${cfg.notes.length ? cfg.notes.map(esc).join(" ") : "Everything in it is drawn."}`;
     BolsterShell.setCurrent(cfg.nav);
     $("#cc-state").value = st.mode;
+    $("#cc-empty-layout").value = st.emptyLayout;
+    $("#cc-empty-layout-field").hidden = !firstUse();
   }
 
   function renderToolbar() {
@@ -322,9 +327,17 @@
     CSS.highlights?.delete("search-hit");
 
     if (firstUse()) {
-      // The header stays primary; outlined creation stands out against the quieter import route.
-      wrap.innerHTML = state(I.inbox, `No ${cfg.noun[1]} yet`, `${cfg.noun[1][0].toUpperCase() + cfg.noun[1].slice(1)} you create or import show up here, with totals and filters.`,
-        `${cfg.create ? `<button type="button" class="button" data-variant="secondary" data-concept-action="${esc(cfg.create)}">${esc(cfg.create)}</button>` : ""}<button type="button" class="button" data-variant="ghost" data-concept-action="Import from a spreadsheet">Import from a spreadsheet</button>`);
+      // Proton compares the original button pair; the other adaptations keep the header primary.
+      const createVariant = st.emptyLayout === "proton" ? "primary" : "secondary";
+      const importVariant = st.emptyLayout === "proton" ? "secondary" : "ghost";
+      wrap.innerHTML = `<section class="state" data-empty-layout="${st.emptyLayout}" aria-labelledby="empty-state-title">
+        <div class="empty-layout-content"><span class="state-icon" aria-hidden="true">${I.inbox}</span>
+          <div class="empty-layout-copy"><h3 id="empty-state-title">No ${esc(cfg.noun[1])} yet</h3>
+            <p>${esc(cfg.noun[1][0].toUpperCase() + cfg.noun[1].slice(1))} you create or import show up here, with totals and filters.</p>
+          </div>
+        </div>
+        <div class="state-actions">${cfg.create ? `<button type="button" class="button" data-variant="${createVariant}" data-concept-action="${esc(cfg.create)}">${esc(cfg.create)}</button>` : ""}<button type="button" class="button" data-variant="${importVariant}" data-concept-action="Import from a spreadsheet">Import from a spreadsheet</button></div>
+      </section>`;
       return;
     }
     if (st.mode === "error") {
@@ -989,6 +1002,7 @@
       return;
     }
     if (t.id === "cc-state") { st.mode = t.value; st.selected.clear(); st.picking = false; if (firstUse() && openId) closeDetail({ focus: false }); render(); }
+    if (t.id === "cc-empty-layout" && EMPTY_LAYOUTS.includes(t.value)) { st.emptyLayout = t.value; render(); }
     if (t.id === "cc-grid") {
       document.documentElement.toggleAttribute("data-grid", t.checked);
       $('[data-tune="net"]').hidden = !t.checked;

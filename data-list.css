@@ -3,7 +3,30 @@
    tuners, the About dialog, the recipe note) and what's still being tried (the grid on the page). */
 
 @layer concept {
+  /* Illustrative adaptations. Only layout varies: existing Bolster states, buttons and tokens
+     keep the same meaning and visual hierarchy in every case. */
+  .empty-layout-content, .empty-layout-copy { display: grid; justify-items: center; gap: var(--space-3); }
+  .state[data-empty-layout="doordash"] .state-actions { flex-direction: column; align-items: center; }
+  .state[data-empty-layout="linear"] { inline-size: 100%; padding: var(--space-8); grid-template-columns: var(--space-12) minmax(0, 1fr) auto; column-gap: var(--space-4); justify-items: start; align-items: center; text-align: start; }
+  .state[data-empty-layout="linear"] :is(.empty-layout-content, .empty-layout-copy) { display: contents; }
+  .state[data-empty-layout="linear"] .state-icon { grid-column: 1; grid-row: 1; }
+  .state[data-empty-layout="linear"] h3 { grid-column: 2; grid-row: 1; font-weight: var(--font-weight-bold); }
+  .state[data-empty-layout="linear"] p { grid-column: 2 / -1; grid-row: 2; }
+  .state[data-empty-layout="linear"] .state-actions { grid-column: 3; grid-row: 1; margin: 0; justify-content: flex-start; }
+  .state[data-empty-layout="proton"] .state-actions { flex-direction: column; inline-size: min(100%, 22rem); }
+  .state[data-empty-layout="proton"] .state-actions .button { inline-size: 100%; justify-content: center; }
+  .state[data-empty-layout="melio"] { padding: 0; gap: 0; justify-items: stretch; text-align: start; }
+  .state[data-empty-layout="melio"] .empty-layout-content { display: flex; align-items: flex-start; gap: var(--space-4); padding: var(--space-8); }
+  .state[data-empty-layout="melio"] .state-icon { flex: none; }
+  .state[data-empty-layout="melio"] .empty-layout-copy { justify-items: start; min-inline-size: 0; }
+  .state[data-empty-layout="melio"] .state-actions { justify-content: flex-end; margin: 0; padding: var(--space-4) var(--space-8); border-block-start: var(--border-width-default) solid var(--color-line-subtle); background: var(--color-surface-tint); }
   @media (max-width: 767px) {
+    .state[data-empty-layout="square"] .state-actions { flex-direction: column; align-items: center; }
+    .state[data-empty-layout="linear"] { padding: var(--space-6); grid-template-columns: var(--space-12) minmax(0, 1fr); }
+    .state[data-empty-layout="linear"] p { grid-column: 1 / -1; }
+    .state[data-empty-layout="linear"] .state-actions { grid-column: 1 / -1; grid-row: 3; flex-direction: column; align-items: flex-start; margin-block-start: var(--space-2); }
+    .state[data-empty-layout="melio"] .empty-layout-content { flex-direction: column; padding: var(--space-6); }
+    .state[data-empty-layout="melio"] .state-actions { flex-direction: column; align-items: stretch; padding: var(--space-4) var(--space-6); }
     /* During first use, the only primary action stays in the page header. */
     body[data-first-use] #create[data-float] { position: static; inset: auto; }
   }
