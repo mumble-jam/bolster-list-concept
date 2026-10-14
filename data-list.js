@@ -515,10 +515,11 @@
   // ---------- floating bar: count first, select all, actions, the risky one last, clear ----------
   // a menu row that opens its own menu (drills in on phones)
   const sub = (name, label, icon, value, items, cls = "") => `<div class="submenu-row${cls}"><button type="button" class="menu-item submenu-trigger" role="menuitem" data-sub="${name}" data-focus-key="sub-${name}" aria-haspopup="menu" aria-expanded="false" aria-controls="pop-sub-${name}">${mi(icon)}<span class="submenu-label">${label}</span><span class="submenu-value">${esc(value)}</span>${I.chevR}</button><div class="pop submenu" id="pop-sub-${name}" popover role="menu" aria-label="${label}"><button type="button" class="menu-item submenu-back" data-sub-back="${name}" aria-label="Back"><span class="submenu-back-to">${I.chevL}Back</span><span class="submenu-label">${label}</span><span></span></button>${items}</div></div>`;
-  const risky = (a) => /^(archive|delete)/i.test(a);
-  // red is for what can't be undone: Delete. Archive still confirms and sits apart, but isn't red
-  const destructive = (a) => /^delete/i.test(a);
-  const isDanger = (a) => risky(a) || /^(void|cancel)/i.test(a) || !!cfg.danger?.includes(a);
+  // risky actions sit apart, last, and confirm (L-risky); red is for what can't be undone: Delete,
+  // Void, and whatever a page description marks tone danger (Cancel order). Archive can be undone, so
+  // it confirms and sits apart, but isn't red
+  const risky = (a) => /^(archive|delete|void)/i.test(a) || !!cfg.danger?.includes(a);
+  const destructive = (a) => /^(delete|void)/i.test(a) || !!cfg.danger?.includes(a);
   // a row's menu, from the row or from its record's More (lists without per-status actions): what isn't on
   // the card. Its buttons are left out, any folded off a narrow card come first, "Open" (and the
   // catalog's "Edit") would only reopen the record, and the row's next step (L-next-step) comes first
@@ -1047,9 +1048,10 @@
       pop.innerHTML = `<div class="pop-body">${actionItems(list, { peek: p.key, nested: true })}</div>`;
     } else if (p.kind === "row") {
       const acts = rowMenuActs(p.key, p.from?.closest(".detail"));
-      // the destructive ones go last, in red after a rule (L-risky), whatever their place in the list
-      const safe = acts.filter((a) => !isDanger(a)), danger = acts.filter(isDanger);
-      const btn = (a) => `<button type="button" class="menu-item" role="menuitem"${isDanger(a) ? ' data-tone="danger"' : ""} ${a === "Open" || a === "Edit" ? `data-peek="${p.key}"` : `data-concept-action="${esc(a)}"`}>${mi(actionIcons[a])}${esc(a)}</button>`;
+      // the risky ones go last, after a rule (L-risky), red when they can't be undone, whatever their
+      // place in the list
+      const safe = acts.filter((a) => !risky(a)), danger = acts.filter(risky);
+      const btn = (a) => `<button type="button" class="menu-item" role="menuitem"${destructive(a) ? ' data-tone="danger"' : ""} ${a === "Open" || a === "Edit" ? `data-peek="${p.key}"` : `data-concept-action="${esc(a)}"`}>${mi(actionIcons[a])}${esc(a)}</button>`;
       pop.innerHTML = `<div class="pop-body">${safe.map(btn).join("")}${safe.length && danger.length ? "<hr>" : ""}${danger.map(btn).join("")}</div>`;
     }
     pop.style.inlineSize = p.kind === "row" || p.kind === "bulk" || p.kind === "add" ? "auto" : p.kind === "info" ? "16rem" : "";

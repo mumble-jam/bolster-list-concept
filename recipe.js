@@ -247,7 +247,8 @@ window.BDS_RECIPE = (() => {
       sub: fill(name.detail, x),
       timeline: d.record?.timeline === false ? [] : [{ what: `${cap(n.one)} created`, meta: fmt.date(dates[0] ? x[dates[0].key] : TODAY) }],
       actions: recordActions(x),
-      fields: recordFields.filter((k) => byKey[k]).map((k) => [byKey[k].label || cap(k), byKey[k].type === "person" ? person(x[k]) : byKey[k].type === "status" ? badge(statusMap[x[k]]) : byKey[k].type === "kinds" ? esc(kindsText(byKey[k], x[k]) || "–") : esc(text(x[k]) || "–")]),
+      // each field reads as its type does in the list (L-types): money as money, a date as a date
+      fields: recordFields.filter((k) => byKey[k]).map((k) => [byKey[k].label || cap(k), byKey[k].type === "person" ? person(x[k]) : byKey[k].type === "status" ? badge(statusMap[x[k]]) : byKey[k].type === "kinds" ? esc(kindsText(byKey[k], x[k]) || "–") : x[k] == null || x[k] === "" ? "–" : cellOf(byKey[k], { statusMap })(x)]),
       doc: d.record?.document ? { label: d.record.document, name: `${d.record.document.replace(/\s+/g, "-")}-${idKey ? text(x[idKey]) : x.id}.pdf`, view: `View ${d.record.document.toLowerCase()}` } : null,
     });
 
@@ -270,7 +271,7 @@ window.BDS_RECIPE = (() => {
       views,
       bulk: (d.selection.bulk || []).map(label),
       rowActions: d.actions?.row ? d.actions.row.map(label) : ["Open"],
-      danger: (d.actions?.row || []).filter((a) => typeof a === "object" && a.tone === "danger").map(label),
+      danger: [...(d.actions?.row || []), ...(d.selection.bulk || []), ...Object.values(d.actions?.byStatus || {}).flatMap((s) => [...(s.primary || []), ...(s.more || [])])].filter((a) => typeof a === "object" && a.tone === "danger").map(label),
       ...(actionsFor ? { actionsFor } : {}),
       selectable: !!d.selection.enabled,
       export: !!d.export,
