@@ -649,9 +649,17 @@
     if (p.kind === "bulk") return $(`[data-bulk-menu="${p.key}"]`) || p.from;
     return null;
   }
+  // a menu opened from the record's sheet lives inside the sheet while it's open: a modal dialog makes
+  // everything outside it inert, so a tap on the menu would count as a tap outside and close it
+  function hostPop(host = document.body) {
+    if (pop.parentElement === host) return;
+    if (pop.matches(":popover-open")) pop.hidePopover();
+    host.append(pop);
+  }
   function openPop(kind, key, from) {
     const id = `${kind}:${key ?? ""}${from?.closest(".detail") ? ":detail" : ""}`;
     if (lastClose.id === id && performance.now() - lastClose.t < 250) return; // same trigger: let it close
+    hostPop(from?.closest("dialog[open]") || undefined);
     popFor = { kind, key, id, from };
     delete pop.dataset.drill;
     pop.setAttribute("role", kind === "view" || kind === "row" || kind === "bulk" || kind === "add" || kind === "display" ? "menu" : "dialog");
@@ -739,6 +747,7 @@
     triggerOf(name)?.focus({ preventScroll: true });
   }
   pop.addEventListener("toggle", (e) => {
+    if (e.target === pop && e.newState === "closed" && !pop.matches(":popover-open")) return hostPop();
     if (!e.target.matches?.(".submenu") || !e.target.isConnected) return;
     const open = e.newState === "open", tr = triggerOf(e.target.id.replace("pop-sub-", ""));
     tr?.setAttribute("aria-expanded", open);
@@ -1040,9 +1049,14 @@
     t.innerHTML = `<span class="toast-message"></span><button class="toast-close" aria-label="Dismiss">×</button>`;
     t.querySelector(".toast-message").textContent = message;
     t.querySelector(".toast-close").onclick = () => t.remove();
-    $(".toast-region").append(t);
+    // over an open sheet or dialog: a modal one covers everything outside it, so the toasts move in
+    const region = $(".toast-region"), host = [...document.querySelectorAll("dialog:modal")].pop() || document.body;
+    if (region.parentElement !== host) host.append(region);
+    region.append(t);
     setTimeout(() => t.remove(), 4000);
   }
+  // and back out when it closes
+  document.addEventListener("close", (e) => { const region = $(".toast-region"); if (e.target.contains?.(region)) document.body.append(region); }, true);
 
   // ---------- the record: beside the list on wide screens, a sheet on narrower ones ----------
   // As in Mercury: heading and close, status, the amount, a timeline (oldest first, the next step
@@ -1100,6 +1114,7 @@
     if (!cfg.rows.some((r) => r.id === id)) return;
     // D30: this list's rows open the record itself, which the concept doesn't build
     if (cfg.rowClick === "open") { toast(`Rows here open the ${cfg.noun[0]} itself (D30); the record isn't part of this concept.`); return; }
+    hostPop(); // out of the sheet before its contents are redrawn
     if (pop.matches(":popover-open")) pop.hidePopover();
     openId = id;
     markRow();
@@ -1144,7 +1159,7 @@
     if (inBar) $("#select-page")?.focus({ preventScroll: true });
   });
   // Escape on the sheet: back to the row it came from (I11)
-  $("#peek").addEventListener("close", () => { if (!splitMQ.matches && openId) { const id = openId; openId = null; markRow(); $(`.data-table-link[data-peek="${id}"]`)?.focus(); } });
+  $("#peek").addEventListener("close", () => { hostPop(); if (!splitMQ.matches && openId) { const id = openId; openId = null; markRow(); $(`.data-table-link[data-peek="${id}"]`)?.focus(); } });
   // crossing the breakpoint moves an open record between the side and the sheet
   splitMQ.addEventListener("change", () => { if (openId) openPeek(openId); });
   $("#detail").addEventListener("keydown", (e) => { if (e.key === "Escape" && !pop.matches(":popover-open")) { e.preventDefault(); closeDetail(); } });
