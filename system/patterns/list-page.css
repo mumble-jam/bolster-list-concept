@@ -60,7 +60,7 @@
   .list-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); align-items: start; }
   @media (min-width: 1280px) {
     .list-split[data-open] { grid-template-columns: minmax(0, 1fr) 24rem; }
-    .list-split[data-open] .data-table :is(th, td):not([data-m], .data-table-select, .row-actions) { display: none; }
+    .list-split[data-open] .data-table :is(th, td):is(:not([data-m], .data-table-select, .row-actions), [data-m="flags"]) { display: none; }
   }
   /* below 1440 the list keeps only name, status and amount beside the record */
   @media (min-width: 1280px) and (max-width: 1439px) {

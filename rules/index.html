@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../system/bolster.css?v=a33dfc14">
-<link rel="stylesheet" href="../system/specimens/specimen.css?v=a33dfc14">
+<link rel="stylesheet" href="../system/bolster.css?v=15288494">
+<link rel="stylesheet" href="../system/specimens/specimen.css?v=15288494">
 <style>
   .rule-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr)); }
   .rule-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
@@ -32,7 +32,7 @@
   <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
 </header>
 <main class="spec-main">
-  <p class="spec-intro">How any list page in Bolster is described, and the rules it follows. One set of files serves two readers: this page (the back office, for people) and the <code>bolster-page</code> skill (the front office, for Claude), which turns a screenshot and a short survey into a page description. 22 rules, 14 decided and 8 proposed. Generated from <code>system/recipes/list/rules.json</code> and <code>schema.json</code> by <code>scripts/build-rules.mjs</code>; don't edit it by hand.</p>
+  <p class="spec-intro">How any list page in Bolster is described, and the rules it follows. One set of files serves two readers: this page (the back office, for people) and the <code>bolster-page</code> skill (the front office, for Claude), which turns a screenshot and a short survey into a page description. 22 rules, 16 decided and 6 proposed. Generated from <code>system/recipes/list/rules.json</code> and <code>schema.json</code> by <code>scripts/build-rules.mjs</code>; don't edit it by hand.</p>
 
   <section class="spec-section">
     <h2>How a page gets made</h2>
@@ -72,21 +72,21 @@
     </div>
   </article>
   <article class="card rule-card" id="L-types">
-    <header class="card-header rule-head"><h3><code>L-types</code> Every column has a type</h3><span class="badge" data-tone="warning">Proposed</span></header>
+    <header class="card-header rule-head"><h3><code>L-types</code> Every column has a type</h3><span class="badge" data-tone="success">Decided</span></header>
     <div class="card-body rule-body">
       <p>Each column declares one of the types in the types table. The type decides alignment, format, sort direction, the filter picker and where the value sits on a phone; the description never sets those one by one.</p>
       <p class="text-secondary"><b>Why:</b> One answer per column covers six decisions, so pages come out alike and the survey stays short.</p>
       
-      <p class="rule-meta"><span class="badge">schema</span> <span class="badge">renderer</span> <span class="text-secondary">· Tables on phones research (Figma, Oct 2026)</span></p>
+      <p class="rule-meta"><span class="badge">schema</span> <span class="badge">renderer</span> <span class="badge">check</span> <span class="text-secondary">· Tables on phones research (Figma, Oct 2026), Product designer, 14 Oct 2026</span></p>
     </div>
   </article>
   <article class="card rule-card" id="L-priority">
-    <header class="card-header rule-head"><h3><code>L-priority</code> Every column has a priority, and one is the name</h3><span class="badge" data-tone="warning">Proposed</span></header>
+    <header class="card-header rule-head"><h3><code>L-priority</code> Every column has a priority, and one is the name</h3><span class="badge" data-tone="success">Decided</span></header>
     <div class="card-body rule-body">
       <p>Priority 1 is the row's name: exactly one column, type name, never hidden. 2 is the key figure (left unused when the list has none), 3 the status; higher numbers leave first as the screen narrows and beside an open peek. Numbers needn't be consecutive.</p>
       <p class="text-secondary"><b>Why:</b> What survives at each width is decided once, not per breakpoint. NN/g: lead with a readable name.</p>
       
-      <p class="rule-meta"><span class="badge">schema</span> <span class="badge">check</span> <span class="text-secondary">· D17, Tables on phones research</span></p>
+      <p class="rule-meta"><span class="badge">schema</span> <span class="badge">check</span> <span class="text-secondary">· D17, Tables on phones research, Product designer, 14 Oct 2026</span></p>
     </div>
   </article>
   <article class="card rule-card" id="L-name-first">
@@ -308,6 +308,6 @@
     <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>File</th><th>What it is</th><th>Check</th></tr></thead><tbody><tr><td><code>concept/catalog.json</code></td><td>9 columns · no status · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/customers.json</code></td><td>9 columns · 3 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/invoices.json</code></td><td>8 columns · 4 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/jobs.json</code></td><td>8 columns · 5 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr></tbody></table></div>
   </section>
 </main>
-<script src="../system/specimens/specimen.js?v=a33dfc14"></script>
+<script src="../system/specimens/specimen.js?v=15288494"></script>
 </body>
 </html>

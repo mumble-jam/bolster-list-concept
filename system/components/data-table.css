@@ -236,6 +236,10 @@
     }
     .data-table tr:has(td[data-m="where"]) td[data-m="title"] .cell-sub { display: none; }
     .data-table td[data-m="title"] .cell-sub { font-size: var(--text-sm); line-height: var(--leading-sm); }
+    /* attention flags (type flags) under the name, on a line of their own when there are any */
+    .data-table tbody tr:has(td[data-m="flags"] .badge) { grid-template-areas: "sel over trail" "sel title title" "sel flags flags" "sel where badge"; }
+    .data-table td[data-m="flags"] { grid-area: flags; }
+    .data-table td[data-m="flags"]:not(:has(.badge)) { display: none; }
     .data-table td[data-m="where"] { grid-area: where; font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .data-table td[data-m="trail"] { grid-area: trail; padding-inline-start: var(--space-3); text-align: end; font-size: var(--text-base); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; }
     .data-table td[data-m="badge"] { grid-area: badge; justify-self: end; padding-inline-start: var(--space-3); }

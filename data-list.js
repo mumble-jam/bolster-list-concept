@@ -64,13 +64,17 @@
     return Array.isArray(v) && v.length === 1 && cfg.metrics.some((m) => m.value === v[0]) ? v[0] : null;
   }
   const chipped = () => cfg.filters.filter((f) => f.key !== cfg.dateKey && (isSet(f.key, st.filters[f.key]) || st.added.includes(f.key)));
+  // a range filter reads in its type's unit (L-types): $ for money (the default), % for a percentage
+  // (typed as 25, stored as 0.25), or a suffix such as days
+  const rangePre = (f) => f.prefix ?? (f.suffix ? "" : "$");
+  const rangeText = (f, v) => (rangePre(f) === "$" ? fmt.money0(v) : `${fmt.count(v)}${f.suffix === "%" ? "%" : f.suffix ? ` ${f.suffix}` : ""}`);
   function passes(f, row) {
     const val = st.filters[f.key];
     const x = f.get(row);
     if (f.type === "enum") return val.includes(x);
     if (f.type === "single") return f.options.find((o) => o.value === val)?.test(x) ?? true;
     if (f.type === "date") return inSpan(val, x);
-    if (f.type === "range") return (val.min == null || x >= val.min) && (val.max == null || x <= val.max);
+    if (f.type === "range") { const v = x * (f.scale || 1); return (val.min == null || v >= val.min) && (val.max == null || v <= val.max); }
     return true;
   }
   // ---------- dates (D37) ----------
@@ -173,8 +177,8 @@
     if (f.type === "single") return f.options.find((o) => o.value === val)?.label ?? val;
     if (f.type === "date") return dateText(val);
     if (f.type === "range") {
-      if (val.min != null && val.max != null) return `${fmt.money0(val.min)}–${fmt.money0(val.max)}`;
-      return val.min != null ? `${fmt.money0(val.min)} or more` : `Up to ${fmt.money0(val.max)}`;
+      if (val.min != null && val.max != null) return `${rangeText(f, val.min)}–${rangeText(f, val.max)}`;
+      return val.min != null ? `${rangeText(f, val.min)} or more` : `Up to ${rangeText(f, val.max)}`;
     }
     return "";
   }
@@ -970,7 +974,9 @@
       const head = `<div class="pop-head"><h3>${esc(f.label)}</h3>${set ? `<button type="button" class="button" data-variant="ghost" data-size="sm" data-remove="${f.key}">Clear</button>` : ""}</div>`;
       if (f.type === "enum") {
         const base = rowsWhere({ except: f.key });
-        pop.innerHTML = `${head}<div class="pop-body" role="group" aria-label="${esc(f.label)}">${f.options.map((o) => {
+        // a long list of records gets a find box (L-types: records are searchable)
+        const find = f.searchable || f.options.length > 12 ? `<div class="pop-find"><input class="input" data-size="sm" type="search" data-opt-find placeholder="Find ${esc(f.label.toLowerCase())}" aria-label="Find ${esc(f.label.toLowerCase())}" autocomplete="off"></div>` : "";
+        pop.innerHTML = `${head}${find}<div class="pop-body" role="group" aria-label="${esc(f.label)}">${f.options.map((o) => {
           const n = base.filter((x) => f.get(x) === o.value).length;
           return `<label class="option"><input type="checkbox" class="checkbox" data-opt="${esc(o.value)}" data-focus-key="${esc(o.value)}"${val?.includes(o.value) ? " checked" : ""}><span class="option-label">${o.html || esc(o.label)}</span><span class="option-count">${n}</span></label>`;
         }).join("")}</div>`;
@@ -981,7 +987,8 @@
         fillDate(f);
       } else if (f.type === "range") {
         const v = val || {};
-        const box = (id, label, x) => `<div class="field" data-size="sm"><label class="field-label" for="${id}">${label}</label><div class="input-group"><span class="input-adornment">$</span><input class="input" id="${id}" data-numeric inputmode="decimal" placeholder="Any" value="${x ?? ""}"></div></div>`;
+        const pre = rangePre(f), suf = f.suffix;
+        const box = (id, label, x) => `<div class="field" data-size="sm"><label class="field-label" for="${id}">${label}</label><div class="input-group">${pre ? `<span class="input-adornment">${pre}</span>` : ""}<input class="input" id="${id}" data-numeric inputmode="decimal" placeholder="Any" value="${x ?? ""}">${suf ? `<span class="input-adornment">${esc(suf)}</span>` : ""}</div></div>`;
         pop.innerHTML = `${head}<form data-range><div class="range">${box("range-min", "Minimum", v.min)}${box("range-max", "Maximum", v.max)}</div><div class="pop-foot"><button class="button" data-size="sm">Apply</button></div></form>`;
       }
     } else if (p.kind === "add") {
@@ -1261,7 +1268,7 @@
     if ((el = q("[data-sort]"))) {
       const key = el.dataset.sort;
       const col = cfg.columns.find((c) => c.key === key);
-      set(() => { st.sort = st.sort.key === key ? { key, dir: st.sort.dir === "asc" ? "desc" : "asc" } : { key, dir: col.numeric || /date|created|modified|issued|due|updated|contact/i.test(key) ? "desc" : "asc" }; }, { keepSelection: true });
+      set(() => { st.sort = st.sort.key === key ? { key, dir: st.sort.dir === "asc" ? "desc" : "asc" } : { key, dir: col.dir || (col.numeric || /date|created|modified|issued|due|updated|contact/i.test(key) ? "desc" : "asc") }; }, { keepSelection: true });
       // the header is sticky: a plain focus() scrolls the page to where the header would sit unstuck
       $(`[data-sort="${key}"]`)?.focus({ preventScroll: true });
       return;
@@ -1336,10 +1343,15 @@
     if (t.id === "cc-cards") { tactile(t.checked); try { localStorage.setItem("bolster-concepts:tactile", t.checked ? "on" : "off"); } catch {} }
   });
 
+  pop.addEventListener("input", (e) => {
+    if (!e.target.matches("[data-opt-find]")) return;
+    const q = e.target.value.trim().toLowerCase();
+    $$(".option", pop).forEach((o) => (o.hidden = !!q && !o.textContent.toLowerCase().includes(q)));
+  });
   document.addEventListener("submit", (e) => {
     if (!e.target.matches("[data-range]")) return;
     e.preventDefault();
-    const num = (id) => { const v = parseFloat($(id).value.replace(/[$,\s]/g, "")); return Number.isFinite(v) ? v : null; };
+    const num = (id) => { const v = parseFloat($(id).value.replace(/[$%,\s]/g, "")); return Number.isFinite(v) ? v : null; };
     const min = num("#range-min"), max = num("#range-max");
     const key = popFor.key;
     setFilter(key, { ...(min != null ? { min } : {}), ...(max != null ? { max } : {}) });

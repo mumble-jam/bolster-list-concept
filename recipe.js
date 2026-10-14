@@ -10,6 +10,9 @@ window.BDS_RECIPE = (() => {
   const { fmt, esc, TODAY, ageDays, kit } = window.BDS_CONCEPT;
   const { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, person, main, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf } = kit;
   const NUMERIC = new Set(["money", "number", "percent", "count", "duration"]);
+  // the first click on a header sorts the type's way (rules.json → types): biggest, newest and most
+  // flagged first; names, words and the lifecycle from the top
+  const DESC = new Set([...NUMERIC, "date", "datetime", "flags"]);
   const WIDTH = { id: "6rem", money: "7rem", number: "5rem", percent: "5.5rem", count: "7rem", duration: "6rem", date: "6.5rem", datetime: "8rem", status: "7.5rem", person: "12.5rem", record: "12rem", category: "7rem", address: "11rem", contact: "14rem", text: "8rem", flags: "11rem" };
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -140,7 +143,7 @@ window.BDS_RECIPE = (() => {
     const dates = d.columns.filter((c) => (c.type === "date" || c.type === "datetime") && !c.hidden).sort((a, b) => a.priority - b.priority);
     const empty = { statusMap };
     const columns = d.columns.map((c) => {
-      const out = { key: c.key, label: c.label, hidden: !!c.hidden, sort: sortOf(c, order) };
+      const out = { key: c.key, label: c.label, hidden: !!c.hidden, sort: sortOf(c, order), dir: DESC.has(c.type) ? "desc" : "asc" };
       if (c.priority === 1) {
         out.m = "title"; out.required = true;
         out.render = (x) => main(x.id, fill(c.title || `{${c.key}}`, x) || c.empty || `Unnamed ${n.one}`, fill(c.detail, x), c.leading === "avatar" && c.avatarFrom ? (typeof x[c.avatarFrom] === "object" ? x[c.avatarFrom] : { initials: initials(text(x[c.avatarFrom]) || "?"), color: (hash(text(x[c.avatarFrom])) % 8) + 1 }) : null);
@@ -154,7 +157,8 @@ window.BDS_RECIPE = (() => {
       if (c === figure) out.m = "trail";
       else if (c.type === "status" && c.key === statusCol) out.m = "badge";
       else if (c === dates[0]) out.m = "sub";
-      if (!out.m) out.hideBelow = c.priority >= 6 ? "lg" : "md";
+      else if (c.type === "flags") out.m = "flags"; // under the name on phones; leaves by priority elsewhere
+      if (!out.m || out.m === "flags") out.hideBelow = c.priority >= 6 ? "lg" : "md";
       return out;
     });
 
@@ -174,10 +178,10 @@ window.BDS_RECIPE = (() => {
       if (c.type === "status") return { ...base, type: "enum", get: (x) => x[c.key], options: d.status.values.map((v) => ({ value: v.value, label: v.label, html: badge(statusMap[v.value]) })) };
       if (c.type === "person") return { ...base, type: "enum", get: (x) => x[c.key].id, options: OWNERS.map((o) => ({ value: o.id, label: o.me ? `${o.name} (you)` : o.name, html: `${avatar(o, "sm")}${esc(o.me ? `${o.name} (you)` : o.name)}` })) };
       if (c.type === "date" || c.type === "datetime") return { ...base, type: "date", get: (x) => x[c.key] };
-      if (NUMERIC.has(c.type)) return { ...base, type: "range", get: (x) => x[c.key] };
+      if (NUMERIC.has(c.type)) return { ...base, type: "range", get: (x) => x[c.key], ...(c.type === "money" ? { prefix: "$" } : c.type === "percent" ? { suffix: "%", scale: 100 } : c.unit || c.type === "duration" ? { suffix: `${c.unit || "day"}s` } : {}) };
       if (c.type === "address") return { ...base, type: "enum", get: (x) => text(x[c.key]).split(", ").pop(), options: CITIES.map((v) => ({ value: v, label: v })) };
       if (c.type === "flags") return { ...base, type: "enum", get: (x) => x[c.key][0] || "Clear", options: [...FLAGS, "Clear"].map((v) => ({ value: v, label: v })) };
-      return { ...base, type: "enum", get: (x) => text(x[c.key]), options: valuesOf(c.key).map((v) => ({ value: v, label: v })) };
+      return { ...base, type: "enum", get: (x) => text(x[c.key]), options: valuesOf(c.key).map((v) => ({ value: v, label: v })), ...(c.type === "record" ? { searchable: true } : {}) };
     });
 
     // ---------- the cards (rule L-summary) ----------
