@@ -58,6 +58,13 @@
     font: inherit; font-size: var(--text-sm); white-space: nowrap; cursor: pointer;
   }
   .field-button[hidden] { display: none; }
+  /* the date range names its date once set (Created · Last 30 days); on phones only the value shows, and
+     it gives way before the search field does */
+  .date-range-label { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
+  @media (max-width: 767px) {
+    .field-button.date-range { flex: 0 1 auto; min-inline-size: 0; max-inline-size: 55%; }
+    .date-range-field { display: none; }
+  }
   .field-button svg { color: var(--color-content-secondary); }
   @media (hover: hover) { .field-button:hover:not(:disabled) { border-color: var(--color-line-strong); } }
   .field-button[aria-expanded="true"] { border-color: var(--color-action-accent); }

@@ -8,7 +8,7 @@
 
 window.BDS_RECIPE = (() => {
   const { fmt, esc, TODAY, ageDays, kit } = window.BDS_CONCEPT;
-  const { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, person, main, pastPresets, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf } = kit;
+  const { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, person, main, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf } = kit;
   const NUMERIC = new Set(["money", "number", "percent", "count", "duration"]);
   const WIDTH = { id: "6rem", money: "7rem", number: "5rem", percent: "5.5rem", count: "7rem", duration: "6rem", date: "6.5rem", datetime: "8rem", status: "7.5rem", person: "12.5rem", record: "12rem", category: "7rem", address: "11rem", contact: "14rem", text: "8rem", flags: "11rem" };
   const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
@@ -173,7 +173,7 @@ window.BDS_RECIPE = (() => {
       const c = byKey[f.column], base = { key: c.key, label: c.label, pinned: !!f.pinned };
       if (c.type === "status") return { ...base, type: "enum", get: (x) => x[c.key], options: d.status.values.map((v) => ({ value: v.value, label: v.label, html: badge(statusMap[v.value]) })) };
       if (c.type === "person") return { ...base, type: "enum", get: (x) => x[c.key].id, options: OWNERS.map((o) => ({ value: o.id, label: o.me ? `${o.name} (you)` : o.name, html: `${avatar(o, "sm")}${esc(o.me ? `${o.name} (you)` : o.name)}` })) };
-      if (c.type === "date" || c.type === "datetime") return { ...base, type: "single", get: (x) => x[c.key], options: pastPresets };
+      if (c.type === "date" || c.type === "datetime") return { ...base, type: "date", get: (x) => x[c.key] };
       if (NUMERIC.has(c.type)) return { ...base, type: "range", get: (x) => x[c.key] };
       if (c.type === "address") return { ...base, type: "enum", get: (x) => text(x[c.key]).split(", ").pop(), options: CITIES.map((v) => ({ value: v, label: v })) };
       if (c.type === "flags") return { ...base, type: "enum", get: (x) => x[c.key][0] || "Clear", options: [...FLAGS, "Clear"].map((v) => ({ value: v, label: v })) };

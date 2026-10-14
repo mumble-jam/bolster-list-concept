@@ -26,7 +26,7 @@
   "group": { "options": ["category", "vendor"], "default": "category" },
   "views": [
     { "id": "all", "label": "All items", "icon": "layers", "filters": {}, "group": "category" },
-    { "id": "stale", "label": "Prices to review", "icon": "clock", "filters": { "updated": "older90" }, "sort": { "column": "usedIn", "dir": "desc" } },
+    { "id": "stale", "label": "Prices to review", "icon": "clock", "filters": { "updated": "..-91" }, "sort": { "column": "usedIn", "dir": "desc" } },
     { "id": "flat", "label": "Flat list", "icon": "list", "filters": {} }
   ],
   "rowClick": "peek",

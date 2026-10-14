@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=0337ae5c">
-<link rel="stylesheet" href="data-list.css?v=0337ae5c">
+<link rel="stylesheet" href="system/bolster.css?v=9166a189">
+<link rel="stylesheet" href="data-list.css?v=9166a189">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -109,7 +109,7 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=0337ae5c"></script>
+<script src="shared/icons.js?v=9166a189"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -142,11 +142,12 @@ const C = [
   ["Table card", "Search", "yours", "Beside the date range, in the Shopify header; just “Search”; typed words become a chip; matches highlighted in the table (9 Oct).", "Live filtering while you type, the / shortcut, highlighter yellow, and which fields get marked."],
   ["Table card", "Filter chips", "yours", "Field and value in the same grey at rest; the whole chip turns blue on hover; the × only darkens.", "Size, fill and the popover each chip opens."],
   ["Table card", "Filter value pickers", "mine", "Never discussed.", "Option lists with counts, checkbox or radio by filter type, amount ranges, Apply and Clear."],
-  ["Table card", "Date range", "steered", "The button came from your Figma sketch; search moved next to it.", "Its options and their popover."],
+  ["Table card", "Date range", "yours", "The button came from your Figma sketch; search moved next to it. Then the date range picker research, implemented (14 Oct, D37): presets, a calendar, typing, the button naming its date.", "The research itself, the keyboard, typed formats, the phone sheet's drill-in, the value grammar."],
+  ["Table card", "Calendar", "yours", "Asked for as a component of its own (14 Oct, D37).", "Its states: today, span ends, the band and its caps, days after today."],
   ["Table card", "Display settings", "yours", "Its icon (table-cells-columns) and tooltip; group by, row height and columns as nested menus with a check by the choice; no Sort by where the headers sort.", "Sort kept in the menu on phones, where the headers are hidden; Reset view."],
   ["Table card", "Count and Clear all", "steered", "A count with the filters (8 Oct); the card's missing chip (9 Oct).", "“31 of 132 jobs”, and the second row only once something narrows the list."],
 
-  ["Table", "Column headers and sorting", "mine", "You reported jumps when sorting, which made the rule that focus stays put.", "Header style, sort arrows, sticky header, hover-revealed arrow."],
+  ["Table", "Column headers and sorting", "mine", "You reported jumps when sorting, which made the rule that focus stays put; then the header lagging in Chrome and losing its pinned cells in Safari (14 Oct, D38), both bugs.", "Header style, sort arrows, sticky header and how it follows the scroll, hover-revealed arrow."],
   ["Table", "Rows", "mine", "You reported the hover lag between the first cell and the rest.", "Avatar and two-line name, row heights, hover, selected colour, the open row's blue edge."],
   ["Table", "Sideways scroll", "yours", "Scroll sideways once columns reach their content width (9 Oct).", "Pinned checkbox and name, the edge rule once scrolled, the fade on the right."],
   ["Table", "Column widths", "steered", "A status must never clip, as a rule (9 Oct).", "Measuring every value, every status and the header offscreen."],
@@ -259,6 +260,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=0337ae5c"></script>
+<script src="system/specimens/specimen.js?v=9166a189"></script>
 </body>
 </html>

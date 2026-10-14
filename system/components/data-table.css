@@ -104,6 +104,7 @@
      --_stick is where it rests (under the bars, or the very top while they're hidden); registered,
      so it slides with them. */
   @property --_stick { syntax: "<length>"; inherits: true; initial-value: 0px; }
+  @keyframes list-head-follow { from { translate: 0 0; } to { translate: 0 var(--_room, 0px); } }
   .data-table th > .data-table-sort { min-inline-size: calc(var(--_w, 0px) - var(--space-6)); }
   @media (min-width: 768px) {
     .list-panel .table-wrap { overflow-x: auto; overscroll-behavior-x: contain; scroll-padding-inline-start: var(--_pin-w, 0px); }
@@ -115,6 +116,22 @@
       transition: --_stick 300ms var(--ease-out);
     }
     :root[data-chrome-hidden] .list-panel .data-table thead { --_stick: 0px; }
+    /* where the browser can, it moves the header itself, on the scroll (a scroll-driven animation tied
+       to the table's place on the page), so it never trails a frame behind; and it moves the cells, not
+       the header group, which Safari won't move with pinned cells in it (D38). The script's way above
+       stays for browsers without it */
+    @supports (animation-timeline: view()) {
+      .list-panel .table-wrap { view-timeline: --list-table block; view-timeline-inset: 0px; } /* not the page's scroll padding */
+      .list-panel .data-table thead { translate: none; }
+      /* the range always assumes the bars are there (Safari won't redo a range when a value in it
+         changes); while they're away, the header rides up by their height, sliding with them */
+      .list-panel .data-table th {
+        animation: list-head-follow linear both;
+        animation-timeline: --list-table;
+        animation-range: exit-crossing calc(0px - var(--list-head-top, 0px)) exit-crossing calc(100% - var(--list-head-top, 0px) - var(--_head-h, var(--control-height-md)));
+        transform: translateY(calc(var(--_stick) - var(--list-head-top, 0px)));
+      }
+    }
     .list-panel .data-table th { position: relative; inset-block-start: auto; }
     /* pinned: the checkbox and the name, on the row's own colour */
     .list-panel .data-table tbody tr { --_row-bg: var(--color-surface-default); }

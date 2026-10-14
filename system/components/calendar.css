@@ -1,0 +1,85 @@
+/* Calendar and date range picker (D37, I14).
+   Calendar: one month as a grid (the WAI-ARIA date picker pattern). Days are buttons in cells; the cell
+   carries the state: data-range="start|end|in|single" for a span (aria-selected on its ends), data-cap
+   where the band starts or stops inside a week, data-today, and disabled days (after today, for a date
+   that can only be in the past). Weeks start on Sunday (US English).
+   <div class="calendar-month">
+     <h4 class="calendar-title" id="cal-2026-09">September 2026</h4>
+     <table class="calendar-grid" role="grid" aria-labelledby="cal-2026-09">
+       <thead><tr><th scope="col" abbr="Sunday">S</th>…</tr></thead>
+       <tbody><tr><td></td>…<td data-range="start" aria-selected="true"><button type="button" class="calendar-day"
+         data-day="2026-09-08" tabindex="0" aria-label="Tuesday, September 8, 2026">8</button></td>…</tr></tbody>
+     </table>
+   </div>
+   Date range picker (the list's date filter): presets in a rail, then From and To, two months, and a
+   foot with what it filters by and Apply. Presets apply at once; a span built by hand waits for Apply.
+   <div class="date-range">
+     <div class="date-range-presets" role="group" aria-label="Presets"><button class="menu-item" aria-pressed="true">…</button>…</div>
+     <div class="date-range-main">
+       <div class="date-range-fields">…two .field…</div>
+       <div class="date-range-months"><div class="date-range-nav">‹ ›</div>…two .calendar-month…</div>
+       <div class="date-range-foot"><p class="date-range-note">…</p>…Cancel, Apply…</div>
+     </div>
+   </div>
+   Phones: the sheet lists the presets (menu items); Custom drills in to From and To, a run of months
+   that scrolls (.date-range-scroll), and Apply pinned to the bottom. */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  /* ---------- calendar ---------- */
+  .calendar-month { --_cell: 2.25rem; display: grid; gap: var(--space-1); align-content: start; }
+  .calendar-title { margin: 0; block-size: var(--control-height-sm); display: flex; align-items: center; font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); }
+  .calendar-grid { border-collapse: separate; border-spacing: 0 var(--space-0-5); table-layout: fixed; inline-size: calc(var(--_cell) * 7); }
+  .calendar-grid th { block-size: var(--space-6); padding: 0; font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-regular); color: var(--color-content-secondary); text-align: center; }
+  .calendar-grid td { padding: 0; block-size: var(--_cell); }
+  .calendar-day {
+    display: grid; place-items: center; inline-size: 100%; block-size: var(--_cell); padding: 0;
+    border: 0; border-radius: var(--radius-md); background: none; color: var(--color-content-primary);
+    font: inherit; font-size: var(--text-sm); font-variant-numeric: tabular-nums; cursor: pointer;
+  }
+  @media (hover: hover) { .calendar-day:hover:not(:disabled) { background: var(--color-surface-hover); } }
+  .calendar-day:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 0; position: relative; z-index: 1; }
+  .calendar-day:disabled { color: var(--color-content-disabled); cursor: default; }
+  .calendar-grid td[data-today] > .calendar-day { box-shadow: inset 0 0 0 var(--border-width-default) var(--color-content-secondary); }
+  /* a span: a band behind the days, joined across a week and capped where it starts or stops; the two
+     ends are filled, and the band reaches into them from the inside */
+  .calendar-grid td[data-range="in"] { background: var(--color-surface-selected); }
+  .calendar-grid td[data-range="start"] { background: linear-gradient(to right, transparent 50%, var(--color-surface-selected) 50%); }
+  .calendar-grid td[data-range="end"] { background: linear-gradient(to left, transparent 50%, var(--color-surface-selected) 50%); }
+  .calendar-grid td[data-range="start"][data-cap~="end"], .calendar-grid td[data-range="end"][data-cap~="start"] { background: none; }
+  .calendar-grid td[data-cap~="start"] { border-start-start-radius: var(--radius-sm); border-end-start-radius: var(--radius-sm); }
+  .calendar-grid td[data-cap~="end"] { border-start-end-radius: var(--radius-sm); border-end-end-radius: var(--radius-sm); }
+  .calendar-grid td:is([data-range="start"], [data-range="end"], [data-range="single"]) > .calendar-day { background: var(--color-surface-inverse); color: var(--color-content-inverse); }
+  @media (hover: hover) { .calendar-grid td[data-range="in"] > .calendar-day:hover { background: var(--color-surface-tint-hover); } }
+
+  /* ---------- date range picker ---------- */
+  .date-range { display: grid; grid-template-columns: auto minmax(0, 1fr); }
+  /* the rail: presets as menu rows, 8 in from the popover's edge like every menu's rows (D35) */
+  .date-range-presets {
+    display: grid; align-content: start; gap: var(--space-0-5); min-inline-size: 11rem;
+    padding: calc(var(--inset-menu) - var(--border-width-default));
+    border-inline-end: var(--border-width-default) solid var(--color-line-subtle); background: var(--color-surface-canvas);
+  }
+  .date-range-presets .menu-item[aria-pressed="true"] { background: var(--color-surface-tint); font-weight: var(--font-weight-medium); }
+  .date-range-main { display: grid; gap: var(--space-4); align-content: start; padding: var(--space-5); }
+  .date-range-fields { display: flex; align-items: flex-end; gap: var(--space-2); }
+  .date-range-fields .field { flex: 1; min-inline-size: 0; max-inline-size: 10rem; }
+  .date-range-dash { padding-block-end: var(--space-2); color: var(--color-content-tertiary); }
+  .date-range-months { position: relative; display: flex; gap: var(--space-8); }
+  .date-range-nav { position: absolute; inset-block-start: 0; inset-inline-end: 0; display: flex; gap: var(--space-1); }
+  .date-range-nav .button svg { inline-size: 0.75rem; block-size: 0.75rem; }
+  .date-range-foot { display: flex; align-items: center; gap: var(--space-2); }
+  .date-range-note { flex: 1; min-inline-size: 0; margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  .date-range-error { margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-feedback-danger-content); }
+  /* the popover that holds it grows to fit */
+  .pop:has(> .date-range) { inline-size: max-content; max-inline-size: calc(100vw - var(--space-6)); max-block-size: none; overflow: hidden; }
+
+  /* phones: the presets are the sheet's list; Custom is a view of its own with one run of months */
+  .date-range-custom { display: grid; gap: var(--space-3); padding: 0 var(--space-4); }
+  .date-range-scroll { display: grid; gap: var(--space-4); max-block-size: 50dvh; overflow-y: auto; overscroll-behavior: contain; justify-items: center; }
+  .date-range-scroll .calendar-month { --_cell: min(3rem, calc((100vw - var(--space-8)) / 7)); }
+  .date-range-custom .date-range-fields .field { max-inline-size: none; }
+  .date-range-custom .date-range-foot { position: sticky; inset-block-end: 0; padding-block: var(--space-3); background: var(--color-surface-raised); }
+  .date-range-custom .date-range-foot .button { flex: 1; }
+}

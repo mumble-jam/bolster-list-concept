@@ -209,7 +209,7 @@
         "status": [
           "past"
         ],
-        "lastContact": "older90"
+        "lastContact": "..-91"
       },
       "sort": {
         "column": "lifetime",

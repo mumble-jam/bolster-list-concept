@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=0337ae5c">
-<link rel="stylesheet" href="specimen.css?v=0337ae5c">
+<link rel="stylesheet" href="../bolster.css?v=9166a189">
+<link rel="stylesheet" href="specimen.css?v=9166a189">
 <style>
   .rule-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr)); }
   .rule-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
@@ -182,7 +182,7 @@
   <article class="card rule-card" id="L-date-range">
     <header class="card-header rule-head"><h3><code>L-date-range</code> Lists with a date get a date range</h3><span class="badge" data-tone="warning">Proposed</span></header>
     <div class="card-body rule-body">
-      <p>A list with a date column offers the date range picker on its main date (created, issued, due), even if the original has none. Lists without a meaningful date leave it out.</p>
+      <p>A list with a date column offers the date range picker on its main date (created, issued, due), even if the original has none: ten presets, then Custom with From and To and two months (D37). Lists without a meaningful date leave it out. Saved views hold a preset id or a span relative to today (..-91 is more than 90 days ago).</p>
       <p class="text-secondary"><b>Why:</b> “Last 30 days” is the most common question asked of any list.</p>
       
       <p class="rule-meta"><span class="badge">survey</span> <span class="text-secondary">· List page layout research</span></p>
@@ -308,6 +308,6 @@
     <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>File</th><th>What it is</th><th>Check</th></tr></thead><tbody><tr><td><code>concept/catalog.json</code></td><td>9 columns · no status · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/customers.json</code></td><td>9 columns · 3 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/invoices.json</code></td><td>8 columns · 4 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/jobs.json</code></td><td>8 columns · 5 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr></tbody></table></div>
   </section>
 </main>
-<script src="specimen.js?v=0337ae5c"></script>
+<script src="specimen.js?v=9166a189"></script>
 </body>
 </html>

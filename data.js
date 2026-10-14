@@ -97,13 +97,6 @@
     options: OWNERS.map((o) => ({ value: o.id, label: o.me ? `${o.name} (you)` : o.name, html: `${avatar(o, "sm")}${esc(o.me ? `${o.name} (you)` : o.name)}` })),
   });
   const cityFilter = (get) => ({ key: "city", label: "City", type: "enum", get, options: CITIES.map((c) => ({ value: c, label: c })) });
-  const pastPresets = [
-    { value: "7", label: "Last 7 days", test: (d) => ageDays(d) <= 7 },
-    { value: "30", label: "Last 30 days", test: (d) => ageDays(d) <= 30 },
-    { value: "90", label: "Last 90 days", test: (d) => ageDays(d) <= 90 },
-    { value: "365", label: "Last 12 months", test: (d) => ageDays(d) <= 365 },
-    { value: "older90", label: "More than 90 days ago", test: (d) => ageDays(d) > 90 },
-  ];
   const statusOptions = (map) => Object.entries(map).map(([value, s]) => ({ value, label: s.label, html: badge(s) }));
   const badge = (s) => `<span class="badge" ${s.attr}${s.mark ? ` data-mark="${s.mark}"` : ""}>${esc(s.label)}</span>`;
 
@@ -175,7 +168,7 @@
     filters: [
       { key: "status", label: "Status", type: "enum", pinned: true, get: (x) => x.status, options: statusOptions(EST_STATUS) },
       ownerFilter((x) => x.owner.id),
-      { key: "created", label: "Created", type: "single", pinned: true, get: (x) => x.created, options: pastPresets },
+      { key: "created", label: "Created", type: "date", pinned: true, get: (x) => x.created },
       { key: "total", label: "Total", type: "range", get: (x) => x.total },
       cityFilter((x) => x.city),
       { key: "source", label: "Source", type: "enum", get: (x) => x.source, options: SOURCES.map((s) => ({ value: s, label: s })) },
@@ -185,7 +178,7 @@
     views: [
       { id: "all", label: "All jobs", icon: "list", filters: {} },
       { id: "mine", label: "My open jobs", icon: "user", filters: { owner: ["hm"], status: ["draft", "pending"] } },
-      { id: "stale", label: "Needs follow-up", icon: "clock", filters: { status: ["pending"], created: "older90" }, sort: { key: "created", dir: "asc" } },
+      { id: "stale", label: "Needs follow-up", icon: "clock", filters: { status: ["pending"], created: "..-91" }, sort: { key: "created", dir: "asc" } },
       { id: "big", label: "Large jobs", icon: "dollar", filters: { total: { min: 20000 } }, sort: { key: "total", dir: "desc" } },
       { id: "by-owner", label: "By owner", icon: "layers", filters: { status: ["draft", "pending"] }, group: "owner" },
     ],
@@ -301,7 +294,7 @@
     ],
     filters: [
       { key: "status", label: "Status", type: "enum", pinned: true, get: (x) => x.status, options: statusOptions(INV_STATUS) },
-      { key: "issued", label: "Issued", type: "single", pinned: true, get: (x) => x.issued, options: pastPresets },
+      { key: "issued", label: "Issued", type: "date", pinned: true, get: (x) => x.issued },
       { key: "balance", label: "Balance due", type: "range", get: (x) => x.balance },
       ownerFilter((x) => x.owner.id),
       cityFilter((x) => x.city),
@@ -395,7 +388,7 @@
     filters: [
       { key: "status", label: "Status", type: "enum", pinned: true, get: (x) => x.status, options: statusOptions(CL_STATUS) },
       ownerFilter((x) => x.owner.id),
-      { key: "lastContact", label: "Last contact", type: "single", pinned: true, get: (x) => x.lastContact, options: pastPresets },
+      { key: "lastContact", label: "Last contact", type: "date", pinned: true, get: (x) => x.lastContact },
       cityFilter((x) => x.city),
       { key: "source", label: "Source", type: "enum", get: (x) => x.source, options: SOURCES.map((s) => ({ value: s, label: s })) },
       { key: "lifetime", label: "Lifetime value", type: "range", get: (x) => x.lifetime },
@@ -405,7 +398,7 @@
     views: [
       { id: "all", label: "Everyone", icon: "users", filters: {} },
       { id: "my-leads", label: "My leads", icon: "user", filters: { status: ["lead"], owner: ["hm"] } },
-      { id: "quiet", label: "Gone quiet", icon: "clock", filters: { status: ["past"], lastContact: "older90" }, sort: { key: "lifetime", dir: "desc" } },
+      { id: "quiet", label: "Gone quiet", icon: "clock", filters: { status: ["past"], lastContact: "..-91" }, sort: { key: "lifetime", dir: "desc" } },
     ],
     bulk: ["Message", "Change owner", "Archive"],
     rowActions: ["Open", "Message", "Create job", "Archive"],
@@ -466,13 +459,13 @@
       { key: "category", label: "Category", type: "enum", pinned: true, get: (x) => x.category, options: Object.keys(CATALOG).map((c) => ({ value: c, label: c })) },
       { key: "vendor", label: "Vendor", type: "enum", pinned: true, get: (x) => x.vendor, options: VENDORS.map((v) => ({ value: v, label: v })) },
       { key: "price", label: "Price", type: "range", get: (x) => x.price },
-      { key: "updated", label: "Price updated", type: "single", get: (x) => x.updated, options: pastPresets },
+      { key: "updated", label: "Price updated", type: "date", get: (x) => x.updated },
     ],
     groups: ["category", "vendor"],
     defaultSort: { key: "name", dir: "asc" },
     views: [
       { id: "all", label: "All items", icon: "layers", filters: {}, group: "category" },
-      { id: "stale", label: "Prices to review", icon: "clock", filters: { updated: "older90" }, sort: { key: "usedIn", dir: "desc" } },
+      { id: "stale", label: "Prices to review", icon: "clock", filters: { updated: "..-91" }, sort: { key: "usedIn", dir: "desc" } },
       { id: "flat", label: "Flat list", icon: "list", filters: {} },
     ],
     bulk: ["Update prices", "Change category", "Archive"],
@@ -506,7 +499,7 @@
   window.BDS_CONCEPT = {
     TODAY, fmt, esc, ageDays, attrIcons, actionIcons,
     // the parts recipe.js builds a list from a page description with
-    kit: { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, person, main, pastPresets, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf, MIN_SAMPLE },
+    kit: { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, person, main, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf, MIN_SAMPLE },
     configs: { jobs: estimatesConfig, invoices: invoicesConfig, customers: clientsConfig, catalog: itemsConfig },
   };
 })();

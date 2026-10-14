@@ -51,7 +51,7 @@
     const f = filterDef(key);
     if (!f || val == null) return false;
     if (f.type === "enum") return val.length > 0;
-    if (f.type === "single") return !!val;
+    if (f.type === "single" || f.type === "date") return !!val;
     if (f.type === "range") return val.min != null || val.max != null;
     return false;
   }
@@ -69,9 +69,88 @@
     const x = f.get(row);
     if (f.type === "enum") return val.includes(x);
     if (f.type === "single") return f.options.find((o) => o.value === val)?.test(x) ?? true;
+    if (f.type === "date") return inSpan(val, x);
     if (f.type === "range") return (val.min == null || x >= val.min) && (val.max == null || x <= val.max);
     return true;
   }
+  // ---------- dates (D37) ----------
+  // A date filter's value is a preset id, or a span "from..to" whose ends are each a date (2026-09-08), a
+  // count of days from today (-91: more than 90 days ago), or empty. Days are the company's days.
+  const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const ymd = (s) => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+  const today = () => new Date(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate());
+  const addDays = (d, n) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
+  const monthOf = (d, n = 0) => new Date(d.getFullYear(), d.getMonth() + n, 1);
+  // short to long, All time first (the research's ten)
+  const DATE_PRESETS = [
+    { id: "", label: "All time", span: () => null },
+    { id: "today", label: "Today", span: (t) => [t, t] },
+    { id: "yesterday", label: "Yesterday", span: (t) => [addDays(t, -1), addDays(t, -1)] },
+    { id: "7d", label: "Last 7 days", span: (t) => [addDays(t, -6), t] },
+    { id: "30d", label: "Last 30 days", span: (t) => [addDays(t, -29), t] },
+    { id: "month", label: "This month", span: (t) => [monthOf(t), t] },
+    { id: "last-month", label: "Last month", span: (t) => [monthOf(t, -1), addDays(monthOf(t), -1)] },
+    { id: "quarter", label: "This quarter", span: (t) => [new Date(t.getFullYear(), Math.floor(t.getMonth() / 3) * 3, 1), t] },
+    { id: "ytd", label: "Year to date", span: (t) => [new Date(t.getFullYear(), 0, 1), t] },
+    { id: "12m", label: "Last 12 months", span: (t) => [new Date(t.getFullYear() - 1, t.getMonth(), t.getDate() + 1), t] },
+  ];
+  // phones list the common ones, then Custom (the research's sheet)
+  const PHONE_PRESETS = ["", "today", "7d", "30d", "month", "last-month"];
+  // links shared before D37
+  const LEGACY = { 7: "7d", 30: "30d", 90: "-89..", 365: "12m", older90: "..-91" };
+  const presetOf = (val) => DATE_PRESETS.find((p) => p.id === (LEGACY[val] ?? val ?? ""));
+  // [from, to] as dates, either end possibly null; null for all time
+  function dateSpan(val) {
+    if (!val) return null;
+    const p = presetOf(val);
+    if (p) return p.span(today());
+    const m = /^(.*)\.\.(.*)$/.exec(LEGACY[val] ?? val);
+    if (!m) return null;
+    const end = (x) => (!x ? null : /^-?\d+$/.test(x) ? addDays(today(), +x) : /^\d{4}-\d{2}-\d{2}$/.test(x) ? ymd(x) : undefined);
+    const a = end(m[1]), b = end(m[2]);
+    return a === undefined || b === undefined || (!a && !b) ? null : [a, b];
+  }
+  function inSpan(val, d) {
+    const s = dateSpan(val);
+    if (!s) return true;
+    const k = iso(d);
+    return (!s[0] || k >= iso(s[0])) && (!s[1] || k <= iso(s[1]));
+  }
+  const monthDay = (d) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  const longDate = (d) => d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  // the month as a word, so 9/10 can't be read two ways
+  function spanText(a, b) {
+    if (a && b) return iso(a) === iso(b) ? longDate(a) : a.getFullYear() === b.getFullYear() ? `${monthDay(a)} – ${longDate(b)}` : `${longDate(a)} – ${longDate(b)}`;
+    return a ? `Since ${longDate(a)}` : `Until ${longDate(b)}`;
+  }
+  function dateText(val) {
+    const p = presetOf(val);
+    if (p) return p.label;
+    const s = dateSpan(val);
+    return s ? spanText(s[0], s[1]) : "All time";
+  }
+  // a span that matches a preset is that preset (Sep 1 – Sep 30 is Last month, when it is)
+  function spanValue(a, b) {
+    if (!a && !b) return undefined;
+    const t = today();
+    const p = a && b && DATE_PRESETS.find((x) => { const s = x.span(t); return s && iso(s[0]) === iso(a) && iso(s[1]) === iso(b); });
+    return p ? p.id : `${a ? iso(a) : ""}..${b ? iso(b) : ""}`;
+  }
+  // typed dates: Sep 8, 2026 · 8 Sep 2026 · Sep 8 · 9/8/2026 · 2026-09-08; undefined when it isn't one
+  const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+  function parseTyped(text) {
+    const s = text.trim().replace(/\s+/g, " ");
+    if (!s) return null;
+    const make = (y, m, d) => { const x = new Date(y, m - 1, d); return m >= 1 && m <= 12 && x.getMonth() === m - 1 && x.getDate() === d ? x : undefined; };
+    const mon = (w) => MONTHS.indexOf(w.slice(0, 3).toLowerCase()) + 1;
+    let m;
+    if ((m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s))) return make(+m[1], +m[2], +m[3]);
+    if ((m = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2}|\d{4})$/.exec(s))) return make(m[3].length === 2 ? 2000 + +m[3] : +m[3], +m[1], +m[2]);
+    if ((m = /^([a-z]{3,})\.? (\d{1,2})(?:,? (\d{4}))?$/i.exec(s)) && mon(m[1])) return make(m[3] ? +m[3] : TODAY.getFullYear(), mon(m[1]), +m[2]);
+    if ((m = /^(\d{1,2}) ([a-z]{3,})\.?,?(?: (\d{4}))?$/i.exec(s)) && mon(m[2])) return make(m[3] ? +m[3] : TODAY.getFullYear(), mon(m[2]), +m[1]);
+    return undefined;
+  }
+
   function rowsWhere({ except, search = true } = {}) {
     // every search chip has to match, and so does whatever is still being typed
     const qs = search ? [...st.terms, st.search].map((t) => t.trim().toLowerCase()).filter(Boolean) : [];
@@ -92,6 +171,7 @@
       return labels.length <= 2 ? labels.join(", ") : `${labels.length} selected`;
     }
     if (f.type === "single") return f.options.find((o) => o.value === val)?.label ?? val;
+    if (f.type === "date") return dateText(val);
     if (f.type === "range") {
       if (val.min != null && val.max != null) return `${fmt.money0(val.min)}–${fmt.money0(val.max)}`;
       return val.min != null ? `${fmt.money0(val.min)} or more` : `Up to ${fmt.money0(val.max)}`;
@@ -125,6 +205,7 @@
       const raw = p.get(f.key);
       if (f.type === "enum") st.filters[f.key] = raw.split(",").filter((x) => f.options.some((o) => o.value === x));
       else if (f.type === "single") st.filters[f.key] = f.options.some((o) => o.value === raw) ? raw : undefined;
+      else if (f.type === "date") st.filters[f.key] = dateSpan(raw) ? LEGACY[raw] ?? raw : undefined;
       else if (f.type === "range") { const [a, b] = raw.split("-").map((x) => (x === "" ? null : +x)); st.filters[f.key] = { ...(a != null ? { min: a } : {}), ...(b != null ? { max: b } : {}) }; }
     }
     st.terms = p.getAll("q").filter((t) => t.trim()); st.search = "";
@@ -185,14 +266,13 @@
     // date range: the list's own date filter, shown as a span ending today
     const df = filterDef(cfg.dateKey);
     const dv = df && st.filters[df.key];
-    const long = (d) => d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-    const ago = (n) => new Date(+TODAY - n * 864e5);
-    const label = !dv ? "All time" : /^older(\d+)$/.test(dv) ? `Before ${long(ago(+dv.slice(5)))}` : `${long(ago(+dv))} – Now`;
+    // at rest it says All time; once set it names the date it filters by, then the preset or the dates
+    const label = dv ? `<span class="date-range-field">${esc(df.label)} · </span>${esc(dateText(dv))}` : "All time";
     const dr = $("#date-range");
     dr.hidden = !df || st.mode === "empty";
-    $("#date-range-label").textContent = label;
+    $("#date-range-label").innerHTML = label;
     dr.toggleAttribute("data-active", !!dv);
-    if (df) dr.setAttribute("aria-label", `${df.label}: ${label}. Change`);
+    if (df) dr.setAttribute("aria-label", `${df.label}: ${dateText(dv)}. Change`);
 
     // search: a bare field in the header; what's typed filters live, Enter turns it into a chip
     const input = $("#search");
@@ -569,7 +649,7 @@
     fillPop();
     pop.showPopover();
     place();
-    if (kind !== "info") ($$("input:checked, input, [role^=menuitem], button", pop).find((el) => el.checkVisibility()) || pop).focus({ preventScroll: true });
+    if (kind !== "info") ($$("[data-date-preset][aria-pressed='true'], [data-date-custom][aria-pressed='true'], input:checked, input, [role^=menuitem], button", pop).find((el) => el.checkVisibility()) || pop).focus({ preventScroll: true });
   }
   function place() {
     const a = anchorFor(popFor);
@@ -662,6 +742,7 @@
     const p = popFor;
     let a = anchorFor(p);
     lastClose = { id: p.id, t: performance.now() };
+    dp = null;
     a?.setAttribute("aria-expanded", "false");
     a?.closest(".chip")?.removeAttribute("data-open");
     // a field picked from "Add filter" but left without a value goes away again
@@ -674,6 +755,182 @@
   addEventListener("resize", () => popFor && (place(), placeSub()));
   sheetMQ.addEventListener("change", () => { if (pop.matches(":popover-open")) pop.hidePopover(); });
   addEventListener("scroll", () => popFor && (place(), placeSub()), { passive: true });
+
+  // ---------- the date range picker (D37, I14) ----------
+  // presets apply at once; a span built from days or typed dates waits for Apply. dp is the draft while
+  // the popover is open: from, to, the month shown first, the day that holds focus, a hovered end
+  let dp = null;
+  const pastOnly = (f) => f.past !== false;
+  function startDate(f) {
+    const s = dateSpan(st.filters[f.key]) || [null, null];
+    const t = today(), end = s[1] || s[0] || t;
+    dp = { key: f.key, from: s[0], to: s[1], view: monthOf(end, sheet() ? 0 : -1), focus: iso(end), hover: null, custom: false, error: null };
+    if (pastOnly(f) && dp.view > monthOf(t, sheet() ? 0 : -1)) dp.view = monthOf(t, sheet() ? 0 : -1);
+  }
+  const dayName = (d) => d.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
+  function monthGrid(first, f) {
+    const y = first.getFullYear(), m = first.getMonth(), n = new Date(y, m + 1, 0).getDate(), t = iso(today());
+    const id = `cal-${y}-${m + 1}`;
+    const cells = [...Array(first.getDay()).fill(""), ...Array.from({ length: n }, (_, i) => {
+      const d = new Date(y, m, i + 1), k = iso(d), off = pastOnly(f) && k > t;
+      return `<td${k === t ? " data-today" : ""}><button type="button" class="calendar-day" data-day="${k}" tabindex="-1" aria-label="${dayName(d)}${k === t ? ", today" : ""}"${off ? " disabled" : ""}>${i + 1}</button></td>`;
+    })];
+    while (cells.length % 7) cells.push("");
+    const weeks = [];
+    for (let i = 0; i < cells.length; i += 7) weeks.push(`<tr>${cells.slice(i, i + 7).map((c) => c || "<td></td>").join("")}</tr>`);
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    return `<div class="calendar-month"><h4 class="calendar-title" id="${id}">${first.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</h4>
+      <table class="calendar-grid" role="grid" aria-labelledby="${id}"><thead><tr>${days.map((w) => `<th scope="col" abbr="${w}">${w[0]}</th>`).join("")}</tr></thead><tbody>${weeks.join("")}</tbody></table></div>`;
+  }
+  // the span on the days: ends filled, a band between, capped at a week's or a month's edge
+  function paintDays() {
+    const lo0 = dp.from && iso(dp.from);
+    let hi0 = dp.to ? iso(dp.to) : dp.from && dp.hover && dp.hover > dp.from ? iso(dp.hover) : null;
+    const lo = lo0 || hi0, hi = hi0 || lo0;
+    for (const b of $$("[data-day]", pop)) {
+      const k = b.dataset.day, td = b.parentElement, d = ymd(k);
+      const r = !lo ? null : k === lo && k === hi ? "single" : k === lo ? "start" : k === hi ? "end" : k > lo && k < hi ? "in" : null;
+      r ? td.setAttribute("data-range", r) : td.removeAttribute("data-range");
+      r === "start" || r === "end" || r === "single" ? td.setAttribute("aria-selected", "true") : td.removeAttribute("aria-selected");
+      const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+      const cap = [(d.getDay() === 0 || d.getDate() === 1) && "start", (d.getDay() === 6 || d.getDate() === last) && "end"].filter(Boolean).join(" ");
+      r && r !== "single" && cap ? td.setAttribute("data-cap", cap) : td.removeAttribute("data-cap");
+      b.tabIndex = k === dp.focus ? 0 : -1;
+    }
+    // the focus day is always one that's shown
+    if (!$("[data-day][tabindex='0']", pop)) { const b = $$("[data-day]:not(:disabled)", pop).at(-1); if (b) { b.tabIndex = 0; dp.focus = b.dataset.day; } }
+  }
+  function months(f) {
+    if (sheet()) {
+      // phones: a run of months to scroll, the last twelve and this one
+      const t = today();
+      return `<div class="date-range-scroll">${Array.from({ length: 13 }, (_, i) => monthGrid(monthOf(t, i - 12), f)).join("")}</div>`;
+    }
+    const nextOff = pastOnly(f) && monthOf(dp.view, 1) >= monthOf(today());
+    const nav = (n, label, icon, off) => `<button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-cal-nav="${n}" aria-label="${label}"${off ? " disabled" : ""}>${ic(icon, 12)}</button>`;
+    return `<div class="date-range-months"><div class="date-range-nav">${nav(-1, "Previous month", "chevron-left")}${nav(1, "Next month", "chevron-right", nextOff)}</div>${monthGrid(dp.view, f)}${monthGrid(monthOf(dp.view, 1), f)}</div>`;
+  }
+  function dateFoot(f) {
+    const cur = st.filters[f.key], draft = spanValue(dp.from, dp.to);
+    const days = dp.from && dp.to ? Math.round((dp.to - dp.from) / 864e5) + 1 : 0;
+    const note = dp.error ? `<p class="date-range-error" id="date-hint">Type a date like ${longDate(today())}.</p>`
+      : `<p class="date-range-note" id="date-hint">By ${esc(f.label.toLowerCase())} date${days ? ` · ${fmt.plural(days, "day", "days")}` : ""} · Eastern time</p>`;
+    const off = !draft || draft === cur || !!dp.error;
+    return sheet() ? `${note}<div class="date-range-foot"><button type="button" class="button" data-date-apply${off ? " disabled" : ""}>Apply</button></div>`
+      : `<div class="date-range-foot">${note}<button type="button" class="button" data-variant="secondary" data-size="sm" data-date-cancel>Cancel</button><button type="button" class="button" data-size="sm" data-date-apply${off ? " disabled" : ""}>Apply</button></div>`;
+  }
+  function dateFields() {
+    const field = (end, label, d) => `<div class="field" data-size="sm"><label class="field-label" for="date-${end}">${label}</label><input class="input" id="date-${end}" data-date-field="${end}" value="${d ? longDate(d) : ""}" placeholder="${end === "from" ? "Any" : "Today"}" autocomplete="off" aria-describedby="date-hint"${dp.error === end ? ' aria-invalid="true"' : ""}></div>`;
+    return `<div class="date-range-fields">${field("from", "From", dp.from)}<span class="date-range-dash" aria-hidden="true">–</span>${field("to", "To", dp.to)}</div>`;
+  }
+  function fillDate(f) {
+    if (!dp || dp.key !== f.key) startDate(f);
+    const cur = st.filters[f.key];
+    const pressed = presetOf(spanValue(dp.from, dp.to) ?? "")?.id ?? "custom";
+    const set = isSet(f.key, cur);
+    if (sheet() && !dp.custom) {
+      // phones: the presets are the sheet's list; one picked on desktop shows too
+      const ids = PHONE_PRESETS.includes(presetOf(cur)?.id ?? "") ? PHONE_PRESETS : [...PHONE_PRESETS, presetOf(cur).id];
+      const row = (p) => `<button type="button" class="menu-item" data-date-preset="${p.id}" aria-pressed="${presetOf(cur)?.id === p.id}">${esc(p.label)}${presetOf(cur)?.id === p.id ? I.check : ""}</button>`;
+      const custom = presetOf(cur) ? "" : `<span class="submenu-value">${esc(dateText(cur))}</span>`;
+      pop.innerHTML = `<div class="pop-head"><h3>${esc(f.label)}</h3>${set ? `<button type="button" class="button" data-variant="ghost" data-size="sm" data-remove="${f.key}">Clear</button>` : ""}</div>
+        <div class="pop-body">${ids.map((id) => row(presetOf(id))).join("")}<button type="button" class="menu-item" data-date-custom aria-pressed="${!presetOf(cur)}"><span class="submenu-label">Custom…</span>${custom}${I.chevR}</button></div>`;
+      return;
+    }
+    if (sheet()) {
+      pop.innerHTML = `<div class="pop-head"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-date-back aria-label="Back to presets">${ic("chevron-left", 14)}</button><h3>${esc(f.label)}: custom</h3></div>
+        <div class="date-range-custom">${dateFields()}${months(f)}<div data-date-foot>${dateFoot(f)}</div></div>`;
+      paintDays();
+      // open on the month that holds the span, or this one
+      const at = $(`[data-day="${iso(dp.from || dp.to || today())}"]`, pop)?.closest(".calendar-month");
+      const sc = $(".date-range-scroll", pop);
+      if (at && sc) sc.scrollTop = at.offsetTop - sc.offsetTop;
+      return;
+    }
+    pop.innerHTML = `<div class="date-range">
+      <div class="date-range-presets" role="group" aria-label="Presets">${DATE_PRESETS.map((p) => `<button type="button" class="menu-item" data-date-preset="${p.id}" aria-pressed="${pressed === p.id}">${esc(p.label)}</button>`).join("")}<button type="button" class="menu-item" data-date-custom aria-pressed="${pressed === "custom"}">Custom</button></div>
+      <div class="date-range-main">${dateFields()}<div data-date-months>${months(f)}</div><div data-date-foot>${dateFoot(f)}</div></div></div>`;
+    paintDays();
+  }
+  // redraw what the draft changes, leaving the fields alone while one is being typed in
+  function redrawDate({ focusDay = false } = {}) {
+    const f = filterDef(dp.key);
+    const pressed = presetOf(spanValue(dp.from, dp.to) ?? "")?.id ?? "custom";
+    $$(".date-range-presets .menu-item", pop).forEach((b) => b.setAttribute("aria-pressed", (b.dataset.datePreset ?? "custom") === pressed));
+    const mo = $("[data-date-months]", pop);
+    if (mo) mo.innerHTML = months(f);
+    $("[data-date-foot]", pop).innerHTML = dateFoot(f);
+    for (const end of ["from", "to"]) {
+      const el = $(`#date-${end}`, pop);
+      if (!el) continue;
+      if (document.activeElement !== el) el.value = dp[end] ? longDate(dp[end]) : "";
+      dp.error === end ? el.setAttribute("aria-invalid", "true") : el.removeAttribute("aria-invalid");
+    }
+    paintDays();
+    if (focusDay) $(`[data-day="${dp.focus}"]`, pop)?.focus({ preventScroll: !sheet() });
+  }
+  // keep the focus day on screen: desktop shows two months, phones scroll through thirteen
+  function showDay(k) {
+    const d = ymd(k), t = today();
+    if (pastOnly(filterDef(dp.key)) && k > iso(t)) return;
+    if (sheet()) { if (d < monthOf(t, -12)) return; dp.focus = k; return; }
+    dp.focus = k;
+    if (d < dp.view) dp.view = monthOf(d);
+    else if (d >= monthOf(dp.view, 2)) dp.view = monthOf(d, -1);
+  }
+  function pickDay(k) {
+    const d = ymd(k);
+    if (!dp.from || dp.to) { dp.from = d; dp.to = null; }
+    else if (k < iso(dp.from)) { dp.to = dp.from; dp.from = d; }
+    else dp.to = d;
+    dp.focus = k; dp.hover = null; dp.error = null;
+  }
+  function applyDate(val) {
+    const key = dp.key;
+    pop.hidePopover();
+    setFilter(key, val);
+  }
+
+  // a typed date: kept when it reads as one (the calendar moves to it), flagged when it doesn't
+  function typeDate(el) {
+    const end = el.dataset.dateField, d = parseTyped(el.value);
+    if (d === undefined || (d && pastOnly(filterDef(dp.key)) && iso(d) > iso(today()))) { dp.error = end; return redrawDate(); }
+    dp.error = null;
+    dp[end] = d;
+    if (dp.from && dp.to && dp.from > dp.to) [dp.from, dp.to] = [dp.to, dp.from];
+    if (d) { el.value = longDate(d); showDay(iso(d)); }
+    redrawDate();
+  }
+  // the calendar's keys (WAI-ARIA date picker): arrows by day and week, Home and End to the week's ends,
+  // Page Up and Down by month (with Shift, by year); Enter or Space picks, Escape closes
+  pop.addEventListener("keydown", (e) => {
+    if (e.target.matches?.("[data-date-field]") && e.key === "Enter") { e.preventDefault(); typeDate(e.target); return; }
+    const pr = e.target.closest?.("[data-date-preset], [data-date-custom]");
+    if (pr && dp) {
+      const items = $$("[data-date-preset], [data-date-custom]", pop), i = items.indexOf(pr);
+      const next = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: items.length - 1 }[e.key];
+      if (next !== undefined) { e.preventDefault(); items[(next + items.length) % items.length].focus(); }
+      return;
+    }
+    const b = e.target.closest?.("[data-day]");
+    if (!b || !dp) return;
+    const d = ymd(b.dataset.day);
+    const byMonth = (n) => { const x = new Date(d.getFullYear(), d.getMonth() + n, 1); return new Date(x.getFullYear(), x.getMonth(), Math.min(d.getDate(), new Date(x.getFullYear(), x.getMonth() + 1, 0).getDate())); };
+    const to = { ArrowLeft: addDays(d, -1), ArrowRight: addDays(d, 1), ArrowUp: addDays(d, -7), ArrowDown: addDays(d, 7), Home: addDays(d, -d.getDay()), End: addDays(d, 6 - d.getDay()),
+      PageUp: byMonth(e.shiftKey ? -12 : -1), PageDown: byMonth(e.shiftKey ? 12 : 1) }[e.key];
+    if (!to) return;
+    e.preventDefault();
+    showDay(iso(to));
+    if (dp.from && !dp.to) dp.hover = ymd(dp.focus);
+    redrawDate({ focusDay: true });
+  });
+  // while a span is half built, the band follows the pointer to show where it would end
+  pop.addEventListener("pointerover", (e) => {
+    const b = e.target.closest?.("[data-day]");
+    if (!dp || !b || b.disabled || !dp.from || dp.to) return;
+    dp.hover = ymd(b.dataset.day);
+    paintDays();
+  });
 
   function fillPop() {
     const p = popFor;
@@ -691,6 +948,8 @@
       } else if (f.type === "single") {
         const base = rowsWhere({ except: f.key });
         pop.innerHTML = `${head}<div class="pop-body" role="radiogroup" aria-label="${esc(f.label)}"><label class="option"><input type="radio" class="radio" name="pop-single" data-single="" data-focus-key="any"${!val ? " checked" : ""}><span class="option-label">Any time</span><span class="option-count">${base.length}</span></label>${f.options.map((o) => `<label class="option"><input type="radio" class="radio" name="pop-single" data-single="${o.value}" data-focus-key="${o.value}"${val === o.value ? " checked" : ""}><span class="option-label">${esc(o.label)}</span><span class="option-count">${base.filter((x) => o.test(f.get(x))).length}</span></label>`).join("")}</div>`;
+      } else if (f.type === "date") {
+        fillDate(f);
       } else if (f.type === "range") {
         const v = val || {};
         const box = (id, label, x) => `<div class="field" data-size="sm"><label class="field-label" for="${id}">${label}</label><div class="input-group"><span class="input-adornment">$</span><input class="input" id="${id}" data-numeric inputmode="decimal" placeholder="Any" value="${x ?? ""}"></div></div>`;
@@ -906,6 +1165,24 @@
     // columns: several can change, so the menu stays open
     if ((el = q("[data-col-toggle]"))) { const k = el.dataset.colToggle; st.hidden = st.hidden.includes(k) ? st.hidden.filter((x) => x !== k) : [...st.hidden, k]; return render(); }
     if (q("[data-info]")) return openPop("info");
+    // the date range picker: a preset applies; days and typed dates build a draft that waits for Apply
+    if ((el = q("[data-date-preset]"))) return applyDate(el.dataset.datePreset || undefined);
+    if (q("[data-date-custom]")) {
+      if (sheet()) { dp.custom = true; fillPop(); $("#date-from", pop)?.focus({ preventScroll: true }); return; }
+      return $("#date-from", pop)?.focus();
+    }
+    if (q("[data-date-back]")) { dp.custom = false; fillPop(); $("[data-date-custom]", pop)?.focus({ preventScroll: true }); return; }
+    if ((el = q("[data-day]"))) { pickDay(el.dataset.day); return redrawDate({ focusDay: true }); }
+    if ((el = q("[data-cal-nav]"))) {
+      const n = +el.dataset.calNav;
+      dp.view = monthOf(dp.view, n);
+      redrawDate();
+      const again = $(`[data-cal-nav="${n}"]`, pop);
+      (again && !again.disabled ? again : $(`[data-cal-nav="${-n}"]`, pop))?.focus();
+      return;
+    }
+    if (q("[data-date-apply]")) return applyDate(spanValue(dp.from, dp.to));
+    if (q("[data-date-cancel]")) return pop.hidePopover();
     if ((el = q("[data-filter]"))) return openPop("filter", el.dataset.filter);
     if ((el = q("[data-remove]"))) {
       const key = el.dataset.remove;
@@ -984,6 +1261,7 @@
       return setFilter(key, order.filter((v) => cur.has(v)));
     }
     if (t.matches("[data-single]")) return setFilter(popFor.key, t.dataset.single || undefined);
+    if (t.matches("[data-date-field]")) return typeDate(t);
     if (t.matches("[data-select]")) {
       t.checked ? st.selected.add(t.dataset.select) : st.selected.delete(t.dataset.select);
       t.closest("tr").toggleAttribute("data-selected", t.checked);
@@ -1082,14 +1360,18 @@
   // header from sticking to the page, so the header is moved down with the page instead (--_table-top,
   // the table's top on screen; CSS keeps it under the bars). One table, so headers stay tied to cells.
   const tableWrap = $("#table-wrap");
+  // where the browser ties the header to the scroll itself (D38), the script only measures the room
+  // it has; elsewhere it moves the header on every scroll
+  const scrollDriven = CSS.supports("animation-timeline: view()");
   let frame = 0;
   function follow() {
     frame = 0;
     const t = $(".data-table", tableWrap), head = t?.tHead;
     if (!head) return;
     const r = t.getBoundingClientRect();
-    head.style.setProperty("--_table-top", `${r.top}px`);
+    if (!scrollDriven) head.style.setProperty("--_table-top", `${r.top}px`);
     head.style.setProperty("--_room", `${Math.max(0, r.height - head.offsetHeight)}px`);
+    head.style.setProperty("--_head-h", `${head.offsetHeight}px`);
   }
   function edges() {
     const max = tableWrap.scrollWidth - tableWrap.clientWidth;
@@ -1102,7 +1384,7 @@
     tableWrap.style.setProperty("--_pin-w", `${(sel?.offsetWidth || 0) + (name?.offsetWidth || 0)}px`);
   }
   const relayout = () => { pins(); edges(); follow(); };
-  addEventListener("scroll", () => { if (!frame) frame = requestAnimationFrame(follow); }, { passive: true });
+  if (!scrollDriven) addEventListener("scroll", () => { if (!frame) frame = requestAnimationFrame(follow); }, { passive: true });
   addEventListener("resize", relayout);
   tableWrap.addEventListener("scroll", edges, { passive: true });
   new ResizeObserver(relayout).observe(tableWrap);
