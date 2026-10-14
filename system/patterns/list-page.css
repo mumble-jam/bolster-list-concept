@@ -83,11 +83,11 @@
       position: fixed; z-index: var(--z-sticky);
       inset-inline-end: var(--space-4); inset-block-end: calc(var(--shell-bottom-bar-height) + var(--space-4));
       display: inline-grid; grid-template-columns: 1.5rem 1fr; align-items: center; column-gap: var(--space-2);
-      block-size: 3rem; padding-inline: var(--space-4) var(--space-5);
+      block-size: 3.5rem; padding-inline: var(--space-4) var(--space-5); /* 56 in both states: only the width moves */
       border-radius: var(--radius-lg); font-size: var(--text-base);
       filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.18));
       transition: --_sa 150ms, --_sk 150ms, --_pa 150ms, --_da 150ms, translate 150ms, background-color var(--duration-fast), border-color var(--duration-fast), color var(--duration-fast),
-        grid-template-columns var(--_morph), column-gap var(--_morph), padding var(--_morph), block-size var(--_morph);
+        grid-template-columns var(--_morph), column-gap var(--_morph), padding var(--_morph);
     }
     [data-float]::before { content: "+"; text-align: center; font-size: 1.375rem; line-height: 1; font-weight: var(--font-weight-regular); transition: scale var(--_morph); }
     /* the label slides into the right edge through a soft edge: its last 16 px (about a fifth of a label)
@@ -98,7 +98,7 @@
       -webkit-mask-image: linear-gradient(to left, transparent, #000 var(--_fade)); mask-image: linear-gradient(to left, transparent, #000 var(--_fade));
       transition: --_fade 120ms linear 260ms;
     }
-    :root[data-chrome-hidden] [data-float] { grid-template-columns: 1.5rem 0fr; column-gap: 0; padding-inline: calc(var(--space-4) - var(--border-width-default)); block-size: 3.5rem; } /* 56 square */
+    :root[data-chrome-hidden] [data-float] { grid-template-columns: 1.5rem 0fr; column-gap: 0; padding-inline: calc(var(--space-4) - var(--border-width-default)); } /* 56 square */
     :root[data-chrome-hidden] [data-float]::before { scale: 1.27; }
     :root[data-chrome-hidden] [data-float] .float-label { --_fade: 1rem; transition: --_fade 60ms linear; }
     :root:has(.floating-bar:not([hidden])) [data-float] { display: none; }
