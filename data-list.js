@@ -322,9 +322,9 @@
     CSS.highlights?.delete("search-hit");
 
     if (firstUse()) {
-      // Keep the page header as the only primary action; both contextual routes are secondary.
+      // The header stays primary; outlined creation stands out against the quieter import route.
       wrap.innerHTML = state(I.inbox, `No ${cfg.noun[1]} yet`, `${cfg.noun[1][0].toUpperCase() + cfg.noun[1].slice(1)} you create or import show up here, with totals and filters.`,
-        `${cfg.create ? `<button type="button" class="button" data-variant="secondary" data-concept-action="${esc(cfg.create)}">${esc(cfg.create)}</button>` : ""}<button type="button" class="button" data-variant="secondary" data-concept-action="Import from a spreadsheet">Import from a spreadsheet</button>`);
+        `${cfg.create ? `<button type="button" class="button" data-variant="secondary" data-concept-action="${esc(cfg.create)}">${esc(cfg.create)}</button>` : ""}<button type="button" class="button" data-variant="ghost" data-concept-action="Import from a spreadsheet">Import from a spreadsheet</button>`);
       return;
     }
     if (st.mode === "error") {
