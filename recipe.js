@@ -8,7 +8,7 @@
 
 window.BDS_RECIPE = (() => {
   const { fmt, esc, TODAY, ageDays, kit } = window.BDS_CONCEPT;
-  const { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, person, main, PHOTOS, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf } = kit;
+  const { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, person, main, PHOTOS, photoAt, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf } = kit;
   const NUMERIC = new Set(["money", "number", "percent", "count", "duration"]);
   // the first click on a header sorts the type's way (rules.json → types): biggest, newest and most
   // flagged first; names, words and the lifecycle from the top
@@ -260,10 +260,14 @@ window.BDS_RECIPE = (() => {
     if (d.selection.enabled && !d.selection.bulk?.length) notes.push("Bulk actions are still an open question, so the bar shows none.");
 
     // ---------- the record (peek) ----------
+    // a sample photo's credit, as its licence asks (the photos are Wikimedia Commons files)
+    const creditOf = (src) => { const p = Object.values(PHOTOS).find((v) => v[0] === src); return p ? `Photo: <a href="${esc(p[3])}" target="_blank" rel="noopener">${esc(p[1])}, ${esc(p[2])}&nbsp;${window.BolsterIcons("m-external", 12)}</a>` : ""; };
     const recordFields = d.record?.fields || d.columns.filter((c) => c.priority >= 4).map((c) => c.key);
     const peek = (x) => ({
       heading: d.record?.heading ? fill(d.record.heading, x) : fill(name.title || `{${name.key}}`, x),
       open: d.record?.openLabel || `Open ${n.one}`,
+      // a row with a picture shows it large at the top of its record (D55)
+      photo: name.leading === "thumbnail" && name.thumbFrom && x[name.thumbFrom] ? { src: photoAt(x[name.thumbFrom], 500), credit: creditOf(x[name.thumbFrom]) } : null,
       badge: statusCol ? badge(statusMap[x[statusCol]]) : "",
       amount: figure && x[figure.key] ? (figure.type === "money" ? fmt.money(x[figure.key]) : text(x[figure.key])) : null,
       empty: figure?.empty || "–",

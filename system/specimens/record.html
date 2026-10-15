@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=4b43c57c">
-<link rel="stylesheet" href="specimen.css?v=4b43c57c">
+<link rel="stylesheet" href="../bolster.css?v=ae243dc7">
+<link rel="stylesheet" href="specimen.css?v=ae243dc7">
 <style>.spec-panel .detail.card { position: static; max-block-size: none; inline-size: 24rem; max-inline-size: 100%; }</style>
 <style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
 </head>
@@ -55,16 +55,43 @@
   </section>
 
   <section class="spec-section">
+    <h2>A catalog item, with its photo</h2>
+    <p>A row with a picture (a thumbnail in the list, D55) shows it large at the top of its record: the card's width at 3:2, with the credit its licence asks for under it. A broken link takes the whole figure away. A long value in the fields ends in an ellipsis; the record never scrolls sideways.</p>
+    <div class="spec-panel" data-surface="canvas">
+      <section class="card detail" aria-labelledby="r2-title" style="max-inline-size:24rem">
+        <header class="detail-head">
+          <h2 id="r2-title">1/2 in. drywall, 4×8 sheet</h2>
+          <span class="tooltip-anchor"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-labelledby="r2-open-tip"><i data-icon="m-expand" data-size="12" data-optical></i></button><span class="tooltip" role="tooltip" id="r2-open-tip" data-side="bottom">Edit item</span></span>
+          <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close" data-tip="Close"><i data-icon="xmark" data-size="18" data-optical></i></button>
+        </header>
+        <div class="detail-scroll">
+          <div class="detail-section detail-hero">
+            <figure class="detail-photo"><img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Drywall.jpg/500px-Drywall.jpg" alt="1/2 in. drywall, 4×8 sheet" decoding="async" onerror="this.parentElement.remove()"><figcaption>Photo: <a href="https://commons.wikimedia.org/wiki/File:Drywall.jpg" target="_blank" rel="noopener">Amaxson, Public domain&nbsp;<i data-icon="m-external" data-size="12"></i></a></figcaption></figure>
+            <span class="badge">Drywall</span>
+            <p class="detail-amount">$21<span class="detail-cents">.30</span></p>
+            <p class="detail-sub">per sheet · cost $14.20 + 50% markup</p>
+          </div>
+          <dl class="detail-section detail-fields">
+            <div><dt>Vendor</dt><dd>Lowe's Home Improvement, Maple Grove store and contractor desk</dd></div>
+            <div><dt>Used in</dt><dd>17 estimates</dd></div>
+          </dl>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <section class="spec-section">
     <h2>Rules</h2>
     <ul class="spec-stack" style="max-width:70ch;padding-left:var(--space-5)">
       <li>A list either peeks or opens the record itself on a row click; it says which (D30, L-row-click).</li>
       <li>The timeline runs oldest first: a solid line through what happened, a dashed one to the next step (a hollow ring). Job events wear the status mark they moved the job to.</li>
       <li>Two actions and More on one line; when both don't fit, the second moves into More.</li>
+      <li>A row with a picture shows it large at the top, with its credit (D55). The record scrolls down, never sideways: a long field value ends in an ellipsis.</li>
       <li>The header: the record's name, wrapping rather than cut short, then open and close. Open is the expand icon with a tooltip naming the record (“Open job”): the record grows into its full view in the same tab (D40). ↗ only marks links that leave the app.</li>
     </ul>
   </section>
 </main>
-<script src="../../shared/icons.js?v=4b43c57c"></script>
-<script src="specimen.js?v=4b43c57c"></script>
+<script src="../../shared/icons.js?v=ae243dc7"></script>
+<script src="specimen.js?v=ae243dc7"></script>
 </body>
 </html>

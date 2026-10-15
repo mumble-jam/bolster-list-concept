@@ -464,6 +464,8 @@
     "Popcorn removal": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Popcorn_ceiling_texture_close_up.jpg/120px-Popcorn_ceiling_texture_close_up.jpg", "roskvape", "CC BY 2.0", "https://commons.wikimedia.org/wiki/File:Popcorn_ceiling_texture_close_up.jpg"],
     "Dumpster, 20 yd": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d0/Roll-Off.jpg/120px-Roll-Off.jpg", "Boomer77", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Roll-Off.jpg"],
   };
+  // the same Commons file at another width (120 in a row, 500 in the record)
+  const photoAt = (src, w) => src.replace(/\/\d+px-/, `/${w}px-`);
   const VENDORS = ["ABC Supply", "Home Depot", "Lowe's", "In-house"];
   const items = Object.entries(CATALOG).flatMap(([category, list]) => list.map(([name, unit, cost]) => {
     const markup = [0.25, 0.3, 0.35, 0.4, 0.5][int(0, 4)];
@@ -510,9 +512,9 @@
       badge: `<span class="badge">${esc(x.category)}</span>`, amount: fmt.money(x.price), sub: `per ${x.unit} · cost ${fmt.money(x.cost)} + ${fmt.pct(x.markup)} markup`,
       timeline: [{ what: "Added to the catalog", meta: `${fmt.date(daysFrom(x.updated, -(30 + (hash(x.id) % 300))))} · from ${x.vendor}` }, { what: "Price updated from vendor list", meta: fmt.date(x.updated) }],
       actions: [["Update price", "refresh-cw"], ["Duplicate", "copy"]],
-      fields: [["Vendor", esc(x.vendor)], ["Used in", x.usedIn ? fmt.plural(x.usedIn, "estimate", "estimates") : "Unused"], ["Price updated", fmt.ago(x.updated)],
-        // the photo's credit, as its licence asks; the link leaves the app, so it says so (D40)
-        ...(x.photo ? [["Photo", `<a href="${esc(x.photo[3])}" target="_blank" rel="noopener">${esc(x.photo[1])} · ${esc(x.photo[2])}&nbsp;${window.BolsterIcons("m-external", 12)}</a>`]] : [])],
+      fields: [["Vendor", esc(x.vendor)], ["Used in", x.usedIn ? fmt.plural(x.usedIn, "estimate", "estimates") : "Unused"], ["Price updated", fmt.ago(x.updated)]],
+      // the photo, large at the top (D55), with the credit its licence asks for; the link leaves the app (D40)
+      photo: x.photo ? { src: photoAt(x.photo[0], 500), credit: `Photo: <a href="${esc(x.photo[3])}" target="_blank" rel="noopener">${esc(x.photo[1])}, ${esc(x.photo[2])}&nbsp;${window.BolsterIcons("m-external", 12)}</a>` } : null,
       doc: null,
     }),
   };
@@ -536,7 +538,7 @@
   window.BDS_CONCEPT = {
     TODAY, fmt, esc, ageDays, attrIcons, actionIcons,
     // the parts recipe.js builds a list from a page description with
-    kit: { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, thumb, person, main, PHOTOS, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf, MIN_SAMPLE },
+    kit: { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, thumb, person, main, PHOTOS, photoAt, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf, MIN_SAMPLE },
     configs: { jobs: estimatesConfig, invoices: invoicesConfig, customers: clientsConfig, catalog: itemsConfig },
   };
 })();

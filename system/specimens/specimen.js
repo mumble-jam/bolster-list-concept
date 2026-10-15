@@ -33,7 +33,7 @@
   const header = document.querySelector(".spec-header");
   if (header) {
     const btn = document.createElement("button");
-    btn.type = "button"; btn.className = "button spec-nav-toggle"; btn.dataset.variant = "ghost"; btn.dataset.size = "sm"; btn.dataset.iconOnly = "";
+    btn.type = "button"; btn.className = "button spec-nav-toggle"; btn.dataset.variant = "ghost"; btn.dataset.size = "sm"; btn.dataset.iconOnly = ""; btn.dataset.tip = "Menu";
     btn.setAttribute("aria-label", "Menu"); btn.setAttribute("popovertarget", "spec-nav"); btn.setAttribute("aria-controls", "spec-nav");
     btn.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
     header.prepend(btn);

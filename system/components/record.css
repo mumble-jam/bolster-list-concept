@@ -31,10 +31,19 @@
      the heading data-quiet-focus and it gets no ring; opened from the keyboard, it keeps one */
   .detail-head h2[data-quiet-focus]:focus-visible { outline: none; }
   .detail-head .button svg, .detail-doc-head svg { color: var(--color-content-secondary); }
-  .detail-scroll { overflow: auto; overscroll-behavior: contain; }
+  /* the record scrolls down, never sideways: what's too wide for it shortens or wraps */
+  .detail-scroll { overflow: hidden auto; overscroll-behavior: contain; }
   .detail-section { margin: 0; padding: var(--space-5); }
   .detail-section + .detail-section { border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
   .detail-hero { display: grid; justify-items: start; gap: var(--space-1); }
+  /* a row with a picture (a thumbnail in the list, D55) shows it large at the top of its record, the
+     card's width at 3:2, with its credit under it when its licence asks for one; a broken link takes the
+     whole figure away */
+  .detail-photo { display: grid; gap: var(--space-1); justify-self: stretch; margin: 0 0 var(--space-3); }
+  .detail-photo img { display: block; inline-size: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: var(--radius-md); background: var(--color-surface-tint); box-shadow: inset 0 0 0 var(--border-width-default) color-mix(in srgb, var(--color-content-primary) 8%, transparent); }
+  .detail-photo figcaption { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-tertiary); overflow-wrap: anywhere; }
+  .detail-photo figcaption a { color: inherit; text-decoration: underline; text-decoration-color: color-mix(in srgb, currentColor 40%, transparent); text-underline-offset: 2px; }
+  .detail-photo figcaption svg { display: inline-block; vertical-align: -1px; }
   .detail-amount { margin: var(--space-2) 0 0; font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1.15; font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; }
   .detail-amount.is-empty { color: var(--color-content-tertiary); font-size: var(--text-2xl); }
   .detail-cents { font-size: 0.5em; vertical-align: 0.8em; margin-inline-start: 1px; }
@@ -48,12 +57,12 @@
   /* a record with nothing to do in its state (paid, cancelled) has no action row at all */
   .detail-actions:not(:has(> :not([hidden]))) { display: none; }
   .detail-actions .button svg { flex: none; }
-  .detail-fields { display: grid; gap: var(--space-3); font-size: var(--text-sm); }
+  /* one track no wider than the card: a long value (a name, a link) ends in an ellipsis rather than
+     widening the list and the card with it */
+  .detail-fields { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); font-size: var(--text-sm); }
   .detail-fields > div { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); min-block-size: var(--space-6); }
   .detail-fields dt { flex: none; color: var(--color-content-secondary); }
   .detail-fields dd { margin: 0; min-inline-size: 0; text-align: end; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  /* a link that leaves the app carries its ↗ on the same line (D40) */
-  .detail-fields dd a > svg { display: inline-block; vertical-align: -1px; }
   .detail-fields .cell-person { display: inline-flex; align-items: center; gap: var(--space-2); }
   .detail-doc { display: grid; gap: var(--space-2); }
   .detail-doc-head { display: flex; align-items: center; justify-content: space-between; font-size: var(--text-sm); color: var(--color-content-secondary); }

@@ -1122,6 +1122,7 @@
       </header>
       <div class="detail-scroll">
         <div class="detail-section detail-hero">
+          ${p.photo ? `<figure class="detail-photo"><img src="${esc(p.photo.src)}" alt="${esc(p.heading)}" decoding="async" onerror="this.parentElement.remove()">${p.photo.credit ? `<figcaption>${p.photo.credit}</figcaption>` : ""}</figure>` : ""}
           ${p.badge}
           <p class="detail-amount${p.amount ? "" : " is-empty"}">${p.amount ? money(p.amount) : esc(p.empty)}</p>
           <p class="detail-sub">${esc(p.sub)}</p>
