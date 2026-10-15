@@ -252,7 +252,9 @@ window.BDS_RECIPE = (() => {
     const lead = (x, list) => { const nx = nextOf(x); return nx ? [nx, ...list.filter((a) => label(a) !== label(nx))] : list; };
     const recordActions = (x) => {
       const list = lead(x, d.actions?.byStatus ? d.actions.byStatus[x[statusCol]]?.primary || [] : (d.actions?.row || []).filter((a) => !/^(open|edit)$/i.test(label(a))));
-      return list.filter((a) => typeof a === "string" || !a.menu).slice(0, 2).map((a) => [label(a), ICON[label(a)] || "pen"]);
+      // icons from the description (L-icons); a hand-written one falls back to the concept's own, and
+      // an action with none has none, never a stand-in
+      return list.filter((a) => typeof a === "string" || !a.menu).slice(0, 2).map((a) => [label(a), d.icons?.actions?.[label(a)] || ICON[label(a)] || null]);
     };
     const actionsFor = d.actions?.byStatus && (
       (sel) => sel.length !== 1
@@ -303,6 +305,7 @@ window.BDS_RECIPE = (() => {
       rowActions: d.actions?.row ? d.actions.row.map(label) : ["Open"],
       danger: [...(d.actions?.row || []), ...(d.selection.bulk || []), ...Object.values(d.actions?.byStatus || {}).flatMap((s) => [...(s.primary || []), ...(s.more || [])])].filter((a) => typeof a === "object" && a.tone === "danger").map(label),
       ...(actionsFor ? { actionsFor } : {}),
+      ...(d.icons ? { attrIcons: d.icons.fields, actionIcons: d.icons.actions } : {}),
       selectable: !!d.selection.enabled,
       export: !!d.export,
       ...(d.actions?.next ? { nextFor: (x) => (nextOf(x) ? label(nextOf(x)) : null) } : {}),

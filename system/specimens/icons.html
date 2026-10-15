@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Icon vocabulary · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=650f2eb0">
+<link rel="stylesheet" href="specimen.css?v=650f2eb0">
+<style>
+  .voc { inline-size: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+  .voc th, .voc td { padding: var(--space-2) var(--space-3); border-block-end: var(--border-width-default) solid var(--color-line-subtle); text-align: start; vertical-align: middle; }
+  .voc th { font-size: var(--text-xs); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
+  .voc td:first-child { inline-size: 2.5rem; color: var(--color-content-secondary); }
+  .voc td:first-child svg { display: block; }
+  .voc code { font-size: var(--text-xs); color: var(--color-content-secondary); }
+  .voc .why { color: var(--color-content-secondary); }
+  .voc-wrap { overflow-x: auto; }
+</style>
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Icon vocabulary</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">Icons are meaning, so they belong to the system, not to a page (D58, rule L-icons). One meaning, one icon, everywhere. A field takes its icon from what its key means, else from the record it links to, else from its type; an action from its label, else from its verb. The build writes them into a page's description and the checker holds every page to this list; a meaning it doesn't cover stops the build until an icon is proposed and approved. Seeded from the job list. <span class="badge" data-tone="warning">Proposed</span> marks picks waiting for review. Read from <code>system/model/icons.json</code>, drawn in the menus' size and weight.</p>
+
+  <section class="spec-section">
+    <h2>Vendor orders, resolved</h2>
+    <p>Every field (filter, sort, group and column menus) and every action (the record, the bulk bar, menus) on the built vendor orders page, with the reason it has its icon.</p>
+    <div class="spec-panel voc-wrap"><table class="voc" id="page"></table></div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Fields</h2>
+    <div class="spec-panel voc-wrap"><table class="voc" id="fields"></table></div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Actions</h2>
+    <div class="spec-panel voc-wrap"><table class="voc" id="actions"></table></div>
+  </section>
+</main>
+<script src="../../shared/icons.js?v=650f2eb0"></script>
+<script src="specimen.js?v=650f2eb0"></script>
+<script type="module">
+  import { iconResolver, actionLabels } from "../recipes/icons.mjs";
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+  const vocab = await fetch("../model/icons.json").then((r) => r.json());
+  const proposedKeys = new Set(Object.keys(vocab.proposed));
+  const glyph = (i) => window.BolsterIcons(`m-${i}`, 14) || window.BolsterIcons(i, 16);
+  const flag = (path) => (proposedKeys.has(path) ? ` <span class="badge" data-tone="warning">Proposed</span>` : "");
+  const row = (icon, what, how, path = "") => `<tr><td>${glyph(icon)}</td><td>${what}${flag(path)}</td><td><code>${esc(icon)}</code></td><td class="why">${how}</td></tr>`;
+  const head = (a, b, c) => `<tr><th></th><th>${a}</th><th>Icon</th><th>${c}</th></tr>`;
+
+  document.querySelector("#fields").innerHTML = head("Meaning", "", "From")
+    + Object.entries(vocab.fields.byKey).map(([k, i]) => row(i, `<code>${esc(k)}</code>`, "what the key means", `fields.byKey.${k}`)).join("")
+    + Object.entries(vocab.fields.byRecord).map(([k, i]) => row(i, `a link to a ${esc(k)}`, "the record it links to", `fields.byRecord.${k}`)).join("")
+    + Object.entries(vocab.fields.byType).map(([k, i]) => row(i, `any <code>${esc(k)}</code>`, "its type", `fields.byType.${k}`)).join("");
+  const verbName = (v) => v.verb.replace(/\\b|[\^$()]/g, "").replace(/\|/g, ", ").replace(/\?/g, "").replace(/\.\*/g, " … ");
+  document.querySelector("#actions").innerHTML = head("Action", "", "From")
+    + Object.entries(vocab.actions.byLabel).map(([k, i]) => row(i, esc(k), "its label", `actions.byLabel.${k}`)).join("")
+    + vocab.actions.byVerb.map((v) => row(v.icon, esc(verbName(v)) + (v.proposed ? ` <span class="badge" data-tone="warning">Proposed</span>` : ""), "its verb")).join("");
+
+  const d = await fetch("../../pages/list/vendor-orders.json").then((r) => r.json());
+  const { field, action } = iconResolver(vocab);
+  const fields = [...d.columns, ...(d.fields || [])];
+  document.querySelector("#page").innerHTML = head("Field or action", "", "Why")
+    + fields.map((f) => { const r = field(f); return row(r.icon, `${esc(f.label)} <code>${esc(f.type)}</code>`, esc(r.why), r.path); }).join("")
+    + ["Open", ...actionLabels(d)].map((l) => { const r = action(l); return row(r.icon, esc(l) + (r.proposed ? ` <span class="badge" data-tone="warning">Proposed</span>` : ""), esc(r.why), r.path || ""); }).join("");
+</script>
+</body>
+</html>

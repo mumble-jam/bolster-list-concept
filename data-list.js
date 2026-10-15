@@ -6,6 +6,9 @@
 (() => {
   const { configs, fmt, esc, TODAY, attrIcons, actionIcons } = window.BDS_CONCEPT;
   const { avatar } = window.BDS_CONCEPT.kit;
+  // a built list brings its own icons, from the vocabulary (L-icons); the concept's lists use these maps
+  const attrIcon = (k) => cfg.attrIcons?.[k] ?? attrIcons[k];
+  const actionIcon = (a) => cfg.actionIcons?.[a] ?? actionIcon(a);
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 
@@ -547,7 +550,7 @@
   // red after a rule. In the bulk menus the risky ones confirm and the rest name what's selected.
   function actionItems(list, { bulk = false, peek, nested = false } = {}) {
     const n = st.selected.size, what = n === 1 ? `1 ${cfg.noun[0]}` : `${fmt.count(n)} ${cfg.noun[1]}`;
-    const item = (a) => `<button type="button" class="menu-item" role="menuitem"${destructive(a) ? ' data-tone="danger"' : ""} ${a === "Open" ? `data-peek="${peek}"` : risky(a) && bulk ? `data-confirm="${esc(a)}"` : `data-concept-action="${esc(a)}${bulk ? ` ${what}` : ""}"`}>${mi(actionIcons[a])}${esc(a)}</button>`;
+    const item = (a) => `<button type="button" class="menu-item" role="menuitem"${destructive(a) ? ' data-tone="danger"' : ""} ${a === "Open" ? `data-peek="${peek}"` : risky(a) && bulk ? `data-confirm="${esc(a)}"` : `data-concept-action="${esc(a)}${bulk ? ` ${what}` : ""}"`}>${mi(actionIcon(a))}${esc(a)}</button>`;
     const sectionItems = (g) => g.items.map((i) => g.current === undefined ? item(i)
       : `<button type="button" class="menu-item" role="menuitemradio" aria-checked="${i === g.current}" data-concept-action="${esc(g.label)} to ${esc(i.toLowerCase())}${bulk ? ` for ${what}` : ""}"><span class="menu-icon"></span>${esc(i)}${i === g.current ? I.check : ""}</button>`).join("");
     const plain = list.filter((a) => typeof a === "string" && !risky(a));
@@ -632,7 +635,7 @@
     const dis = n ? "" : " disabled";
     // 14 Regular beside labels on desktop; 20 over them on phones, in Light, so the lines stay as thin (D41)
     const glyph = (name) => (phoneMQ.matches ? ic(name, 20) : ic(`m-${name}`, 14));
-    const icon = (a) => { const name = typeof a === "string" ? actionIcons[a] : a.icon; return name ? glyph(name) : ""; };
+    const icon = (a) => { const name = typeof a === "string" ? actionIcon(a) : a.icon; return name ? glyph(name) : ""; };
     const label = (t) => `<span class="floating-bar-label">${esc(t)}</span>`;
     const chev = `<span class="floating-bar-chev" aria-hidden="true">${I.chev}</span>`;
     const btn = (inner, attrs) => `<button type="button" class="button" data-variant="ghost" data-size="sm"${dis} ${attrs}>${inner}</button>`;
@@ -1023,7 +1026,7 @@
         pop.innerHTML = `${head}<form data-range><div class="range">${box("range-min", "Minimum", v.min)}${box("range-max", "Maximum", v.max)}</div><div class="pop-foot"><button class="button" data-size="sm">Apply</button></div></form>`;
       }
     } else if (p.kind === "add") {
-      pop.innerHTML = `<div class="pop-body"><div class="pop-section">Filter by</div>${addable().map((f) => `<button type="button" class="menu-item" role="menuitem" data-add="${f.key}">${mi(attrIcons[f.key])}${esc(f.label)}</button>`).join("")}</div>`;
+      pop.innerHTML = `<div class="pop-body"><div class="pop-section">Filter by</div>${addable().map((f) => `<button type="button" class="menu-item" role="menuitem" data-add="${f.key}">${mi(attrIcon(f.key))}${esc(f.label)}</button>`).join("")}</div>`;
     } else if (p.kind === "info") {
       pop.innerHTML = `<div class="pop-note"><h3>${esc(cfg.insight.label)}</h3><p>${terms(cfg.insight.info)}</p></div>`;
     } else if (p.kind === "view") {
@@ -1034,11 +1037,11 @@
       const opt = cfg.columns.filter((c) => !c.required);
       const shown = opt.filter((c) => !st.hidden.includes(c.key)).length;
       const item = (role, on, attrs, label, icon) => `<button type="button" class="menu-item" role="${role}" aria-checked="${on}" ${attrs}>${mi(icon)}<span class="submenu-label">${esc(label)}</span>${on ? I.check : ""}</button>`;
-      const sortItems = cfg.columns.map((c) => item("menuitemradio", st.sort.key === c.key, `data-sort-pick="${c.key}" data-focus-key="s-${c.key}"`, c.label, attrIcons[c.key])).join("")
+      const sortItems = cfg.columns.map((c) => item("menuitemradio", st.sort.key === c.key, `data-sort-pick="${c.key}" data-focus-key="s-${c.key}"`, c.label, attrIcon(c.key))).join("")
         + "<hr>" + [["asc", "Ascending", "sort-asc"], ["desc", "Descending", "sort"]].map(([d, l, i]) => item("menuitemradio", st.sort.dir === d, `data-dir-pick="${d}" data-focus-key="dir-${d}"`, l, i)).join("");
-      const groupItems = [["", "None"], ...cfg.groups.map((k) => [k, filterDef(k).label])].map(([v, l]) => item("menuitemradio", (st.group || "") === v, `data-group-pick="${v}" data-focus-key="g-${v || "none"}"`, l, v ? attrIcons[v] : "list")).join("");
+      const groupItems = [["", "None"], ...cfg.groups.map((k) => [k, filterDef(k).label])].map(([v, l]) => item("menuitemradio", (st.group || "") === v, `data-group-pick="${v}" data-focus-key="g-${v || "none"}"`, l, v ? attrIcon(v) : "list")).join("");
       const densityItems = [["comfortable", "Comfortable"], ["compact", "Compact"]].map(([v, l]) => item("menuitemradio", st.density === v, `data-density-pick="${v}" data-focus-key="d-${v}"`, l)).join("");
-      const colItems = opt.map((c) => item("menuitemcheckbox", !st.hidden.includes(c.key), `data-col-toggle="${c.key}" data-focus-key="c-${c.key}"`, c.label, attrIcons[c.key])).join("");
+      const colItems = opt.map((c) => item("menuitemcheckbox", !st.hidden.includes(c.key), `data-col-toggle="${c.key}" data-focus-key="c-${c.key}"`, c.label, attrIcon(c.key))).join("");
       pop.innerHTML = `<div class="pop-body">
         ${sub("sort", "Sort by", "sort", cfg.columns.find((c) => c.key === st.sort.key)?.label ?? "", sortItems, " pop-phone-only")}
         ${cfg.groups.length ? sub("group", "Group by", "layers", st.group ? filterDef(st.group).label : "None", groupItems) : "" /* L-group: only where people group the list */}
@@ -1058,7 +1061,7 @@
       // the risky ones go last, after a rule (L-risky), red when they can't be undone, whatever their
       // place in the list
       const safe = acts.filter((a) => !risky(a)), danger = acts.filter(risky);
-      const btn = (a) => `<button type="button" class="menu-item" role="menuitem"${destructive(a) ? ' data-tone="danger"' : ""} ${a === "Open" || a === "Edit" ? `data-peek="${p.key}"` : `data-concept-action="${esc(a)}"`}>${mi(actionIcons[a])}${esc(a)}</button>`;
+      const btn = (a) => `<button type="button" class="menu-item" role="menuitem"${destructive(a) ? ' data-tone="danger"' : ""} ${a === "Open" || a === "Edit" ? `data-peek="${p.key}"` : `data-concept-action="${esc(a)}"`}>${mi(actionIcon(a))}${esc(a)}</button>`;
       pop.innerHTML = `<div class="pop-body">${safe.map(btn).join("")}${safe.length && danger.length ? "<hr>" : ""}${danger.map(btn).join("")}</div>`;
     }
     pop.style.inlineSize = p.kind === "row" || p.kind === "bulk" || p.kind === "add" ? "auto" : p.kind === "info" ? "16rem" : "";
@@ -1132,7 +1135,7 @@
           <p class="detail-amount${p.amount ? "" : " is-empty"}">${p.amount ? money(p.amount) : esc(p.empty)}</p>
           <p class="detail-sub">${esc(p.sub)}</p>
           ${timelineHtml(p.timeline)}
-          <div class="detail-actions">${p.actions.map(([l, i]) => `<button type="button" class="button" data-variant="secondary" data-concept-action="${esc(l)}">${ic(`m-${i}`, 14, { optical: true })}${esc(l)}</button>`).join("")}<button type="button" class="button" data-variant="secondary" data-row-menu="${x.id}" aria-haspopup="menu" aria-expanded="false">More${I.chev}</button></div>
+          <div class="detail-actions">${p.actions.map(([l, i]) => `<button type="button" class="button" data-variant="secondary" data-concept-action="${esc(l)}">${i ? ic(`m-${i}`, 14, { optical: true }) : ""}${esc(l)}</button>`).join("")}<button type="button" class="button" data-variant="secondary" data-row-menu="${x.id}" aria-haspopup="menu" aria-expanded="false">More${I.chev}</button></div>
         </div>
         ${p.related?.length ? `<div class="detail-section detail-related"><h3>Related</h3><dl class="detail-fields">${p.related.map(([k, r]) => `<div><dt>${esc(k)}</dt><dd><a href="#${esc(r.id || "")}" class="detail-link" data-concept-action="Open ${esc(k.toLowerCase())}: ${esc(r.name)}">${r.initials ? avatar(r, "sm") : ""}<span>${esc(r.name)}</span></a></dd></div>`).join("")}</dl></div>` : ""}
         <dl class="detail-section detail-fields">${p.fields.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join("")}</dl>
