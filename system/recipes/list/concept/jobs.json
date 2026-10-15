@@ -406,7 +406,8 @@
     ],
     "timeline": true,
     "document": "Proposal",
-    "openLabel": "Open job"
+    "openLabel": "Open job",
+    "related": ["client"]
   },
   "assumptions": [
     {"field": "columns[key=job].leading", "value": "avatar of the client", "why": "The product designer, 15 Oct 2026: the job list keeps its customer's avatar (D55)."}

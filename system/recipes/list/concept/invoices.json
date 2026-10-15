@@ -83,7 +83,7 @@
     {
       "key": "job",
       "label": "Job",
-      "type": "text"
+      "type": "record"
     }
   ],
   "status": {
@@ -262,7 +262,8 @@
     ],
     "timeline": true,
     "document": "Invoice",
-    "openLabel": "Open invoice"
+    "openLabel": "Open invoice",
+    "related": ["client", "job"]
   },
   "assumptions": [
     {"field": "columns[key=invoice].leading", "value": "avatar of the client", "why": "The concept's own invoice list (data.js), reviewed with the product designer: the customer's avatar, as on the job list."}

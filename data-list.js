@@ -5,6 +5,7 @@
 
 (() => {
   const { configs, fmt, esc, TODAY, attrIcons, actionIcons } = window.BDS_CONCEPT;
+  const { avatar } = window.BDS_CONCEPT.kit;
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 
@@ -1133,6 +1134,7 @@
           ${timelineHtml(p.timeline)}
           <div class="detail-actions">${p.actions.map(([l, i]) => `<button type="button" class="button" data-variant="secondary" data-concept-action="${esc(l)}">${ic(`m-${i}`, 14, { optical: true })}${esc(l)}</button>`).join("")}<button type="button" class="button" data-variant="secondary" data-row-menu="${x.id}" aria-haspopup="menu" aria-expanded="false">More${I.chev}</button></div>
         </div>
+        ${p.related?.length ? `<div class="detail-section detail-related"><h3>Related</h3><dl class="detail-fields">${p.related.map(([k, r]) => `<div><dt>${esc(k)}</dt><dd><a href="#${esc(r.id || "")}" class="detail-link" data-concept-action="Open ${esc(k.toLowerCase())}: ${esc(r.name)}">${r.initials ? avatar(r, "sm") : ""}<span>${esc(r.name)}</span></a></dd></div>`).join("")}</dl></div>` : ""}
         <dl class="detail-section detail-fields">${p.fields.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join("")}</dl>
         ${p.doc ? `<div class="detail-section detail-doc"><div class="detail-doc-head"><span>${esc(p.doc.label)}</span><button type="button" class="link-button" data-concept-action="${esc(p.doc.view)}">${esc(p.doc.view)}</button></div><button type="button" class="detail-file" data-concept-action="Download ${esc(p.doc.name)}">${ic("m-file", 14)}<span>${esc(p.doc.name)}</span>${ic("m-download", 14)}</button></div>` : ""}
       </div>`;
@@ -1325,6 +1327,7 @@
     }
     if (q("[data-retry]")) { st.mode = "loading"; render(); setTimeout(() => { st.mode = "ready"; render(); }, 900); return; }
     if ((el = q("[data-concept-action]"))) {
+      if (el.tagName === "A") e.preventDefault(); // a related record's link: the concept has no page behind it
       if (pop.contains(el)) pop.hidePopover();
       toast(`Concept only: “${el.dataset.conceptAction}” isn't wired up.`);
       return;

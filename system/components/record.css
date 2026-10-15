@@ -64,6 +64,15 @@
   .detail-fields dt { flex: none; color: var(--color-content-secondary); }
   .detail-fields dd { margin: 0; min-inline-size: 0; text-align: end; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .detail-fields .cell-person { display: inline-flex; align-items: center; gap: var(--space-2); }
+  /* related records (L-related): every record the thing connects to, as a link to it, its kind on the
+     left like a field's label; a link stays in the app, so no ↗ (D40) */
+  .detail-related { display: grid; gap: var(--space-3); }
+  .detail-related h3 { margin: 0; font-family: var(--font-sans); font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
+  .detail-related .detail-fields { padding: 0; }
+  .detail-link { display: inline-flex; align-items: center; gap: var(--space-2); max-inline-size: 100%; color: var(--color-content-link); text-decoration: none; border-radius: var(--radius-xs); }
+  .detail-link > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  @media (hover: hover) { .detail-link:hover > span:last-child { text-decoration: underline; text-underline-offset: 2px; } }
+  .detail-link:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
   .detail-doc { display: grid; gap: var(--space-2); }
   .detail-doc-head { display: flex; align-items: center; justify-content: space-between; font-size: var(--text-sm); color: var(--color-content-secondary); }
   .detail .link-button { display: inline-flex; align-items: center; gap: var(--space-1); padding: 0; border: 0; background: none; color: var(--color-content-link); font: inherit; font-size: var(--text-sm); cursor: pointer; }

@@ -263,7 +263,7 @@ window.BDS_RECIPE = (() => {
     // ---------- the record (peek) ----------
     // a sample photo's credit, as its licence asks (the photos are Wikimedia Commons files)
     const creditOf = (src) => { const p = Object.values(PHOTOS).find((v) => v[0] === src); return p ? `Photo: <a href="${esc(p[3])}" target="_blank" rel="noopener">${esc(p[1])}, ${esc(p[2])}&nbsp;${window.BolsterIcons("m-external", 12)}</a>` : ""; };
-    const recordFields = d.record?.fields || d.columns.filter((c) => c.priority >= 4).map((c) => c.key);
+    const recordFields = (d.record?.fields || d.columns.filter((c) => c.priority >= 4).map((c) => c.key)).filter((k) => !d.record?.related?.includes(k));
     const peek = (x) => ({
       heading: d.record?.heading ? fill(d.record.heading, x) : fill(name.title || `{${name.key}}`, x),
       open: d.record?.openLabel || `Open ${n.one}`,
@@ -275,6 +275,8 @@ window.BDS_RECIPE = (() => {
       sub: fill(name.detail, x),
       timeline: d.record?.timeline === false ? [] : [{ what: `${cap(n.one)} created`, meta: fmt.date(dates[0] ? x[dates[0].key] : TODAY) }],
       actions: recordActions(x),
+      // the records it connects to, as links (L-related)
+      related: (d.record?.related || []).filter((k) => byKey[k] && x[k]).map((k) => [byKey[k].label || cap(k), typeof x[k] === "object" ? x[k] : { name: text(x[k]) }]),
       // each field reads as its type does in the list (L-types): money as money, a date as a date
       fields: recordFields.filter((k) => byKey[k]).map((k) => [byKey[k].label || cap(k), byKey[k].type === "person" ? person(x[k]) : byKey[k].type === "status" ? badge(statusMap[x[k]]) : byKey[k].type === "kinds" ? esc(kindsText(byKey[k], x[k]) || "–") : x[k] == null || x[k] === "" ? "–" : cellOf(byKey[k], { statusMap })(x)]),
       doc: d.record?.document ? { label: d.record.document, name: `${d.record.document.replace(/\s+/g, "-")}-${idKey ? text(x[idKey]) : x.id}.pdf`, view: `View ${d.record.document.toLowerCase()}` } : null,

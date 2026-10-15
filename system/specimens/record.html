@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=1b8023c2">
-<link rel="stylesheet" href="specimen.css?v=1b8023c2">
+<link rel="stylesheet" href="../bolster.css?v=5901d266">
+<link rel="stylesheet" href="specimen.css?v=5901d266">
 <style>.spec-panel .detail.card { position: static; max-block-size: none; inline-size: 24rem; max-inline-size: 100%; }</style>
 <style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
 </head>
@@ -43,6 +43,9 @@
             </ol>
             <div class="detail-actions"><button type="button" class="button" data-variant="secondary"><i data-icon="m-pen" data-size="14" data-optical></i>Edit</button><button type="button" class="button" data-variant="secondary"><i data-icon="m-file-invoice" data-size="14" data-optical></i>Invoice this project</button><button type="button" class="button" data-variant="secondary">More<i data-icon="chevron-down" data-size="14"></i></button></div>
           </div>
+          <div class="detail-section detail-related"><h3>Related</h3><dl class="detail-fields">
+            <div><dt>Client</dt><dd><a href="#" class="detail-link"><span class="avatar" data-size="sm" data-color="5" aria-hidden="true">IF</span><span>Ingrid Ferreira</span></a></dd></div>
+          </dl></div>
           <dl class="detail-section detail-fields">
             <div><dt>Owner</dt><dd><span class="cell-person"><span class="avatar" data-size="sm" data-color="3">DO</span>Dana Okafor</span></dd></div>
             <div><dt>Source</dt><dd>Referral</dd></div>
@@ -86,12 +89,13 @@
       <li>A list either peeks or opens the record itself on a row click; it says which (D30, L-row-click).</li>
       <li>The timeline runs oldest first: a solid line through what happened, a dashed one to the next step (a hollow ring). Job events wear the status mark they moved the job to.</li>
       <li>Two actions and More on one line; when both don't fit, the second moves into More.</li>
+      <li>Related: a link to every record the thing connects to (the job's client; an order's vendor, job and the job's client), its kind on the left; they stay out of the fields, and View job isn't repeated in More (D57, L-related).</li>
       <li>A row with a picture shows it large at the top, with its credit (D55). The record scrolls down, never sideways: a long field value ends in an ellipsis.</li>
       <li>The header: the record's name, wrapping rather than cut short, then open and close. Open is the expand icon with a tooltip naming the record (“Open job”): the record grows into its full view in the same tab (D40). ↗ only marks links that leave the app.</li>
     </ul>
   </section>
 </main>
-<script src="../../shared/icons.js?v=1b8023c2"></script>
-<script src="specimen.js?v=1b8023c2"></script>
+<script src="../../shared/icons.js?v=5901d266"></script>
+<script src="specimen.js?v=5901d266"></script>
 </body>
 </html>

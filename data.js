@@ -238,7 +238,9 @@
         timeline: ev,
         // the record's two buttons: Bolster's first actions for the status (the rest are under More)
         actions: { draft: [["Edit", "pen"], ["Duplicate", "copy"]], pending: [["Send now", "send"], ["Sign and book now", "file-signature"]], booked: [["Invoice this project", "file-invoice"], ["Review customer", "star"]], "in-progress": [["Invoice this project", "file-invoice"], ["Review customer", "star"]], declined: [["Edit", "pen"], ["Duplicate", "copy"]] }[x.status],
-        fields: [["Client", person(x.client)], ["Owner", person(x.owner)], ["Created", fmt.date(x.created)], ["Last activity", fmt.ago(x.modified)], ["Source", esc(x.source)]],
+        // the records the job connects to, as links (L-related)
+        related: [["Client", x.client]],
+        fields: [["Owner", person(x.owner)], ["Created", fmt.date(x.created)], ["Last activity", fmt.ago(x.modified)], ["Source", esc(x.source)]],
         doc: x.status === "draft" ? null : { label: "Proposal", name: `Proposal-${x.number}.pdf`, view: "View proposal" },
       };
     },
@@ -333,7 +335,8 @@
         badge: badge(INV_STATUS[x.status]), amount: fmt.money(x.status === "paid" ? x.amount : x.balance), sub: x.status === "paid" ? `${x.number} · paid in full` : x.balance < x.amount ? `${x.number} · balance of ${fmt.money(x.amount)}` : `${x.number} · ${x.job}`,
         timeline: ev,
         actions: { draft: [["Send", "send"], ["Edit", "pen"]], outstanding: [["Send reminder", "bell"], ["Record payment", "credit-card"]], overdue: [["Send reminder", "bell"], ["Record payment", "credit-card"]], paid: [["Duplicate", "copy"], ["Edit", "pen"]] }[x.status],
-        fields: [["Client", person(x.client)], ["Job", esc(x.job)], ["Issued", fmt.date(x.issued)], ["Due", fmt.date(x.due)], ["Owner", person(x.owner)]],
+        related: [["Client", x.client], ["Job", { name: x.job }]],
+        fields: [["Issued", fmt.date(x.issued)], ["Due", fmt.date(x.due)], ["Owner", person(x.owner)]],
         doc: { label: "Invoice", name: `Invoice-${x.number}.pdf`, view: "View invoice" },
       };
     },
