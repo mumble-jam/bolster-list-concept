@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=6a9208a4">
-<link rel="stylesheet" href="specimen.css?v=6a9208a4">
+<link rel="stylesheet" href="../bolster.css?v=9fad5cb0">
+<link rel="stylesheet" href="specimen.css?v=9fad5cb0">
 <style>
   .rule-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr)); }
   .rule-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
@@ -32,7 +32,7 @@
   <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
 </header>
 <main class="spec-main">
-  <p class="spec-intro">How any list page in Bolster is described, and the rules it follows. One set of files serves two readers: this page (the back office, for people) and the <code>bolster-page</code> skill (the front office, for Claude), which explores a live page (or reads a screenshot) and, with a short survey, turns it into a page description. 26 rules, 25 decided and 1 proposed. Generated from <code>system/recipes/list/rules.json</code> and <code>schema.json</code> by <code>scripts/build-rules.mjs</code>; don't edit it by hand.</p>
+  <p class="spec-intro">How any list page in Bolster is described, and the rules it follows. One set of files serves two readers: this page (the back office, for people) and the <code>bolster-page</code> skill (the front office, for Claude), which explores a live page (or reads a screenshot) and, with a short survey, turns it into a page description. 27 rules, 26 decided and 1 proposed. Generated from <code>system/recipes/list/rules.json</code> and <code>schema.json</code> by <code>scripts/build-rules.mjs</code>; don't edit it by hand.</p>
 
   <section class="spec-section">
     <h2>How a page gets made</h2>
@@ -132,6 +132,15 @@
       <p class="text-secondary"><b>Why:</b> The same stage looks the same in every list. The shapes were drawn for a job's progress; on another list's statuses they'd promise a meaning they don't have. The label carries the meaning, so colour is never the only signal.</p>
       
       <p class="rule-meta"><span class="badge">schema</span> <span class="badge">renderer</span> <span class="text-secondary">· D12, Product designer, 14 Oct 2026: shapes for the job list only, dots elsewhere, Product designer, 15 Oct 2026</span></p>
+    </div>
+  </article>
+  <article class="card rule-card" id="L-sample">
+    <header class="card-header rule-head"><h3><code>L-sample</code> Sample data tells each row's story, from the model</h3><span class="badge" data-tone="success">Decided</span></header>
+    <div class="card-body rule-body">
+      <p>Sample data is built from the model, one coherent story per row: its status decides the steps it went through (the lifecycle's path, endings from where they come from), the steps decide its dates (in order, never after today), and a field that belongs to a step it didn't reach stays empty (no sent date on a draft, no decline reason on a cancelled order). The record's timeline is that story: each step it reached as its event (“Sent to {vendor}”, with when, who and a note where the model has them), then the next step, dashed. The sample covers what testing needs: every status has rows, with zeros and empty fields among them; ids in the source's format; reasons and names that read like real ones. The renderer checks its sample against the lifecycle and says on the page where it doesn't hold.</p>
+      <p class="text-secondary"><b>Why:</b> Sample data that contradicts itself (a declined order that was never sent) hides real problems and invents fake ones; read from the model, it tests the design the way real data will.</p>
+      
+      <p class="rule-meta"><span class="badge">renderer</span> <span class="text-secondary">· D62, Product designer, 15 Oct 2026</span></p>
     </div>
   </article>
   <article class="card rule-card" id="L-summary">
@@ -327,7 +336,7 @@
     
   <h3 class="field-title">Status value</h3>
   <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>Field</th><th>Takes</th><th>Means</th></tr></thead>
-  <tbody><tr><td><code>value</code> <span class="text-tertiary">required</span></td><td>string</td><td></td></tr><tr><td><code>label</code> <span class="text-tertiary">required</span></td><td>string</td><td></td></tr><tr><td><code>stage</code> <span class="text-tertiary">required</span></td><td><code>new</code> · <code>draft</code> · <code>waiting</code> · <code>won</code> · <code>underway</code> · <code>done</code> · <code>lost</code> · <code>late</code> · <code>neutral</code></td><td>Where the value sits in the lifecycle; picks its colour and shape.</td></tr><tr><td><code>derived</code></td><td>string</td><td>For a status worked out from other fields rather than set by people: how, in words (“outstanding and past its due date”). A row that meets it shows this status instead of its stored one, and counts only here; list it right after the status it comes from.</td></tr></tbody></table></div>
+  <tbody><tr><td><code>value</code> <span class="text-tertiary">required</span></td><td>string</td><td></td></tr><tr><td><code>label</code> <span class="text-tertiary">required</span></td><td>string</td><td></td></tr><tr><td><code>stage</code> <span class="text-tertiary">required</span></td><td><code>new</code> · <code>draft</code> · <code>waiting</code> · <code>won</code> · <code>underway</code> · <code>done</code> · <code>lost</code> · <code>late</code> · <code>neutral</code></td><td>Where the value sits in the lifecycle; picks its colour and shape.</td></tr><tr><td><code>derived</code></td><td>string</td><td>For a status worked out from other fields rather than set by people: how, in words (“outstanding and past its due date”). A row that meets it shows this status instead of its stored one, and counts only here; list it right after the status it comes from.</td></tr><tr><td><code>event</code></td><td>object</td><td>How reaching this status reads in a record's timeline (L-sample): what happened, when (a date field), who (a person field), and a note (a field, such as a decline reason).</td></tr><tr><td><code>from</code></td><td>list of string</td><td>The statuses a row can reach this one from. Left out: the one listed before it (the main path); endings name theirs (Declined from Awaiting approval).</td></tr></tbody></table></div>
     
   <h3 class="field-title">Field</h3>
   <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>Field</th><th>Takes</th><th>Means</th></tr></thead>
@@ -344,6 +353,6 @@
     <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>File</th><th>What it is</th><th>Check</th></tr></thead><tbody><tr><td><code>concept/catalog.json</code></td><td>9 columns · no status · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/customers.json</code></td><td>9 columns · 3 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/invoices.json</code></td><td>8 columns · 4 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/jobs.json</code></td><td>8 columns · 5 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr></tbody></table></div>
   </section>
 </main>
-<script src="specimen.js?v=6a9208a4"></script>
+<script src="specimen.js?v=9fad5cb0"></script>
 </body>
 </html>

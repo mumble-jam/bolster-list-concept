@@ -45,6 +45,8 @@ window.BDS_RECIPE = (() => {
   const TRADE = ["Framing", "Drywall Co.", "Insulation", "Electric", "Plumbing", "Painting", "Supply", "Roofing"];
   const company = (i) => `${PREFIX[(i * 7) % PREFIX.length]} ${TRADE[Math.floor(i / PREFIX.length) % TRADE.length]}`;
   const ITEMS = Object.entries(CATALOG).flatMap(([cat, list]) => list.map(([name, unit, cost]) => ({ name, unit, cost, cat })));
+  // what a reason field says (a decline or cancel reason), so the sample reads like one
+  const REASONS = ["Price is higher than quoted", "Can't deliver before the start date", "Out of stock", "Wrong items on the order", "Duplicate of another order", "Job was put on hold"];
   // an id in the format the source writes it: “#0003” → #0001, #0002…; a long one (“#29599975514”)
   // keeps its length with digits of its own. No format recorded: a plain running number
   const idLike = (format, i, r) => {
@@ -84,7 +86,7 @@ window.BDS_RECIPE = (() => {
           if (/item|product|material/.test(k) || /item|product|material/.test(n.one)) { row._item = pick(ITEMS); return row._item.name; }
           if (/job|project|quote|estimate/.test(k) || /job|project|quote|estimate/.test(n.one)) return pick(JOBS);
           return /vendor|sub|supplier|company/.test(k + n.one) ? company(i) : row._client.name;
-        default: return /unit/.test(k) ? row._item?.unit || pick(UNITS) : /job|project|quote/.test(k) ? pick(JOBS) : `${f.label || cap(f.key)} ${i + 1}`;
+        default: return /reason/.test(k) ? pick(REASONS) : /unit/.test(k) ? row._item?.unit || pick(UNITS) : /job|project|quote/.test(k) ? pick(JOBS) : `${f.label || cap(f.key)} ${i + 1}`;
       }
     };
   }
@@ -165,6 +167,39 @@ window.BDS_RECIPE = (() => {
     const shapes = d.status?.marks === true && d.nav === "job-list";
     const statusMap = Object.fromEntries((d.status?.values || []).map((v) => { const { mark, ...look } = STAGE[v.stage]; return [v.value, { label: v.label, ...look, ...(shapes && mark ? { mark } : {}) }]; }));
 
+    // ---------- a row's story (L-sample): its status decides the steps it went through, the steps their
+    // dates, in order and never after today, and a field that belongs to a step it didn't reach stays
+    // empty. The record's timeline is the same story.
+    const lifecycle = (d.status?.values || []).some((v) => v.event);
+    const SV = Object.fromEntries((d.status?.values || []).map((v, j) => [v.value, { ...v, from: v.from || (j ? [order[j - 1]] : []) }]));
+    const weighted = (list) => { let w = r() * list.reduce((s, v) => s + (WEIGHT[v.stage] || 10), 0); return list.find((v) => (w -= WEIGHT[v.stage] || 10) <= 0)?.value || list[0].value; };
+    const stepFields = new Set((d.status?.values || []).flatMap((v) => [v.event?.at, v.event?.note]).filter(Boolean));
+    function story(x) {
+      const path = [x[statusCol]];
+      for (let k = 0; k < 12; k++) { const fr = SV[path[0]].from; if (!fr.length) break; path.unshift(fr[Math.floor(r() * fr.length)]); }
+      const kept = Object.fromEntries([...stepFields].map((k) => [k, x[k]]));
+      for (const k of stepFields) x[k] = null;
+      // the first step's date, early enough that the rest fit before today
+      const first = SV[path[0]].event?.at;
+      let t = first && kept[first] instanceof Date ? kept[first] : daysAgo(30);
+      const room = path.length * 6;
+      if (ageDays(t) < room) t = daysFrom(TODAY, -(room + Math.floor(r() * 30)));
+      x._story = path.map((s, j) => {
+        if (j) { t = daysFrom(t, Math.floor(r() * 5) + 1); if (t > TODAY) t = new Date(+TODAY - Math.floor(r() * 6) * 3600e3); }
+        const e = SV[s].event || {};
+        if (e.at) x[e.at] = t;
+        if (e.note) x[e.note] = kept[e.note] ?? null;
+        return { status: s, at: t };
+      });
+    }
+    // the sample checks itself against the lifecycle, and says so on the page if it doesn't hold
+    function contradictions(x) {
+      const reached = new Set((x._story || []).map((s) => s.status)), out = [];
+      for (const v of d.status.values) for (const k of [v.event?.at, v.event?.note]) if (k && reached.has(v.value) !== (x[k] != null && x[k] !== "")) out.push(`${k} ${reached.has(v.value) ? "missing" : "set"} on a ${v.label.toLowerCase()} row`);
+      (x._story || []).forEach((s, j, all) => { if (j && s.at < all[j - 1].at) out.push("steps out of order"); if (s.at > TODAY) out.push("a step after today"); });
+      return out;
+    }
+
     // ---------- rows ----------
     const gen = sample(r, n);
     const pickClient = () => CLIENTS[Math.floor(r() * CLIENTS.length)];
@@ -172,7 +207,11 @@ window.BDS_RECIPE = (() => {
       const x = { id: `${id || d.nav}-${i + 1}`, _client: pickClient() };
       for (const f of fields) if (f.type !== "status" && f.type !== "image") x[f.key] = gen(f, x, i);
       for (const f of fields) if (f.type === "image") x[f.key] = gen(f, x, i); // once the name has picked its item
-      if (statusCol) {
+      if (statusCol && lifecycle) {
+        // every status gets rows (the first ones go round them), the rest by how common each stage is
+        x[statusCol] = i < stored.length * 2 ? stored[i % stored.length].value : weighted(stored);
+        story(x);
+      } else if (statusCol) {
         let x2 = r() * stored.reduce((s, v) => s + (WEIGHT[v.stage] || 10), 0);
         x[statusCol] = stored.find((v) => (x2 -= WEIGHT[v.stage] || 10) <= 0)?.value || stored[0].value;
         // a derived status (past due) takes some of the rows of the status listed just before it
@@ -195,6 +234,10 @@ window.BDS_RECIPE = (() => {
       }
       return x;
     });
+    if (lifecycle) {
+      const bad = rows.flatMap(contradictions);
+      if (bad.length) notes.push(`Sample data contradicts the lifecycle in ${bad.length} places (${[...new Set(bad)].slice(0, 3).join("; ")}).`);
+    }
 
     // ---------- columns: alignment, width, phone slot and visibility follow type and priority ----------
     const name = d.columns.find((c) => c.priority === 1);
@@ -309,7 +352,13 @@ window.BDS_RECIPE = (() => {
       amount: figure && x[figure.key] ? (figure.type === "money" ? fmt.money(x[figure.key]) : text(x[figure.key])) : null,
       empty: figure?.empty || "–",
       sub: fill(name.detail, x, asText(x)),
-      timeline: d.record?.timeline === false ? [] : [{ what: `${cap(n.one)} created`, meta: fmt.date(dates[0] ? x[dates[0].key] : TODAY) }],
+      timeline: d.record?.timeline === false ? [] : x._story ? [
+        ...x._story.map(({ status, at }) => {
+          const e = SV[status].event || {}, who = e.by && x[e.by] ? x[e.by].name : "", note = e.note ? text(x[e.note]) : "";
+          return { what: fill(e.what, x, asText(x)) || SV[status].label, meta: [fmt.date(at), who, note].filter(Boolean).join(" · "), ...(SV[status].stage === "lost" ? { tone: "danger" } : {}) };
+        }),
+        ...(nextOf(x) ? [{ what: label(nextOf(x)), meta: "Next step", next: true }] : []),
+      ] : [{ what: `${cap(n.one)} created`, meta: fmt.date(dates[0] ? x[dates[0].key] : TODAY) }],
       actions: recordActions(x),
       // the records it connects to, as links (L-related)
       related: (d.record?.related || []).filter((k) => byKey[k] && x[k]).map((k) => [byKey[k].label || cap(k), typeof x[k] === "object" ? x[k] : { name: text(x[k]) }]),
