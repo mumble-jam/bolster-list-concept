@@ -3,18 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Data table, cards and avatars · Bolster DS</title>
+<title>Data table, cards, avatars and thumbnails · Bolster DS</title>
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=26a44821">
-<link rel="stylesheet" href="specimen.css?v=26a44821">
+<link rel="stylesheet" href="../bolster.css?v=4d53c73a">
+<link rel="stylesheet" href="specimen.css?v=4d53c73a">
 <style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
 </head>
 <body>
 <header class="spec-header">
   <a href="../index.html">← Catalog</a>
-  <h1>Data table, cards and avatars</h1>
+  <h1>Data table, cards, avatars and thumbnails</h1>
   <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
 </header>
 <main class="spec-main">
@@ -86,7 +86,16 @@
       <div class="spec-row" style="margin-top:var(--space-4)"><span class="avatar" data-size="sm" data-color="2">MK</span><span class="avatar" data-color="2">MK</span><span class="avatar" data-size="lg" data-color="2">MK</span><span class="spec-note">24 · 32 · 40</span></div>
     </div>
   </section>
+  <section class="spec-section">
+    <h2>Thumbnails</h2>
+    <p>A photo of a thing, such as a catalog item (D55). What sits before a row's name is a slot: an avatar for a person or company (round), a thumbnail for a thing (square), an icon, or nothing, page by page. The photo lies over a placeholder, the image icon on a quiet tint, so while it loads, where there's none, or when its link breaks, the placeholder shows. A list with photos keeps them on phones, down the left of each item; a list without any drops the slot there, as it drops avatars.</p>
+    <div class="spec-panel">
+      <div class="spec-row"><span class="thumb"><i data-icon="image" data-size="16"></i><img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Drywall.jpg/120px-Drywall.jpg" alt="" loading="lazy" onerror="this.remove()"></span><span class="thumb"><i data-icon="image" data-size="16"></i></span><span class="thumb"><i data-icon="image" data-size="16"></i><img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/Missing.jpg/120px-Missing.jpg" alt="" loading="lazy" onerror="this.remove()"></span><span class="spec-note">photo · empty · broken link</span></div>
+      <div class="spec-row" style="margin-top:var(--space-4)"><span class="thumb" data-size="sm"><i data-icon="image" data-size="16"></i><img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Drywall.jpg/120px-Drywall.jpg" alt="" loading="lazy" onerror="this.remove()"></span><span class="thumb"><i data-icon="image" data-size="16"></i><img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Drywall.jpg/120px-Drywall.jpg" alt="" loading="lazy" onerror="this.remove()"></span><span class="thumb" data-size="lg"><i data-icon="image" data-size="16"></i><img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Drywall.jpg/120px-Drywall.jpg" alt="" loading="lazy" onerror="this.remove()"></span><span class="spec-note">24 · 40 · 64. Photo: Amaxson, public domain, Wikimedia Commons</span></div>
+    </div>
+  </section>
 </main>
-<script src="specimen.js?v=26a44821"></script>
+<script src="../../shared/icons.js?v=4d53c73a"></script>
+<script src="specimen.js?v=4d53c73a"></script>
 </body>
 </html>

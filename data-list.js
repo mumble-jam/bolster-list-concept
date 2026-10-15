@@ -634,7 +634,8 @@
       + (more.length ? btn(`<span class="floating-bar-more-icon" aria-hidden="true">${ic("ellipsis", 20)}</span>${label("More")}${chev}`, menuAttrs("more")) : "");
     const danger = del.map((a) => btn(glyph("trash") + label(a), `data-tone="danger" data-confirm="${esc(a)}"`)).join("");
     bar.innerHTML = `<button type="button" class="floating-bar-count" data-clear-selection aria-label="Clear selection (${fmt.count(n)} selected)">${ic("xmark", 12)}<span aria-live="polite">${all && n > 1 ? `All ${fmt.count(n)} selected` : `${fmt.count(n)} selected`}</span></button>`
-      + (all ? `<button type="button" class="floating-bar-link" data-unselect-all>Unselect all</button>` : `<button type="button" class="floating-bar-link" data-select-matching>Select all ${fmt.count(matching)}</button>`)
+      // with everything ticked the chip's × already clears it all, so the link goes rather than repeat it
+      + (all ? "" : `<button type="button" class="floating-bar-link" data-select-matching>Select all ${fmt.count(matching)}</button>`)
       + `<span class="floating-bar-sep" aria-hidden="true"></span><span class="floating-bar-actions">${actions}</span>`
       + (danger ? `<span class="floating-bar-sep" aria-hidden="true"></span>${danger}` : "");
     // phones: a label cut short means one action too many; it goes into More and the rest widen
@@ -1304,7 +1305,7 @@
     if (q("[data-detail-close]")) return closeDetail();
     if ((el = q("[data-tl-more]"))) { const ol = el.closest(".timeline"); $$("[data-fold]", ol).forEach((li) => (li.hidden = false)); const first = $("[data-fold]", ol); el.closest("li").remove(); first?.setAttribute("tabindex", "-1"); first?.focus({ preventScroll: true }); return; }
     if (q("[data-select-done]")) { unpick(); $("#select-mode")?.focus({ preventScroll: true }); return; }
-    if ((el = q("[data-select-matching]"))) { const head = el.id === "select-all" || !!el.closest(".select-bar"); rowsWhere().forEach((x) => st.selected.add(x.id)); renderBody(); renderBulk(); (head ? el : $("#bulk-bar .floating-bar-link"))?.focus({ preventScroll: true }); return; }
+    if ((el = q("[data-select-matching]"))) { const head = el.id === "select-all" || !!el.closest(".select-bar"); rowsWhere().forEach((x) => st.selected.add(x.id)); renderBody(); renderBulk(); (head ? el : $("#bulk-bar .floating-bar-count"))?.focus({ preventScroll: true }); return; }
     if (q("[data-clear-selection]")) { unpick(); $("#select-page")?.focus({ preventScroll: true }); return; }
     if ((el = q("[data-unselect-all]"))) { const head = el.id === "select-all" || !!el.closest(".select-bar"); untick(); (head ? el : $("#bulk-bar .floating-bar-link") || $("#select-page"))?.focus({ preventScroll: true }); return; }
     if (q("#select-mode")) { st.picking || st.selected.size ? unpick() : ((st.picking = true), renderBulk()); return; }

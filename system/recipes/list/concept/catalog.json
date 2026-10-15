@@ -4,7 +4,7 @@
   "noun": { "one": "item", "many": "items" },
   "source": { "product": "Data list concept", "page": "concepts/data-list/#catalog", "date": "2026-10-13" },
   "columns": [
-    { "key": "name", "label": "Item", "type": "name", "priority": 1, "title": "{name}", "detail": "{category} · {vendor}" },
+    { "key": "name", "label": "Item", "type": "name", "priority": 1, "title": "{name}", "detail": "{category} · {vendor}", "leading": "thumbnail", "thumbFrom": "photo" },
     { "key": "category", "label": "Category", "type": "category", "priority": 5 },
     { "key": "unit", "label": "Unit", "type": "text", "priority": 3 },
     { "key": "vendor", "label": "Vendor", "type": "category", "priority": 8, "hidden": true },
@@ -14,6 +14,7 @@
     { "key": "usedIn", "label": "Used in", "type": "count", "priority": 7, "empty": "Unused" },
     { "key": "updated", "label": "Price updated", "type": "date", "priority": 9, "hidden": true }
   ],
+  "fields": [{ "key": "photo", "label": "Photo", "type": "image" }],
   "search": { "columns": ["name", "category", "vendor"], "hint": "Search by item, category or vendor" },
   "dateRange": { "column": "updated" },
   "filters": [

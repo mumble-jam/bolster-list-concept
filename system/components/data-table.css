@@ -151,6 +151,18 @@
        or they'd lead and the rest of the row would follow */
     .list-panel .data-table tbody td:is(.data-table-select, [data-primary]) { background: var(--_row-bg); transition: background-color var(--duration-fast) var(--ease-standard); }
     .list-panel .table-wrap[data-scrolled] .data-table [data-primary] { box-shadow: inset -1px 0 0 var(--color-line-default); }
+    /* the pinned cells paint over the row, so a ring on the row would stop where they start: the
+       cells draw it instead, top and bottom on each, the sides on the first and the last shown (the
+       phone's cells are hidden here) */
+    .list-panel .data-table tbody tr:has(.data-table-link:focus-visible) { outline: none; }
+    .list-panel .data-table tbody tr:has(.data-table-link:focus-visible) > td {
+      --_ring-w: var(--focus-ring-width);
+      --_ring: inset 0 var(--_ring-w) 0 var(--color-focus-ring), inset 0 calc(0px - var(--_ring-w)) 0 var(--color-focus-ring);
+      box-shadow: var(--_ring);
+    }
+    .list-panel .data-table tbody tr:has(.data-table-link:focus-visible) > td:first-child { box-shadow: var(--_ring), inset var(--_ring-w) 0 0 var(--color-focus-ring); }
+    .list-panel .data-table tbody tr:has(.data-table-link:focus-visible) > td:nth-last-child(1 of :not(.row-phone)) { box-shadow: var(--_ring), inset calc(0px - var(--_ring-w)) 0 0 var(--color-focus-ring); }
+    .list-panel .table-wrap[data-scrolled] .data-table tbody tr:has(.data-table-link:focus-visible) > td[data-primary] { box-shadow: var(--_ring), inset -1px 0 0 var(--color-line-default); }
     .group-head { position: sticky; inset-inline-start: var(--space-4); }
   }
   .data-table tbody tr[data-selected] td { background: var(--color-surface-selected); }
@@ -252,7 +264,14 @@
     .data-table td[data-m="trail"] { grid-area: trail; padding-inline-start: var(--space-3); text-align: end; font-size: var(--text-base); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; }
     .data-table td[data-m="badge"] { grid-area: badge; justify-self: end; padding-inline-start: var(--space-3); }
     .data-table td.row-actions { display: none; }
-    .data-table .cell-main .avatar { display: none; }
+    .data-table .cell-main :is(.avatar, .thumb) { display: none; }
+    /* thumbnails (D55): a list with photos keeps them, a column down the left beside the whole item; a
+       list whose slots are all empty drops them, as it drops avatars */
+    .data-table:has(.cell-main .thumb > img) tbody tr { grid-template-columns: var(--_pick-w) auto minmax(0, 1fr) auto; grid-template-areas: "sel thumb over trail" "sel thumb title title" "sel thumb where badge"; }
+    .data-table:has(.cell-main .thumb > img) tbody tr:has(td[data-m="flags"] .badge) { grid-template-areas: "sel thumb over trail" "sel thumb title title" "sel thumb flags flags" "sel thumb where badge"; }
+    .data-table:has(.cell-main .thumb > img) :is(td[data-m="title"], td[data-m="title"] :is(.cell, .cell-main)) { display: contents; }
+    .data-table:has(.cell-main .thumb > img) td[data-m="title"] .cell-main > div { grid-area: title; min-inline-size: 0; }
+    .data-table:has(.cell-main .thumb > img) .cell-main .thumb { --_size: var(--space-12); display: inline-grid; grid-area: thumb; margin-inline-end: var(--space-3); }
     /* a ticked or opened row tints as a whole, not cell by cell */
     .data-table tbody tr[data-selected] { background: var(--color-surface-selected); }
     .data-table tbody tr:is([data-selected], [data-open]) td { background: none; box-shadow: none; }

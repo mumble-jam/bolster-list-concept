@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=26a44821">
-<link rel="stylesheet" href="data-list.css?v=26a44821">
+<link rel="stylesheet" href="system/bolster.css?v=4d53c73a">
+<link rel="stylesheet" href="data-list.css?v=4d53c73a">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -78,7 +78,7 @@
   <header class="inv-head">
     <p class="text-caption"><a href="index.html">Jobs list concept</a></p>
     <h1>Components, and who decided them</h1>
-    <p>Every component the jobs list concept uses, marked by how much of it came from you. Built from your messages on 8 to 14 October and the commits behind them. Where you only reported a bug, that doesn't count as a design decision, so it's noted but the component stays my call.</p>
+    <p>Every component the jobs list concept uses, marked by how much of it came from you. Built from your messages on 8 to 15 October and the commits behind them. Where you only reported a bug, that doesn't count as a design decision, so it's noted but the component stays my call.</p>
   </header>
 
   <section class="inv-legend" aria-label="Levels">
@@ -109,7 +109,7 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=26a44821"></script>
+<script src="shared/icons.js?v=4d53c73a"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -149,6 +149,7 @@ const C = [
 
   ["Table", "Column headers and sorting", "mine", "You reported jumps when sorting, which made the rule that focus stays put; then the header lagging in Chrome and losing its pinned cells in Safari (14 Oct, D38), both bugs.", "Header style, sort arrows, sticky header and how it follows the scroll, hover-revealed arrow."],
   ["Table", "Rows", "mine", "You reported the hover lag between the first cell and the rest.", "Avatar and two-line name, row heights, hover, selected colour, the open row's blue edge."],
+  ["Table", "Thumbnails", "steered", "What sits before the name is a slot: an avatar, a thumbnail, anything else, or nothing; the job list keeps its avatar, the catalog gets photos with a placeholder where there's none or a link breaks (15 Oct, D55).", "The rounded square and its sizes, the image icon on a tint, picking and crediting 25 open-licence photos, the broken-link fallback, the column of photos on phones."],
   ["Table", "Sideways scroll", "yours", "Scroll sideways once columns reach their content width (9 Oct).", "Pinned checkbox and name, the edge rule once scrolled, the fade on the right."],
   ["Table", "Column widths", "steered", "A status must never clip, as a rule (9 Oct).", "Measuring every value, every status and the header offscreen."],
   ["Table", "Status badges", "steered", "The marks inside them are yours, and they're the job list's own: other lists show a plain badge and a dot on the card (14 Oct, D49).", "The badge itself: pill, tint and text."],
@@ -157,7 +158,7 @@ const C = [
   ["Table", "Phone rows", "yours", "Names not cut on the first line, then direction C from the tables-on-phones research (13 Oct, D32): the number and a date on an overline, the amount top right, the name full width at 16 px, where and status below; invoices lead with the customer.", "The overline at 12 px (the system has no 13), the catalog's category on its overline, and how lists built from a description fill the corners."],
 
   ["Selection and actions", "Checkbox selection", "steered", "On phones selecting is a mode, from direction C (13 Oct): Select, or a long press; the checkboxes slide in. The count, Select all and Done kept in reach at any scroll, in a compact bar that leaves on scroll down and comes back on scroll up or a tick (14 Oct, D39).", "The desktop checkbox column, select all and its partial state; the 450 ms hold and the slide."],
-  ["Selection and actions", "Floating bar", "yours", "Bulk actions in a floating bar that will replace Bolster's other situational bars (8 Oct); “Unselect all” once everything is selected. Then the research's A and D (13 Oct, D34): on desktop a count chip that holds its own ×, icons beside labels, one rule before a red Delete, 48 tall with 14 px corners; on phones the header shows the count with Select all and Done, and the tab bar turns into the action bar. Then three slots and More, Delete preferably in More; phones on their own rule, fewer actions when a label doesn't fit (14 Oct, D36).", "Escape clearing the selection, two slots between 768 and 1099, More never holding just one, disabled until something is ticked, the slide-up."],
+  ["Selection and actions", "Floating bar", "yours", "Bulk actions in a floating bar that will replace Bolster's other situational bars (8 Oct); “Unselect all” once everything is selected. Then the research's A and D (13 Oct, D34): on desktop a count chip that holds its own ×, icons beside labels, one rule before a red Delete, 48 tall with 14 px corners; on phones the header shows the count with Select all and Done, and the tab bar turns into the action bar. Then three slots and More, Delete preferably in More; phones on their own rule, fewer actions when a label doesn't fit (14 Oct, D36). Unselect all goes once everything is ticked: the chip's × already does it (15 Oct, D54).", "Escape clearing the selection, two slots between 768 and 1099, More never holding just one, disabled until something is ticked, the slide-up."],
   ["Selection and actions", "Job actions", "yours", "As Bolster has them, by status (9 Oct).", "What goes in More, and the Download and Change status submenus."],
   ["Selection and actions", "Row menu", "steered", "Its actions follow Bolster's, as above.", "The ⋯ button and the menu's shape."],
   ["Selection and actions", "Confirm dialog", "mine", "Never discussed.", "The danger confirmation for delete."],
@@ -261,6 +262,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=26a44821"></script>
+<script src="system/specimens/specimen.js?v=4d53c73a"></script>
 </body>
 </html>

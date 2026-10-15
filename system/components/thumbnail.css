@@ -1,0 +1,35 @@
+/* Thumbnail: a photo of a thing (a catalog item), in a rounded square, for the slot before a row's name
+   or anywhere a picture of a thing goes (D55).
+   <span class="thumb" [data-size="sm|lg"]><svg …image icon…></svg><img src="…" alt="" loading="lazy" onerror="this.remove()"></span>
+   With no photo it shows a placeholder, the image icon on a quiet tint; the photo sits on top of it,
+   so while it loads the placeholder shows. A broken link: onerror="this.remove()" on the img, or the browser draws its own
+   broken-image mark over it. People are avatars (circles); things are thumbnails (squares). */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  :where(.thumb) {
+    --_size: var(--control-height-md); /* 40 */
+    display: inline-grid;
+    flex-shrink: 0;
+    inline-size: var(--_size);
+    block-size: var(--_size);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-tint);
+    color: var(--color-content-tertiary);
+    overflow: hidden;
+    position: relative;
+    user-select: none;
+  }
+  /* the icon and the photo share the one cell: the photo covers the icon once it has drawn */
+  :where(.thumb) > * { grid-area: 1 / 1; }
+  :where(.thumb) > svg { place-self: center; inline-size: 40%; block-size: 40%; }
+  :where(.thumb) > img { inline-size: 100%; block-size: 100%; object-fit: cover; }
+  /* a hairline inside the edge, so a white photo still reads as a square on a white row */
+  :where(.thumb:has(> img))::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    box-shadow: inset 0 0 0 var(--border-width-default) color-mix(in srgb, var(--color-content-primary) 8%, transparent);
+  }
+  :where(.thumb[data-size="sm"]) { --_size: var(--space-6); border-radius: var(--radius-sm); } /* 24 */
+  :where(.thumb[data-size="lg"]) { --_size: var(--space-16); }                                /* 64 */
+}

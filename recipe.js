@@ -8,7 +8,7 @@
 
 window.BDS_RECIPE = (() => {
   const { fmt, esc, TODAY, ageDays, kit } = window.BDS_CONCEPT;
-  const { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, person, main, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf } = kit;
+  const { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, person, main, PHOTOS, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf } = kit;
   const NUMERIC = new Set(["money", "number", "percent", "count", "duration"]);
   // the first click on a header sorts the type's way (rules.json → types): biggest, newest and most
   // flagged first; names, words and the lifecycle from the top
@@ -61,6 +61,8 @@ window.BDS_RECIPE = (() => {
         case "address": return /city/.test(k) ? row._client.city : row._client.address;
         case "contact": return { email: emailOf(row._client), phone: `(555) ${int(200, 899)}-${String(int(0, 9999)).padStart(4, "0")}` };
         case "flags": return r() < 0.45 ? [] : FLAGS.filter(() => r() < 0.5).slice(0, 3);
+        // an item's photo where the sample has one; the rest show the thumbnail's placeholder (D55)
+        case "image": return row._item ? PHOTOS[row._item.name]?.[0] ?? null : null;
         case "kinds": { const vs = (f.values || []).map((v) => v.value); const some = vs.filter(() => r() < 0.45); return some.length ? some : [pick(vs)]; }
         case "category": return row._item && /category/.test(k) ? row._item.cat : /source/.test(k) ? pick(SOURCES) : /vendor|supplier/.test(k) ? pick(VENDORS) : /category/.test(k) ? pick(Object.keys(CATALOG)) : /work|trade/.test(k) ? pick(TRADES) : /contain|kind/.test(k) ? pick(["Materials", "Labour", "Materials and labour"]) : `${f.label || cap(f.key)} ${"ABC"[int(0, 2)]}`;
         case "name":
@@ -136,7 +138,8 @@ window.BDS_RECIPE = (() => {
     const pickClient = () => CLIENTS[Math.floor(r() * CLIENTS.length)];
     const rows = Array.from({ length: 96 }, (_, i) => {
       const x = { id: `${id || d.nav}-${i + 1}`, _client: pickClient() };
-      for (const f of fields) if (f.type !== "status") x[f.key] = gen(f, x, i);
+      for (const f of fields) if (f.type !== "status" && f.type !== "image") x[f.key] = gen(f, x, i);
+      for (const f of fields) if (f.type === "image") x[f.key] = gen(f, x, i); // once the name has picked its item
       if (statusCol) {
         let x2 = r() * stored.reduce((s, v) => s + (WEIGHT[v.stage] || 10), 0);
         x[statusCol] = stored.find((v) => (x2 -= WEIGHT[v.stage] || 10) <= 0)?.value || stored[0].value;
@@ -158,7 +161,7 @@ window.BDS_RECIPE = (() => {
       const out = { key: c.key, label: c.label, hidden: !!c.hidden, sort: sortOf(c, order), dir: DESC.has(c.type) ? "desc" : "asc" };
       if (c.priority === 1) {
         out.m = "title"; out.required = true;
-        out.render = (x) => main(x.id, fill(c.title || `{${c.key}}`, x) || c.empty || `Unnamed ${n.one}`, fill(c.detail, x), c.leading === "avatar" && c.avatarFrom ? (typeof x[c.avatarFrom] === "object" ? x[c.avatarFrom] : { initials: initials(text(x[c.avatarFrom]) || "?"), color: (hash(text(x[c.avatarFrom])) % 8) + 1 }) : null);
+        out.render = (x) => main(x.id, fill(c.title || `{${c.key}}`, x) || c.empty || `Unnamed ${n.one}`, fill(c.detail, x), c.leading === "thumbnail" ? { thumb: c.thumbFrom ? x[c.thumbFrom] : null } : c.leading === "avatar" && c.avatarFrom ? (typeof x[c.avatarFrom] === "object" ? x[c.avatarFrom] : { initials: initials(text(x[c.avatarFrom]) || "?"), color: (hash(text(x[c.avatarFrom])) % 8) + 1 }) : null);
         out.sort = (x) => fill(c.title || `{${c.key}}`, x).toLowerCase();
         return out;
       }

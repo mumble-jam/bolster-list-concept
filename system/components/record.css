@@ -52,6 +52,8 @@
   .detail-fields > div { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); min-block-size: var(--space-6); }
   .detail-fields dt { flex: none; color: var(--color-content-secondary); }
   .detail-fields dd { margin: 0; min-inline-size: 0; text-align: end; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* a link that leaves the app carries its ↗ on the same line (D40) */
+  .detail-fields dd a > svg { display: inline-block; vertical-align: -1px; }
   .detail-fields .cell-person { display: inline-flex; align-items: center; gap: var(--space-2); }
   .detail-doc { display: grid; gap: var(--space-2); }
   .detail-doc-head { display: flex; align-items: center; justify-content: space-between; font-size: var(--text-sm); color: var(--color-content-secondary); }

@@ -10,9 +10,9 @@
 <link rel="apple-touch-icon" href="shared/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=26a44821">
-<link rel="stylesheet" href="shared/shell.css?v=26a44821">
-<link rel="stylesheet" href="data-list.css?v=26a44821">
+<link rel="stylesheet" href="system/bolster.css?v=4d53c73a">
+<link rel="stylesheet" href="shared/shell.css?v=4d53c73a">
+<link rel="stylesheet" href="data-list.css?v=4d53c73a">
 </head>
 <body>
 <div class="app-shell">
@@ -123,6 +123,7 @@
         <li><b>The count is said once,</b> by the filters ("55 of 132 jobs"). The footer shows the range and loads 25 more; rows also load as you scroll. No totals row in this view.</li>
         <li><b>Selection never moves the rows.</b> A floating bar at the bottom: the count, Select all, three or four actions, the risky one last behind a confirmation that names the number, and ×. It's built to replace the other situational bars later.</li>
         <li><b>Rows open, "···" acts.</b> One click opens a row; row actions sit in "···", shown on hover and focus. From 1280 wide the record opens beside the list, as in Mercury: the list keeps its name, status and amount columns, the opened row stays marked, and the record sticks under the bars. Below 1280 it is a sheet from the side, full width on phones. The record reads top to bottom: status, the amount, a timeline, two actions and More (one action and More when both don't fit on a line; the other moves into More), the details, then the document. The timeline runs oldest first: a solid line through what happened, then a dashed line to the next step, drawn as a hollow ring. On jobs each event wears the status shape it moved the job to: the circle fills a quarter at a time (created: dashed, sent: a quarter, approved: half, work started: three quarters; closed would be full), and declined is the slash. Long histories fold to "+ n more events". The sketch drops the view menu and refresh from the page header; saved views come back once we decide where they live.</li>
+        <li><b>Before the name, a slot (D55).</b> It holds what the list needs: the customer’s avatar on jobs, a photo on catalog items (Wikimedia Commons, open licences, credited in each item’s record), with a placeholder where there’s none or a link breaks.</li>
         <li><b>Status has a shape, not just a colour.</b> Jobs: an empty circle for draft, a half-filled one for pending, a solid dot for booked, and a circle with a slash for declined (the client said no). One drawing on a 12px grid, 12px in the table badge and 14px on the cards. Draft and pending marks go a step darker than their old dots so each shape reaches 3:1.</li>
         <li><b>Every state is designed:</b> loading, first-use empty, no results, and error. Switch between them in the concept controls.</li>
         <li><b>Live areas keep their shape (I13).</b> What updates while you act elsewhere (filters, search, sort, selection) changes its values, never its layout. Every state fills the same slots at the same size, said by what a slot holds (“2 of 4”, “None decided yet”, an empty bar), not by lines coming and going. Sizes come from the whole list, not the rows on screen; optional parts leave a placeholder; anything that comes and goes appears where you acted or floats; a redraw never moves the page or your focus.</li>
@@ -178,11 +179,11 @@
 </details>
 
 <div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
-<script src="shared/icons.js?v=26a44821"></script>
-<script src="shared/shell.js?v=26a44821"></script>
-<script src="system/specimens/specimen.js?v=26a44821"></script>
-<script src="data.js?v=26a44821"></script>
-<script src="recipe.js?v=26a44821"></script>
+<script src="shared/icons.js?v=4d53c73a"></script>
+<script src="shared/shell.js?v=4d53c73a"></script>
+<script src="system/specimens/specimen.js?v=4d53c73a"></script>
+<script src="data.js?v=4d53c73a"></script>
+<script src="recipe.js?v=4d53c73a"></script>
 <script>
   // ?from=description builds the four lists from their page descriptions; ?d=<path> adds one more list
   // from any description. Either way data-list.js starts once the descriptions are compiled.

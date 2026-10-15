@@ -90,8 +90,14 @@
   // ---------- shared renderers ----------
   const avatar = (p, size) => `<span class="avatar"${size ? ` data-size="${size}"` : ""} data-color="${p.color}" aria-hidden="true">${esc(p.initials)}</span>`;
   const person = (p) => `<span class="cell-person">${avatar(p, "sm")}${esc(p.me ? `${p.name} (you)` : p.name)}</span>`;
-  const main = (id, title, sub, who) =>
-    `<div class="cell-main">${who ? avatar(who) : ""}<div><a class="data-table-link" href="#${id}" data-peek="${id}">${esc(title)}</a>${sub ? `<div class="cell-sub">${esc(sub)}</div>` : ""}</div></div>`;
+  // a thumbnail, for the name's slot when a list's rows have pictures (D55): the photo lies over the
+  // empty placeholder, so while it loads the placeholder shows; a broken link takes the photo away
+  // (browsers draw their own broken-image mark otherwise), leaving the placeholder
+  const thumb = (src, size) => `<span class="thumb"${size ? ` data-size="${size}"` : ""} aria-hidden="true">${window.BolsterIcons("image", 16)}${src ? `<img src="${esc(src)}" alt="" loading="lazy" decoding="async" onerror="this.remove()">` : ""}</span>`;
+  // lead, the slot before the name: a person or company ({ initials, color }) for an avatar,
+  // { thumb: src } for a thumbnail, or nothing
+  const main = (id, title, sub, lead) =>
+    `<div class="cell-main">${!lead ? "" : "thumb" in lead ? thumb(lead.thumb) : avatar(lead)}<div><a class="data-table-link" href="#${id}" data-peek="${id}">${esc(title)}</a>${sub ? `<div class="cell-sub">${esc(sub)}</div>` : ""}</div></div>`;
   const ownerFilter = (get) => ({
     key: "owner", label: "Owner", type: "enum", pinned: true, get,
     options: OWNERS.map((o) => ({ value: o.id, label: o.me ? `${o.name} (you)` : o.name, html: `${avatar(o, "sm")}${esc(o.me ? `${o.name} (you)` : o.name)}` })),
@@ -429,10 +435,39 @@
     Finishing: [["Tape and mud, level 4", "sq ft", 0.48], ["Level 5 finish", "sq ft", 0.96], ["Knockdown texture", "sq ft", 0.42], ["Orange peel texture", "sq ft", 0.38], ["Corner bead, metal", "lin ft", 0.62], ["Joint compound, 4.5 gal", "bucket", 21.5], ["Primer, PVA", "gallon", 18.2], ["Skim coat", "sq ft", 0.71]],
     Labor: [["Hang and finish crew", "hour", 58], ["Insulation installer", "hour", 46], ["Demo and haul-away", "hour", 52], ["Ceiling repair, patch", "each", 145], ["Popcorn removal", "sq ft", 1.45], ["Site protection and cleanup", "each", 180], ["Dumpster, 20 yd", "each", 465]],
   };
+  // photos for the items that have one (D55), from Wikimedia Commons: [image, author, licence, file page].
+  // The rest show the thumbnail's placeholder, as does any of these whose link breaks
+  const PHOTOS = {
+    "1/2 in. drywall, 4×8 sheet": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Drywall.jpg/120px-Drywall.jpg", "Amaxson", "Public domain", "https://commons.wikimedia.org/wiki/File:Drywall.jpg"],
+    "5/8 in. fire-rated, 4×12 sheet": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2a/Gib_board_aka_plasterboard_tapered_edges_02.jpg/120px-Gib_board_aka_plasterboard_tapered_edges_02.jpg", "Panamitsu", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Gib_board_aka_plasterboard_tapered_edges_02.jpg"],
+    "Moisture-resistant board, 4×8": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/2/29/Shower_project_clamps_secure_boards_while_glue_hardens.jpg/120px-Shower_project_clamps_secure_boards_while_glue_hardens.jpg", "Tomwsulcer", "CC0", "https://commons.wikimedia.org/wiki/File:Shower_project_clamps_secure_boards_while_glue_hardens.jpg"],
+    "Drywall install, walls": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3a/Interior_drywall_board_is_ready_to_finish.jpg/120px-Interior_drywall_board_is_ready_to_finish.jpg", "Riverview Homes, Inc.", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Interior_drywall_board_is_ready_to_finish.jpg"],
+    "Drywall install, ceilings": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f1/Roof_and_Ceiling_are_built_and_drywalled.jpg/120px-Roof_and_Ceiling_are_built_and_drywalled.jpg", "Riverview Homes, Inc.", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Roof_and_Ceiling_are_built_and_drywalled.jpg"],
+    "R-13 batts, 2×4 walls": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a1/Glass_wool_insulation.jpg/120px-Glass_wool_insulation.jpg", "Radomil", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Glass_wool_insulation.jpg"],
+    "R-19 batts, 2×6 walls": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/CSIRO_ScienceImage_2175_Installing_Insulation_Batts.jpg/120px-CSIRO_ScienceImage_2175_Installing_Insulation_Batts.jpg", "Tracey Nicholls, CSIRO", "CC BY 3.0", "https://commons.wikimedia.org/wiki/File:CSIRO_ScienceImage_2175_Installing_Insulation_Batts.jpg"],
+    "R-30 batts, attic": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/6/68/AtticInsulation.jpg/120px-AtticInsulation.jpg", "Jason Dale", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:AtticInsulation.jpg"],
+    "R-38 blown cellulose": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/b/be/Insulating_attic_%2849525467656%29.jpg/120px-Insulating_attic_%2849525467656%29.jpg", "USFWS Mountain Prairie", "Public domain", "https://commons.wikimedia.org/wiki/File:Insulating_attic_(49525467656).jpg"],
+    "Closed-cell spray foam, 2 in.": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Chicago_Closed_Cell_Spray_Foam_Insulation_In_Wall.jpg/120px-Chicago_Closed_Cell_Spray_Foam_Insulation_In_Wall.jpg", "Chicagosprayfoam", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Chicago_Closed_Cell_Spray_Foam_Insulation_In_Wall.jpg"],
+    "Open-cell spray foam, 3.5 in.": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7e/Spray_Polyurethane_Foam_Application.jpg/120px-Spray_Polyurethane_Foam_Application.jpg", "Chicagosprayfoam", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Spray_Polyurethane_Foam_Application.jpg"],
+    "Rigid foam board, 1 in.": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e6/Polyisocyanurate_insulation_boards.jpg/120px-Polyisocyanurate_insulation_boards.jpg", "thingermejig", "CC BY-SA 2.0", "https://commons.wikimedia.org/wiki/File:Polyisocyanurate_insulation_boards.jpg"],
+    "Mineral wool, sound": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/1/10/Arrangement_Mineralwolle.jpeg/120px-Arrangement_Mineralwolle.jpeg", "FMI Fachverband Mineralwolleindustrie", "CC BY-SA 3.0 de", "https://commons.wikimedia.org/wiki/File:Arrangement_Mineralwolle.jpeg"],
+    "Vapor barrier, 6 mil": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Vapour_barrier.JPG/120px-Vapour_barrier.JPG", "P199", "CC0", "https://commons.wikimedia.org/wiki/File:Vapour_barrier.JPG"],
+    "Steel stud, 3-5/8 in.": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f8/Light_gage_metal_framing.JPG/120px-Light_gage_metal_framing.JPG", "P199", "Public domain", "https://commons.wikimedia.org/wiki/File:Light_gage_metal_framing.JPG"],
+    "Resilient channel": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/7/76/Ceiling_Soundproofing.jpg/120px-Ceiling_Soundproofing.jpg", "36N63", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Ceiling_Soundproofing.jpg"],
+    "Tape and mud, level 4": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/6/61/Taping_gypsum_board_seams_in_back_of_house_rooms_in_the_new_LIRR_passenger_concourse_in_preparation_for_painting_and_final_finishes._4-17-19_%2847645209441%29.jpg/120px-Taping_gypsum_board_seams_in_back_of_house_rooms_in_the_new_LIRR_passenger_concourse_in_preparation_for_painting_and_final_finishes._4-17-19_%2847645209441%29.jpg", "MTA Capital Construction Mega Projects", "CC BY 2.0", "https://commons.wikimedia.org/wiki/File:Taping_gypsum_board_seams_in_back_of_house_rooms_in_the_new_LIRR_passenger_concourse_in_preparation_for_painting_and_final_finishes._4-17-19_(47645209441).jpg"],
+    "Knockdown texture": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/4/49/Ceiling_texture.jpg/120px-Ceiling_texture.jpg", "Laurel F.", "CC0", "https://commons.wikimedia.org/wiki/File:Ceiling_texture.jpg"],
+    "Primer, PVA": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/0/03/White_primer_bucket.jpg/120px-White_primer_bucket.jpg", "Daniel Case", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:White_primer_bucket.jpg"],
+    "Hang and finish crew": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d1/Drywall_Crane_Workers.jpg/120px-Drywall_Crane_Workers.jpg", "NIOSH", "Public domain", "https://commons.wikimedia.org/wiki/File:Drywall_Crane_Workers.jpg"],
+    "Insulation installer": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/f/f7/US_Navy_100809-N-8863V-043_A_construction_worker_installs_new_energy-efficient_windows_in_Bldg._519_at_Naval_Surface_Warfare_Center.jpg/120px-US_Navy_100809-N-8863V-043_A_construction_worker_installs_new_energy-efficient_windows_in_Bldg._519_at_Naval_Surface_Warfare_Center.jpg", "U.S. Navy photo by Greg Vojtko", "Public domain", "https://commons.wikimedia.org/wiki/File:US_Navy_100809-N-8863V-043_A_construction_worker_installs_new_energy-efficient_windows_in_Bldg._519_at_Naval_Surface_Warfare_Center.jpg"],
+    "Demo and haul-away": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/7/74/Martinsburg_Mall_interior_demolition.jpg/120px-Martinsburg_Mall_interior_demolition.jpg", "Nationdecay1149", "CC BY-SA 4.0", "https://commons.wikimedia.org/wiki/File:Martinsburg_Mall_interior_demolition.jpg"],
+    "Ceiling repair, patch": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a0/Ceiling_Repair_Portland-Cascade_Painting_and_Restoration_-_panoramio.jpg/120px-Ceiling_Repair_Portland-Cascade_Painting_and_Restoration_-_panoramio.jpg", "Carl Nurmi", "CC BY 3.0", "https://commons.wikimedia.org/wiki/File:Ceiling_Repair_Portland-Cascade_Painting_and_Restoration_-_panoramio.jpg"],
+    "Popcorn removal": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Popcorn_ceiling_texture_close_up.jpg/120px-Popcorn_ceiling_texture_close_up.jpg", "roskvape", "CC BY 2.0", "https://commons.wikimedia.org/wiki/File:Popcorn_ceiling_texture_close_up.jpg"],
+    "Dumpster, 20 yd": ["https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d0/Roll-Off.jpg/120px-Roll-Off.jpg", "Boomer77", "CC BY-SA 3.0", "https://commons.wikimedia.org/wiki/File:Roll-Off.jpg"],
+  };
   const VENDORS = ["ABC Supply", "Home Depot", "Lowe's", "In-house"];
   const items = Object.entries(CATALOG).flatMap(([category, list]) => list.map(([name, unit, cost]) => {
     const markup = [0.25, 0.3, 0.35, 0.4, 0.5][int(0, 4)];
-    return { id: `it-${hash(name)}`, name, category, unit, cost, markup, price: Math.round(cost * (1 + markup) * 100) / 100, vendor: category === "Labor" ? "In-house" : pick(VENDORS.slice(0, 3)), updated: daysAgo(int(0, 300)), usedIn: int(0, 46) };
+    return { id: `it-${hash(name)}`, name, category, unit, cost, markup, price: Math.round(cost * (1 + markup) * 100) / 100, vendor: category === "Labor" ? "In-house" : pick(VENDORS.slice(0, 3)), updated: daysAgo(int(0, 300)), usedIn: int(0, 46), photo: PHOTOS[name] };
   }));
   const itemsConfig = {
     id: "catalog", nav: "catalog", title: "Catalog", noun: ["item", "items"], create: "Add item",
@@ -445,7 +480,7 @@
     // no status, so the unit takes the bottom line; the vendor joins the overline
     phone: { over: (x) => `${esc(x.category)} · ${esc(x.vendor)}`, where: (x) => `per ${esc(x.unit)}` },
     columns: [
-      { key: "name", label: "Item", m: "title", required: true, sort: (x) => x.name, render: (x) => main(x.id, x.name, `${x.category} · ${x.vendor}`) },
+      { key: "name", label: "Item", m: "title", required: true, sort: (x) => x.name, render: (x) => main(x.id, x.name, `${x.category} · ${x.vendor}`, { thumb: x.photo?.[0] }) },
       { key: "category", label: "Category", w: "6rem", hideBelow: "md", sort: (x) => x.category, render: (x) => `<span class="badge">${esc(x.category)}</span>` },
       { key: "unit", label: "Unit", w: "6.5rem", m: "sub", sort: (x) => x.unit, render: (x) => `<span class="cell-muted">per ${esc(x.unit)}</span>` },
       { key: "vendor", label: "Vendor", w: "7rem", hidden: true, hideBelow: "lg", sort: (x) => x.vendor, render: (x) => `<span class="cell-muted">${esc(x.vendor)}</span>` },
@@ -475,7 +510,9 @@
       badge: `<span class="badge">${esc(x.category)}</span>`, amount: fmt.money(x.price), sub: `per ${x.unit} · cost ${fmt.money(x.cost)} + ${fmt.pct(x.markup)} markup`,
       timeline: [{ what: "Added to the catalog", meta: `${fmt.date(daysFrom(x.updated, -(30 + (hash(x.id) % 300))))} · from ${x.vendor}` }, { what: "Price updated from vendor list", meta: fmt.date(x.updated) }],
       actions: [["Update price", "refresh-cw"], ["Duplicate", "copy"]],
-      fields: [["Vendor", esc(x.vendor)], ["Used in", x.usedIn ? fmt.plural(x.usedIn, "estimate", "estimates") : "Unused"], ["Price updated", fmt.ago(x.updated)]],
+      fields: [["Vendor", esc(x.vendor)], ["Used in", x.usedIn ? fmt.plural(x.usedIn, "estimate", "estimates") : "Unused"], ["Price updated", fmt.ago(x.updated)],
+        // the photo's credit, as its licence asks; the link leaves the app, so it says so (D40)
+        ...(x.photo ? [["Photo", `<a href="${esc(x.photo[3])}" target="_blank" rel="noopener">${esc(x.photo[1])} · ${esc(x.photo[2])}&nbsp;${window.BolsterIcons("m-external", 12)}</a>`]] : [])],
       doc: null,
     }),
   };
@@ -499,7 +536,7 @@
   window.BDS_CONCEPT = {
     TODAY, fmt, esc, ageDays, attrIcons, actionIcons,
     // the parts recipe.js builds a list from a page description with
-    kit: { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, person, main, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf, MIN_SAMPLE },
+    kit: { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, thumb, person, main, PHOTOS, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf, MIN_SAMPLE },
     configs: { jobs: estimatesConfig, invoices: invoicesConfig, customers: clientsConfig, catalog: itemsConfig },
   };
 })();
