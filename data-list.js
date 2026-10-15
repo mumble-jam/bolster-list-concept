@@ -534,6 +534,13 @@
     const open = rest[0] === "Open" ? [rest.shift()] : [];
     return [...open, ...lead, ...folded, ...rest];
   }
+  // a list whose actions go by status: everything offered for this row's status, and from the record,
+  // minus its own buttons (and Open, which the record already is)
+  function statusMenuActs(key, card) {
+    const { bar, more } = cfg.actionsFor([cfg.rows.find((r) => r.id === key)]);
+    const own = card ? ["Open", ...$$(".detail-actions [data-concept-action]:not([hidden])", card).map((b) => b.dataset.conceptAction)] : [];
+    return ["Open", ...bar, ...more].filter((a) => !own.includes(a));
+  }
   const selectedRows = () => cfg.rows.filter((r) => st.selected.has(r.id));
   // a list of actions as menu items: plain ones, then the menus as labelled sections, then the risky ones in
   // red after a rule. In the bulk menus the risky ones confirm and the rest name what's selected.
@@ -1043,10 +1050,7 @@
       pop.innerHTML = `<div class="pop-body">${g ? actionItems([{ ...g }], { bulk: true }).replace(/^<div class="pop-section">[^<]*<\/div>/, "") : actionItems(more, { bulk: true, nested: true })}</div>`;
     } else if (p.kind === "row" && cfg.actionsFor) {
       // the row's menu: everything Bolster offers for this job's status; from the record, minus its own buttons
-      const x = cfg.rows.find((r) => r.id === p.key);
-      const { bar, more } = cfg.actionsFor([x]);
-      const own = p.from?.closest(".detail") ? ["Open", ...$$(".detail-actions [data-concept-action]:not([hidden])", p.from.closest(".detail")).map((b) => b.dataset.conceptAction)] : [];
-      const list = ["Open", ...bar, ...more].filter((a) => !own.includes(a));
+      const list = statusMenuActs(p.key, p.from?.closest(".detail"));
       pop.innerHTML = `<div class="pop-body">${actionItems(list, { peek: p.key, nested: true })}</div>`;
     } else if (p.kind === "row") {
       const acts = rowMenuActs(p.key, p.from?.closest(".detail"));
@@ -1142,7 +1146,7 @@
     const acts = $$("[data-concept-action]", row), more = $("[data-row-menu]", row);
     acts.forEach((b) => (b.hidden = false));
     // More only when it has something in it
-    if (more && !cfg.actionsFor) more.hidden = !rowMenuActs(more.dataset.rowMenu, d).length;
+    if (more) more.hidden = !(cfg.actionsFor ? statusMenuActs : rowMenuActs)(more.dataset.rowMenu, d).length;
     if (row.scrollWidth > row.clientWidth + 1) { acts.slice(1).forEach((b) => (b.hidden = true)); if (more) more.hidden = false; }
   }
   const refit = new ResizeObserver((es) => es.forEach((e) => fitActions(e.target)));

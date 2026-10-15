@@ -151,11 +151,12 @@ window.BDS_RECIPE = (() => {
         x[statusCol] = stored.find((v) => (x2 -= WEIGHT[v.stage] || 10) <= 0)?.value || stored[0].value;
         // a derived status (past due) takes some of the rows of the status listed just before it
         d.status.values.forEach((v, j) => { if (v.derived && j && x[statusCol] === order[j - 1] && r() < 0.35) x[statusCol] = v.value; });
-        // a date named for a step in the lifecycle (sent, approved, paid…) stays empty until the row's
+        // a field named for a step in the lifecycle (sent, approved, paid…) stays empty until the row's
         // status has got that far: a draft has no sent date
         const reached = RANK[STAGE_OF[x[statusCol]]] ?? 4, stage = STAGE_OF[x[statusCol]];
         const dated = fields.filter((f) => f.type === "date" || f.type === "datetime");
-        for (const f of dated) {
+        // (and anything else named for a step: a cancelled order has no decline reason)
+        for (const f of fields.filter((f) => !["status", "name", "id"].includes(f.type))) {
           const step = STEPS.find(([re]) => re.test(f.key));
           if (step && !(typeof step[1] === "string" ? stage === step[1] : reached >= step[1])) x[f.key] = null;
         }
