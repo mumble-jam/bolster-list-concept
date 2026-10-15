@@ -45,6 +45,8 @@ window.BDS_RECIPE = (() => {
   const TRADE = ["Framing", "Drywall Co.", "Insulation", "Electric", "Plumbing", "Painting", "Supply", "Roofing"];
   const company = (i) => `${PREFIX[(i * 7) % PREFIX.length]} ${TRADE[Math.floor(i / PREFIX.length) % TRADE.length]}`;
   const ITEMS = Object.entries(CATALOG).flatMap(([cat, list]) => list.map(([name, unit, cost]) => ({ name, unit, cost, cat })));
+  // the longest names a list should expect, real-world long: legal names with their trades and places
+  const LONG = { vendor: ["Northline Commercial Drywall & Acoustical Ceiling Supply", "Great Lakes Insulation and Building Materials Distributors, Inc.", "Hernández-Whitfield Construction Specialties & Fasteners", "Twin Cities Fireproofing, Firestopping and Sealants Co."] };
   // what a reason field says (a decline or cancel reason), so the sample reads like one
   const REASONS = ["Price is higher than quoted", "Can't deliver before the start date", "Out of stock", "Wrong items on the order", "Duplicate of another order", "Job was put on hold"];
   // an id in the format the source writes it: “#0003” → #0001, #0002…; a long one (“#29599975514”)
@@ -73,7 +75,8 @@ window.BDS_RECIPE = (() => {
         case "duration": return int(1, 90);
         case "date": case "datetime": return /due|scheduled|start/.test(k) ? daysFrom(TODAY, int(-40, 45)) : daysAgo(int(0, 240));
         case "person": return weighted([[OWNERS[0], 40], [OWNERS[1], 25], [OWNERS[2], 20], [OWNERS[3], 15]]);
-        case "record": return /client|customer/.test(k) ? row._client : recordOf(/vendor|sub|supplier/.test(k) ? pick(VENDORS) : `${pick(JOBS)}`);
+        // one row in twelve gets the longest kind of name, so the layout is tested at its worst (L-sample)
+        case "record": return /client|customer/.test(k) ? row._client : recordOf(/vendor|sub|supplier/.test(k) ? (i % 12 === 5 ? LONG.vendor[(i / 12 | 0) % LONG.vendor.length] : pick(VENDORS)) : `${pick(JOBS)}`);
         case "address": return /city/.test(k) ? row._client.city : row._client.address;
         case "contact": return { email: emailOf(row._client), phone: `(555) ${int(200, 899)}-${String(int(0, 9999)).padStart(4, "0")}` };
         case "flags": return r() < 0.45 ? [] : FLAGS.filter(() => r() < 0.5).slice(0, 3);
