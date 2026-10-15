@@ -77,10 +77,11 @@ window.BDS_RECIPE = (() => {
 
   // ---------- how each type reads (rules.json → types) ----------
   const shortDate = (d) => (Math.abs(ageDays(d)) < 7 ? fmt.ago(d) : fmt.date(d));
-  // a kinds value in words, from its column's values (“Materials, Labour”)
-  const kindsText = (c, v) => (v || []).map((k) => c.values?.find((o) => o.value === k)?.label || k).join(", ");
-  // each icon names itself in a tooltip (D52) and, together, for screen readers
-  const kindsIcons = (c, v) => (v?.length ? `<span class="cell-kinds" role="img" aria-label="${esc(kindsText(c, v))}">${v.map((k) => { const o = c.values?.find((x) => x.value === k); return o ? `<span data-tip="${esc(o.label)}">${window.BolsterIcons(o.icon, 14)}</span>` : ""; }).join("")}</span>` : "");
+  // what a row holds, in its column's order, as one phrase: “Labor”, “Labor and materials”
+  const kindsOf = (c, v) => (c.values || []).filter((o) => (v || []).includes(o.value));
+  const kindsText = (c, v) => kindsOf(c, v).map((o, i) => (i ? o.label.toLowerCase() : o.label)).join(", ").replace(/, ([^,]*)$/, " and $1");
+  // the icons share one tooltip that names them together (D52, D53), as it does for screen readers
+  const kindsIcons = (c, v) => (kindsOf(c, v).length ? `<span class="cell-kinds" role="img" aria-label="${esc(kindsText(c, v))}" data-tip="${esc(kindsText(c, v))}">${kindsOf(c, v).map((o) => window.BolsterIcons(o.icon, 14)).join("")}</span>` : "");
   const text = (v) => {
     if (v == null || v === "") return "";
     if (v instanceof Date) return shortDate(v);
