@@ -31,6 +31,10 @@ window.BDS_RECIPE = (() => {
   const badge = (s) => `<span class="badge" ${s.attr}${s.mark ? ` data-mark="${s.mark}"` : ""}>${esc(s.label)}</span>`;
   // how often each stage turns up in sample data
   const WEIGHT = { new: 24, draft: 12, waiting: 30, won: 20, underway: 22, done: 34, lost: 12, late: 14, neutral: 30 };
+  // how far along the lifecycle each stage is, and the steps a date can be named for: a rank the row
+  // must have reached, or the one stage it belongs to (declined, cancelled)
+  const RANK = { new: 0, draft: 0, waiting: 1, late: 1, lost: 1, neutral: 1, won: 2, underway: 3, done: 4 };
+  const STEPS = [[/sent|emailed|submitted|issued/i, 1], [/approv|accept|sign|book|won/i, 2], [/paid|complet|closed|finish/i, 4], [/declin|reject|lost/i, "lost"], [/cancel|void/i, "neutral"]];
 
   // ---------- sample values, by type and by what the key sounds like ----------
   const TRADES = ["Drywall", "Insulation", "Framing", "Painting", "Electrical", "Plumbing"];
@@ -97,8 +101,8 @@ window.BDS_RECIPE = (() => {
       case "percent": return (x) => fmt.pct(x[c.key]);
       case "count": return (x) => (x[c.key] ? (c.unit ? fmt.plural(x[c.key], c.unit, `${c.unit}s`) : fmt.count(x[c.key])) : none("–"));
       case "duration": return (x) => fmt.plural(x[c.key], c.unit || "day", `${c.unit || "day"}s`);
-      case "date": return (x) => muted(shortDate(x[c.key]));
-      case "datetime": return (x) => muted(ageDays(x[c.key]) <= 1 ? `${fmt.ago(x[c.key])} ${x[c.key].toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }).toLowerCase().replace(" ", "")}` : shortDate(x[c.key]));
+      case "date": return (x) => (x[c.key] ? muted(shortDate(x[c.key])) : none("–"));
+      case "datetime": return (x) => !x[c.key] ? none("–") : muted(ageDays(x[c.key]) <= 1 ? `${fmt.ago(x[c.key])} ${x[c.key].toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }).toLowerCase().replace(" ", "")}` : shortDate(x[c.key]));
       case "status": return (x) => badge(empty.statusMap[x[c.key]]);
       case "person": return (x) => person(x[c.key]);
       case "record": return (x) => `<span class="cell-person">${avatar(x[c.key], "sm")}${esc(x[c.key].name)}</span>`;
@@ -129,6 +133,7 @@ window.BDS_RECIPE = (() => {
     const statusCol = d.status?.column;
     const stored = (d.status?.values || []).filter((v) => !v.derived);
     const order = (d.status?.values || []).map((v) => v.value);
+    const STAGE_OF = Object.fromEntries((d.status?.values || []).map((v) => [v.value, v.stage]));
     // the status shapes (dashed, quarter, half…) are the job list's own (D49): elsewhere a stage is its
     // colour, a dot on its card and a plain tinted badge
     const shapes = d.status?.marks === true && d.nav === "job-list";
@@ -146,6 +151,20 @@ window.BDS_RECIPE = (() => {
         x[statusCol] = stored.find((v) => (x2 -= WEIGHT[v.stage] || 10) <= 0)?.value || stored[0].value;
         // a derived status (past due) takes some of the rows of the status listed just before it
         d.status.values.forEach((v, j) => { if (v.derived && j && x[statusCol] === order[j - 1] && r() < 0.35) x[statusCol] = v.value; });
+        // a date named for a step in the lifecycle (sent, approved, paid…) stays empty until the row's
+        // status has got that far: a draft has no sent date
+        const reached = RANK[STAGE_OF[x[statusCol]]] ?? 4, stage = STAGE_OF[x[statusCol]];
+        const dated = fields.filter((f) => f.type === "date" || f.type === "datetime");
+        for (const f of dated) {
+          const step = STEPS.find(([re]) => re.test(f.key));
+          if (step && !(typeof step[1] === "string" ? stage === step[1] : reached >= step[1])) x[f.key] = null;
+        }
+        // and the steps follow one another: each a few days after the one before, from the row's own
+        // first date (created), never after today
+        const steps = dated.map((f) => [f, STEPS.findIndex(([re]) => re.test(f.key))]).filter(([f, i]) => i >= 0 && x[f.key]).sort((a, b) => a[1] - b[1]);
+        let t = dated.find((f) => !STEPS.some(([re]) => re.test(f.key)) && !/due|scheduled|start/.test(f.key))?.key;
+        t = t ? x[t] : null;
+        for (const [f] of steps) if (t) { t = daysFrom(t, Math.floor(r() * 9) + 1); if (t > TODAY) t = new Date(+TODAY - Math.floor(r() * 6) * 3600e3); x[f.key] = t; }
       }
       return x;
     });
@@ -183,7 +202,7 @@ window.BDS_RECIPE = (() => {
     const titleT = name.title || `{${name.key}}`;
     const dateCol = dates[0] && columns.find((c) => c.key === dates[0].key);
     const phone = {
-      over: (x) => (kindsCol ? kindsIcons(kindsCol, x[kindsCol.key]) : "") + [idKey && !titleT.includes(`{${idKey}}`) ? esc(text(x[idKey])) : "", dateCol ? dateCol.render(x) : ""].filter(Boolean).join(" · "),
+      over: (x) => (kindsCol ? kindsIcons(kindsCol, x[kindsCol.key]) : "") + [idKey && !titleT.includes(`{${idKey}}`) ? esc(text(x[idKey])) : "", dateCol && x[dateCol.key] ? dateCol.render(x) : ""].filter(Boolean).join(" · "),
       where: (x) => esc(fill(name.detail, idKey ? { ...x, [idKey]: "" } : x)),
     };
 

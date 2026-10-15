@@ -35,5 +35,8 @@
   "create": { "label": "Add item" },
   "export": true,
   "actions": { "row": ["Edit", "Duplicate", "Archive"] },
-  "record": { "heading": "{name}", "fields": ["vendor", "usedIn", "updated"], "timeline": true, "openLabel": "Edit item" }
+  "record": { "heading": "{name}", "fields": ["vendor", "usedIn", "updated"], "timeline": true, "openLabel": "Edit item" },
+  "assumptions": [
+    {"field": "columns[key=name].leading", "value": "thumbnail from photo", "why": "The product designer, 15 Oct 2026: catalog items get photos, a placeholder where there's none (D55)."}
+  ]
 }

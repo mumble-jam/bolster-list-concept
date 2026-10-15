@@ -117,6 +117,7 @@
   function inSpan(val, d) {
     const s = dateSpan(val);
     if (!s) return true;
+    if (!d) return false; // no date yet (a draft's sent date) is outside any span
     const k = iso(d);
     return (!s[0] || k >= iso(s[0])) && (!s[1] || k <= iso(s[1]));
   }

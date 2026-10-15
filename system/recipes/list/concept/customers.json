@@ -248,5 +248,8 @@
     ],
     "timeline": true,
     "openLabel": "Open customer"
-  }
+  },
+  "assumptions": [
+    {"field": "columns[key=name].leading", "value": "avatar of the customer", "why": "The concept's own customer list (data.js), reviewed with the product designer: a customer is a person or company."}
+  ]
 }
