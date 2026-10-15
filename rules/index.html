@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../system/bolster.css?v=b67049d0">
-<link rel="stylesheet" href="../system/specimens/specimen.css?v=b67049d0">
+<link rel="stylesheet" href="../system/bolster.css?v=6a9208a4">
+<link rel="stylesheet" href="../system/specimens/specimen.css?v=6a9208a4">
 <style>
   .rule-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr)); }
   .rule-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
@@ -56,7 +56,7 @@
   <article class="card rule-card" id="L-source">
     <header class="card-header rule-head"><h3><code>L-source</code> A source is evidence of meaning, never of design</h3><span class="badge" data-tone="success">Decided</span></header>
     <div class="card-body rule-body">
-      <p>A live page, a screenshot, a brief or a PRD is read for what it means: the things on the page, what each knows, how it moves through its life, what people do with it and what they look for first. That reading is written down twice, as the thing's model (system/model/, what exists, shared by every page that shows it) and the page's intent (what this page is for). The page description is then built from those by the rules (build.mjs), never transcribed from the original: how the original draws, places, orders or clicks things is left behind, and only becomes evidence when it says something about meaning (a per-row Send button says a draft's next step is Send). Questions are about meaning only; what the system decides is never asked. Where neither meaning nor a rule decides something (whether a date shows its time of day), the default is the option closest to the existing product; the builder may suggest another, as a suggestion. Identifiers keep the source's format exactly (“#0003”, “#29599975514”): people recognise and search them; the description records it (format) and sample data follows it. When the source shows none, it's a question.</p>
+      <p>A live page, a screenshot, a brief or a PRD is read for what it means: the things on the page, what each knows, how it moves through its life, what people do with it and what they look for first. That reading is written down twice, as the thing's model (system/model/, what exists, shared by every page that shows it) and the page's intent (what this page is for). The page description is then built from those by the rules (build.mjs), never transcribed from the original: how the original draws, places, orders or clicks things is left behind, and only becomes evidence when it says something about meaning (a per-row Send button says a draft's next step is Send). Questions are about meaning only; what the system decides is never asked. Where neither meaning nor a rule decides something (whether a date shows its time of day), the default is the option closest to the existing product; the builder may suggest another, as a suggestion. Identifiers keep the source's format exactly (“#0003”, “#29599975514”): people recognise and search them; the description records it (format) and sample data follows it. When the source shows none, it's a question. A label that puts several values in one line (“Vendor 100001846 #0003”, “Mykola • Job”) is read apart into its fields, each with the thing it belongs to (the vendor's name, the vendor order's own number): that's a requirement, written in the model; how the parts show is the rules'. When the source doesn't say whose a value is, it's a question.</p>
       <p class="text-secondary"><b>Why:</b> Copying a page's presentation carries its accidents into the system, and every list ends up looking like the page it came from instead of like the system. Reading meaning is also how a PRD will be read, so existing pages and new requirements go through the same door.</p>
       
       <p class="rule-meta"><span class="badge">survey</span> <span class="text-secondary">· Product designer, 15 Oct 2026</span></p>
@@ -110,7 +110,7 @@
   <article class="card rule-card" id="L-name-first">
     <header class="card-header rule-head"><h3><code>L-name-first</code> Rows lead with a name, not a code</h3><span class="badge" data-tone="success">Decided</span></header>
     <div class="card-body rule-body">
-      <p>The name column's title starts with words a person recognises (customer, job, item); numbers and codes go to its detail line. A field may show in more than one place: the name's lines are read on their own (on a phone, where the columns go, they're all there is), so a field there may also have its own column, and the record may repeat what the row says. Nothing is dropped from one place for being in another.</p>
+      <p>The name column's title starts with words a person recognises (customer, job, item); numbers and codes go to its detail line. A field with its own column in the table isn't repeated on the name's second line: one place per row. On a phone, where the columns go, the row's bottom line shows the first of them (the job), so nothing is lost there.</p>
       <p class="text-secondary"><b>Why:</b> People read about the first two words of each row (NN/g); “INV-1199 · Lucia Ruiz-Ortega” spends them on the number.</p>
       
       <p class="rule-meta"><span class="badge">check</span> <span class="text-secondary">· D32, Tables on phones research, Product designer, 15 Oct 2026</span></p>
@@ -344,6 +344,6 @@
     <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>File</th><th>What it is</th><th>Check</th></tr></thead><tbody><tr><td><code>concept/catalog.json</code></td><td>9 columns · no status · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/customers.json</code></td><td>9 columns · 3 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/invoices.json</code></td><td>8 columns · 4 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/jobs.json</code></td><td>8 columns · 5 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr></tbody></table></div>
   </section>
 </main>
-<script src="../system/specimens/specimen.js?v=b67049d0"></script>
+<script src="../system/specimens/specimen.js?v=6a9208a4"></script>
 </body>
 </html>

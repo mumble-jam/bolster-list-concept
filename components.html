@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=b67049d0">
-<link rel="stylesheet" href="data-list.css?v=b67049d0">
+<link rel="stylesheet" href="system/bolster.css?v=6a9208a4">
+<link rel="stylesheet" href="data-list.css?v=6a9208a4">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -109,7 +109,7 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=b67049d0"></script>
+<script src="shared/icons.js?v=6a9208a4"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -152,7 +152,7 @@ const C = [
   ["Table", "Thumbnails", "steered", "What sits before the name is a slot: an avatar, a thumbnail, anything else, or nothing; the job list keeps its avatar, the catalog gets photos with a placeholder where there's none or a link breaks (15 Oct, D55). The photo shows large at the top of the item's record, not as a link (15 Oct).", "The rounded square and its sizes, the image icon on a tint, picking and crediting 25 open-licence photos, the broken-link fallback, the column of photos on phones."],
   ["Table", "Sideways scroll", "yours", "Scroll sideways once columns reach their content width (9 Oct).", "Pinned checkbox and name, the edge rule once scrolled, the fade on the right."],
   ["Table", "Column widths", "steered", "A status must never clip, as a rule (9 Oct).", "Measuring every value, every status and the header offscreen."],
-  ["Table", "Status badges", "steered", "The marks inside them are yours, and they're the job list's own: other lists show a plain badge and a dot on the card (14 Oct, D49).", "The badge itself: pill, tint and text."],
+  ["Table", "Status badges", "steered", "The marks inside them are yours, and they're the job list's own: other lists show a plain badge and a dot on the card (14 Oct, D49). No dot on any status badge: a dot isn't an icon, icons show on demand (15 Oct, D61).", "The badge itself: pill, tint and text."],
   ["Table", "Grouped rows", "steered", "Group by as a nested menu with a check.", "Group rows with a chevron, count and total; collapsing."],
   ["Table", "Load more", "steered", "Load more and scrolling combined, no total row (8 Oct).", "The footer range (“Showing 1–50 of 132”) and loading as you scroll."],
   ["Table", "Phone rows", "yours", "Names not cut on the first line, then direction C from the tables-on-phones research (13 Oct, D32): the number and a date on an overline, the amount top right, the name full width at 16 px, where and status below; invoices lead with the customer.", "The overline at 12 px (the system has no 13), the catalog's category on its overline, and how lists built from a description fill the corners."],
@@ -263,6 +263,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=b67049d0"></script>
+<script src="system/specimens/specimen.js?v=6a9208a4"></script>
 </body>
 </html>

@@ -486,7 +486,7 @@
     // no status, so the unit takes the bottom line; the vendor joins the overline
     phone: { over: (x) => `${esc(x.category)} · ${esc(x.vendor)}`, where: (x) => `per ${esc(x.unit)}` },
     columns: [
-      { key: "name", label: "Item", m: "title", required: true, sort: (x) => x.name, render: (x) => main(x.id, x.name, `${x.category} · ${x.vendor}`, { thumb: x.photo?.[0] }) },
+      { key: "name", label: "Item", m: "title", required: true, sort: (x) => x.name, render: (x) => main(x.id, x.name, x.vendor, { thumb: x.photo?.[0] }) },
       { key: "category", label: "Category", w: "6rem", hideBelow: "md", sort: (x) => x.category, render: (x) => `<span class="badge">${esc(x.category)}</span>` },
       { key: "unit", label: "Unit", w: "6.5rem", m: "sub", sort: (x) => x.unit, render: (x) => `<span class="cell-muted">per ${esc(x.unit)}</span>` },
       { key: "vendor", label: "Vendor", w: "7rem", hidden: true, hideBelow: "lg", sort: (x) => x.vendor, render: (x) => `<span class="cell-muted">${esc(x.vendor)}</span>` },

@@ -4,7 +4,7 @@
   "noun": { "one": "item", "many": "items" },
   "source": { "product": "Data list concept", "page": "concepts/data-list/#catalog", "date": "2026-10-13" },
   "columns": [
-    { "key": "name", "label": "Item", "type": "name", "priority": 1, "title": "{name}", "detail": "{category} · {vendor}", "leading": "thumbnail", "thumbFrom": "photo" },
+    { "key": "name", "label": "Item", "type": "name", "priority": 1, "title": "{name}", "detail": "{vendor}", "leading": "thumbnail", "thumbFrom": "photo" },
     { "key": "category", "label": "Category", "type": "category", "priority": 5 },
     { "key": "unit", "label": "Unit", "type": "text", "priority": 3 },
     { "key": "vendor", "label": "Vendor", "type": "category", "priority": 8, "hidden": true },

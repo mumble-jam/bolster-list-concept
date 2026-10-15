@@ -333,7 +333,8 @@
   const phoneMQ = matchMedia("(max-width: 767px)");
   const narrowMQ = matchMedia("(min-width: 768px) and (max-width: 1099px)");
   [phoneMQ, narrowMQ].forEach((m) => m.addEventListener("change", () => { if (!$("#bulk-bar").hidden || st.picking) renderBulk(); }));
-  phoneMQ.addEventListener("change", () => renderSlices());
+  // back to table widths from a phone's: the columns get measured now, so draw the rows again
+  phoneMQ.addEventListener("change", () => { renderSlices(); if (!phoneMQ.matches) renderBody(); });
 
   // the one card that isn't a filter: label with a definition, the value with its counts, the parts, then a second figure
   function insight(scope) {
@@ -381,6 +382,9 @@
   const widths = {};
   function measureColumns() {
     if (widths[cfg.id]) return widths[cfg.id];
+    // phones lay rows out as items, with no columns to size: measured there, every width would come out
+    // as its floor and stay so once the window widens (statuses clipped). Measure only at table widths
+    if (phoneMQ.matches) return {};
     const list = cfg.columns.filter((col) => !col.required);
     const values = (col) => {
       const rows = [...cfg.rows];

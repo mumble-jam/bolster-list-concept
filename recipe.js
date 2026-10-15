@@ -228,9 +228,17 @@ window.BDS_RECIPE = (() => {
     const idKey = fields.find((f) => f.type === "id")?.key;
     const titleT = name.title || `{${name.key}}`;
     const dateCol = dates[0] && columns.find((c) => c.key === dates[0].key);
+    const phoneWhere = () => d.columns.filter((c) => !c.hidden && c.priority > 3 && ["record", "text", "address", "category"].includes(c.type) && c.key !== dates[0]?.key).sort((a, b) => a.priority - b.priority)[0];
     const phone = {
       over: (x) => (kindsCol ? kindsIcons(kindsCol, x[kindsCol.key]) : "") + [idKey && !titleT.includes(`{${idKey}}`) ? esc(text(x[idKey])) : "", dateCol && x[dateCol.key] ? dateCol.render(x) : ""].filter(Boolean).join(" · "),
-      where: (x) => { const y = idKey ? { ...x, [idKey]: "" } : x; return esc(fill(name.detail, y, asText(y))); },
+      // the name's second line, less the id (it's on the overline); when that leaves nothing, the first
+      // column with no other place on a phone row (L-name-first: the job, kept off the desktop line
+      // because it has a column there)
+      where: (x) => {
+        const y = idKey ? { ...x, [idKey]: "" } : x, line = fill(name.detail, y, asText(y));
+        if (line) return esc(line);
+        const c = phoneWhere(); return c ? esc(asText(x)(c.key)) : "";
+      },
     };
 
     // ---------- filters: the picker comes from the type ----------

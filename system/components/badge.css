@@ -1,7 +1,7 @@
 /* Badge
    Feedback tone:  <span class="badge" data-tone="neutral|success|warning|danger|info" [data-fill="solid"]>Paid</span>
    Job status:     <span class="badge" data-status="lead|draft|pending|booked|in-progress|active|outstanding">Pending</span>
-   Status badges always show a dot, so colour is never the only cue besides the word.
+   No dot: the word is the cue, colour the second one; a status shape shows only where a list asks (D61).
    Count:          <span class="badge" data-count>5</span>
    Square chrome tag: data-shape="square". See docs/decisions.md D12. 
    Status marks: <span class="badge" data-status="pending" data-mark="quarter">Pending</span> draws the
@@ -36,15 +36,8 @@
   :where(.badge[data-tone="info"])    { --_bg: var(--color-feedback-info-surface);    --_fg: var(--color-feedback-info-content); }
   :where(.badge[data-fill="solid"]) { background: var(--_fg); color: var(--_bg); box-shadow: none; }
 
-  /* job status: token-backed, with a dot */
-  :where(.badge[data-status]) { padding-inline-start: var(--space-1); }
-  :where(.badge[data-status])::before {
-    content: "";
-    inline-size: 0.375rem;
-    block-size: 0.375rem;
-    border-radius: var(--radius-full);
-    background: var(--_dot);
-  }
+  /* job status: token-backed colour and words, no dot: a dot isn't an icon, and icons show only where a
+     list asks for them, as the job list's status marks do (D61). --_dot stays for those marks */
   :where(.badge[data-status="lead"])        { --_bg: var(--color-status-lead-surface);        --_fg: var(--color-status-lead-content);        --_dot: var(--color-status-lead-dot); }
   :where(.badge[data-status="draft"])       { --_bg: var(--color-status-draft-surface);       --_fg: var(--color-status-draft-content);       --_dot: var(--color-status-draft-dot); }
   :where(.badge[data-status="pending"])     { --_bg: var(--color-status-pending-surface);     --_fg: var(--color-status-pending-content);     --_dot: var(--color-status-pending-dot); }
