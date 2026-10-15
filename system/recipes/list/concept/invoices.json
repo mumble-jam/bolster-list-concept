@@ -78,7 +78,8 @@
     {
       "key": "number",
       "label": "Invoice number",
-      "type": "id"
+      "type": "id",
+      "format": "#29599975514"
     },
     {
       "key": "job",

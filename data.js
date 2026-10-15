@@ -263,7 +263,7 @@
     const amount = money(380, 42000);
     const partial = status !== "paid" && status !== "draft" && r() < 0.25;
     const balance = status === "paid" ? 0 : partial ? Math.round(amount * 0.5 * 100) / 100 : amount;
-    return { id: `inv-${1180 + i}`, number: `INV-${1180 + i}`, job: pick(JOBS), client, city: client.city, status, owner: owner(), issued, due, amount, balance, paidIn: status === "paid" ? int(2, 41) : null };
+    return { id: `inv-${1180 + i}`, number: `#${29599975514 - i * 7919}`, job: pick(JOBS), client, city: client.city, status, owner: owner(), issued, due, amount, balance, paidIn: status === "paid" ? int(2, 41) : null };
   });
   const invoicesConfig = {
     id: "invoices", nav: "invoices", title: "Invoices", noun: ["invoice", "invoices"], create: "Create invoice",
@@ -337,7 +337,7 @@
         actions: { draft: [["Send", "send"], ["Edit", "pen"]], outstanding: [["Send reminder", "bell"], ["Record payment", "credit-card"]], overdue: [["Send reminder", "bell"], ["Record payment", "credit-card"]], paid: [["Duplicate", "copy"], ["Edit", "pen"]] }[x.status],
         related: [["Client", x.client], ["Job", { name: x.job }]],
         fields: [["Issued", fmt.date(x.issued)], ["Due", fmt.date(x.due)], ["Owner", person(x.owner)]],
-        doc: { label: "Invoice", name: `Invoice-${x.number}.pdf`, view: "View invoice" },
+        doc: { label: "Invoice", name: `Invoice-${x.number.replace(/^#/, "")}.pdf`, view: "View invoice" },
       };
     },
   };

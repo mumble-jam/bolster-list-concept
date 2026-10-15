@@ -45,6 +45,15 @@ window.BDS_RECIPE = (() => {
   const TRADE = ["Framing", "Drywall Co.", "Insulation", "Electric", "Plumbing", "Painting", "Supply", "Roofing"];
   const company = (i) => `${PREFIX[(i * 7) % PREFIX.length]} ${TRADE[Math.floor(i / PREFIX.length) % TRADE.length]}`;
   const ITEMS = Object.entries(CATALOG).flatMap(([cat, list]) => list.map(([name, unit, cost]) => ({ name, unit, cost, cat })));
+  // an id in the format the source writes it: “#0003” → #0001, #0002…; a long one (“#29599975514”)
+  // keeps its length with digits of its own. No format recorded: a plain running number
+  const idLike = (format, i, r) => {
+    const m = /^(\D*)(\d+)(\D*)$/.exec(format || "");
+    if (!m) return `#${1001 + i}`;
+    const [, pre, digits, post] = m, len = digits.length;
+    const num = len <= 6 ? String(i + 1).padStart(len, "0") : String(digits[0]) + Array.from({ length: len - 1 }, () => Math.floor(r() * 10)).join("");
+    return `${pre}${num}${post}`;
+  };
   function sample(r, n) {
     const int = (a, b) => Math.floor(a + r() * (b - a + 1));
     const pick = (a) => a[Math.floor(r() * a.length)];
@@ -53,7 +62,8 @@ window.BDS_RECIPE = (() => {
     return (f, row, i) => {
       const k = f.key.toLowerCase();
       switch (f.type) {
-        case "id": return `${(n.one.slice(0, 3) || "rec").toUpperCase()}-${1040 + i}`;
+        // the source's own format (“#0003”, “#29599975514”): its prefix and suffix, its number of digits
+        case "id": return idLike(f.format, i, r);
         case "money": if (row._item && /cost/.test(k)) return row._item.cost; if (row._item && /price/.test(k)) return Math.round(row._item.cost * 1.35 * 100) / 100; return r() < 0.06 ? 0 : money(380, 62000);
         case "number": return int(1, 40);
         case "percent": return [0.25, 0.3, 0.35, 0.4, 0.5][int(0, 4)];
@@ -122,7 +132,8 @@ window.BDS_RECIPE = (() => {
     return (x) => text(x[c.key]).toLowerCase();
   };
   // {key} templates: a missing value drops with its separator
-  const fill = (t, x) => (t || "").split(/\s+[·•–-]\s+/).map((part) => part.replace(/\{([a-zA-Z0-9]+)\}/g, (_, k) => text(x[k]))).filter((s) => s.trim()).join(" · ");
+  // each value reads as its type does in its column (L-types): “5 items”, “$1,900.00”, “3 Oct”
+  const fill = (t, x, as = (k) => text(x[k])) => (t || "").split(/\s+[·•–-]\s+/).map((part) => part.replace(/\{([a-zA-Z0-9]+)\}/g, (_, k) => as(k))).filter((s) => s.trim()).join(" · ");
 
   function compile(d, { id } = {}) {
     const notes = [];
@@ -130,6 +141,21 @@ window.BDS_RECIPE = (() => {
     const r = seeded(hash(d.nav));
     const fields = [...(d.fields || []), ...d.columns];
     const byKey = Object.fromEntries(fields.map((f) => [f.key, f]));
+    // a value in a template, read as its type (L-types)
+    const asText = (x) => (k) => {
+      const f = byKey[k], v = x[k];
+      if (v == null || v === "" || (Array.isArray(v) && !v.length)) return "";
+      switch (f?.type) {
+        case "money": return fmt.money(v);
+        case "percent": return fmt.pct(v);
+        case "count": return !v ? f.empty || "" : f.unit ? fmt.plural(v, f.unit, `${f.unit}s`) : fmt.count(v); // none, as its column says it
+        case "duration": return fmt.plural(v, f.unit || "day", `${f.unit || "day"}s`);
+        case "number": return fmt.count(v);
+        case "kinds": return kindsText(f, v);
+        case "status": return d.status?.values.find((s) => s.value === v)?.label || text(v);
+        default: return text(v);
+      }
+    };
     const statusCol = d.status?.column;
     const stored = (d.status?.values || []).filter((v) => !v.derived);
     const order = (d.status?.values || []).map((v) => v.value);
@@ -182,8 +208,8 @@ window.BDS_RECIPE = (() => {
       const out = { key: c.key, label: c.label, hidden: !!c.hidden, sort: sortOf(c, order), dir: DESC.has(c.type) ? "desc" : "asc" };
       if (c.priority === 1) {
         out.m = "title"; out.required = true;
-        out.render = (x) => main(x.id, fill(c.title || `{${c.key}}`, x) || c.empty || `Unnamed ${n.one}`, fill(c.detail, x), c.leading === "thumbnail" ? { thumb: c.thumbFrom ? x[c.thumbFrom] : null } : c.leading === "avatar" && c.avatarFrom ? (typeof x[c.avatarFrom] === "object" ? x[c.avatarFrom] : { initials: initials(text(x[c.avatarFrom]) || "?"), color: (hash(text(x[c.avatarFrom])) % 8) + 1 }) : null);
-        out.sort = (x) => fill(c.title || `{${c.key}}`, x).toLowerCase();
+        out.render = (x) => main(x.id, fill(c.title || `{${c.key}}`, x, asText(x)) || c.empty || `Unnamed ${n.one}`, fill(c.detail, x, asText(x)), c.leading === "thumbnail" ? { thumb: c.thumbFrom ? x[c.thumbFrom] : null } : c.leading === "avatar" && c.avatarFrom ? (typeof x[c.avatarFrom] === "object" ? x[c.avatarFrom] : { initials: initials(text(x[c.avatarFrom]) || "?"), color: (hash(text(x[c.avatarFrom])) % 8) + 1 }) : null);
+        out.sort = (x) => fill(c.title || `{${c.key}}`, x, asText(x)).toLowerCase();
         return out;
       }
       out.w = WIDTH[c.type] || "8rem";
@@ -204,7 +230,7 @@ window.BDS_RECIPE = (() => {
     const dateCol = dates[0] && columns.find((c) => c.key === dates[0].key);
     const phone = {
       over: (x) => (kindsCol ? kindsIcons(kindsCol, x[kindsCol.key]) : "") + [idKey && !titleT.includes(`{${idKey}}`) ? esc(text(x[idKey])) : "", dateCol && x[dateCol.key] ? dateCol.render(x) : ""].filter(Boolean).join(" · "),
-      where: (x) => esc(fill(name.detail, idKey ? { ...x, [idKey]: "" } : x)),
+      where: (x) => { const y = idKey ? { ...x, [idKey]: "" } : x; return esc(fill(name.detail, y, asText(y))); },
     };
 
     // ---------- filters: the picker comes from the type ----------
@@ -267,21 +293,21 @@ window.BDS_RECIPE = (() => {
     const creditOf = (src) => { const p = Object.values(PHOTOS).find((v) => v[0] === src); return p ? `Photo: <a href="${esc(p[3])}" target="_blank" rel="noopener">${esc(p[1])}, ${esc(p[2])}&nbsp;${window.BolsterIcons("m-external", 12)}</a>` : ""; };
     const recordFields = (d.record?.fields || d.columns.filter((c) => c.priority >= 4).map((c) => c.key)).filter((k) => !d.record?.related?.includes(k));
     const peek = (x) => ({
-      heading: d.record?.heading ? fill(d.record.heading, x) : fill(name.title || `{${name.key}}`, x),
+      heading: d.record?.heading ? fill(d.record.heading, x, asText(x)) : fill(name.title || `{${name.key}}`, x, asText(x)),
       open: d.record?.openLabel || `Open ${n.one}`,
       // a row with a picture shows it large at the top of its record (D55)
       photo: name.leading === "thumbnail" && name.thumbFrom && x[name.thumbFrom] ? { src: photoAt(x[name.thumbFrom], 500), credit: creditOf(x[name.thumbFrom]) } : null,
       badge: statusCol ? badge(statusMap[x[statusCol]]) : "",
       amount: figure && x[figure.key] ? (figure.type === "money" ? fmt.money(x[figure.key]) : text(x[figure.key])) : null,
       empty: figure?.empty || "–",
-      sub: fill(name.detail, x),
+      sub: fill(name.detail, x, asText(x)),
       timeline: d.record?.timeline === false ? [] : [{ what: `${cap(n.one)} created`, meta: fmt.date(dates[0] ? x[dates[0].key] : TODAY) }],
       actions: recordActions(x),
       // the records it connects to, as links (L-related)
       related: (d.record?.related || []).filter((k) => byKey[k] && x[k]).map((k) => [byKey[k].label || cap(k), typeof x[k] === "object" ? x[k] : { name: text(x[k]) }]),
       // each field reads as its type does in the list (L-types): money as money, a date as a date
       fields: recordFields.filter((k) => byKey[k]).map((k) => [byKey[k].label || cap(k), byKey[k].type === "person" ? person(x[k]) : byKey[k].type === "status" ? badge(statusMap[x[k]]) : byKey[k].type === "kinds" ? esc(kindsText(byKey[k], x[k]) || "–") : x[k] == null || x[k] === "" ? "–" : cellOf(byKey[k], { statusMap })(x)]),
-      doc: d.record?.document ? { label: d.record.document, name: `${d.record.document.replace(/\s+/g, "-")}-${idKey ? text(x[idKey]) : x.id}.pdf`, view: `View ${d.record.document.toLowerCase()}` } : null,
+      doc: d.record?.document ? { label: d.record.document, name: `${d.record.document.replace(/\s+/g, "-")}-${idKey ? text(x[idKey]).replace(/^#/, "") : x.id}.pdf`, view: `View ${d.record.document.toLowerCase()}` } : null,
     });
 
     const searchKeys = d.search.columns;
