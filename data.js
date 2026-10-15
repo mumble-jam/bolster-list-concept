@@ -124,14 +124,15 @@
     const created = daysAgo(int(0, 240));
     const modified = daysFrom(created, Math.floor(r() * Math.min(40, ageDays(created))));
     const total = status === "draft" && r() < 0.15 ? 0 : money(650, 68000);
-    return { id: `est-${2041 + i}`, number: `EST-${2041 + i}`, job: pick(JOBS), client, city: client.city, status, owner: owner(), total, created, modified, source: pick(SOURCES) };
+    // no job number: Bolster's job list shows none (a row is “client • job”), so the concept invents none (D60)
+    return { id: `est-${2041 + i}`, job: pick(JOBS), client, city: client.city, status, owner: owner(), total, created, modified, source: pick(SOURCES) };
   });
 
   const estimatesConfig = {
     id: "jobs", nav: "job-list", title: "Jobs", noun: ["job", "jobs"], create: "Create job",
     rows: estimates,
-    search: (x) => `${x.job} ${x.client.name} ${x.number} ${x.city}`,
-    searchHint: "Search by client, job, address or number",
+    search: (x) => `${x.job} ${x.client.name} ${x.client.address} ${x.city}`,
+    searchHint: "Search by client, job or address",
     dateKey: "created",
     cardKey: "status",
     metrics: [
@@ -161,9 +162,9 @@
     },
     statusMap: EST_STATUS,
     // phones (L-phone-row): the number and last activity on the overline, the address under the name
-    phone: { over: (x) => `${esc(x.number)} · ${fmt.ago(x.modified)}`, where: (x) => esc(x.client.address) },
+    phone: { over: (x) => fmt.ago(x.modified), where: (x) => esc(x.client.address) },
     columns: [
-      { key: "job", label: "Job", m: "title", required: true, sort: (x) => `${x.job} ${x.client.name}`, render: (x) => main(x.id, `${x.client.name} · ${x.job}`, `${x.number} · ${x.client.address}`, x.client) },
+      { key: "job", label: "Job", m: "title", required: true, sort: (x) => `${x.job} ${x.client.name}`, render: (x) => main(x.id, `${x.client.name} · ${x.job}`, x.client.address, x.client) },
       { key: "status", label: "Status", w: "6.5rem", m: "badge", sort: (x) => Object.keys(EST_STATUS).indexOf(x.status), render: (x) => badge(EST_STATUS[x.status]) },
       { key: "owner", label: "Owner", w: "12.5rem", hideBelow: "lg", sort: (x) => x.owner.name, render: (x) => person(x.owner) },
       { key: "source", label: "Source", w: "7rem", hidden: true, hideBelow: "lg", sort: (x) => x.source, render: (x) => `<span class="cell-muted">${esc(x.source)}</span>` },
@@ -234,14 +235,14 @@
       }
       return {
         heading: `${x.job} for ${x.client.name}`, open: "Open job",
-        badge: badge(S[x.status]), amount: x.total ? fmt.money(x.total) : null, empty: "No price yet", sub: `${x.number} · ${x.client.address}`,
+        badge: badge(S[x.status]), amount: x.total ? fmt.money(x.total) : null, empty: "No price yet", sub: x.client.address,
         timeline: ev,
         // the record's two buttons: Bolster's first actions for the status (the rest are under More)
         actions: { draft: [["Edit", "pen"], ["Duplicate", "copy"]], pending: [["Send now", "send"], ["Sign and book now", "file-signature"]], booked: [["Invoice this project", "file-invoice"], ["Review customer", "star"]], "in-progress": [["Invoice this project", "file-invoice"], ["Review customer", "star"]], declined: [["Edit", "pen"], ["Duplicate", "copy"]] }[x.status],
         // the records the job connects to, as links (L-related)
         related: [["Client", x.client]],
         fields: [["Owner", person(x.owner)], ["Created", fmt.date(x.created)], ["Last activity", fmt.ago(x.modified)], ["Source", esc(x.source)]],
-        doc: x.status === "draft" ? null : { label: "Proposal", name: `Proposal-${x.number}.pdf`, view: "View proposal" },
+        doc: x.status === "draft" ? null : { label: "Proposal", name: `Proposal-${x.job.replace(/\s+/g, "-")}.pdf`, view: "View proposal" },
       };
     },
   };

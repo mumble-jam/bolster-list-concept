@@ -18,7 +18,7 @@
       "type": "name",
       "priority": 1,
       "title": "{client} · {job}",
-      "detail": "{number} · {address}",
+      "detail": "{address}",
       "leading": "avatar",
       "avatarFrom": "client"
     },
@@ -74,11 +74,6 @@
       "key": "client",
       "label": "Client",
       "type": "record"
-    },
-    {
-      "key": "number",
-      "label": "Job number",
-      "type": "id"
     },
     {
       "key": "address",
@@ -165,11 +160,10 @@
     "columns": [
       "job",
       "client",
-      "number",
       "address",
       "city"
     ],
-    "hint": "Search by client, job, address or number"
+    "hint": "Search by client, job or address"
   },
   "dateRange": {
     "column": "created"
