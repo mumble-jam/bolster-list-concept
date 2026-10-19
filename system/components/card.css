@@ -92,7 +92,7 @@
   }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --_card-top: var(--card-line-d); --_card-k: var(--card-dark-k); --_card-sc: #000; } }
   :root[data-theme="dark"] { --_card-top: var(--card-line-d); --_card-k: var(--card-dark-k); --_card-sc: #000; }
-  :root:not([data-cards="flat"]) :is(.card, .slice) {
+  :root:not([data-cards="flat"]) :is(.card, .slice, .money-bar) {
     --_ring: 0 0 transparent;
     border-radius: var(--card-radius);
     border-color: var(--color-line-card);

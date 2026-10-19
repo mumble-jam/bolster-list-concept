@@ -14,7 +14,7 @@
 
 @layer components {
   /* ---------- slice cards: one per status plus "All"; the whole card toggles the filter ---------- */
-  /* cards sit flat on the page: an edge, no shadow */
+  /* the flat base: an edge; the tactile body (sheen, shadows) comes from card.css unless data-cards="flat" */
   .slices { min-inline-size: 0; }
   .slices[hidden] { display: none; }
   .slice-row[data-no-insight] { grid-template-columns: repeat(var(--_slices, 5), minmax(max-content, 1fr)); }

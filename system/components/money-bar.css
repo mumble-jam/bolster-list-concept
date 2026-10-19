@@ -16,7 +16,8 @@
      <div class="money-bar-group">…</div>
    </div>
    <button class="money-bar-note" type="button" aria-pressed="false"><span class="dot" …></span>13 drafts not sent · $55,354</button>
-   Nested corners share a centre (D35): the card's 16 around 8px figures, an 8 inset. */
+   Nested corners share a centre (D35): the card's 16 around 8px figures, an 8 inset. The body (edge,
+   sheen, shadows) is the cards' (card.css), so the bar sits on the page like the summary cards. */
 
 @layer tokens, base, components, utilities;
 
@@ -32,6 +33,8 @@
   .money-bar-group { display: grid; align-content: start; gap: var(--space-1); min-inline-size: 0; padding-block-end: var(--space-2); }
   /* the second group sits after a hairline, as far from it as the first group's figures are from its edge */
   .money-bar-group + .money-bar-group { border-inline-start: var(--border-width-default) solid var(--color-line-subtle); padding-inline-start: var(--inset-card); }
+  /* and the same room before the hairline, so the bars stop as far from it on both sides */
+  .money-bar-group:not(:last-child) { padding-inline-end: var(--inset-card); }
   .money-bar-head {
     display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); margin: 0;
     padding: var(--space-1) var(--space-3) 0;
@@ -76,6 +79,7 @@
   /* phones: the groups stack */
   @media (max-width: 767px) {
     .money-bar { grid-template-columns: minmax(0, 1fr); }
+    .money-bar-group:not(:last-child) { padding-inline-end: 0; }
     .money-bar-group + .money-bar-group { border-inline-start: 0; padding-inline-start: 0; border-block-start: var(--border-width-default) solid var(--color-line-subtle); padding-block-start: var(--space-2); }
     /* the figures stay side by side, their lines wrapping, so the bar stays short */
     .money-bar-figures { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); }
