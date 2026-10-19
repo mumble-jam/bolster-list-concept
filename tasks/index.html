@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolster to-do concept</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="../shared/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../shared/assets/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../shared/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../system/bolster.css?v=b05d7739">
+<link rel="stylesheet" href="../shared/shell.css?v=b05d7739">
+<link rel="stylesheet" href="../data-list.css?v=b05d7739">
+<link rel="stylesheet" href="todo.css?v=b05d7739">
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<div class="app-shell">
+  <main class="app-main">
+    <div class="canvas-layers" aria-hidden="true"><div class="canvas-glow"></div><div class="canvas-net"></div></div>
+    <header class="page-header">
+      <div class="page-title">
+        <button class="button page-tool" data-variant="ghost" data-size="sm" data-icon-only data-collapse-sidebar aria-label="Hide menu" data-tip="Hide menu"><i data-icon="panel-left" data-size="18"></i></button>
+        <h1 id="page-title">Tasks</h1>
+        <p class="select-count" id="select-count" aria-live="polite" hidden></p>
+      </div>
+      <div class="page-header-actions">
+        <!-- the check completes, so selecting is a mode everywhere (T-check); it reads Done while it's on -->
+        <button class="button" data-variant="ghost" id="select-mode">Select</button>
+        <button class="button" data-float id="create" data-tip="Create task"><span class="float-label">Create task</span></button>
+      </div>
+    </header>
+
+    <div class="app-content list-page todo-page" data-width="wide">
+      <div class="list-split" id="list-split">
+      <section class="todo-panel" aria-labelledby="page-title">
+        <div class="card todo-bar"><div class="list-toolbar" role="search" aria-label="Search and filter">
+          <!-- the table card's bar (D21): Add filter, then the search, then display settings; picks become chips
+               on the row below, with the count and Clear all. On the page (trying out), the search is an icon on
+               the right that opens into a small field -->
+          <div class="list-bar" id="list-bar">
+            <button type="button" class="field-button add-filter" id="add-filter" aria-haspopup="menu" aria-expanded="false" data-tip="Add filter"><i data-icon="filter" data-size="16"></i><span>Add filter</span></button>
+            <!-- on the page (trying out): the count beside Add filter, a rule between, as search and display settings on the right -->
+            <span class="list-bar-sep todo-bar-only" aria-hidden="true"></span>
+            <p class="result-count todo-bar-only" id="bar-count" aria-live="polite"></p>
+            <label class="list-search" id="search-box"><i data-icon="search" data-size="16"></i><input type="search" id="search" aria-label="Search tasks" placeholder="Search" enterkeyhint="search" autocomplete="off"></label>
+            <button type="button" class="button todo-search-open" data-variant="ghost" data-size="sm" data-icon-only id="search-open" aria-label="Search" aria-controls="search" aria-expanded="false" data-tip="Search"><i data-icon="search" data-size="16"></i></button>
+            <span class="list-bar-sep" aria-hidden="true"></span>
+            <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only id="view-options" aria-haspopup="menu" aria-expanded="false" aria-label="Display settings" data-tip="Display settings"><i data-icon="m-display-settings" data-size="16"></i></button>
+          </div>
+          <div class="list-chips" id="list-chips">
+            <p class="result-count" id="result-count" aria-live="polite">Loading…</p>
+            <div class="filters" id="filters"></div>
+          </div>
+        </div></div>
+        <!-- each group is a card of its own: a day's tasks read as one piece -->
+        <div class="todo-groups" id="groups"></div>
+      </section>
+      <section class="card detail" id="detail" aria-labelledby="detail-title" hidden></section>
+      </div>
+      <div class="floating-bar" id="bulk-bar" role="toolbar" aria-label="Actions for the selected tasks" hidden></div>
+    </div>
+  </main>
+</div>
+<div class="pop" id="pop" popover></div>
+<dialog class="dialog peek detail" id="peek" aria-labelledby="detail-title"></dialog>
+<div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
+<dialog class="dialog notes" id="notes" aria-labelledby="notes-title">
+  <header class="dialog-header"><h2 id="notes-title">About this concept</h2>
+    <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close data-tip="Close"><i data-icon="xmark" data-size="16"></i></button></header>
+  <div class="dialog-body">
+    <section>
+      <h3>What it is</h3>
+      <p class="text-secondary">Bolster's Tasks page as a to-do list, not a list (D71, D72): work to tick off, grouped by when, its fields set where they are. Built after the table builder couldn't carry it (the Tasks list, 19 Oct) and the “To-do lists” research board in Figma.</p>
+    </section>
+    <section>
+      <h3>Principles</h3>
+      <ol>
+        <li><b>The check is the row (T-check).</b> Round, first, one tap: the task is done, struck through where it is, and a toast says so with Undo. Nothing asks first. Selecting is a mode (Select in the header): the checks turn into square boxes, and a bar offers Complete, Due date and Assign.</li>
+        <li><b>Done stays in place (T-done).</b> A ticked task keeps its place until the list is next drawn (a filter, a search, the other grouping), then joins Completed, the last group, folded with its count.</li>
+        <li><b>Grouped by when (T-when).</b> Overdue in red, Today, Tomorrow, This week, Later, No due date; an empty group doesn't show. Job is the other grouping. Each header counts its open tasks: no cards above the list (T-summary). Each group is a card of its own, under the toolbar's, so a day reads as one piece.</li>
+        <li><b>Fields change in place (T-in-place).</b> The due date and the assignee are chips that open a picker and save on pick. An empty one shows on hover (a dashed chip, a ghost face), never “Set date” on every row; on phones it's in the task. Priority is a mark before the title, as in Linear: one, two or three bars for Low, Med and High, faint dots for none.</li>
+        <li><b>Add where you are (T-add).</b> Add task at the end of each group, filled with its value (due today, this job); Create task in the header for the rest.</li>
+        <li><b>Your own order.</b> Drag a task by its handle to reorder it (or Alt and the arrow keys). It starts by priority, then due date. Dropped into another day's group, it takes that day, with Undo; Overdue and Completed take no drops. On phones a long press lifts the task, and it follows the finger.</li>
+        <li><b>A task opens beside the list (T-open).</b> From 1280 wide a panel beside it, below that a sheet: its fields, set the same way, and its story.</li>
+        <li><b>The table card's toolbar, Bolster's filters.</b> Add filter offers what Bolster's Filter & sort panel does: Show (general tasks, labor tasks, material items; it opens on the first two, as Bolster does), Priority, Assignee, several at once, and a Period of due dates. Each is a chip on the row below with the count and Clear all. Display settings hold Group by (When, Job) and Show completed tasks.</li>
+        <li><b>Trying out: the toolbar on the page (on by default).</b> The bar sits on the page itself above the group cards, so the only cards are the days, in one row: Add filter as an icon and the count after a rule on the left, the search (an icon that opens into a small field, closing again when left empty; Escape empties it) and display settings after a rule on the right. Chips take the row below only when there are some. Switch it off in Concept controls to compare with the toolbar on its own card, the search a bare field across it. Not a rule yet.</li>
+        <li><b>The job's schedule fills it.</b> Most tasks are a job's labor, with their hours; some are written by people, some are material items.</li>
+      </ol>
+    </section>
+    <section>
+      <h3>Open questions</h3>
+      <ul>
+        <li>How long Completed keeps tasks: the last 30 days, as the lists' endings?</li>
+        <li>Recurring tasks, subtasks and comments: none were seen on Bolster's page.</li>
+      </ul>
+    </section>
+  </div>
+</dialog>
+<details class="concept-controls" id="concept-controls" data-more-entry="Concept controls" data-more-icon="sliders">
+  <summary><span class="concept-tag">Concept</span> Controls</summary>
+  <div class="concept-body">
+    <div class="field" data-size="sm">
+      <label class="choice"><input type="checkbox" role="switch" class="toggle" id="cc-bar"> Toolbar on the page, not on a card</label>
+      <p class="field-helper">Trying out: the bar on the page above the cards, the search an icon on the right that opens into a field. No rule changes with it yet.</p></div>
+    <button class="button" data-variant="secondary" data-size="sm" data-open-dialog="notes">About this concept</button>
+    <div class="cluster" style="justify-content:space-between">
+      <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+    </div>
+  </div>
+</details>
+<script src="../shared/icons.js?v=b05d7739"></script>
+<script src="../shared/shell.js?v=b05d7739"></script>
+<script src="../system/components/tooltip.js?v=b05d7739"></script>
+<script src="../data.js?v=b05d7739"></script>
+<script src="todo.js?v=b05d7739"></script>
+</body>
+</html>

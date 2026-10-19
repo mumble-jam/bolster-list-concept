@@ -1,0 +1,185 @@
+/* To-do list concept (D72): Bolster's Tasks as work to tick off. Rows in groups (by when or by job), each
+   a round check, a priority mark, the title and its job, then the hours, the due date and who, those two
+   set in place. Built on the system (cards, the list toolbar, popovers, the record, the floating bar,
+   toasts); what's new lives here until it settles: the check, the mark, the in-place chips, the groups. */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  /* the toolbar in a card of its own, then a card per group */
+  .todo-panel { display: grid; gap: var(--space-3); align-content: start; min-inline-size: 0; }
+  .todo-bar { border-color: var(--color-line-card); }
+  /* the toolbar scrolls with the page here, so it doesn't slide away with the bars */
+  :root[data-chrome-hidden] .todo-bar .list-toolbar { translate: none; }
+  .todo-bar .list-toolbar { position: static; border-block-end: 0; border-radius: calc(var(--radius-xl) - var(--border-width-default)); background: none; }
+  .todo-panel .list-chips { display: flex; }
+  /* trying out (Concept controls): the toolbar on the page, not a card; the search becomes a field of its
+     own there, as the filters beside it are. Not a rule yet */
+  :root[data-todo-bar="surface"] .todo-bar.card { border: 0; border-radius: 0; background: none; background-image: none; box-shadow: none; }
+  :root[data-todo-bar="surface"] .todo-bar .list-bar { padding: 0; }
+  :root[data-todo-bar="surface"] .todo-bar .list-toolbar { border-radius: 0; }
+  /* the search: on the card, the table card's bare field; on the page, an icon on the right that opens into
+     a small field (and stays open while it holds words) */
+  .todo-search-open, .todo-bar-only { display: none; }
+  /* on the page: Add filter is an icon button, the count beside it after a rule, as on the right; the chips
+     get the row below only when there are some */
+  :root[data-todo-bar="surface"] .todo-bar .todo-bar-only { display: block; }
+  :root[data-todo-bar="surface"] .todo-bar #bar-count { margin: 0; }
+  :root[data-todo-bar="surface"] .todo-bar .add-filter { inline-size: var(--control-height-sm); padding: 0; justify-content: center; gap: 0; border-color: transparent; background: none; }
+  :root[data-todo-bar="surface"] .todo-bar .add-filter span { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+  @media (hover: hover) { :root[data-todo-bar="surface"] .todo-bar .add-filter:hover { border-color: transparent; background: var(--color-action-ghost-hover); } }
+  :root[data-todo-bar="surface"] .todo-bar .add-filter[aria-expanded="true"] { background: var(--color-action-ghost-hover); }
+  :root[data-todo-bar="surface"] .todo-bar #result-count { display: none; }
+  :root[data-todo-bar="surface"] .todo-bar .list-chips:not(:has(.chip)) { display: none; }
+  :root[data-todo-bar="surface"] .todo-bar .list-search { display: none; flex: 0 1 14rem; margin-inline-start: auto; border: var(--border-width-default) solid var(--color-line-card); background: var(--color-surface-default); padding-inline: var(--space-3); }
+  :root[data-todo-bar="surface"] .todo-bar :is(.list-bar[data-search-open], .list-bar:has(input:not(:placeholder-shown))) .list-search { display: flex; }
+  :root[data-todo-bar="surface"] .todo-search-open { display: inline-flex; margin-inline-start: auto; }
+  :root[data-todo-bar="surface"] :is(.list-bar[data-search-open], .list-bar:has(input:not(:placeholder-shown))) .todo-search-open { display: none; }
+  @media (hover: hover) { :root[data-todo-bar="surface"] .todo-bar .list-search:hover { border-color: var(--color-line-strong); background: var(--color-surface-default); } }
+  :root[data-todo-bar="surface"] .todo-bar .list-bar-sep { background: var(--color-line-default); }
+  :root[data-todo-bar="surface"] .todo-bar .list-chips { padding: var(--space-2) 0 0; }
+  .todo-groups { display: grid; gap: var(--space-3); }
+
+  /* ---------- a group: its header, its rows, Add task ---------- */
+  /* a group's card: rows 8 in from its edges, so their 8px corners share the card's 16 (D35) */
+  .todo-group.card { --_in: calc(var(--inset-card) - var(--border-width-default)); display: block; padding: 0 var(--_in) var(--_in); border-color: var(--color-line-card); }
+  .todo-group-head { display: flex; align-items: baseline; gap: var(--space-2); margin: 0; padding: calc(var(--space-4) - var(--border-width-default)) var(--space-3) var(--space-2); font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); color: var(--color-content-primary); }
+  .todo-group-head[data-late] .todo-group-label { color: var(--color-feedback-danger-content); }
+  .todo-group-count { font-weight: var(--font-weight-regular); color: var(--color-content-tertiary); font-variant-numeric: tabular-nums; }
+  /* Completed folds: its header is the toggle */
+  .todo-fold { display: inline-flex; align-items: center; gap: var(--space-2); margin: calc(-1 * var(--space-1)) calc(-1 * var(--space-2)); padding: var(--space-1) var(--space-2); border: 0; border-radius: var(--radius-sm); background: none; color: inherit; font: inherit; cursor: pointer; }
+  .todo-fold svg { transition: transform var(--duration-fast) var(--ease-standard); color: var(--color-content-tertiary); }
+  .todo-fold[aria-expanded="false"] svg { transform: rotate(-90deg); }
+  @media (hover: hover) { .todo-fold:hover { background: var(--color-surface-hover); } }
+  .todo-fold:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 0; }
+
+  .todo-list { display: grid; margin: 0; padding: 0; list-style: none; }
+
+  /* ---------- a row ---------- */
+  .todo-row {
+    position: relative;
+    display: grid; grid-template-columns: var(--space-4) var(--space-5) var(--space-4) minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-2);
+    min-block-size: var(--control-height-lg); padding: var(--space-1) var(--space-2) var(--space-1) 0;
+    border-radius: var(--radius-md);
+  }
+  .todo-row + .todo-row::before { content: ""; position: absolute; inset-inline: calc(var(--space-4) + var(--space-2)) 0; inset-block-start: 0; border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
+  @media (hover: hover) { .todo-row:hover { background: var(--color-surface-hover); } .todo-row:hover::before, .todo-row:hover + .todo-row::before { border-color: transparent; } }
+  .todo-row[data-open] { background: var(--color-surface-selected); }
+  .todo-row[data-selected] { background: var(--color-surface-selected); }
+
+  /* the handle: shown on hover and focus, dragged to reorder (Alt and the arrows from the keyboard) */
+  .todo-grip { display: grid; place-items: center; inline-size: var(--space-4); block-size: var(--space-6); padding: 0; border: 0; border-radius: var(--radius-xs); background: none; color: var(--color-content-tertiary); cursor: grab; opacity: 0; }
+  .todo-row:hover .todo-grip, .todo-grip:focus-visible { opacity: 1; }
+  .todo-grip:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
+  .todo-row[data-dragging] { opacity: 0.4; }
+  /* where a dragged task lands: a line in the seam between two rows, from the check to the row's end, a dot
+     at its start; never a row's own edge, which follows its rounded corners and reads as picking that row */
+  .todo-drop-line { position: absolute; z-index: 1; block-size: var(--border-width-strong); border-radius: var(--radius-full); background: var(--color-action-accent); pointer-events: none; }
+  .todo-drop-line::before { content: ""; position: absolute; inset-inline-start: calc(-1 * var(--space-1)); inset-block-start: 50%; inline-size: var(--space-2); block-size: var(--space-2); translate: 0 -50%; border: var(--border-width-strong) solid var(--color-action-accent); border-radius: var(--radius-full); background: var(--color-surface-default); box-sizing: border-box; }
+
+  /* the check: round, so it never reads as selecting (T-check); a real checkbox named after its task */
+  .todo-check {
+    appearance: none; margin: 0; display: grid; place-content: center;
+    inline-size: var(--space-5); block-size: var(--space-5); border-radius: var(--radius-full);
+    border: var(--border-width-strong) solid var(--color-content-tertiary); background: var(--color-surface-default);
+    cursor: pointer; transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
+  }
+  .todo-check::before { content: ""; inline-size: 10px; block-size: 10px; background: currentColor; color: var(--color-content-on-accent); opacity: 0;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6.2l2.3 2.3 4.7-5' fill='none' stroke='%23000' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+  @media (hover: hover) { .todo-check:hover:not(:checked) { border-color: var(--color-feedback-success-accent); } .todo-check:hover:not(:checked)::before { opacity: 1; color: var(--color-feedback-success-accent); } }
+  .todo-check:checked { border-color: var(--color-feedback-success-accent); background: var(--color-feedback-success-accent); }
+  .todo-check:checked::before { opacity: 1; }
+  .todo-check:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+  /* selecting: the system's square box in the check's place */
+  .todo-row .checkbox { justify-self: center; }
+
+  /* priority, as Linear marks it: bars for Low, Med, High; faint dots for none */
+  .todo-prio { display: grid; place-items: center; inline-size: var(--space-4); block-size: var(--space-6); padding: 0; border: 0; border-radius: var(--radius-xs); background: none; cursor: pointer; }
+  .todo-prio:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
+  .prio-mark { display: inline-flex; align-items: flex-end; gap: 2px; block-size: 12px; }
+  .prio-mark i { inline-size: 3px; border-radius: 1px; background: var(--color-line-strong); }
+  .prio-mark i:nth-child(1) { block-size: 5px; } .prio-mark i:nth-child(2) { block-size: 8px; } .prio-mark i:nth-child(3) { block-size: 12px; }
+  .prio-mark[data-level="1"] i:nth-child(-n+1), .prio-mark[data-level="2"] i:nth-child(-n+2), .prio-mark[data-level="3"] i { background: var(--color-content-secondary); }
+  .prio-mark[data-level="0"] { align-items: center; }
+  .prio-mark[data-level="0"] i { block-size: 3px; inline-size: 3px; border-radius: var(--radius-full); background: var(--color-line-default); }
+
+  /* the title and its job */
+  .todo-main { min-inline-size: 0; display: flex; align-items: baseline; flex-wrap: wrap; column-gap: var(--space-2); }
+  .todo-title { padding: var(--space-1) 0; border: 0; background: none; color: var(--color-content-primary); font: inherit; font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); text-align: start; overflow-wrap: anywhere; cursor: pointer; }
+  @media (hover: hover) { .todo-title:hover { text-decoration: underline; text-underline-offset: 3px; } }
+  .todo-title:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); border-radius: var(--radius-xs); }
+  .todo-job { font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); text-decoration: none; white-space: nowrap; }
+  .todo-job::before { content: "· "; color: var(--color-content-tertiary); }
+  @media (hover: hover) { .todo-job:hover { color: var(--color-content-primary); text-decoration: underline; } }
+  .todo-meta { display: none; }
+  .todo-row[data-done] .todo-title { color: var(--color-content-tertiary); text-decoration: line-through; }
+  .todo-row[data-done] .todo-job, .todo-row[data-done] .todo-side { opacity: 0.6; }
+
+  /* hours, when, who: set in place, saved on pick (T-in-place) */
+  .todo-side { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-2); }
+  .todo-hours { min-inline-size: 3.5em; font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-tertiary); font-variant-numeric: tabular-nums; text-align: end; white-space: nowrap; }
+  .todo-due { display: inline-flex; align-items: center; gap: var(--space-1); min-inline-size: 6.5em; justify-content: flex-start; padding: 2px var(--space-2); border: var(--border-width-default) solid transparent; border-radius: var(--radius-sm); background: none; color: var(--color-content-secondary); font: inherit; font-size: var(--text-sm); line-height: var(--leading-sm); white-space: nowrap; cursor: pointer; }
+  .todo-due svg { color: var(--color-content-tertiary); }
+  @media (hover: hover) { .todo-due:hover { background: var(--color-surface-tint-hover); } }
+  .todo-due[data-late] { color: var(--color-feedback-danger-content); }
+  .todo-due[data-late] svg { color: currentColor; }
+  .todo-who { display: grid; place-items: center; inline-size: var(--control-height-sm); block-size: var(--control-height-sm); padding: 0; border: 0; border-radius: var(--radius-full); background: none; cursor: pointer; }
+  .todo-due:focus-visible, .todo-who:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
+  /* an empty field stays quiet: a dashed chip and a ghost face on hover or focus, nothing at rest */
+  .todo-due[data-empty] { color: var(--color-content-tertiary); border-style: dashed; border-color: var(--color-line-default); }
+  .todo-who[data-empty] .ghost { display: grid; place-items: center; inline-size: 24px; block-size: 24px; border-radius: var(--radius-full); border: var(--border-width-default) dashed var(--color-content-tertiary); color: var(--color-content-tertiary); }
+  .todo-due[data-empty], .todo-who[data-empty] { opacity: 0; }
+  .todo-row:hover :is(.todo-due, .todo-who)[data-empty], .todo-row:focus-within :is(.todo-due, .todo-who)[data-empty], :is(.todo-due, .todo-who)[data-empty][aria-expanded="true"] { opacity: 1; }
+  .todo-row[data-done] :is(.todo-due, .todo-who)[data-empty] { visibility: hidden; }
+
+  /* Add task, at the end of each group, with the group's value (T-add) */
+  .todo-add { display: flex; align-items: center; gap: var(--space-2); inline-size: 100%; min-block-size: var(--control-height-md); padding: 0 var(--space-2) 0 calc(var(--space-4) + var(--space-2)); border: 0; border-radius: var(--radius-md); background: none; color: var(--color-content-tertiary); font: inherit; font-size: var(--text-sm); text-align: start; cursor: pointer; }
+  @media (hover: hover) { .todo-add:hover { color: var(--color-content-primary); background: var(--color-surface-hover); } }
+  .todo-add:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
+  .todo-add-hint { color: var(--color-content-tertiary); }
+  .todo-add-form { display: grid; grid-template-columns: var(--space-4) var(--space-5) minmax(0, 1fr); align-items: center; column-gap: var(--space-2); padding: var(--space-1) var(--space-2) var(--space-1) 0; }
+  .todo-add-form .todo-check { grid-column: 2; cursor: default; }
+  .todo-add-form .input { grid-column: 3; }
+  .todo-add-form .field-helper { grid-column: 3; margin: var(--space-1) 0 0; }
+
+  .todo-empty { padding: var(--space-10) var(--space-4); text-align: center; color: var(--color-content-secondary); border-color: var(--color-line-card); }
+
+  /* the pickers: menus in the shared popover; the date's calendar under its presets */
+  /* the date menu holds a month: it grows to fit, rather than scrolling it under its edge */
+  .pop[data-kind="due"] { max-block-size: min(36rem, 90dvh); }
+  /* the last week sits clear of the menu's bottom corners (D35) */
+  .pop .todo-cal { padding: var(--space-2) var(--space-2) var(--space-5); }
+  .pop .todo-cal-nav { display: flex; align-items: center; justify-content: space-between; padding-inline: var(--space-1); }
+  .pop .todo-period { gap: var(--space-3); padding: 0 var(--space-4) var(--space-4); }
+  .pop .todo-period p { margin: 0; }
+  .menu-item .menu-hint { margin-inline-start: auto; color: var(--color-content-tertiary); font-size: var(--text-xs); }
+
+  /* the record: its fields set the same way */
+  .todo-detail-fields .todo-due, .todo-detail-fields .todo-who { opacity: 1; }
+  .todo-detail-fields .todo-who { inline-size: auto; padding-inline-end: var(--space-2); display: inline-flex; gap: var(--space-2); border-radius: var(--radius-sm); font: inherit; font-size: var(--text-sm); color: var(--color-content-primary); }
+  .todo-detail-fields .todo-prio { inline-size: auto; display: inline-flex; gap: var(--space-2); padding: 2px var(--space-2); font: inherit; font-size: var(--text-sm); color: var(--color-content-primary); }
+  .todo-story { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2); font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
+  .todo-story time { color: var(--color-content-tertiary); }
+
+  /* ---------- phones: the title wraps, when · job · who on a line under it; empty fields live in the task ---------- */
+  @media (max-width: 767px) {
+    :root[data-todo-bar="surface"] .todo-bar .list-search { flex: 1 1 auto; }
+    .todo-row { grid-template-columns: var(--space-6) var(--space-4) minmax(0, 1fr); align-items: start; padding: var(--space-3) var(--space-2) var(--space-3) var(--space-1); column-gap: var(--space-2); }
+    .todo-row + .todo-row::before { inset-inline-start: var(--space-8); }
+    .todo-grip { display: none; }
+    /* a long press lifts a task to reorder it: no text selection or callout under the finger */
+    .todo-row { -webkit-touch-callout: none; user-select: none; }
+    .todo-row[data-lifted] { z-index: 2; background: var(--color-surface-default); box-shadow: var(--shadow-raised); scale: 1.02; transition: scale var(--duration-fast) var(--ease-out); }
+    .todo-check, .todo-row .checkbox { grid-column: 1; justify-self: center; inline-size: var(--space-6); block-size: var(--space-6); }
+    .todo-prio { grid-column: 2; block-size: var(--space-6); }
+    .todo-main { grid-column: 3; display: grid; row-gap: var(--space-0-5); }
+    .todo-title { padding: 0; font-size: var(--text-base); line-height: var(--leading-base); }
+    .todo-job, .todo-side { display: none; }
+    .todo-meta { display: block; margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
+    .todo-meta [data-late] { color: var(--color-feedback-danger-content); }
+    .todo-add { padding-inline-start: var(--space-8); min-block-size: var(--control-height-lg); }
+    .todo-add-form { grid-template-columns: var(--space-6) minmax(0, 1fr); padding-inline-start: var(--space-1); }
+    .todo-add-form .todo-check { grid-column: 1; }
+    .todo-add-form .input, .todo-add-form .field-helper { grid-column: 2; }
+  }
+}

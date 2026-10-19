@@ -1256,9 +1256,11 @@
     return true;
   }
 
+  // the menu: the four lists by hash, and Tasks, the to-do concept beside this one (published at tasks/)
+  const TODO = "tasks/";
   BolsterShell.mount({
     current: "job-list",
-    links: Object.fromEntries(Object.values(configs).map((c) => [c.nav, `#${c.id}`])),
+    links: { ...Object.fromEntries(Object.values(configs).map((c) => [c.nav, `#${c.id}`])), tasks: TODO },
   });
 
   // ---------- events ----------
