@@ -49,8 +49,10 @@
     ["Send the scope of work to the client", "Bathroom remodel", "general", null, null, 0, "hm", 2],
   ];
   const CREATED_BY = ["dc", "hm", "mr", "pn"];
+  // a task can have several people on it (the product designer, 19 Oct): a few here have two
+  const ALSO = { 0: "pn", 9: "dc", 12: "hm" };
   let tasks = RAW.map(([name, job, kind, hours, due, priority, assignee, doneAgo], i) => ({
-    id: `t${i + 1}`, name, job, kind, hours, priority, assignee,
+    id: `t${i + 1}`, name, job, kind, hours, priority, assignees: [assignee, assignee && ALSO[i]].filter(Boolean),
     // what the item behind it holds, as Bolster's rows show it: labor (some with their materials), a material item's materials, nothing for a task someone wrote
     includes: kind === "labor" ? (i % 3 === 0 ? ["labor", "materials"] : ["labor"]) : kind === "material" ? ["materials"] : [],
     due: due == null ? null : daysFrom(TODAY, due),
@@ -97,7 +99,7 @@
       options: () => [["general", "General tasks"], ["labor", "Labor tasks"], ["material", "Material items"]].map(([value, label]) => ({ value, label })) },
     { key: "prio", label: "Priority", icon: "status", get: (t) => String(t.priority),
       options: () => [3, 2, 1].map((l) => ({ value: String(l), label: PRIO[l], icon: mark(l) })) },
-    { key: "who", label: "Assignee", icon: "user", get: (t) => t.assignee,
+    { key: "who", label: "Assignee", icon: "user", get: (t) => t.assignees,
       options: () => OWNERS.map((p) => ({ value: p.id, label: p.me ? `${p.name} (you)` : p.name, icon: avatar(p, "sm") })) },
     { key: "period", label: "Period", icon: "calendar", period: true,
       test: (t, v) => !!t.due && (!v.from || isoDay(t.due) >= v.from) && (!v.to || isoDay(t.due) <= v.to) },
@@ -117,7 +119,7 @@
 
   // ---------- which tasks, in which groups ----------
   const matches = (t) => {
-    for (const [k, v] of Object.entries(st.filters)) { const f = filterDef(k); if (f.period ? !f.test(t, v) : !v.includes(f.get(t))) return false; }
+    for (const [k, v] of Object.entries(st.filters)) { const f = filterDef(k), g = f.period ? null : f.get(t); if (f.period ? !f.test(t, v) : Array.isArray(g) ? !g.some((x) => v.includes(x)) : !v.includes(g)) return false; }
     const q = st.q.trim().toLowerCase();
     return !q || `${t.name} ${t.job || ""}`.toLowerCase().includes(q);
   };
@@ -140,21 +142,24 @@
   }
 
   // ---------- drawing ----------
-  // what a task includes: the system's kinds (kinds.json, D50, D53), their icons side by side under one
-  // tooltip that names them together, “Labor and materials”
+  // what a task includes, in the system's words for its kinds (kinds.json, D50, D53): “Labor and materials”.
+  // Shown in the task, not on its row (its icons on rows were tried and dropped, 19 Oct: too much)
   const INCLUDES = [{ key: "labor", label: "Labor", icon: "hard-hat" }, { key: "materials", label: "Materials", icon: "box" }];
   const includesText = (t) => INCLUDES.filter((k) => t.includes?.includes(k.key)).map((k, i) => (i ? k.label.toLowerCase() : k.label)).join(" and ");
-  const includesIcons = (t) => (t.includes?.length ? `<span class="cell-kinds todo-kinds" role="img" aria-label="${includesText(t)}" data-tip="${includesText(t)}">${INCLUDES.filter((k) => t.includes.includes(k.key)).map((k) => ic(k.icon, 14)).join("")}</span>` : "");
   const dueChip = (t) => t.due
     ? `<button type="button" class="todo-due" data-pick="due" data-id="${t.id}"${isLate(t) ? " data-late" : ""} aria-haspopup="menu" aria-expanded="false" aria-label="Due ${esc(dueWords(t.due))}. Change the due date">${ic("calendar", 14)}<span>${esc(dueWords(t.due))}</span></button>`
     : `<button type="button" class="todo-due" data-pick="due" data-id="${t.id}" data-empty aria-haspopup="menu" aria-expanded="false" aria-label="No due date. Set one">${ic("calendar", 14)}<span>Date</span></button>`;
+  // who's on it: one or more people, their faces overlapping (three, then +n), named together in the tooltip
+  const peopleOf = (t) => t.assignees.map(who).filter(Boolean);
+  const together = (names) => (names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`);
+  const faces = (ps) => `<span class="todo-faces" aria-hidden="true">${ps.slice(0, 3).map((p) => avatar(p, "sm")).join("")}${ps.length > 3 ? `<span class="todo-faces-more">+${ps.length - 3}</span>` : ""}</span>`;
   const whoChip = (t) => {
-    const p = t.assignee && who(t.assignee);
-    return p
-      ? `<button type="button" class="todo-who" data-pick="who" data-id="${t.id}" aria-haspopup="menu" aria-expanded="false" aria-label="Assigned to ${esc(p.name)}. Change" data-tip="${esc(p.name)}">${avatar(p, "sm")}</button>`
-      : `<button type="button" class="todo-who" data-pick="who" data-id="${t.id}" data-empty aria-haspopup="menu" aria-expanded="false" aria-label="No one on it. Assign" data-tip="Assign"><span class="ghost" aria-hidden="true">+</span></button>`;
+    const ps = peopleOf(t), names = together(ps.map((p) => p.name));
+    return ps.length
+      ? `<button type="button" class="todo-who" data-pick="who" data-id="${t.id}" aria-haspopup="dialog" aria-expanded="false" aria-label="Assigned to ${esc(names)}. Change" data-tip="${esc(names)}">${faces(ps)}</button>`
+      : `<button type="button" class="todo-who" data-pick="who" data-id="${t.id}" data-empty aria-haspopup="dialog" aria-expanded="false" aria-label="No one on it. Assign" data-tip="Assign"><span class="ghost" aria-hidden="true">+</span></button>`;
   };
-  const meta = (t) => [t.due && `<span${isLate(t) ? " data-late" : ""}>${esc(dueWords(t.due))}</span>`, [st.group !== "job" && t.job && esc(t.job), includesIcons(t)].filter(Boolean).join(" ") || null, t.hours && `${t.hours}\u00a0h`, t.assignee && (who(t.assignee).me ? "You" : esc(who(t.assignee).name))].filter(Boolean).join(" · ");
+  const meta = (t) => [t.due && `<span${isLate(t) ? " data-late" : ""}>${esc(dueWords(t.due))}</span>`, st.group !== "job" && t.job && esc(t.job), t.hours && `${t.hours}\u00a0h`, t.assignees.length && esc(together(peopleOf(t).map((p) => (p.me ? "You" : p.name))))].filter(Boolean).join(" · ");
   function rowHtml(t) {
     const lead = st.selecting
       ? `<input type="checkbox" class="checkbox" data-select="${t.id}" aria-label="Select ${esc(t.name)}"${st.sel.has(t.id) ? " checked" : ""}>`
@@ -165,7 +170,7 @@
       <button type="button" class="todo-prio" data-pick="prio" data-id="${t.id}" aria-haspopup="menu" aria-expanded="false" aria-label="Priority: ${PRIO[t.priority]}. Change" data-tip="${t.priority ? PRIO[t.priority] : "Set priority"}">${mark(t.priority)}</button>
       <div class="todo-main">
         <button type="button" class="todo-title" data-open-task="${t.id}">${esc(t.name)}</button>
-        ${st.group !== "job" && t.job ? `<a class="todo-job" href="../index.html#jobs" data-tip="Open ${esc(t.job)}">${esc(t.job)}</a>` : ""}${includesIcons(t)}
+        ${st.group !== "job" && t.job ? `<a class="todo-job" href="../index.html#jobs" data-tip="Open ${esc(t.job)}">${esc(t.job)}</a>` : ""}
         <p class="todo-meta">${meta(t)}</p>
       </div>
       <div class="todo-side">
@@ -265,8 +270,13 @@
     } else if (popFor.kind === "prio") {
       pop.innerHTML = `<div class="pop-body">${[3, 2, 1, 0].map((l) => item(`data-set-prio="${l}"`, PRIO[l], { icon: mark(l), on: one && one.priority === l })).join("")}</div>`;
     } else if (popFor.kind === "who") {
-      const people = [ME, ...OWNERS.filter((o) => !o.me)];
-      pop.innerHTML = `<div class="pop-body">${people.map((p) => item(`data-set-who="${p.id}"`, p.me ? "Assign to me" : p.name, { icon: avatar(p, "sm"), on: one && one.assignee === p.id })).join("")}${item(`data-set-who="none"`, "No one", { on: one && !one.assignee })}</div>`;
+      // several people at once: ticked as you go, you first; for a selection, ticked when all of it has them
+      const people = [ME, ...OWNERS.filter((o) => !o.me)], ts = targets();
+      pop.setAttribute("role", "dialog");
+      pop.innerHTML = `<div class="pop-head"><h3>Assignees</h3></div><div class="pop-body">${people.map((p) => {
+        const n = ts.filter((t) => t.assignees.includes(p.id)).length;
+        return `<label class="option"><input type="checkbox" class="checkbox" data-assign="${p.id}"${n && n === ts.length ? " checked" : ""}${n && n < ts.length ? " data-mixed" : ""}><span class="option-label"><span class="menu-icon">${avatar(p, "sm")}</span>${esc(p.me ? "Assign to me" : p.name)}</span></label>`; }).join("")}</div>`;
+      $$("[data-mixed]", pop).forEach((b) => (b.indeterminate = true));
     } else if (popFor.kind === "add") {
       pop.innerHTML = `<div class="pop-body">${FILTERS.filter((f) => st.filters[f.key] == null).map((f) => `<button type="button" class="menu-item" role="menuitem" data-add-filter="${f.key}"><span class="menu-icon">${ic(`m-${f.icon}`, 14)}</span><span>${esc(f.label)}</span></button>`).join("")}</div>`;
     } else if (popFor.kind === "filter") {
@@ -323,7 +333,7 @@
   function addTask(key, name) {
     const g = groups().out.find((x) => x.key === key) || { key };
     const due = key.startsWith("job:") ? null : WHEN.find((w) => w.key === key)?.due;
-    const t = { id: `t${nextId++}`, name, job: key.startsWith("job:") ? key.slice(4) || null : null, kind: "general", includes: [], hours: null, priority: 0, assignee: null,
+    const t = { id: `t${nextId++}`, name, job: key.startsWith("job:") ? key.slice(4) || null : null, kind: "general", includes: [], hours: null, priority: 0, assignees: [],
       due: due == null ? null : daysFrom(TODAY, due), created: new Date(TODAY), createdBy: ME.id, done: false, doneAt: null, doneBy: null };
     const last = g.rows?.at(-1);
     t.rank = (last ? last.rank : Math.max(0, ...tasks.map((x) => x.rank))) + 5;
@@ -507,8 +517,8 @@
   // ---------- the task, beside the list or as a sheet (T-open) ----------
   const split = matchMedia("(min-width: 1280px)");
   function taskHtml(t) {
-    const p = t.assignee && who(t.assignee), by = who(t.createdBy);
-    const story = [[`Created by ${by.name}`, t.created], p && [`Assigned to ${p.name}`, daysFrom(t.created, 1)], t.done && [`Completed by ${who(t.doneBy).name}`, t.doneAt]].filter(Boolean);
+    const ps = peopleOf(t), by = who(t.createdBy);
+    const story = [[`Created by ${by.name}`, t.created], ps.length && [`Assigned to ${together(ps.map((p) => p.name))}`, daysFrom(t.created, 1)], t.done && [`Completed by ${who(t.doneBy).name}`, t.doneAt]].filter(Boolean);
     return `<header class="detail-head"><h2 id="detail-title" tabindex="-1">${esc(t.name)}</h2>
         <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close" data-close-task data-tip="Close">${ic("xmark", 18, { optical: true })}</button></header>
       <div class="detail-scroll">
@@ -519,7 +529,7 @@
         <dl class="detail-section detail-fields todo-detail-fields">
           <div><dt>Due date</dt><dd>${dueChip(t)}</dd></div>
           <div><dt>Priority</dt><dd><button type="button" class="todo-prio" data-pick="prio" data-id="${t.id}" aria-haspopup="menu" aria-expanded="false">${mark(t.priority)}<span>${PRIO[t.priority]}</span></button></dd></div>
-          <div><dt>Assignee</dt><dd><button type="button" class="todo-who" data-pick="who" data-id="${t.id}" aria-haspopup="menu" aria-expanded="false">${p ? `${avatar(p, "sm")}<span>${esc(p.name)}</span>` : `<span class="ghost" aria-hidden="true">+</span><span class="text-secondary">No one</span>`}</button></dd></div>
+          <div><dt>Assignees</dt><dd><button type="button" class="todo-who" data-pick="who" data-id="${t.id}" aria-haspopup="dialog" aria-expanded="false">${ps.length ? `${faces(ps)}<span>${esc(together(ps.map((p) => p.name)))}</span>` : `<span class="ghost" aria-hidden="true">+</span><span class="text-secondary">No one</span>`}</button></dd></div>
           <div><dt>Job</dt><dd>${t.job ? `<a class="detail-link" href="../index.html#jobs">${esc(t.job)}</a>` : `<span class="text-secondary">No job</span>`}</dd></div>
           <div><dt>Hours</dt><dd>${t.hours ? `${t.hours} h` : `<span class="text-secondary">–</span>`}</dd></div>
           <div><dt>Includes</dt><dd>${includesText(t) || `<span class="text-secondary">–</span>`}</dd></div>
@@ -556,6 +566,16 @@
   document.addEventListener("change", (e) => {
     const c = e.target.closest("[data-check]");
     if (c && !c.dataset.fromTask) return setDone([c.dataset.check], c.checked);
+    // putting people on a task, or taking them off: at once, the picker staying open for the next
+    const as = e.target.closest("[data-assign]");
+    if (as && popFor) {
+      const id = as.dataset.assign, ts = targets();
+      for (const t of ts) t.assignees = as.checked ? [...new Set([...t.assignees, id])].sort((a, b) => OWNERS.findIndex((o) => o.id === a) - OWNERS.findIndex((o) => o.id === b)) : t.assignees.filter((x) => x !== id);
+      render({ keepFresh: true });
+      if (st.openId) drawTask(st.openId);
+      if (popFor.from && !popFor.from.isConnected) popFor.from = popFor.bulk ? $('[data-bulk="who"]') : $(`[data-pick="who"][data-id="${popFor.id}"]`);
+      popFor.from?.setAttribute("aria-expanded", "true"); place(); return;
+    }
     // ticking a value applies it at once; none, or all of them, is no filter
     const fo = e.target.closest("[data-filter-opt]");
     if (fo && popFor) { const k = popFor.id, set = new Set(st.filters[k] || []); fo.checked ? set.add(fo.dataset.filterOpt) : set.delete(fo.dataset.filterOpt);
@@ -582,7 +602,6 @@
     if ((el = q("[data-set-due]"))) { const v = el.dataset.setDue; const d = v === "none" ? null : daysFrom(TODAY, +v); return apply((t) => (t.due = d), v === "none" ? "have no due date" : `due ${dueWords(d).toLowerCase()}`); }
     if ((el = q("[data-cal]"))) { const m = calMonth || new Date(targets()[0]?.due || TODAY); calMonth = new Date(m.getFullYear(), m.getMonth() + +el.dataset.cal, 1); fillPop(); place(); $(`[data-cal="${el.dataset.cal}"]`, pop)?.focus(); return; }
     if ((el = q("[data-set-prio]"))) return apply((t) => (t.priority = +el.dataset.setPrio), `set to ${PRIO[+el.dataset.setPrio].toLowerCase()}`);
-    if ((el = q("[data-set-who]"))) { const v = el.dataset.setWho; return apply((t) => (t.assignee = v === "none" ? null : v), v === "none" ? "unassigned" : `assigned to ${who(v).name}`); }
     if ((el = q("[data-open-task]"))) { if (st.selecting) return; return openTask(el.dataset.openTask, e.detail === 0); }
     if (q("[data-close-task]")) return closeTask();
     if ((el = q("[data-add]"))) { st.adding = el.dataset.add; return render({ keepFresh: true }); }
@@ -642,25 +661,12 @@
     show();
   })();
 
-  // scrolling (as the list does, option D): once you're into the groups, scrolling down hides the top bar
-  // (and the tab bar on phones, list-page.css) and scrolling up brings them back; not while a menu, a sheet
-  // or a field up top is in use, nor while a task is lifted
-  (() => {
-    const html = document.documentElement, topBar = $(".top-bar"), DOWN = 24, UP = 6;
-    let lastY = scrollY, travel = 0;
-    const setChrome = (hidden) => { if (html.hasAttribute("data-chrome-hidden") !== hidden) html.toggleAttribute("data-chrome-hidden", hidden); };
-    const busy = () => !!document.querySelector(":popover-open, dialog[open], .sidebar[data-open]") || !!document.activeElement?.closest?.(".top-bar, .todo-bar") || !!lifted;
-    addEventListener("scroll", () => {
-      const y = scrollY, dy = y - lastY;
-      lastY = y;
-      const into = $("#groups").getBoundingClientRect().top < (topBar?.offsetHeight || 0);
-      if (!into || busy()) { travel = 0; return setChrome(false); }
-      travel = Math.sign(dy) === Math.sign(travel) ? travel + dy : dy;
-      if (travel > DOWN) setChrome(true);
-      else if (travel < -UP) setChrome(false);
-    }, { passive: true });
-    document.addEventListener("focusin", (e) => { if (e.target.closest?.(".top-bar, .todo-bar")) setChrome(false); });
-  })();
+  // what sticks and what hides as you scroll is the shell's, as on the list (BolsterShell.scrolling): this
+  // page says where its groups start, and that a lifted task or a focused toolbar counts as in use
+  BolsterShell.scrolling({
+    into: (top) => $("#groups").getBoundingClientRect().top < top,
+    busy: () => !!lifted || !!document.activeElement?.closest?.(".todo-bar"),
+  });
 
   const live = document.createElement("p"); live.id = "live"; live.className = "visually-hidden"; live.setAttribute("aria-live", "polite"); document.body.append(live);
   render();

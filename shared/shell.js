@@ -272,5 +272,40 @@ window.BolsterShell = (() => {
     });
   }
 
-  return { mount, setCurrent, label, hydrateIcons, toast, icon };
+  // What stays on screen as you scroll (option D of the "What stays on screen" board; D73), the shell's for
+  // every page, so every page does the same: the page says where its content starts (into: true once
+  // you've scrolled into it) and what else it keeps in use; the shell hides the top bar (and on phones the
+  // tab bar, list-page.css) as you scroll down, brings them back as you scroll up, when a menu, a sheet or
+  // the sidebar is open, or when focus goes up there, and keeps what sticks under them in place:
+  // --list-toolbar-top is the top bar's height, --list-head-top that plus the page's sticky toolbar, if any.
+  //   const chrome = BolsterShell.scrolling({ into: (top) => el.getBoundingClientRect().top < top, toolbar, busy, onScroll });
+  function scrolling({ into, toolbar = null, busy = () => false, onScroll = () => {} }) {
+    const html = document.documentElement, top = document.querySelector(".top-bar"), DOWN = 24, UP = 6;
+    const set = (hidden) => { if (html.hasAttribute("data-chrome-hidden") !== hidden) html.toggleAttribute("data-chrome-hidden", hidden); };
+    const stick = () => {
+      const h = top.offsetHeight;
+      html.style.setProperty("--list-toolbar-top", `${h}px`);
+      html.style.setProperty("--list-head-top", `${h + (toolbar && !toolbar.hidden ? toolbar.offsetHeight : 0)}px`);
+    };
+    new ResizeObserver(stick).observe(top);
+    if (toolbar) new ResizeObserver(stick).observe(toolbar);
+    addEventListener("resize", stick);
+    stick();
+    const inUse = () => !!document.querySelector(":popover-open, dialog[open], .sidebar[data-open]") || !!document.activeElement?.closest?.(".top-bar") || !!toolbar?.contains(document.activeElement) || busy();
+    let lastY = scrollY, travel = 0;
+    addEventListener("scroll", () => {
+      onScroll();
+      const y = scrollY, dy = y - lastY;
+      lastY = y;
+      if (!into(top.offsetHeight) || inUse()) { travel = 0; return set(false); }
+      travel = Math.sign(dy) === Math.sign(travel) ? travel + dy : dy;
+      if (travel > DOWN) set(true);
+      else if (travel < -UP) set(false);
+    }, { passive: true });
+    // tabbing into the top bar or the page's toolbar brings them back
+    document.addEventListener("focusin", (e) => { if (e.target.closest?.(".top-bar") || toolbar?.contains(e.target)) set(false); });
+    return { show: () => set(false), stick };
+  }
+
+  return { mount, setCurrent, label, hydrateIcons, toast, icon, scrolling };
 })();

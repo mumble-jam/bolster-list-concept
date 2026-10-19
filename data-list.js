@@ -1470,17 +1470,21 @@
   // what sticks (D, from the scrolling research): the page title scrolls away. Under the top bar the card's
   // header sticks, then the table header. Once you're into the list, scrolling down hides the top bar and the
   // card header, leaving the column header; a few pixels back up brings them back.
+  // what sticks and what hides as you scroll is the shell's (BolsterShell.scrolling): this page says where its
+  // list starts, its sticky toolbar, and that the phone's selection bar counts as in use
   const topBar = $(".top-bar");
-  const toolbar = $("#list-toolbar");
-  const stick = () => {
-    const top = topBar.offsetHeight;
-    const root = document.documentElement.style;
-    root.setProperty("--list-toolbar-top", `${top}px`);
-    root.setProperty("--list-head-top", `${top + (toolbar.hidden ? 0 : toolbar.offsetHeight)}px`);
-  };
-  new ResizeObserver(stick).observe(topBar);
-  new ResizeObserver(stick).observe(toolbar);
-  addEventListener("resize", stick);
+  const html = document.documentElement;
+  // the page header gone under the top bar: on phones, while selecting, the compact bar stands in (D39)
+  const headOut = () => html.toggleAttribute("data-head-out", $(".page-header").getBoundingClientRect().bottom < topBar.offsetHeight);
+  headOut();
+  const chrome = BolsterShell.scrolling({
+    into: (top) => $(".list-panel").getBoundingClientRect().top < top,
+    toolbar: $("#list-toolbar"),
+    busy: () => !!document.activeElement?.closest?.(".select-bar"),
+    onScroll: headOut,
+  });
+  const stick = chrome.stick;
+  const setChrome = (hidden) => { if (!hidden) chrome.show(); };
 
   // ---------- sideways scroll ----------
   // Columns never get narrower than their set width; when they don't fit, the table scrolls sideways
@@ -1543,29 +1547,6 @@
   tableWrap.addEventListener("pointermove", (e) => { if (press && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 8) unpress(); });
   for (const ev of ["pointerup", "pointercancel", "pointerleave"]) tableWrap.addEventListener(ev, unpress);
   tableWrap.addEventListener("contextmenu", (e) => { if (phoneMQ.matches && e.target.closest("tbody tr[data-id]")) e.preventDefault(); });
-
-  const html = document.documentElement;
-  const DOWN = 24, UP = 6; // px of travel before the bars go, and before they come back
-  let lastY = scrollY, travel = 0;
-  const setChrome = (hidden) => { if (html.hasAttribute("data-chrome-hidden") !== hidden) html.toggleAttribute("data-chrome-hidden", hidden); };
-  // keep them while something up there is in use: a menu, a focused field, the sidebar overlay
-  const busy = () => !!document.querySelector(":popover-open, dialog[open], .sidebar[data-open]") || !!document.activeElement?.closest?.(".top-bar, #list-toolbar, .select-bar");
-  // the page header gone under the top bar: on phones, while selecting, the compact bar stands in (D39)
-  const headOut = () => html.toggleAttribute("data-head-out", $(".page-header").getBoundingClientRect().bottom < topBar.offsetHeight);
-  headOut();
-  addEventListener("scroll", () => {
-    headOut();
-    const y = scrollY, dy = y - lastY;
-    lastY = y;
-    // only once the card header has reached the top bar; above that the page scrolls as normal
-    const into = $(".list-panel").getBoundingClientRect().top < topBar.offsetHeight;
-    if (!into || busy()) { travel = 0; return setChrome(false); }
-    travel = Math.sign(dy) === Math.sign(travel) ? travel + dy : dy;
-    if (travel > DOWN) setChrome(true);
-    else if (travel < -UP) setChrome(false);
-  }, { passive: true });
-  // tabbing into the top bar or the card header brings them back
-  document.addEventListener("focusin", (e) => { if (e.target.closest?.(".top-bar, #list-toolbar")) setChrome(false); });
 
   // ---------- lists: switch by hash, keep each list's state for the session ----------
   function load() {
