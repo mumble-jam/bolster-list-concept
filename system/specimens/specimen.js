@@ -13,7 +13,7 @@
     ["Overview", [["Catalog", "index.html"]]],
     ["Foundations", [["Tokens", "specimens/tokens.html"], ["App shell", "specimens/shell.html"]]],
     ["Page types", [["List page", "specimens/list-page.html"], ["List recipe", "specimens/list-recipe.html"]]],
-    ["List page parts", [["Summary cards", "specimens/summary-cards.html"], ["Money bar", "specimens/money-bar.html"], ["Table card", "specimens/table-card.html"], ["Record", "specimens/record.html"], ["Floating bar", "specimens/floating-bar.html"], ["Popover", "specimens/popover.html"], ["States", "specimens/states.html"]]],
+    ["List page parts", [["Summary cards", "specimens/summary-cards.html"], ["Table card", "specimens/table-card.html"], ["Record", "specimens/record.html"], ["Floating bar", "specimens/floating-bar.html"], ["Popover", "specimens/popover.html"], ["States", "specimens/states.html"]]],
     ["Components", [["Button", "specimens/button.html"], ["Badge", "specimens/badge.html"], ["Field", "specimens/field.html"], ["Checkbox, radio, toggle", "specimens/choice.html"], ["Segmented control", "specimens/segmented-control.html"], ["Tabs", "specimens/tabs.html"], ["Tooltip, menu, dialog", "specimens/overlays.html"], ["Data table, cards, avatars, thumbnails", "specimens/data.html"], ["Toast", "specimens/toast.html"], ["Calendar", "specimens/calendar.html"], ["Icon vocabulary", "specimens/icons.html"]]],
     ["Live", [["List concept ↗", CONCEPT]]],
   ];

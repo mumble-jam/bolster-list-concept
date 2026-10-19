@@ -315,10 +315,6 @@
     if (box.hidden) return;
     const row = $("#metrics");
 
-    if (st.mode === "loading" && cfg.moneyBar) {
-      row.innerHTML = `<div class="money-bar" aria-hidden="true">${cfg.moneyBar.groups.map(() => `<div class="money-bar-group"><span class="skeleton" style="inline-size:40%;margin:var(--space-2) var(--space-3)"></span><span class="skeleton" style="block-size:var(--space-6);inline-size:60%;margin:0 var(--space-3)"></span></div>`).join("")}</div>`;
-      return;
-    }
     if (st.mode === "loading") {
       row.style.setProperty("--_slices", cfg.metrics.length + 1);
       row.innerHTML = [...Array(cfg.metrics.length + 1)].map(() => `<div class="slice" aria-hidden="true"><span class="skeleton" style="inline-size:60%"></span><span class="skeleton" style="block-size:var(--space-6);inline-size:75%"></span></div>`).join("")
@@ -327,7 +323,6 @@
     }
 
     // cards count what the other filters let through, so each number is what a click gives you
-    if (cfg.moneyBar) return renderMoneyBar();
     const scope = rowsWhere({ except: cardKeys() });
     const picked = cardValue();
     const none = cardKeys().every((k) => !isSet(k, st.filters[k]));
@@ -344,31 +339,6 @@
     row.toggleAttribute("data-no-insight", !cfg.insight);
     // on phones the insight leads: it's the overview, so it belongs in the first screen, not behind a swipe
     row.innerHTML = phoneMQ.matches ? insight(scope) + all + cards.join("") : all + cards.join("") + insight(scope);
-  }
-  // the money bar (D67): a list's KPIs where money splits by where it is. Its figures are cards underneath
-  // (the same filters, one at a time, a chip named after each); the bar is their picture
-  function renderMoneyBar() {
-    const row = $("#metrics");
-    const scope = rowsWhere({ except: cardKeys() });
-    const picked = cardValue();
-    const byValue = Object.fromEntries(cfg.metrics.map((m) => [m.value, m]));
-    const sliceOf = (m) => scope.filter((r) => cardMatch(m).includes(filterDef(cardKeyOf(m)).get(r)));
-    const figure = (m) => {
-      const s = sliceOf(m);
-      return `<button class="money-bar-figure" type="button" data-metric="${m.value}" aria-pressed="${picked === m.value}"${s.length ? "" : " data-empty"}>
-        <span class="money-bar-label"><span class="dot" style="--_dot:${m.dot}"></span>${esc(m.title || m.label)}</span>
-        <span class="money-bar-value">${s.length ? m.big(s) : "—"}</span><span class="money-bar-sub">${esc(m.sub(s))}</span></button>`;
-    };
-    const group = (g) => {
-      const ms = g.parts.map((v) => byValue[v]), slices = ms.map(sliceOf), amounts = ms.map((m, i) => m.amount(slices[i]));
-      const total = amounts.reduce((a, b) => a + b, 0), n = slices.reduce((a, s) => a + s.length, 0);
-      return `<div class="money-bar-group"><p class="money-bar-head">${esc(g.head)} <span class="money-bar-total">${fmt.money0(total)} · ${fmt.plural(n, cfg.noun[0], cfg.noun[1])}</span></p>
-        <div class="money-bar-figures">${ms.map(figure).join("")}</div>
-        <div class="money-bar-track" aria-hidden="true">${ms.map((m, i) => (amounts[i] > 0 ? `<span style="--_share:${Math.round(amounts[i])};--_dot:${m.dot}"></span>` : "")).join("")}</div></div>`;
-    };
-    const note = cfg.moneyBar.note && byValue[cfg.moneyBar.note];
-    const noteHtml = note ? (() => { const s = sliceOf(note); return s.length ? `<button class="money-bar-note" type="button" data-metric="${note.value}" aria-pressed="${picked === note.value}"><span class="dot" style="--_dot:${note.dot}"></span>${esc(note.big(s))}</button>` : ""; })() : "";
-    row.innerHTML = `<div class="money-bar" role="group" aria-label="${esc(cfg.moneyBar.label)}">${cfg.moneyBar.groups.map(group).join("")}</div>${noteHtml}`;
   }
   const phoneMQ = matchMedia("(max-width: 767px)");
   const narrowMQ = matchMedia("(min-width: 768px) and (max-width: 1099px)");

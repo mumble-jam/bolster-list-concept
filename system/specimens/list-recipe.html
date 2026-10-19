@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=291a20ca">
-<link rel="stylesheet" href="specimen.css?v=291a20ca">
+<link rel="stylesheet" href="../bolster.css?v=d4cad560">
+<link rel="stylesheet" href="specimen.css?v=d4cad560">
 <style>
   .rule-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr)); }
   .rule-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
@@ -146,7 +146,7 @@
   <article class="card rule-card" id="L-summary">
     <header class="card-header rule-head"><h3><code>L-summary</code> A summary is KPIs, or the lifecycle</h3><span class="badge" data-tone="success">Decided</span></header>
     <div class="card-body rule-body">
-      <p>Above the list is one of two summaries, never tabs. KPIs, the default: the few figures that say how the list is doing and what needs someone (money owed, overdue, paid in the last 30 days, missing documents, a rate), at most four, as a row of cards, or as a money bar where the key figure is money split by where it is (owed: overdue and not due yet; came in: the last 30 days), as on invoices. A KPI that's a slice of rows filters the list when picked, one at a time, its chip named after it; a calculated one (win rate, collected) doesn't. KPIs may overlap; they don't add up. The lifecycle, when the page is where people move rows through their statuses (its tasks act on two statuses or more: jobs, vendor orders): All, then the statuses in the lifecycle's order, endings included, one card each, adding up to All. An ending counts the last 30 days and says so; a rare ending (lost or set aside, under a tenth of rows) stays in the Status filter unless a figure needs it (Declined, for win rate). One calculated figure may join the row. Either way: money where the key figure is, the count beside it, any window named; a filter the page opens with is its default view; segments (Top customers, Submitted by vendors) are saved views; a list with no KPI worth showing (the catalog) has no summary.</p>
+      <p>Above the list is one of two summaries, never tabs. KPIs, the default: the few figures that say how the list is doing and what needs someone (money owed, overdue, paid in the last 30 days, missing documents, a rate), at most four, as a row of cards. A KPI that's a slice of rows filters the list when picked, one at a time, its chip named after it; a calculated one (win rate, collected) doesn't. KPIs may overlap; they don't add up. The lifecycle, when the page is where people move rows through their statuses (its tasks act on two statuses or more: jobs, vendor orders): All, then the statuses in the lifecycle's order, endings included, one card each, adding up to All. An ending counts the last 30 days and says so; a rare ending (lost or set aside, under a tenth of rows) stays in the Status filter unless a figure needs it (Declined, for win rate). One calculated figure may join the row. Either way: money where the key figure is, the count beside it, any window named; a filter the page opens with is its default view; segments (Top customers, Submitted by vendors) are saved views; a list with no KPI worth showing (the catalog) has no summary.</p>
       <p class="text-secondary"><b>Why:</b> Products split this in two (research board, 19 Oct): lifecycle rows that show every status, endings included (Stripe, Xero, Deel), and KPI figures that cut across them (Mercury, QuickBooks, Midday). A row of work queues did neither: it dropped endings people need (Paid, Declined) and gave a steady state a card. Tabs were ruled out to keep one summary pattern.</p>
       
       <p class="rule-meta"><span class="badge">schema</span> <span class="badge">check</span> <span class="text-secondary">· D17, I8, D66, D67, Research: What earns a summary card (Figma, 19 Oct), Product designer, 19 Oct 2026</span></p>
@@ -353,6 +353,6 @@
     <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>File</th><th>What it is</th><th>Check</th></tr></thead><tbody><tr><td><code>concept/catalog.json</code></td><td>9 columns · no status · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/customers.json</code></td><td>9 columns · 3 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/invoices.json</code></td><td>8 columns · 4 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/jobs.json</code></td><td>8 columns · 5 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr></tbody></table></div>
   </section>
 </main>
-<script src="specimen.js?v=291a20ca"></script>
+<script src="specimen.js?v=d4cad560"></script>
 </body>
 </html>

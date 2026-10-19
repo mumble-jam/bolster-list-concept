@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=291a20ca">
-<link rel="stylesheet" href="data-list.css?v=291a20ca">
+<link rel="stylesheet" href="system/bolster.css?v=d4cad560">
+<link rel="stylesheet" href="data-list.css?v=d4cad560">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -109,7 +109,7 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=291a20ca"></script>
+<script src="shared/icons.js?v=d4cad560"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -131,9 +131,9 @@ const C = [
   ["Page", "Primary and brand buttons", "yours", "Claude Design-style body, then your values from the button tuner (edge, lines, sheen, shadows, hover lift, press sink, 150ms).", "Nothing: the values are yours."],
   ["Page", "Secondary, ghost and danger buttons", "steered", "Research asked for (10 Oct, Figma research page); you took all my recommendations: a quieter tactile secondary, no tertiary, a ghost hover that shows, red only for Delete in three weights.", "The values: cement edge and shadow, hover fills, the confirmation wording “Keep jobs”."],
 
-  ["Status cards", "Status cards", "yours", "Big numbers on top of the table, clickable, never tabs (8 Oct); filter cards on the page; In progress replaces Draft (9 Oct); picking a card shows its chip; then, after the research board: two kinds, KPIs by default and the lifecycle where people work through statuses, no tabs, a money bar for invoices (19 Oct, D67).", "The anatomy (label, count, total), the All card and the pressed look; the work-queue rewrite of the rule, cards for flags and categories, the chip named after the card."],
+  ["Status cards", "Status cards", "yours", "Big numbers on top of the table, clickable, never tabs (8 Oct); filter cards on the page; In progress replaces Draft (9 Oct); picking a card shows its chip; then, after the research board: two kinds, KPIs by default and the lifecycle where people work through statuses, no tabs, a money bar for invoices (19 Oct, D67), then no money bar: KPIs are cards (19 Oct, D68).", "The anatomy (label, count, total), the All card and the pressed look; the work-queue rewrite of the rule, cards for flags and categories, the chip named after the card."],
   ["Status cards", "Status marks", "yours", "Shapes, not just colours: empty draft, half pending, solid booked, a slash for declined; then a set that makes room for In progress; In progress in blue (13 Oct).", "The quarter steps (dashed, quarter, half, three quarters), the 12/14px drawing and the other colours."],
-  ["Status cards", "Money bar", "steered", "Asked for after the summary-card research (19 Oct): KPIs as a money bar on invoices; direction 1 of the Figma board picked, two halves.", "The three directions and the pick, the hidden 30-day filter behind Paid, the drafts note, phones keeping the figures side by side."],
+  ["Status cards", "Money bar", "steered", "Asked for after the summary-card research (19 Oct): KPIs as a money bar on invoices; direction 1 of the Figma board picked, two halves; then dropped entirely, as it didn't work on phones (19 Oct, D68).", "The three directions and the pick, the hidden 30-day filter behind Paid, the drafts note, phones keeping the figures side by side."],
   ["Status cards", "Insight card", "steered", "Different from the other cards, between Jobber and Deel; the “2 of 4” version below five decided; you questioned a selected state for it; first on phones, so the overview is in the first screen (13 Oct).", "Win rate as the figure, the split bar, the second figure (average won job)."],
   ["Status cards", "Info popovers", "steered", "Their copy follows your rule: the screen's own words, statuses drawn with their marks (D27).", "The ⓘ button and its popover."],
   ["Status cards", "Tactile cards", "steered", "Asked for (9 Oct), with sliders in the concept controls.", "Every value: the body, both shadows, hover, press and selected. Not tuned by you yet."],
@@ -264,6 +264,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=291a20ca"></script>
+<script src="system/specimens/specimen.js?v=d4cad560"></script>
 </body>
 </html>
