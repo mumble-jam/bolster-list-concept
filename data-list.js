@@ -1244,8 +1244,8 @@
 
   // the menu: the four lists by hash, and Tasks, the to-do concept beside this one (published at tasks/)
   const TODO = "tasks/";
-  // the calendar concept, beside them; viewed locally for now, so the published copy leaves it out
-  const CALENDAR = null;
+  // the calendar concept, beside them (published at calendar/)
+  const CALENDAR = "calendar/";
   BolsterShell.mount({
     current: "job-list",
     links: { ...Object.fromEntries(Object.values(configs).map((c) => [c.nav, `#${c.id}`])), tasks: TODO, ...(CALENDAR ? { calendar: CALENDAR } : {}) },

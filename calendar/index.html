@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolster calendar concept</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="../shared/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../shared/assets/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../shared/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../system/bolster.css?v=177babe8">
+<link rel="stylesheet" href="../shared/shell.css?v=177babe8">
+<link rel="stylesheet" href="../data-list.css?v=177babe8">
+<link rel="stylesheet" href="calendar.css?v=177babe8">
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<div class="app-shell">
+  <main class="app-main">
+    <div class="canvas-layers" aria-hidden="true"><div class="canvas-glow"></div><div class="canvas-net"></div></div>
+    <header class="page-header">
+      <div class="page-title">
+        <button class="button page-tool" data-variant="ghost" data-size="sm" data-icon-only data-collapse-sidebar aria-label="Hide menu" data-tip="Hide menu"><i data-icon="panel-left" data-size="18"></i></button>
+        <h1 id="page-title">Calendar</h1>
+      </div>
+      <div class="page-header-actions">
+        <button class="button" data-float id="create" data-tip="Create event"><span class="float-label">Create event</span></button>
+      </div>
+    </header>
+
+    <div class="app-content list-page cal-page" data-width="wide">
+      <!-- the toolbar on the page, as the to-do tries it: where you are on the left, the view and what's shown on the right (C-views, C-show) -->
+      <div class="cal-bar" id="cal-bar" role="toolbar" aria-label="Calendar">
+        <div class="cal-where">
+          <button type="button" class="button" data-variant="secondary" data-size="sm" id="go-today">Today</button>
+          <span class="cal-arrows">
+            <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only id="go-prev" aria-label="Previous" data-tip="Previous"><i data-icon="chevron-left" data-size="16"></i></button>
+            <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only id="go-next" aria-label="Next" data-tip="Next"><i data-icon="chevron-right" data-size="16"></i></button>
+          </span>
+          <h2 class="cal-period" id="period" aria-live="polite"></h2>
+        </div>
+        <div class="cal-controls">
+          <div class="segmented cal-views" role="radiogroup" aria-label="View" id="views">
+            <label class="segmented-option"><input type="radio" name="view" value="month"> Month</label>
+            <label class="segmented-option"><input type="radio" name="view" value="week"> Week</label>
+            <label class="segmented-option"><input type="radio" name="view" value="day"> Day</label>
+            <label class="segmented-option"><input type="radio" name="view" value="crew"> Crew</label>
+          </div>
+          <button type="button" class="field-button" id="pick-show" aria-haspopup="dialog" aria-expanded="false"><i data-icon="layers" data-size="16"></i><span id="show-text">Show</span></button>
+          <button type="button" class="field-button" id="pick-people" aria-haspopup="dialog" aria-expanded="false"><i data-icon="user" data-size="16"></i><span id="people-text">Everyone</span></button>
+          <button type="button" class="field-button" id="tray-toggle" aria-expanded="false" aria-controls="tray" data-tip="Unscheduled"><i data-icon="inbox" data-size="16"></i><span>Unscheduled</span><span class="cal-count" id="tray-count"></span></button>
+        </div>
+      </div>
+
+      <div class="cal-split" id="cal-split">
+        <section class="card cal-card" id="cal" aria-labelledby="period"></section>
+        <!-- work with no dates waits beside the calendar, to be dragged onto a day (C-unscheduled) -->
+        <aside class="card cal-tray" id="tray" aria-labelledby="tray-title" hidden>
+          <header class="cal-tray-head"><h2 id="tray-title">Unscheduled</h2>
+            <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-close-tray aria-label="Close" data-tip="Close"><i data-icon="xmark" data-size="16"></i></button></header>
+          <p class="cal-tray-help">Jobs with no dates yet. Drag one onto a day, or open it to pick a start.</p>
+          <ul class="cal-tray-list" id="tray-list"></ul>
+        </aside>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="pop" id="pop" popover></div>
+<div class="cal-ghost" id="ghost" aria-hidden="true" hidden></div>
+<div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
+<p class="visually-hidden" id="live" aria-live="polite"></p>
+<dialog class="dialog notes" id="notes" aria-labelledby="notes-title">
+  <header class="dialog-header"><h2 id="notes-title">About this concept</h2>
+    <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close data-tip="Close"><i data-icon="xmark" data-size="16"></i></button></header>
+  <div class="dialog-body">
+    <section>
+      <h3>What it is</h3>
+      <p class="text-secondary">Bolster's Calendar (Jobs → Calendar) as the “Calendar · research” board in Figma suggests it (19 Oct): the team's dated work laid out on days. Jobs' phases as spans, appointments (site visits and meetings) at their times, and other calendars' busy time, for everyone or the people you pick. Made-up sample data.</p>
+    </section>
+    <section>
+      <h3>Principles</h3>
+      <ol>
+        <li><b>What has a date shows (C-show).</b> A job's phase is a bar with the job's mark (a briefcase) and its name first; an appointment is its time, then what and who; busy time is hatched and says Busy. A word or a mark as well as a colour. Show picks kinds, People picks whose.</li>
+        <li><b>Each job its colour.</b> A job's phases share one of the system's avatar hues, a tint to fill and the hue at the edge, so a job reads as one across the month, the week and the crew; done ones fade. Colour says which job, never what kind: the name is on every bar, and appointments and busy time stay neutral.</li>
+        <li><b>A span is one bar (C-span).</b> Across its days in Month and Crew, in the all-day row in Week and Day: no view leaves it out (Bolster's Week and Day do). Squared where it carries on past a week's edge, its name once.</li>
+        <li><b>Four views (C-views).</b> Month, Week and Day, and Crew: people down the side, the week across, for who's where. Today, back, forward and the period in words. Weeks start on Monday, the weekend together at their end; weekends are tinted as days off, never blocked.</li>
+        <li><b>A full day says how many more (C-more).</b> Spans first, then appointments by time; past what fits, “+n more” opens the day's list.</li>
+        <li><b>A click opens a summary (C-open).</b> What, when (with “day 2 of 4” on a running phase), where, who, and the step: Open job. The full record is one step further.</li>
+        <li><b>Moving is dragging; the drop is the save (C-move).</b> Drag to another day (in Week and Day, another time too; in Crew, onto another person), drag a bar's end to stretch it; Undo in the toast. The summary's dates are the keyboard's and the phone's way. Busy time doesn't move.</li>
+        <li><b>Undated work waits beside (C-unscheduled).</b> Unscheduled opens a tray of jobs with no dates; drag one onto a day, or open it to pick a start.</li>
+        <li><b>On phones, an agenda (C-phone).</b> A week strip over the days, each with a heading: spans first, appointments by time, a phase that only runs through a day as one line, an empty day as one line. A tap opens the summary as a sheet; no dragging.</li>
+      </ol>
+    </section>
+    <section>
+      <h3>Adjusted from the research</h3>
+      <ul>
+        <li>Show and People read back in their buttons rather than as chips: there are only two, always set, so chips would only repeat them.</li>
+        <li>Day is one column of hours; per-person columns are Crew's job.</li>
+        <li>Phones have no Month: the strip and the agenda carry it, and the month is a week away with the arrows.</li>
+      </ul>
+    </section>
+    <section>
+      <h3>Open questions</h3>
+      <ul>
+        <li>Who it's for: the office seeing everyone's week (assumed), or each person's own day first?</li>
+        <li>What a job is here: a bar per phase (assumed) or one bar for the job?</li>
+        <li>Moving a phase: does what follows move with it, as the Timeline would? It should be one action, defined once.</li>
+        <li>Other calendars: busy time only (assumed), or their titles too?</li>
+        <li>The grid as one tab stop with arrow keys (the guidance) isn't built yet: every item is a button of its own, named with its day.</li>
+      </ul>
+    </section>
+  </div>
+</dialog>
+<details class="concept-controls" id="concept-controls" data-more-entry="Concept controls" data-more-icon="sliders">
+  <summary><span class="concept-tag">Concept</span> Controls</summary>
+  <div class="concept-body">
+    <button class="button" data-variant="secondary" data-size="sm" data-open-dialog="notes">About this concept</button>
+    <div class="cluster" style="justify-content:space-between">
+      <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+    </div>
+  </div>
+</details>
+<script src="../shared/icons.js?v=177babe8"></script>
+<script src="../shared/shell.js?v=177babe8"></script>
+<script src="../system/specimens/specimen.js?v=177babe8"></script>
+<script src="../data.js?v=177babe8"></script>
+<script src="calendar.js?v=177babe8"></script>
+</body>
+</html>

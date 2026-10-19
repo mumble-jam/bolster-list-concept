@@ -1,0 +1,245 @@
+/* Calendar concept: the team's dated work on days, as the “Calendar · research” board suggests it (C-rules).
+   Month, Week, Day and Crew on wider screens, a week strip over an agenda on phones; jobs' phases as spans,
+   appointments at their times, other calendars' busy time hatched. Built on the system (cards, buttons, the
+   segmented control, field buttons, popovers, avatars, toasts); what's new lives here until it settles. */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  .cal-page { --_hour: 3rem; --_lane: 1.375rem; --_gap: var(--space-0-5); }
+
+  /* ---------- a job's colour: the system's avatar hues (D13), one per job, a tint to fill and the hue at
+     the edge; in dark the tint is stronger and the edge lighter, so both still read ---------- */
+  :root { --cal-tint: 16%; --cal-tint-hover: 24%; --cal-edge-mix: 0%; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --cal-tint: 34%; --cal-tint-hover: 44%; --cal-edge-mix: 45%; } }
+  :root[data-theme="dark"] { --cal-tint: 34%; --cal-tint-hover: 44%; --cal-edge-mix: 45%; }
+  [data-hue="2"] { --_hue: var(--color-avatar-2); }
+  [data-hue="3"] { --_hue: var(--color-avatar-3); }
+  [data-hue="4"] { --_hue: var(--color-avatar-4); }
+  [data-hue="5"] { --_hue: var(--color-avatar-5); }
+  [data-hue="6"] { --_hue: var(--color-avatar-6); }
+  [data-hue="7"] { --_hue: var(--color-avatar-7); }
+  [data-hue] { --_edge: color-mix(in srgb, var(--_hue), var(--color-content-primary) var(--cal-edge-mix)); --_fill: color-mix(in srgb, var(--_hue) var(--cal-tint), var(--color-surface-default)); }
+
+  /* ---------- the toolbar, on the page ---------- */
+  .cal-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
+  .cal-where, .cal-controls { display: flex; align-items: center; gap: var(--space-2); min-inline-size: 0; }
+  .cal-arrows { display: inline-flex; }
+  .cal-period { margin: 0 0 0 var(--space-1); font-family: var(--font-display, inherit); font-size: var(--text-xl); line-height: var(--leading-xl); font-weight: var(--font-weight-medium); white-space: nowrap; }
+  .cal-controls .field-button { flex: none; }
+  .cal-count { min-inline-size: 1.25rem; padding-inline: var(--space-1); border-radius: var(--radius-full); background: var(--color-surface-tint); color: var(--color-content-secondary); font-size: var(--text-xs); line-height: var(--leading-xs); text-align: center; font-variant-numeric: tabular-nums; }
+  #tray-toggle[aria-expanded="true"] { border-color: var(--color-action-accent); }
+
+  /* ---------- the calendar and the tray beside it ---------- */
+  .cal-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); align-items: start; }
+  .cal-split:has(> .cal-tray:not([hidden])) { grid-template-columns: minmax(0, 1fr) 17rem; }
+  .cal-card { display: block; padding: 0; overflow: hidden; border-color: var(--color-line-card); }
+  .cal-card[data-view="week"], .cal-card[data-view="day"] { overflow: clip; }
+
+  /* weekday heads, shared by Month, Week and Crew */
+  .cal-head { display: grid; grid-template-columns: var(--_cols); border-block-end: var(--border-width-default) solid var(--color-line-default); background: var(--color-surface-header, var(--color-surface-default)); }
+  .cal-head > * { padding: var(--space-2) var(--space-3); font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
+  .cal-head [data-today] { color: var(--color-content-primary); }
+  .cal-head .cal-head-num { display: inline-grid; place-items: center; min-inline-size: 1.5rem; block-size: 1.5rem; margin-inline-start: var(--space-1); border-radius: var(--radius-full); font-size: var(--text-sm); color: var(--color-content-primary); }
+  .cal-head [data-today] .cal-head-num { background: var(--color-surface-inverse); color: var(--color-content-inverse); }
+
+  /* ---------- a week's row: day cells behind, spans in lanes, then each day's items ---------- */
+  .cal-week { position: relative; display: grid; grid-template-columns: repeat(var(--_n, 7), minmax(0, 1fr)); row-gap: var(--_gap); min-block-size: 8.75rem; --_pt: 0px; --_pb: var(--space-1); padding-block: var(--_pt) var(--_pb); }
+  .cal-week + .cal-week { border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
+  /* a day reaches into the row's padding, so its tint runs from line to line */
+  .cal-day { grid-row: 1 / -1; position: relative; margin-block: calc(-1 * var(--_pt)) calc(-1 * var(--_pb)); border-inline-start: var(--border-width-default) solid var(--color-line-subtle); }
+  .cal-day:first-child { border-inline-start: 0; }
+  /* days off (the company's settings: weekends here) tinted, never blocked; the days around the month quieter */
+  .cal-day[data-off] { background: var(--color-surface-sunken); }
+  .cal-day[data-drop] { background: var(--color-action-accent-subtle); box-shadow: inset 0 0 0 var(--border-width-strong) var(--color-action-accent); }
+  .cal-date { grid-row: 1; justify-self: start; display: inline-grid; place-items: center; min-inline-size: 1.5rem; block-size: 1.5rem; margin: var(--space-1) 0 0 var(--space-2); padding-inline: var(--space-1); border-radius: var(--radius-full); font-size: var(--text-xs); line-height: 1; font-weight: var(--font-weight-medium); color: var(--color-content-primary); font-variant-numeric: tabular-nums; pointer-events: none; position: relative; z-index: 1; }
+  .cal-date[data-past], .cal-date[data-other] { color: var(--color-content-tertiary); }
+  .cal-date[data-today] { background: var(--color-surface-inverse); color: var(--color-content-inverse); }
+  /* a day's empty space adds on that day (C-add): the cell is a button behind the items, a quiet + on hover */
+  button.cal-day { padding: 0; border-block: 0; border-inline-end: 0; background: none; font: inherit; color: inherit; cursor: pointer; }
+  button.cal-day[data-off] { background: var(--color-surface-sunken); }
+  button.cal-day::after { content: "+"; position: absolute; inset-block-start: var(--space-1); inset-inline-end: var(--space-2); font-size: var(--text-base); line-height: 1.5rem; color: var(--color-content-tertiary); opacity: 0; }
+  @media (hover: hover) { button.cal-day:hover::after { opacity: 1; } }
+  button.cal-day:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
+
+  /* a span: a job's phase, one bar across its days; squared where it carries on past the week's edge */
+  .cal-span {
+    position: relative; z-index: 1; display: flex; align-items: center; gap: var(--space-1); min-inline-size: 0;
+    margin-inline: var(--space-1); padding: 0 var(--space-2); border: 0; border-radius: var(--radius-sm);
+    background: var(--color-surface-tint); color: var(--color-content-primary);
+    font: inherit; font-size: var(--text-xs); line-height: var(--_lane); font-weight: var(--font-weight-medium); text-align: start; white-space: nowrap; cursor: pointer;
+    box-shadow: inset var(--border-width-strong) 0 0 var(--color-content-secondary);
+  }
+  .cal-span > span { overflow: hidden; text-overflow: ellipsis; }
+  .cal-span .cal-sub { font-weight: var(--font-weight-regular); color: var(--color-content-secondary); }
+  .cal-span svg { flex: none; color: var(--color-content-secondary); }
+  .cal-span[data-cont-l] { margin-inline-start: 0; border-start-start-radius: 0; border-end-start-radius: 0; box-shadow: none; }
+  .cal-span[data-cont-r] { margin-inline-end: 0; border-start-end-radius: 0; border-end-end-radius: 0; }
+  .cal-span[data-hue] { background: var(--_fill); box-shadow: inset var(--border-width-strong) 0 0 var(--_edge); }
+  .cal-span[data-hue] svg { color: var(--_edge); }
+  .cal-span[data-cont-l] { box-shadow: none; }
+  /* done: the job's colour, faded */
+  .cal-span[data-past] { color: var(--color-content-secondary); }
+  .cal-span[data-past][data-hue] { --cal-tint: 7%; box-shadow: inset var(--border-width-strong) 0 0 color-mix(in srgb, var(--_edge) 45%, var(--color-surface-default)); }
+  .cal-span[data-past][data-cont-l] { box-shadow: none; }
+  @media (hover: hover) { .cal-span[data-hue]:hover { --cal-tint: var(--cal-tint-hover); } }
+  .cal-span:focus-visible, .cal-item:focus-visible, .cal-more:focus-visible, .cal-block:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
+  .cal-span[aria-expanded="true"], .cal-item[aria-expanded="true"], .cal-block[aria-expanded="true"] { outline: var(--border-width-strong) solid var(--color-action-accent); outline-offset: 0; }
+  /* its end: drag to stretch (C-move) */
+  .cal-resize { position: absolute; inset-block: 0; inset-inline-end: 0; inline-size: var(--space-2); cursor: ew-resize; }
+  .cal-span:not(:hover) .cal-resize { display: none; }
+
+  /* a day's items under the lanes: appointments at their times, busy time, +n more */
+  .cal-items { grid-row: -2; display: grid; align-content: start; gap: var(--_gap); min-inline-size: 0; padding-inline: var(--space-1); z-index: 1; }
+  .cal-item { display: flex; align-items: center; gap: var(--space-1); min-inline-size: 0; block-size: var(--_lane); padding: 0 var(--space-1); border: 0; border-radius: var(--radius-sm); background: none; color: var(--color-content-primary); font: inherit; font-size: var(--text-xs); line-height: var(--leading-xs); text-align: start; white-space: nowrap; cursor: pointer; }
+  .cal-item > span:last-child { overflow: hidden; text-overflow: ellipsis; }
+  .cal-item .cal-time { flex: none; color: var(--color-content-secondary); font-variant-numeric: tabular-nums; }
+  .cal-item::before { content: ""; flex: none; inline-size: 6px; block-size: 6px; border-radius: var(--radius-full); background: var(--color-content-primary); }
+  @media (hover: hover) { .cal-item:hover { background: var(--color-surface-hover); } }
+  .cal-item[data-past] { color: var(--color-content-secondary); }
+  .cal-item[data-past]::before { background: var(--color-line-strong); }
+  /* busy time from other calendars: quieter, hatched, and it says Busy */
+  .cal-item[data-kind="busy"] { color: var(--color-content-secondary); }
+  .cal-item[data-kind="busy"]::before { border-radius: 1px; background: repeating-linear-gradient(135deg, var(--color-content-tertiary) 0 1.5px, transparent 1.5px 3px); }
+  .cal-more { justify-self: start; padding: 0 var(--space-1); border: 0; border-radius: var(--radius-sm); background: none; color: var(--color-content-secondary); font: inherit; font-size: var(--text-xs); line-height: var(--_lane); font-weight: var(--font-weight-medium); cursor: pointer; }
+  @media (hover: hover) { .cal-more:hover { background: var(--color-surface-hover); color: var(--color-content-primary); } }
+  .cal-more[aria-expanded="true"] { background: var(--color-surface-selected); }
+
+  /* ---------- Week and Day: an all-day row over the hours ---------- */
+  .cal-time { --_cols: 3.5rem repeat(var(--_n), minmax(0, 1fr)); }
+  .cal-allday { display: grid; grid-template-columns: 3.5rem minmax(0, 1fr); border-block-end: var(--border-width-default) solid var(--color-line-default); }
+  .cal-allday > .cal-gutter-label { align-self: center; }
+  .cal-allday .cal-week { min-block-size: 0; --_pt: var(--space-1); }
+  .cal-allday .cal-week .cal-date { display: none; }
+  .cal-gutter-label { padding-inline: var(--space-2); font-size: var(--text-xxs, 0.6875rem); line-height: 1; color: var(--color-content-tertiary); text-align: end; font-variant-numeric: tabular-nums; }
+  .cal-hours { position: relative; display: grid; grid-template-columns: var(--_cols); max-block-size: calc(100dvh - 15rem); min-block-size: 20rem; overflow-y: auto; }
+  .cal-gutter { position: relative; block-size: calc(var(--_hour) * var(--_span-h)); }
+  .cal-gutter .cal-gutter-label { position: absolute; inset-inline: 0; translate: 0 -50%; }
+  .cal-col { position: relative; block-size: calc(var(--_hour) * var(--_span-h)); border-inline-start: var(--border-width-default) solid var(--color-line-subtle);
+    background-image: repeating-linear-gradient(to bottom, var(--color-line-subtle) 0 var(--border-width-default), transparent var(--border-width-default) var(--_hour)); }
+  .cal-col[data-off] { background-color: var(--color-surface-sunken); }
+  .cal-col[data-drop] { background-color: var(--color-action-accent-subtle); }
+  .cal-block {
+    position: absolute; inset-block-start: var(--_top); block-size: var(--_h); inset-inline-start: calc(var(--_x) * 100% + 2px); inline-size: calc(var(--_w) * 100% - 4px);
+    display: flex; flex-direction: column; overflow: hidden; padding: var(--space-0-5) var(--space-2); border: var(--border-width-default) solid var(--color-line-default); border-inline-start: var(--border-width-strong) solid var(--color-content-primary);
+    border-radius: var(--radius-sm); background: var(--color-surface-default); color: var(--color-content-primary);
+    font: inherit; font-size: var(--text-xs); line-height: var(--leading-xs); text-align: start; cursor: pointer;
+  }
+  .cal-block b { font-weight: var(--font-weight-medium); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cal-block span { color: var(--color-content-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cal-block[data-past] { color: var(--color-content-secondary); border-inline-start-color: var(--color-line-strong); }
+  .cal-block[data-kind="busy"] { border-color: var(--color-line-subtle); border-inline-start-color: var(--color-line-strong); color: var(--color-content-secondary);
+    background: repeating-linear-gradient(135deg, var(--color-surface-sunken) 0 4px, var(--color-surface-default) 4px 8px); }
+  @media (hover: hover) { .cal-block:hover { background-color: var(--color-surface-hover); } }
+  /* now: a line across today's column (C-today) */
+  .cal-now { position: absolute; inset-inline: 0; inset-block-start: var(--_top); z-index: 2; block-size: var(--border-width-strong); background: var(--color-feedback-danger-accent); pointer-events: none; }
+  .cal-now::before { content: ""; position: absolute; inset-inline-start: -4px; inset-block-start: -3px; inline-size: 8px; block-size: 8px; border-radius: var(--radius-full); background: var(--color-feedback-danger-accent); }
+
+  /* ---------- Crew: people down the side, the week across ---------- */
+  .cal-crew { --_cols: 12rem repeat(7, minmax(0, 1fr)); }
+  .cal-crew-row { display: grid; grid-template-columns: 12rem minmax(0, 1fr); border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
+  .cal-person { display: flex; align-items: flex-start; gap: var(--space-2); padding: var(--space-3); border-inline-end: var(--border-width-default) solid var(--color-line-subtle); min-inline-size: 0; }
+  .cal-person p { margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); }
+  .cal-person small { display: block; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); font-weight: var(--font-weight-regular); }
+  .cal-crew-row .cal-week { min-block-size: 4.5rem; --_pt: var(--space-1); }
+  .cal-crew-row .cal-week .cal-date { display: none; }
+  .cal-crew-row[data-drop] { background: var(--color-action-accent-subtle); }
+
+  /* ---------- the tray ---------- */
+  .cal-tray { position: sticky; inset-block-start: calc(var(--list-toolbar-top, 0px) + var(--space-4)); display: grid; gap: var(--space-2); padding: calc(var(--inset-card) - var(--border-width-default)); border-color: var(--color-line-card); }
+  /* its head and words in line with the items' text, not their edges */
+  .cal-tray-head, .cal-tray-help { padding-inline-start: var(--space-3); }
+  .cal-tray-head { display: flex; align-items: center; justify-content: space-between; }
+  .cal-tray-head h2 { margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); }
+  .cal-tray-help { margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  .cal-tray-list { display: grid; gap: var(--space-1); margin: 0; padding: 0; list-style: none; }
+  .cal-tray-item { display: grid; gap: var(--space-0-5); inline-size: 100%; padding: var(--space-2) var(--space-3); border: var(--border-width-default) solid var(--color-line-default); border-radius: var(--radius-md); background: var(--color-surface-default); color: var(--color-content-primary); font: inherit; text-align: start; cursor: grab; }
+  /* in the sheet, a row of a menu: its corners follow the menu's (D35) */
+  .pop .cal-tray-item { border-radius: var(--radius-sm); }
+  .cal-tray-item[data-hue] { border-inline-start: var(--border-width-strong) solid var(--_edge); }
+  .cal-tray-item b { font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); }
+  .cal-tray-item span { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  @media (hover: hover) { .cal-tray-item:hover { border-color: var(--color-line-strong); } }
+  .cal-tray-item:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
+  .cal-tray-empty { margin: 0; padding: var(--space-4) var(--space-1); font-size: var(--text-sm); color: var(--color-content-secondary); }
+
+  /* ---------- dragging: a ghost follows the pointer and says where it lands ---------- */
+  .cal-ghost { position: fixed; z-index: 1000; inset: 0 auto auto 0; display: grid; gap: 1px; max-inline-size: 16rem; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); background: var(--color-surface-inverse); color: var(--color-content-inverse); font-size: var(--text-xs); line-height: var(--leading-xs); box-shadow: var(--shadow-popover); pointer-events: none; }
+  .cal-ghost b { font-weight: var(--font-weight-medium); }
+  :root[data-cal-dragging], :root[data-cal-dragging] * { cursor: grabbing !important; user-select: none; }
+  :root[data-cal-dragging="resize"], :root[data-cal-dragging="resize"] * { cursor: ew-resize !important; }
+  [data-dragging-item] { opacity: 0.45; }
+
+  /* ---------- the summary and the day's list, in the shared popover ---------- */
+  @media (min-width: 768px) { .pop:is([data-kind="summary"], [data-kind="more"], [data-kind="schedule"]) { inline-size: 20rem; } }
+  .cal-sum { display: grid; gap: var(--space-3); padding: var(--space-4); }
+  /* the kind line and Close share the top row; Close sits 13 in from the corner, where the pop-head puts it */
+  .cal-sum-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin: calc(-1 * var(--space-1)) calc(-1 * var(--space-1)) calc(-1 * var(--space-2)) 0; }
+  .cal-sum-kind { display: flex; align-items: center; gap: var(--space-1); margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  .cal-sum[data-hue] .cal-sum-kind svg { color: var(--_edge); }
+  .cal-sum[data-hue] h3 { padding-inline-start: var(--space-2); box-shadow: inset var(--border-width-strong) 0 0 var(--_edge); }
+  .cal-sum h3 { margin: 0; font-size: var(--text-base); line-height: var(--leading-base); font-weight: var(--font-weight-medium); }
+  .cal-sum-when { margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); }
+  .cal-sum-when small { display: block; color: var(--color-content-secondary); font-size: var(--text-sm); }
+  .cal-sum dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-1) var(--space-3); margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); }
+  .cal-sum dt { color: var(--color-content-secondary); }
+  .cal-sum dd { margin: 0; display: flex; align-items: center; gap: var(--space-2); min-inline-size: 0; }
+  .cal-sum-move { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); align-items: end; padding-block-start: var(--space-3); border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
+  .cal-sum-move:has(.cal-move-time) { grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr) auto; }
+  .cal-sum-move .field { margin: 0; }
+  .cal-sum-note { margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  .cal-sum-actions { display: flex; gap: var(--space-2); }
+  .cal-faces { display: inline-flex; }
+  .cal-faces .avatar + .avatar { margin-inline-start: calc(-1 * (var(--space-1) + var(--space-0-5))); box-shadow: 0 0 0 var(--border-width-strong) var(--color-surface-raised); }
+  .cal-day-list { display: grid; gap: var(--space-0-5); }
+  .cal-day-list .cal-span { margin: 0; }
+  .cal-day-list .cal-item { block-size: auto; min-block-size: var(--_lane, 1.375rem); }
+
+  /* ---------- phones: a week strip over an agenda of days (C-phone) ---------- */
+  .cal-phone { display: none; }
+  @media (max-width: 767px) {
+    .cal-bar { gap: var(--space-2); }
+    .cal-where { inline-size: 100%; }
+    .cal-period { font-size: var(--text-lg); line-height: var(--leading-lg); }
+    .cal-views, #tray-toggle span:not(.cal-count) { display: none; }
+    .cal-controls { inline-size: 100%; }
+    .cal-controls .field-button { flex: 1 1 0; min-inline-size: 0; }
+    .cal-controls .field-button > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    #tray-toggle { flex: none; }
+    .cal-split:has(> .cal-tray:not([hidden])) { grid-template-columns: minmax(0, 1fr); }
+    .cal-tray { display: none !important; }
+    .cal-card { background: none; border: 0; box-shadow: none; overflow: visible; }
+    .cal-desk { display: none; }
+    .cal-phone { display: grid; gap: var(--space-3); }
+  }
+  .cal-strip { position: sticky; inset-block-start: var(--list-toolbar-top, 0px); z-index: 3; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1); padding: calc(var(--space-2) - var(--border-width-default)); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-xl); background: var(--color-surface-default); transition: inset-block-start var(--duration-medium) var(--ease-standard); }
+  /* with the bars away it sits a little below the screen's edge, the page's canvas above it so the days
+     scrolling under don't show in the gap */
+  :root[data-chrome-hidden] .cal-strip { inset-block-start: var(--space-2); }
+  .cal-strip::before { content: ""; position: absolute; inset-inline: calc(-1 * var(--space-4)); inset-block-end: 100%; block-size: var(--space-4); background: var(--color-surface-canvas); }
+  .cal-strip button { display: grid; justify-items: center; gap: 2px; padding: var(--space-1) 0 var(--space-1-5, 6px); border: 0; border-radius: var(--radius-md); background: none; color: var(--color-content-primary); font: inherit; cursor: pointer; min-block-size: var(--touch-target-min); }
+  .cal-strip small { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  .cal-strip b { display: grid; place-items: center; inline-size: 2rem; block-size: 2rem; border-radius: var(--radius-full); font-size: var(--text-base); font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; }
+  .cal-strip [data-past] b { color: var(--color-content-tertiary); }
+  .cal-strip [data-today] b { box-shadow: inset 0 0 0 var(--border-width-strong) var(--color-content-primary); }
+  .cal-strip [aria-current="date"] b { background: var(--color-surface-inverse); color: var(--color-content-inverse); box-shadow: none; }
+  .cal-strip i { inline-size: 4px; block-size: 4px; border-radius: var(--radius-full); background: var(--color-content-secondary); }
+  .cal-strip i[data-none] { background: none; }
+  .cal-strip button:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
+  .cal-agenda { display: grid; gap: var(--space-4); }
+  .cal-agenda-day { display: grid; gap: var(--space-2); scroll-margin-block-start: calc(var(--list-toolbar-top, 0px) + 6rem); }
+  .cal-agenda-day h3 { margin: 0; padding-inline: var(--space-1); font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
+  .cal-agenda-day h3[data-today] { color: var(--color-content-primary); }
+  .cal-card-item { display: grid; gap: 2px; inline-size: 100%; padding: var(--space-3) var(--space-4); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-xl); background: var(--color-surface-default); color: var(--color-content-primary); font: inherit; text-align: start; cursor: pointer; }
+  .cal-card-item b { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-base); line-height: var(--leading-base); font-weight: var(--font-weight-medium); }
+  .cal-card-item b svg { flex: none; color: var(--color-content-secondary); }
+  .cal-card-item span { font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
+  .cal-card-item[data-hue] { border-inline-start: var(--border-width-strong) solid var(--_edge); background: var(--_fill); }
+  .cal-card-item[data-hue] b svg, .cal-line[data-hue] svg { color: var(--_edge); }
+  .cal-card-item[data-kind="busy"] { background: repeating-linear-gradient(135deg, var(--color-surface-sunken) 0 4px, var(--color-surface-default) 4px 8px); }
+  .cal-card-item:focus-visible, .cal-line:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
+  /* a phase that only runs through the day, and an empty day: one line each */
+  .cal-line { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-1); border: 0; background: none; color: var(--color-content-secondary); font: inherit; font-size: var(--text-sm); line-height: var(--leading-sm); text-align: start; cursor: pointer; }
+  .cal-line svg { color: var(--color-content-tertiary); }
+  .cal-none { margin: 0; padding-inline: var(--space-1); font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-tertiary); }
+}
