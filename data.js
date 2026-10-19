@@ -273,23 +273,15 @@
     searchHint: "Search by number, client, job or city",
     dateKey: "issued",
     cardKey: "status",
+    // KPIs as a money bar (D67): what's owed, split by whether it's late, and what came in lately; drafts
+    // under it, since nobody owes them yet. Each figure filters like a card
+    moneyBar: { label: "Invoices by money", groups: [{ head: "Unpaid", parts: ["overdue", "outstanding"] }, { head: "Paid · last 30 days", parts: ["paid-recent"] }], note: "draft" },
     metrics: [
-      { value: "outstanding", label: "Outstanding", big: (s) => fmt.money0(sum(s, (x) => x.balance)), sub: (s) => `${fmt.plural(s.length, "invoice", "invoices")} not due yet` },
-      { value: "overdue", label: "Overdue", big: (s) => fmt.money0(sum(s, (x) => x.balance)), sub: (s) => (s.length ? `Oldest ${Math.max(...s.map((x) => ageDays(x.due)))} days late` : "Nothing late") },
-      { value: "paid", label: "Paid", big: (s) => fmt.money0(sum(s, (x) => x.amount)), sub: (s) => `${fmt.plural(s.length, "invoice", "invoices")}` },
-      { value: "draft", label: "Draft", big: (s) => fmt.money0(sum(s, (x) => x.amount)), sub: (s) => `${fmt.plural(s.length, "invoice", "invoices")} not sent` },
+      { value: "overdue", label: "Overdue", dot: INV_STATUS.overdue.dot, amount: (s) => sum(s, (x) => x.balance), big: (s) => fmt.money0(sum(s, (x) => x.balance)), sub: (s) => (s.length ? `${fmt.plural(s.length, "invoice", "invoices")} · oldest ${Math.max(...s.map((x) => ageDays(x.due)))} days late` : "Nothing overdue") },
+      { value: "outstanding", label: "Not due yet", dot: INV_STATUS.outstanding.dot, amount: (s) => sum(s, (x) => x.balance), big: (s) => fmt.money0(sum(s, (x) => x.balance)), sub: (s) => (s.length ? fmt.plural(s.length, "invoice", "invoices") : "Nothing waiting") },
+      { value: "paid-recent", key: "paidRecently", match: ["yes"], label: "Last 30 days", title: "Paid", dot: INV_STATUS.paid.dot, amount: (s) => sum(s, (x) => x.amount), big: (s) => fmt.money0(sum(s, (x) => x.amount)), sub: (s) => (s.length ? fmt.plural(s.length, "invoice", "invoices") : "Nothing paid lately") },
+      { value: "draft", label: "Draft", dot: INV_STATUS.draft.dot, amount: (s) => sum(s, (x) => x.amount), big: (s) => `${fmt.plural(s.length, "draft", "drafts")} not sent · ${fmt.money0(sum(s, (x) => x.amount))}`, sub: () => "" },
     ],
-    allCard: { big: (s) => fmt.whole(sum(s, (x) => x.amount)) },
-    insight: {
-      label: "Collected",
-      info: "{paid} ÷ invoiced, by amount, for the invoices your filters let through. Invoiced is {paid}, {outstanding} and {overdue}; {draft} invoices aren’t sent yet, so they don’t count.",
-      main: (s) => {
-        const sent = s.filter((x) => x.status !== "draft"), invoiced = sum(sent, (x) => x.amount), paid = sum(sent.filter((x) => x.status === "paid"), (x) => x.amount);
-        if (!invoiced) return { value: "Nothing", counts: "invoiced yet", bar: [], empty: true };
-        return { value: fmt.pct(paid / invoiced), counts: `${fmt.money0(paid)} of ${fmt.money0(invoiced)}`, bar: [[paid, INV_STATUS.paid.dot, "Paid"], [invoiced - paid, "var(--color-line-default)", "Outstanding and Overdue"]] };
-      },
-      more: [{ label: "Average time to pay", value: (s) => { const p = s.filter((x) => x.paidIn); return p.length ? `${Math.round(sum(p, (x) => x.paidIn) / p.length)} days` : "–"; }, sub: (s) => { const n = s.filter((x) => x.paidIn).length; return n ? fmt.plural(n, "paid invoice", "paid invoices") : "none paid yet"; } }],
-    },
     statusMap: INV_STATUS,
     phone: { over: (x) => `${esc(x.number)} · ${x.status === "overdue" ? `<span class="cell-danger">${ageDays(x.due)} days late</span>` : x.status === "paid" ? `Paid in ${x.paidIn} days` : `Due ${fmt.date(x.due)}`}`, where: (x) => esc(x.job) },
     columns: [
@@ -305,6 +297,8 @@
       { key: "status", label: "Status", type: "enum", pinned: true, get: (x) => x.status, options: statusOptions(INV_STATUS) },
       { key: "issued", label: "Issued", type: "date", pinned: true, get: (x) => x.issued },
       { key: "balance", label: "Balance due", type: "range", get: (x) => x.balance },
+      // what the money bar's Paid figure picks: paid in the last 30 days (by the date it was paid); not in the menu
+      { key: "paidRecently", label: "Paid", type: "enum", hidden: true, get: (x) => (x.status === "paid" && earliest(daysFrom(x.issued, x.paidIn), TODAY) >= daysAgo(30) ? "yes" : "no"), options: [{ value: "yes", label: "Last 30 days" }, { value: "no", label: "Earlier, or not paid" }] },
       ownerFilter((x) => x.owner.id),
       cityFilter((x) => x.city),
     ],

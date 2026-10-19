@@ -62,10 +62,17 @@
   const active = () => cfg.filters.filter((f) => isSet(f.key, st.filters[f.key]));
   // a single status picked from a slice card: the card is pressed, and the status is a chip like any other filter,
   // so the count row always shows what narrowed the list (× on the chip releases the card)
+  // a card is one filter: a status by default, or any column's values (a flag, a category: L-summary); cards may
+  // overlap, and one is picked at a time
+  const cardKeyOf = (m) => m.key || cfg.cardKey;
+  const cardMatch = (m) => m.match || [m.value];
+  const cardKeys = () => [...new Set((cfg.metrics || []).map(cardKeyOf).filter(Boolean))];
   function cardValue() {
-    if (!cfg.cardKey) return null;
-    const v = st.filters[cfg.cardKey];
-    return Array.isArray(v) && v.length === 1 && cfg.metrics.some((m) => m.value === v[0]) ? v[0] : null;
+    const m = (cfg.metrics || []).find((m) => {
+      const v = st.filters[cardKeyOf(m)], want = cardMatch(m);
+      return Array.isArray(v) && v.length === want.length && want.every((x) => v.includes(x)) && cardKeys().every((k) => k === cardKeyOf(m) || !isSet(k, st.filters[k]));
+    });
+    return m ? m.value : null;
   }
   const chipped = () => cfg.filters.filter((f) => f.key !== cfg.dateKey && (isSet(f.key, st.filters[f.key]) || st.added.includes(f.key)));
   // a range filter reads in its type's unit (L-types): $ for money (the default), % for a percentage
@@ -163,7 +170,7 @@
   function rowsWhere({ except, search = true } = {}) {
     // every search chip has to match, and so does whatever is still being typed
     const qs = search ? [...st.terms, st.search].map((t) => t.trim().toLowerCase()).filter(Boolean) : [];
-    const fs = active().filter((f) => f.key !== except);
+    const fs = active().filter((f) => ![except].flat().includes(f.key));
     return cfg.rows.filter((row) => { const text = qs.length ? cfg.search(row).toLowerCase() : ""; return qs.every((t) => text.includes(t)) && fs.every((f) => passes(f, row)); });
   }
   function sorted(rows) {
@@ -175,6 +182,9 @@
     });
   }
   function chipText(f, val) {
+    // a card's own filter reads as the card (Missing documents), not as the values it stands for
+    const card = (cfg.metrics || []).find((m) => m.key === f.key && m.match.length === val.length && m.match.every((x) => val.includes(x)));
+    if (card) return card.label;
     if (f.type === "enum") {
       const labels = val.map((v) => f.options.find((o) => o.value === v)?.label ?? v);
       return labels.length <= 2 ? labels.join(", ") : `${labels.length} selected`;
@@ -296,7 +306,7 @@
     if (input.value !== st.search) input.value = st.search;
   }
   // Add filter's menu: the pinned filters first (L-filters, at most three), then the rest in order
-  const addable = () => cfg.filters.filter((f) => f.key !== cfg.dateKey && !chipped().includes(f) && !(f.key === cfg.cardKey && isSet(f.key, st.filters[f.key])))
+  const addable = () => cfg.filters.filter((f) => !f.hidden && f.key !== cfg.dateKey && !chipped().includes(f) && !(cardKeys().includes(f.key) && cardValue() && isSet(f.key, st.filters[f.key])))
     .sort((a, b) => !!b.pinned - !!a.pinned);
 
   function renderSlices() {
@@ -305,6 +315,10 @@
     if (box.hidden) return;
     const row = $("#metrics");
 
+    if (st.mode === "loading" && cfg.moneyBar) {
+      row.innerHTML = `<div class="money-bar" aria-hidden="true">${cfg.moneyBar.groups.map(() => `<div class="money-bar-group"><span class="skeleton" style="inline-size:40%;margin:var(--space-2) var(--space-3)"></span><span class="skeleton" style="block-size:var(--space-6);inline-size:60%;margin:0 var(--space-3)"></span></div>`).join("")}</div>`;
+      return;
+    }
     if (st.mode === "loading") {
       row.style.setProperty("--_slices", cfg.metrics.length + 1);
       row.innerHTML = [...Array(cfg.metrics.length + 1)].map(() => `<div class="slice" aria-hidden="true"><span class="skeleton" style="inline-size:60%"></span><span class="skeleton" style="block-size:var(--space-6);inline-size:75%"></span></div>`).join("")
@@ -313,22 +327,48 @@
     }
 
     // cards count what the other filters let through, so each number is what a click gives you
-    const scope = rowsWhere({ except: cfg.cardKey });
+    if (cfg.moneyBar) return renderMoneyBar();
+    const scope = rowsWhere({ except: cardKeys() });
     const picked = cardValue();
-    const none = !isSet(cfg.cardKey, st.filters[cfg.cardKey]);
+    const none = cardKeys().every((k) => !isSet(k, st.filters[k]));
     const card = (value, label, status, count, big, on, empty) =>
       `<button class="slice" type="button" data-metric="${value}" aria-pressed="${on}"${empty ? " data-empty" : ""}>
         <span class="slice-head"><span class="slice-label">${status ? `<span class="${status.mark ? "mark" : "dot"}"${status.mark ? ` data-mark="${status.mark}"` : ""} style="--_dot:${status.dot}"></span>` : ""}${esc(label)}</span>${count != null ? `<span class="slice-count">${fmt.count(count)}</span>` : ""}</span>
         <span class="slice-value">${big}</span></button>`;
     const all = card("", `All ${cfg.noun[1]}`, null, cfg.metrics[0].noCount ? null : scope.length, cfg.allCard ? cfg.allCard.big(scope) : fmt.count(scope.length), none, !scope.length);
     const cards = cfg.metrics.map((m) => {
-      const slice = scope.filter((r) => filterDef(cfg.cardKey).get(r) === m.value);
-      return card(m.value, m.label, cfg.statusMap?.[m.value], m.noCount ? null : slice.length, m.big(slice, scope), picked === m.value, !slice.length);
+      const slice = scope.filter((r) => cardMatch(m).includes(filterDef(cardKeyOf(m)).get(r)));
+      return card(m.value, m.title || m.label, cfg.statusMap?.[m.status || m.value], m.noCount ? null : slice.length, m.big(slice, scope), picked === m.value, !slice.length);
     });
     row.style.setProperty("--_slices", cfg.metrics.length + 1);
     row.toggleAttribute("data-no-insight", !cfg.insight);
     // on phones the insight leads: it's the overview, so it belongs in the first screen, not behind a swipe
     row.innerHTML = phoneMQ.matches ? insight(scope) + all + cards.join("") : all + cards.join("") + insight(scope);
+  }
+  // the money bar (D67): a list's KPIs where money splits by where it is. Its figures are cards underneath
+  // (the same filters, one at a time, a chip named after each); the bar is their picture
+  function renderMoneyBar() {
+    const row = $("#metrics");
+    const scope = rowsWhere({ except: cardKeys() });
+    const picked = cardValue();
+    const byValue = Object.fromEntries(cfg.metrics.map((m) => [m.value, m]));
+    const sliceOf = (m) => scope.filter((r) => cardMatch(m).includes(filterDef(cardKeyOf(m)).get(r)));
+    const figure = (m) => {
+      const s = sliceOf(m);
+      return `<button class="money-bar-figure" type="button" data-metric="${m.value}" aria-pressed="${picked === m.value}"${s.length ? "" : " data-empty"}>
+        <span class="money-bar-label"><span class="dot" style="--_dot:${m.dot}"></span>${esc(m.title || m.label)}</span>
+        <span class="money-bar-value">${s.length ? m.big(s) : "—"}</span><span class="money-bar-sub">${esc(m.sub(s))}</span></button>`;
+    };
+    const group = (g) => {
+      const ms = g.parts.map((v) => byValue[v]), slices = ms.map(sliceOf), amounts = ms.map((m, i) => m.amount(slices[i]));
+      const total = amounts.reduce((a, b) => a + b, 0), n = slices.reduce((a, s) => a + s.length, 0);
+      return `<div class="money-bar-group"><p class="money-bar-head">${esc(g.head)} <span class="money-bar-total">${fmt.money0(total)} · ${fmt.plural(n, cfg.noun[0], cfg.noun[1])}</span></p>
+        <div class="money-bar-figures">${ms.map(figure).join("")}</div>
+        <div class="money-bar-track" aria-hidden="true">${ms.map((m, i) => (amounts[i] > 0 ? `<span style="--_share:${Math.round(amounts[i])};--_dot:${m.dot}"></span>` : "")).join("")}</div></div>`;
+    };
+    const note = cfg.moneyBar.note && byValue[cfg.moneyBar.note];
+    const noteHtml = note ? (() => { const s = sliceOf(note); return s.length ? `<button class="money-bar-note" type="button" data-metric="${note.value}" aria-pressed="${picked === note.value}"><span class="dot" style="--_dot:${note.dot}"></span>${esc(note.big(s))}</button>` : ""; })() : "";
+    row.innerHTML = `<div class="money-bar" role="group" aria-label="${esc(cfg.moneyBar.label)}">${cfg.moneyBar.groups.map(group).join("")}</div>${noteHtml}`;
   }
   const phoneMQ = matchMedia("(max-width: 767px)");
   const narrowMQ = matchMedia("(min-width: 768px) and (max-width: 1099px)");
@@ -885,7 +925,7 @@
     const cur = st.filters[f.key], draft = spanValue(dp.from, dp.to);
     const days = dp.from && dp.to ? Math.round((dp.to - dp.from) / 864e5) + 1 : 0;
     const note = dp.error ? `<p class="date-range-error" id="date-hint">Type a date like ${longDate(today())}.</p>`
-      : `<p class="date-range-note" id="date-hint">By ${esc(f.label.toLowerCase())} date${days ? ` · ${fmt.plural(days, "day", "days")}` : ""} · Eastern time</p>`;
+      : `<p class="date-range-note" id="date-hint">By ${esc(f.label.toLowerCase())}${/\bdate\b/i.test(f.label) ? "" : " date"}${days ? ` · ${fmt.plural(days, "day", "days")}` : ""} · Eastern time</p>`;
     const off = !draft || draft === cur || !!dp.error;
     return sheet() ? `${note}<div class="date-range-foot"><button type="button" class="button" data-date-apply${off ? " disabled" : ""}>Apply</button></div>`
       : `<div class="date-range-foot">${note}<button type="button" class="button" data-variant="secondary" data-size="sm" data-date-cancel>Cancel</button><button type="button" class="button" data-size="sm" data-date-apply${off ? " disabled" : ""}>Apply</button></div>`;
@@ -1136,12 +1176,12 @@
         <div class="detail-section detail-hero">
           ${p.photo ? `<figure class="detail-photo"><img src="${esc(p.photo.src)}" alt="${esc(p.heading)}" decoding="async" onerror="this.parentElement.remove()">${p.photo.credit ? `<figcaption>${p.photo.credit}</figcaption>` : ""}</figure>` : ""}
           ${p.badge}
-          <p class="detail-amount${p.amount ? "" : " is-empty"}">${p.amount ? money(p.amount) : esc(p.empty)}</p>
+          ${p.amount || p.empty != null ? `<p class="detail-amount${p.amount ? "" : " is-empty"}">${p.amount ? money(p.amount) : esc(p.empty)}</p>` : ""}
           <p class="detail-sub">${esc(p.sub)}</p>
           ${timelineHtml(p.timeline)}
           <div class="detail-actions">${p.actions.map(([l, i]) => `<button type="button" class="button" data-variant="secondary" data-concept-action="${esc(l)}">${i ? ic(`m-${i}`, 14, { optical: true }) : ""}${esc(l)}</button>`).join("")}<button type="button" class="button" data-variant="secondary" data-row-menu="${x.id}" aria-haspopup="menu" aria-expanded="false">More${I.chev}</button></div>
         </div>
-        ${p.related?.length ? `<div class="detail-section detail-related"><h3>Related</h3><dl class="detail-fields">${p.related.map(([k, r]) => `<div><dt>${esc(k)}</dt><dd><a href="#${esc(r.id || "")}" class="detail-link" data-concept-action="Open ${esc(k.toLowerCase())}: ${esc(r.name)}">${r.initials ? avatar(r, "sm") : ""}<span>${esc(r.name)}</span></a></dd></div>`).join("")}</dl></div>` : ""}
+        ${p.related?.length ? `<div class="detail-section detail-related"><h3>Related</h3><dl class="detail-fields">${p.related.map(([k, r]) => `<div><dt>${esc(k)}</dt><dd>${r.none ? `<span class="text-secondary">${esc(r.name)}</span>` : `<a href="#${esc(r.id || "")}" class="detail-link" data-concept-action="Open ${esc(k.toLowerCase())}: ${esc(r.name)}">${r.initials ? avatar(r, "sm") : ""}<span>${esc(r.name)}</span></a>`}</dd></div>`).join("")}</dl></div>` : ""}
         <dl class="detail-section detail-fields">${p.fields.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join("")}</dl>
         ${p.doc ? `<div class="detail-section detail-doc"><div class="detail-doc-head"><span>${esc(p.doc.label)}</span><button type="button" class="link-button" data-concept-action="${esc(p.doc.view)}">${esc(p.doc.view)}</button></div><button type="button" class="detail-file" data-concept-action="Download ${esc(p.doc.name)}">${ic("m-file", 14)}<span>${esc(p.doc.name)}</span>${ic("m-download", 14)}</button></div>` : ""}
       </div>`;
@@ -1240,7 +1280,8 @@
     let el;
     if ((el = q("[data-metric]"))) {
       const v = el.dataset.metric;
-      setFilter(cfg.cardKey, !v || cardValue() === v ? [] : [v]);
+      const m = cfg.metrics.find((x) => x.value === v), was = cardValue();
+      set(() => { for (const k of cardKeys()) delete st.filters[k]; if (m && was !== v) st.filters[cardKeyOf(m)] = [...cardMatch(m)]; });
       $(`[data-metric="${v}"]`)?.focus({ preventScroll: true });
       return;
     }

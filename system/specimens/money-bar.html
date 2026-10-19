@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Money bar · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=241bc11e">
+<link rel="stylesheet" href="specimen.css?v=241bc11e">
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Money bar</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">A list's KPIs when its key figure is money split by where the money is (D67, L-summary): on invoices, what's owed (overdue first, then not due yet) beside what came in (paid in the last 30 days, its window named). The figures are the buttons: each filters the list like a summary card, one at a time, its chip named after it. The bar is their picture, hidden from screen readers. What nobody owes yet (drafts) is a quiet line under the card. Designed in Figma (research page, “What earns a summary card”, section 06).</p>
+
+  <section class="spec-section">
+    <h2>Invoices</h2>
+    <p>Nothing picked: the list shows every invoice.</p>
+    <div class="spec-panel" data-surface="canvas">
+      <div class="money-bar" role="group" aria-label="Invoices by money">
+        <div class="money-bar-group">
+          <p class="money-bar-head">Unpaid <span class="money-bar-total">$280,799 · 45 invoices</span></p>
+          <div class="money-bar-figures">
+            <button class="money-bar-figure" type="button" aria-pressed="false"><span class="money-bar-label"><span class="dot" style="--_dot:var(--color-feedback-danger-accent)"></span>Overdue</span><span class="money-bar-value">$93,092</span><span class="money-bar-sub">16 invoices · oldest 90 days late</span></button>
+            <button class="money-bar-figure" type="button" aria-pressed="false"><span class="money-bar-label"><span class="dot" style="--_dot:var(--color-status-outstanding-dot)"></span>Not due yet</span><span class="money-bar-value">$187,707</span><span class="money-bar-sub">29 invoices</span></button>
+          </div>
+          <div class="money-bar-track" aria-hidden="true"><span style="--_share:93092;--_dot:var(--color-feedback-danger-accent)"></span><span style="--_share:187707;--_dot:var(--color-status-outstanding-dot)"></span></div>
+        </div>
+        <div class="money-bar-group">
+          <p class="money-bar-head">Paid · last 30 days <span class="money-bar-total">$120,250 · 12 invoices</span></p>
+          <div class="money-bar-figures">
+            <button class="money-bar-figure" type="button" aria-pressed="false"><span class="money-bar-label"><span class="dot" style="--_dot:var(--color-feedback-success-accent)"></span>Paid</span><span class="money-bar-value">$120,250</span><span class="money-bar-sub">12 invoices</span></button>
+          </div>
+          <div class="money-bar-track" aria-hidden="true"><span style="--_share:120250;--_dot:var(--color-feedback-success-accent)"></span></div>
+        </div>
+      </div>
+      <button class="money-bar-note" type="button" aria-pressed="false"><span class="dot" style="--_dot:var(--color-status-draft-dot)"></span>13 drafts not sent · $55,354</button>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>A figure picked, and an empty one</h2>
+    <p>Overdue is pressed: the list shows those invoices, and its chip reads “Overdue”. With nothing overdue the figure stays, muted, so nothing jumps.</p>
+    <div class="spec-panel" data-surface="canvas">
+      <div class="money-bar" role="group" aria-label="Invoices by money">
+        <div class="money-bar-group">
+          <p class="money-bar-head">Unpaid <span class="money-bar-total">$280,799 · 45 invoices</span></p>
+          <div class="money-bar-figures">
+            <button class="money-bar-figure" type="button" aria-pressed="true"><span class="money-bar-label"><span class="dot" style="--_dot:var(--color-feedback-danger-accent)"></span>Overdue</span><span class="money-bar-value">$93,092</span><span class="money-bar-sub">16 invoices · oldest 90 days late</span></button>
+            <button class="money-bar-figure" type="button" aria-pressed="false"><span class="money-bar-label"><span class="dot" style="--_dot:var(--color-status-outstanding-dot)"></span>Not due yet</span><span class="money-bar-value">$187,707</span><span class="money-bar-sub">29 invoices</span></button>
+          </div>
+          <div class="money-bar-track" aria-hidden="true"><span style="--_share:93092;--_dot:var(--color-feedback-danger-accent)"></span><span style="--_share:187707;--_dot:var(--color-status-outstanding-dot)"></span></div>
+        </div>
+        <div class="money-bar-group">
+          <p class="money-bar-head">Paid · last 30 days <span class="money-bar-total">$0 · 0 invoices</span></p>
+          <div class="money-bar-figures">
+            <button class="money-bar-figure" type="button" aria-pressed="false" data-empty><span class="money-bar-label"><span class="dot" style="--_dot:var(--color-feedback-success-accent)"></span>Paid</span><span class="money-bar-value">—</span><span class="money-bar-sub">Nothing paid lately</span></button>
+          </div>
+          <div class="money-bar-track" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Rules</h2>
+    <ul>
+      <li>Groups answer separate questions with their own time scopes (owed: everything open; came in: the last 30 days), so they never share one scale.</li>
+      <li>Overdue comes first and in the danger colour; the rest wear their status's colour.</li>
+      <li>A segment is never thinner than 4 px, so a small amount still shows; an empty group keeps its track, as a hairline.</li>
+      <li>The figures follow the list's other filters, like summary cards; the Paid window doesn't follow the date range, and says so.</li>
+      <li>Phones: the groups stack, the figures stay side by side and their lines wrap.</li>
+    </ul>
+<code class="spec-code">&lt;div class="money-bar" role="group" aria-label="Invoices by money"&gt;
+  &lt;div class="money-bar-group"&gt;
+    &lt;p class="money-bar-head"&gt;Unpaid &lt;span class="money-bar-total"&gt;$280,799 · 45 invoices&lt;/span&gt;&lt;/p&gt;
+    &lt;div class="money-bar-figures"&gt;&lt;button class="money-bar-figure" type="button" aria-pressed="false"&gt;…&lt;/button&gt;&lt;/div&gt;
+    &lt;div class="money-bar-track" aria-hidden="true"&gt;&lt;span style="--_share:93092;--_dot:…"&gt;&lt;/span&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code>
+  </section>
+</main>
+<script src="../../shared/icons.js?v=241bc11e"></script>
+<script src="specimen.js?v=241bc11e"></script>
+</body>
+</html>

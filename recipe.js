@@ -30,7 +30,8 @@ window.BDS_RECIPE = (() => {
   };
   const badge = (s) => `<span class="badge" ${s.attr}${s.mark ? ` data-mark="${s.mark}"` : ""}>${esc(s.label)}</span>`;
   // how often each stage turns up in sample data
-  const WEIGHT = { new: 24, draft: 12, waiting: 30, won: 20, underway: 22, done: 34, lost: 12, late: 14, neutral: 30 };
+  // how common each stage is in sample data; what's set aside (cancelled, inactive) is rare
+  const WEIGHT = { new: 24, draft: 12, waiting: 30, won: 20, underway: 22, done: 34, lost: 12, late: 14, neutral: 8 };
   // how far along the lifecycle each stage is, and the steps a date can be named for: a rank the row
   // must have reached, or the one stage it belongs to (declined, cancelled)
   const RANK = { new: 0, draft: 0, waiting: 1, late: 1, lost: 1, neutral: 1, won: 2, underway: 3, done: 4 };
@@ -46,6 +47,9 @@ window.BDS_RECIPE = (() => {
   const company = (i) => `${PREFIX[(i * 7) % PREFIX.length]} ${TRADE[Math.floor(i / PREFIX.length) % TRADE.length]}`;
   const ITEMS = Object.entries(CATALOG).flatMap(([cat, list]) => list.map(([name, unit, cost]) => ({ name, unit, cost, cat })));
   // the longest names a list should expect, real-world long: legal names with their trades and places
+  // companies a linked vendor can be: the catalog's suppliers (never its “In-house”, the business's own
+  // labor) and the subcontractors and shops a drywall business pays
+  const COMPANIES = [...VENDORS.filter((v) => v !== "In-house"), "L&W Supply", "Menards", "Fastenal", "Gypsum Supply Co.", "Kowalski Taping", "Metro Scaffold Rental"];
   const LONG = { vendor: ["Northline Commercial Drywall & Acoustical Ceiling Supply", "Great Lakes Insulation and Building Materials Distributors, Inc.", "Hernández-Whitfield Construction Specialties & Fasteners", "Twin Cities Fireproofing, Firestopping and Sealants Co."] };
   // what a reason field says (a decline or cancel reason), so the sample reads like one
   const REASONS = ["Price is higher than quoted", "Can't deliver before the start date", "Out of stock", "Wrong items on the order", "Duplicate of another order", "Job was put on hold"];
@@ -76,19 +80,24 @@ window.BDS_RECIPE = (() => {
         case "date": case "datetime": return /due|scheduled|start/.test(k) ? daysFrom(TODAY, int(-40, 45)) : daysAgo(int(0, 240));
         case "person": return weighted([[OWNERS[0], 40], [OWNERS[1], 25], [OWNERS[2], 20], [OWNERS[3], 15]]);
         // one row in twelve gets the longest kind of name, so the layout is tested at its worst (L-sample)
-        case "record": return /client|customer/.test(k) ? row._client : recordOf(/vendor|sub|supplier/.test(k) ? (i % 12 === 5 ? LONG.vendor[(i / 12 | 0) % LONG.vendor.length] : pick(VENDORS)) : `${pick(JOBS)}`);
+        case "record": return /client|customer/.test(k) ? row._client : recordOf(/vendor|sub|supplier/.test(k) ? (i % 12 === 5 ? LONG.vendor[(i / 12 | 0) % LONG.vendor.length] : pick(COMPANIES)) : `${pick(JOBS)}`);
         case "address": return /city/.test(k) ? row._client.city : row._client.address;
-        case "contact": return { email: emailOf(row._client), phone: `(555) ${int(200, 899)}-${String(int(0, 9999)).padStart(4, "0")}` };
-        case "flags": return r() < 0.45 ? [] : FLAGS.filter(() => r() < 0.5).slice(0, 3);
+        case "contact": return { email: row._company ? `office@${row._company.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "").slice(0, 24)}.example` : emailOf(row._client), // a company writes from its own domain
+           phone: `(555) ${int(200, 899)}-${String(int(0, 9999)).padStart(4, "0")}` };
+        case "flags": { const fs = f.values?.length ? f.values.map((v) => v.label) : FLAGS; return r() < 0.45 ? [] : fs.filter(() => r() < 0.5).slice(0, 3); } // the model's flags when it lists them
         // an item's photo where the sample has one; the rest show the thumbnail's placeholder (D55)
         case "image": return row._item ? PHOTOS[row._item.name]?.[0] ?? null : null;
-        case "kinds": { const vs = (f.values || []).map((v) => v.value); const some = vs.filter(() => r() < 0.45); return some.length ? some : [pick(vs)]; }
-        case "category": return row._item && /category/.test(k) ? row._item.cat : /source/.test(k) ? pick(SOURCES) : /vendor|supplier/.test(k) ? pick(VENDORS) : /category/.test(k) ? pick(Object.keys(CATALOG)) : /work|trade/.test(k) ? pick(TRADES) : /contain|kind/.test(k) ? pick(["Materials", "Labour", "Materials and labour"]) : `${f.label || cap(f.key)} ${"ABC"[int(0, 2)]}`;
+        case "kinds": { const vs = (f.values || []).map((v) => v.value);
+          // a company's name says what it brings: a supplier materials, a trade labor, sometimes both
+          if (row._company && vs.includes("labor") && vs.includes("materials")) return /Supply|Distributors|Materials|Fasteners|Sealants/.test(row._company) ? (r() < 0.2 ? ["labor", "materials"] : ["materials"]) : r() < 0.3 ? ["labor", "materials"] : ["labor"]; const some = vs.filter(() => r() < 0.45); return some.length ? some : [pick(vs)]; }
+        case "category": if (f.values?.length) return pick(f.values).label; // the model's values, never made up
+          return row._item && /category/.test(k) ? row._item.cat : /source/.test(k) ? pick(SOURCES) : /vendor|supplier/.test(k) ? pick(VENDORS) : /category/.test(k) ? pick(Object.keys(CATALOG)) : /work|trade/.test(k) ? (TRADES.find((t) => row._company?.includes(t.slice(0, 5))) || pick(TRADES)) : /contain|kind/.test(k) ? pick(["Materials", "Labour", "Materials and labour"]) : `${f.label || cap(f.key)} ${"ABC"[int(0, 2)]}`;
         case "name":
           if (/number|code|^id$/.test(k)) return `${(n.one.slice(0, 3) || "rec").toUpperCase()}-${1040 + i}`;
           if (/item|product|material/.test(k) || /item|product|material/.test(n.one)) { row._item = pick(ITEMS); return row._item.name; }
           if (/job|project|quote|estimate/.test(k) || /job|project|quote|estimate/.test(n.one)) return pick(JOBS);
-          return /vendor|sub|supplier|company/.test(k + n.one) ? company(i) : row._client.name;
+          if (/vendor|sub|supplier|company/.test(k + n.one)) return (row._company = i % 12 === 5 ? LONG.vendor[(i / 12 | 0) % LONG.vendor.length] : company(i)); // one in twelve long (L-sample)
+          return row._client.name;
         default: return /reason/.test(k) ? pick(REASONS) : /unit/.test(k) ? row._item?.unit || pick(UNITS) : /job|project|quote/.test(k) ? pick(JOBS) : `${f.label || cap(f.key)} ${i + 1}`;
       }
     };
@@ -210,6 +219,10 @@ window.BDS_RECIPE = (() => {
       const x = { id: `${id || d.nav}-${i + 1}`, _client: pickClient() };
       for (const f of fields) if (f.type !== "status" && f.type !== "image") x[f.key] = gen(f, x, i);
       for (const f of fields) if (f.type === "image") x[f.key] = gen(f, x, i); // once the name has picked its item
+      // how many of each list point here (a vendor's orders, its bills): some have none yet
+      x._has = (d.record?.has || []).map(() => (r() < 0.2 ? 0 : 1 + Math.floor(r() * 14)));
+      // a list reached through another (jobs, through its vendor orders) has as many at most, and some if that one has any
+      (d.record?.has || []).forEach((h, j, all) => { const k = all.findIndex((o) => h.via?.toLowerCase().startsWith(o.label.toLowerCase())); if (k >= 0 && k !== j) x._has[j] = x._has[k] ? 1 + Math.floor(r() * x._has[k]) : 0; });
       if (statusCol && lifecycle) {
         // every status gets rows (the first ones go round them), the rest by how common each stage is
         x[statusCol] = i < stored.length * 2 ? stored[i % stored.length].value : weighted(stored);
@@ -289,7 +302,9 @@ window.BDS_RECIPE = (() => {
 
     // ---------- filters: the picker comes from the type ----------
     const valuesOf = (k) => [...new Set(rows.map((x) => text(x[k])).filter(Boolean))].sort();
-    const filters = d.filters.map((f) => {
+    // the date range (L-date-range) filters by its date whether or not the description lists it as a filter
+    const listed = d.dateRange && !d.filters.some((f) => f.column === d.dateRange.column) ? [...d.filters, { column: d.dateRange.column }] : d.filters;
+    const filters = listed.map((f) => {
       const c = byKey[f.column], base = { key: c.key, label: c.label, pinned: !!f.pinned };
       if (c.type === "status") return { ...base, type: "enum", get: (x) => x[c.key], options: d.status.values.map((v) => ({ value: v.value, label: v.label, html: badge(statusMap[v.value]) })) };
       if (c.type === "person") return { ...base, type: "enum", get: (x) => x[c.key].id, options: OWNERS.map((o) => ({ value: o.id, label: o.me ? `${o.name} (you)` : o.name, html: `${avatar(o, "sm")}${esc(o.me ? `${o.name} (you)` : o.name)}` })) };
@@ -297,7 +312,7 @@ window.BDS_RECIPE = (() => {
       if (NUMERIC.has(c.type)) return { ...base, type: "range", get: (x) => x[c.key], ...(c.type === "money" ? { prefix: "$" } : c.type === "percent" ? { suffix: "%", scale: 100 } : c.unit || c.type === "duration" ? { suffix: `${c.unit || "day"}s` } : {}) };
       if (c.type === "address") return { ...base, type: "enum", get: (x) => text(x[c.key]).split(", ").pop(), options: CITIES.map((v) => ({ value: v, label: v })) };
       if (c.type === "kinds") return { ...base, type: "enum", get: (x) => x[c.key], options: c.values.map((v) => ({ value: v.value, label: v.label, html: `${window.BolsterIcons(v.icon, 14)}${esc(v.label)}` })) };
-      if (c.type === "flags") return { ...base, type: "enum", get: (x) => x[c.key][0] || "Clear", options: [...FLAGS, "Clear"].map((v) => ({ value: v, label: v })) };
+      if (c.type === "flags") return { ...base, type: "enum", get: (x) => x[c.key][0] || "Clear", options: [...(c.values?.length ? c.values.map((v) => v.label) : FLAGS), "Clear"].map((v) => ({ value: v, label: v })) };
       return { ...base, type: "enum", get: (x) => text(x[c.key]), options: valuesOf(c.key).map((v) => ({ value: v, label: v })), ...(c.type === "record" ? { searchable: true } : {}) };
     });
 
@@ -309,14 +324,29 @@ window.BDS_RECIPE = (() => {
       return byKey[m.column]?.type === "money" ? fmt.money0(v) : fmt.count(Math.round(v));
     };
     const note = (t, s, m) => (t || "").replace(/\{count\}/g, fmt.plural(s.length, n.one, n.many)).replace(/\{sum\}/g, measure({ ...m, agg: m.agg === "count" ? "count" : "sum" })(s));
-    const metrics = (d.summary?.slices || []).map((sl) => {
+    const metrics = (d.summary?.slices || []).map((sl, i) => {
       const custom = (sl.note || "").match(/\{(?!count\}|sum\})[a-zA-Z]+\}/);
-      if (custom) notes.push(`The ${statusMap[sl.value].label} card's line uses ${custom[0]}, a custom figure: it shows the count instead.`);
-      return { value: sl.value, label: statusMap[sl.value].label, noCount: sl.count === false, big: measure(sl.measure), sub: (s) => (custom || !sl.note ? fmt.plural(s.length, n.one, n.many) : note(sl.note, s, sl.measure)) };
+      const label = sl.filter ? sl.label : statusMap[sl.value].label;
+      if (custom) notes.push(`The ${label} card's line uses ${custom[0]}, a custom figure: it shows the count instead.`);
+      const base = { label, noCount: sl.count === false, big: measure(sl.measure), sub: (s) => (custom || !sl.note ? fmt.plural(s.length, n.one, n.many) : note(sl.note, s, sl.measure)) };
+      // an ending's recent window (L-summary): its own hidden filter, the rows that reached it lately
+      if (!sl.filter && sl.window) return { value: `${sl.value}-recent`, status: sl.value, key: `reached-${sl.value}`, match: ["yes"], ...base, label: `Last ${sl.window.days} days`, title: `${label} · last ${sl.window.days} days` };
+      if (!sl.filter) return { value: sl.value, ...base };
+      // a card for another column (L-summary): its filter's values as that column's filter reads them; any
+      // flag at all is every flag the column has
+      const c = byKey[sl.filter.column];
+      const match = sl.filter.any ? (c.values?.length ? c.values.map((v) => v.label) : FLAGS) : sl.filter.values;
+      return { value: `card-${i + 1}`, key: c.key, match, ...base };
     });
     // explanations name statuses and labels as the screen shows them (D27): {booked} → Booked, [Label] → Label
     const words = (t) => t.replace(/\{([a-z-]+)\}/g, (_, v) => statusMap[v]?.label || v).replace(/\[([^\]]+)\]/g, "$1");
     if (d.summary?.insight) notes.push(`“${d.summary.insight.label}” is a custom figure (${words(d.summary.insight.explain)}), so it's left out until the renderer has code for it.`);
+
+    // the windows' filters: when a row reached its status (its story's last step, else the main date)
+    for (const sl of (d.summary?.slices || []).filter((sl) => sl.window && !sl.filter)) {
+      const since = daysAgo(sl.window.days), when = (x) => x._story?.at(-1)?.at || (dates[0] && x[dates[0].key]);
+      filters.push({ key: `reached-${sl.value}`, label: statusMap[sl.value].label, type: "enum", hidden: true, pinned: false, get: (x) => (x[statusCol] === sl.value && when(x) >= since ? "yes" : "no"), options: [{ value: "yes", label: `Last ${sl.window.days} days` }, { value: "no", label: "Earlier, or not yet" }] });
+    }
 
     // ---------- views ----------
     const viewFilters = (fs = {}) => Object.fromEntries(Object.entries(fs).map(([k, v]) => [k, Array.isArray(v) ? v.map((x) => (x === "me" ? OWNERS[0].id : x)) : v]));
@@ -353,7 +383,7 @@ window.BDS_RECIPE = (() => {
       photo: name.leading === "thumbnail" && name.thumbFrom && x[name.thumbFrom] ? { src: photoAt(x[name.thumbFrom], 500), credit: creditOf(x[name.thumbFrom]) } : null,
       badge: statusCol ? badge(statusMap[x[statusCol]]) : "",
       amount: figure && x[figure.key] ? (figure.type === "money" ? fmt.money(x[figure.key]) : text(x[figure.key])) : null,
-      empty: figure?.empty || "–",
+      empty: figure ? figure.empty || "–" : null, // no key figure, no figure line
       sub: fill(name.detail, x, asText(x)),
       timeline: d.record?.timeline === false ? [] : x._story ? [
         ...x._story.map(({ status, at }) => {
@@ -364,9 +394,13 @@ window.BDS_RECIPE = (() => {
       ] : [{ what: `${cap(n.one)} created`, meta: fmt.date(dates[0] ? x[dates[0].key] : TODAY) }],
       actions: recordActions(x),
       // the records it connects to, as links (L-related)
-      related: (d.record?.related || []).filter((k) => byKey[k] && x[k]).map((k) => [byKey[k].label || cap(k), typeof x[k] === "object" ? x[k] : { name: text(x[k]) }]),
+      related: [
+        ...(d.record?.related || []).filter((k) => byKey[k] && x[k]).map((k) => [byKey[k].label || cap(k), typeof x[k] === "object" ? x[k] : { name: text(x[k]) }]),
+        // lists that point here (a vendor's orders), with a count; an inactive or new record has fewer (L-sample)
+        ...(d.record?.has || []).map((h, j) => { const n = x._has?.[j] ?? 0, one = h.thing.replace(/-/g, " "); return [h.label, n ? { name: fmt.plural(n, one, `${one}s`) } : { name: "None yet", none: true }]; }), // counted in the thing's own noun
+      ],
       // each field reads as its type does in the list (L-types): money as money, a date as a date
-      fields: recordFields.filter((k) => byKey[k]).map((k) => [byKey[k].label || cap(k), byKey[k].type === "person" ? person(x[k]) : byKey[k].type === "status" ? badge(statusMap[x[k]]) : byKey[k].type === "kinds" ? esc(kindsText(byKey[k], x[k]) || "–") : x[k] == null || x[k] === "" ? "–" : cellOf(byKey[k], { statusMap })(x)]),
+      fields: recordFields.filter((k) => byKey[k]).map((k) => [byKey[k].label || cap(k), byKey[k].type === "person" ? person(x[k]) : byKey[k].type === "status" ? badge(statusMap[x[k]]) : byKey[k].type === "kinds" ? esc(kindsText(byKey[k], x[k]) || "–") : byKey[k].type === "flags" && !x[k]?.length ? "Clear" /* as the filter names it */ : x[k] == null || x[k] === "" ? "–" : cellOf(byKey[k], { statusMap })(x)]),
       doc: d.record?.document ? { label: d.record.document, name: `${d.record.document.replace(/\s+/g, "-")}-${idKey ? text(x[idKey]).replace(/^#/, "") : x.id}.pdf`, view: `View ${d.record.document.toLowerCase()}` } : null,
     });
 
@@ -379,7 +413,7 @@ window.BDS_RECIPE = (() => {
       searchHint: d.search.hint,
       searchIn: searchKeys.filter((k) => k !== name.key && d.columns.some((c) => c.key === k)),
       dateKey: d.dateRange?.column || null,
-      cardKey: metrics.length ? statusCol : null,
+      cardKey: metrics.some((m) => !m.key) ? statusCol : null,
       metrics, insight: null,
       allCard: d.summary?.all ? { big: measure(d.summary.all) } : null,
       statusMap: statusCol ? statusMap : null,
