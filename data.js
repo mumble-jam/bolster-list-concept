@@ -130,6 +130,8 @@
 
   const estimatesConfig = {
     id: "jobs", nav: "job-list", title: "Jobs", noun: ["job", "jobs"], create: "Create job",
+    // a job has its own full-screen window, the job workspace (I7): rows open it; the record beside the list is Quick look (D69)
+    rowClick: "open",
     rows: estimates,
     search: (x) => `${x.job} ${x.client.name} ${x.client.address} ${x.city}`,
     searchHint: "Search by client, job or address",

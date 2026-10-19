@@ -8,7 +8,13 @@
   const { avatar } = window.BDS_CONCEPT.kit;
   // a built list brings its own icons, from the vocabulary (L-icons); the concept's lists use these maps
   const attrIcon = (k) => cfg.attrIcons?.[k] ?? attrIcons[k];
-  const actionIcon = (a) => cfg.actionIcons?.[a] ?? actionIcon(a);
+  const actionIcon = (a) => cfg.actionIcons?.[a] ?? actionIcons[a];
+  // a thing with its own full-screen window (D69, L-row-click): a row opens it, and the record beside the
+  // list becomes Quick look, in the row's ··· menu
+  const fullWindow = () => cfg.rowClick === "open";
+  const QUICK = "Quick look";
+  const openLabel = (key) => (fullWindow() ? cfg.peek(cfg.rows.find((r) => r.id === key)).open : "Open");
+  const withQuick = (list) => (fullWindow() ? list.flatMap((a) => (a === "Open" ? ["Open", QUICK] : [a])) : list);
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
 
@@ -548,23 +554,30 @@
     const shown = onCard.filter((b) => !b.hidden).map((b) => b.dataset.conceptAction), folded = onCard.filter((b) => b.hidden).map((b) => b.dataset.conceptAction);
     const nx = cfg.nextFor?.(cfg.rows.find((r) => r.id === key));
     const lead = nx && !shown.includes(nx) && !folded.includes(nx) ? [nx] : [];
-    const rest = cfg.rowActions.filter((a) => a !== nx && !folded.includes(a) && !shown.includes(a) && !(card && (a === "Open" || a === "Edit")));
-    const open = rest[0] === "Open" ? [rest.shift()] : [];
+    const rest = withQuick(cfg.rowActions).filter((a) => a !== nx && !folded.includes(a) && !shown.includes(a) && !(card && (a === "Open" || a === "Edit" || a === QUICK)));
+    const open = [];
+    while (rest[0] === "Open" || rest[0] === QUICK) open.push(rest.shift());
     return [...open, ...lead, ...folded, ...rest];
   }
   // a list whose actions go by status: everything offered for this row's status, and from the record,
   // minus its own buttons (and Open, which the record already is)
   function statusMenuActs(key, card) {
     const { bar, more } = cfg.actionsFor([cfg.rows.find((r) => r.id === key)]);
-    const own = card ? ["Open", ...$$(".detail-actions [data-concept-action]:not([hidden])", card).map((b) => b.dataset.conceptAction)] : [];
-    return ["Open", ...bar, ...more].filter((a) => !own.includes(a));
+    const own = card ? ["Open", QUICK, ...$$(".detail-actions [data-concept-action]:not([hidden])", card).map((b) => b.dataset.conceptAction)] : [];
+    return withQuick(["Open", ...bar, ...more]).filter((a) => !own.includes(a));
   }
   const selectedRows = () => cfg.rows.filter((r) => st.selected.has(r.id));
+  // Open opens what a row click opens: the full window (expand, named after it: Open job) or the record
+  // beside the list; Quick look always the record beside the list
+  const openItem = (a, key) => a === QUICK
+    ? `<button type="button" class="menu-item" role="menuitem" data-quick="${key}">${mi(actionIcon("Open"))}${QUICK}</button>`
+    : `<button type="button" class="menu-item" role="menuitem" data-peek="${key}">${mi(fullWindow() ? "expand" : actionIcon("Open"))}${esc(openLabel(key))}</button>`;
   // a list of actions as menu items: plain ones, then the menus as labelled sections, then the risky ones in
   // red after a rule. In the bulk menus the risky ones confirm and the rest name what's selected.
   function actionItems(list, { bulk = false, peek, nested = false } = {}) {
     const n = st.selected.size, what = n === 1 ? `1 ${cfg.noun[0]}` : `${fmt.count(n)} ${cfg.noun[1]}`;
-    const item = (a) => `<button type="button" class="menu-item" role="menuitem"${destructive(a) ? ' data-tone="danger"' : ""} ${a === "Open" ? `data-peek="${peek}"` : risky(a) && bulk ? `data-confirm="${esc(a)}"` : `data-concept-action="${esc(a)}${bulk ? ` ${what}` : ""}"`}>${mi(actionIcon(a))}${esc(a)}</button>`;
+    const item = (a) => (a === "Open" || a === QUICK) && peek ? openItem(a, peek)
+      : `<button type="button" class="menu-item" role="menuitem"${destructive(a) ? ' data-tone="danger"' : ""} ${risky(a) && bulk ? `data-confirm="${esc(a)}"` : `data-concept-action="${esc(a)}${bulk ? ` ${what}` : ""}"`}>${mi(actionIcon(a))}${esc(a)}</button>`;
     const sectionItems = (g) => g.items.map((i) => g.current === undefined ? item(i)
       : `<button type="button" class="menu-item" role="menuitemradio" aria-checked="${i === g.current}" data-concept-action="${esc(g.label)} to ${esc(i.toLowerCase())}${bulk ? ` for ${what}` : ""}"><span class="menu-icon"></span>${esc(i)}${i === g.current ? I.check : ""}</button>`).join("");
     const plain = list.filter((a) => typeof a === "string" && !risky(a));
@@ -1075,7 +1088,8 @@
       // the risky ones go last, after a rule (L-risky), red when they can't be undone, whatever their
       // place in the list
       const safe = acts.filter((a) => !risky(a)), danger = acts.filter(risky);
-      const btn = (a) => `<button type="button" class="menu-item" role="menuitem"${destructive(a) ? ' data-tone="danger"' : ""} ${a === "Open" || a === "Edit" ? `data-peek="${p.key}"` : `data-concept-action="${esc(a)}"`}>${mi(actionIcon(a))}${esc(a)}</button>`;
+      const btn = (a) => a === "Open" || a === QUICK ? openItem(a, p.key) : a === "Edit" && !fullWindow() ? `<button type="button" class="menu-item" role="menuitem" data-peek="${p.key}">${mi(actionIcon(a))}${esc(a)}</button>`
+        : `<button type="button" class="menu-item" role="menuitem"${destructive(a) ? ' data-tone="danger"' : ""} data-concept-action="${esc(a)}">${mi(actionIcon(a))}${esc(a)}</button>`;
       pop.innerHTML = `<div class="pop-body">${safe.map(btn).join("")}${safe.length && danger.length ? "<hr>" : ""}${danger.map(btn).join("")}</div>`;
     }
     pop.style.inlineSize = p.kind === "row" || p.kind === "bulk" || p.kind === "add" ? "auto" : p.kind === "info" ? "16rem" : "";
@@ -1176,10 +1190,11 @@
     h.toggleAttribute("data-quiet-focus", !byKey);
     h.focus({ ...opts, focusVisible: byKey });
   }
-  function openPeek(id, { byKey = false } = {}) {
+  function openPeek(id, { byKey = false, quick = false } = {}) {
     if (!cfg.rows.some((r) => r.id === id)) return;
-    // D30: this list's rows open the record itself, which the concept doesn't build
-    if (cfg.rowClick === "open") { toast(`Rows here open the ${cfg.noun[0]} itself (D30); the record isn't part of this concept.`); return; }
+    // D69: a thing with its own full-screen window opens there, which the concept doesn't build; Quick look
+    // (the row's ··· menu) still opens the record beside the list
+    if (fullWindow() && !quick) { toast(`${openLabel(id)}: its own full-screen window, not part of this concept. Quick look is in the row's ··· menu.`); return; }
     hostPop(); // out of the sheet before its contents are redrawn
     if (pop.matches(":popover-open")) pop.hidePopover();
     openId = id;
@@ -1227,7 +1242,7 @@
   // Escape on the sheet: back to the row it came from (I11)
   $("#peek").addEventListener("close", () => { hostPop(); if (!splitMQ.matches && openId) { const id = openId; openId = null; markRow(); $(`.data-table-link[data-peek="${id}"]`)?.focus(); } });
   // crossing the breakpoint moves an open record between the side and the sheet
-  splitMQ.addEventListener("change", () => { if (openId) openPeek(openId); });
+  splitMQ.addEventListener("change", () => { if (openId) openPeek(openId, { quick: true }); });
   $("#detail").addEventListener("keydown", (e) => { if (e.key === "Escape" && !pop.matches(":popover-open")) { e.preventDefault(); closeDetail(); } });
 
   // search: the typed words become a chip; one chip per search, and every chip has to match
@@ -1328,6 +1343,7 @@
     if ((el = q("[data-row-menu]"))) return openPop("row", el.dataset.rowMenu, el);
     if ((el = q("[data-bulk-menu]"))) return openPop("bulk", el.dataset.bulkMenu, el);
     if ((el = q("[data-peek]"))) { e.preventDefault(); openPeek(el.dataset.peek, { byKey: e.detail === 0 }); return; }
+    if ((el = q("[data-quick]"))) { e.preventDefault(); openPeek(el.dataset.quick, { byKey: e.detail === 0, quick: true }); return; }
     if (q("[data-detail-close]")) return closeDetail();
     if ((el = q("[data-tl-more]"))) { const ol = el.closest(".timeline"); $$("[data-fold]", ol).forEach((li) => (li.hidden = false)); const first = $("[data-fold]", ol); el.closest("li").remove(); first?.setAttribute("tabindex", "-1"); first?.focus({ preventScroll: true }); return; }
     if (q("[data-select-done]")) { unpick(); $("#select-mode")?.focus({ preventScroll: true }); return; }

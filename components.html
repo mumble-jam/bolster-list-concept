@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=d4cad560">
-<link rel="stylesheet" href="data-list.css?v=d4cad560">
+<link rel="stylesheet" href="system/bolster.css?v=fb14ca66">
+<link rel="stylesheet" href="data-list.css?v=fb14ca66">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -109,7 +109,7 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=d4cad560"></script>
+<script src="shared/icons.js?v=fb14ca66"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -164,7 +164,7 @@ const C = [
   ["Selection and actions", "Row menu", "steered", "Its actions follow Bolster's, as above.", "The ⋯ button and the menu's shape."],
   ["Selection and actions", "Confirm dialog", "mine", "Never discussed.", "The danger confirmation for delete."],
 
-  ["Record", "Record panel", "steered", "Closer to Mercury than a drawer, with more weight on the timeline (9 Oct).", "Beside the list from 1280px and a sheet below; the hero amount, fields and document row."],
+  ["Record", "Record panel", "steered", "Closer to Mercury than a drawer, with more weight on the timeline (9 Oct). Where a thing has its own full-screen window, a row opens that instead, and the panel is Quick look in the row's ··· menu (19 Oct, D69).", "Beside the list from 1280px and a sheet below; the hero amount, fields and document row."],
   ["Record", "Related records", "yours", "Every record the thing connects to, as links on the record: the job and the client, and anything else connected (15 Oct, D57).", "The Related section beside the fields, the kind and avatar per link, View job leaving the menus, checking which records a vendor order connects to (the job's client, read from the Job column). The other way round, from your answer on subs and vendors (16 Oct): what points at a vendor (its vendor orders, bills, bid requests, jobs), each a count linking to the list."],
   ["Record", "Timeline", "steered", "A real line and some colour, “some design” (9 Oct).", "Status-shape dots, dashed and dotted lines, the next step."],
   ["Record", "Record header", "steered", "Keep the look; don't cut the name short; Open job isn't a new tab, since it opens the job's modal (14 Oct). You picked an expand icon beside close (D40), and dropped ↗ from View proposal.", "The three options, the expand icon over ↗, the tooltip naming the record type, ↗ kept for what leaves the app."],
@@ -264,6 +264,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=d4cad560"></script>
+<script src="system/specimens/specimen.js?v=fb14ca66"></script>
 </body>
 </html>

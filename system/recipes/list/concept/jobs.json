@@ -265,7 +265,7 @@
       "group": "owner"
     }
   ],
-  "rowClick": "peek",
+  "rowClick": "open",
   "selection": {
     "enabled": true,
     "bulk": [

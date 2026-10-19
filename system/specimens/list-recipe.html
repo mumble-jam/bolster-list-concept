@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=d4cad560">
-<link rel="stylesheet" href="specimen.css?v=d4cad560">
+<link rel="stylesheet" href="../bolster.css?v=fb14ca66">
+<link rel="stylesheet" href="specimen.css?v=fb14ca66">
 <style>
   .rule-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr)); }
   .rule-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
@@ -72,12 +72,12 @@
     </div>
   </article>
   <article class="card rule-card" id="L-row-click">
-    <header class="card-header rule-head"><h3><code>L-row-click</code> A row click either peeks or opens</h3><span class="badge" data-tone="success">Decided</span></header>
+    <header class="card-header rule-head"><h3><code>L-row-click</code> A row opens the thing's own window, if it has one</h3><span class="badge" data-tone="success">Decided</span></header>
     <div class="card-body rule-body">
-      <p>Every list declares what clicking a row does, and the system decides it, not the original: peek (the record beside the list from 1280 up, a side sheet below), unless the page's intent says the work happens in the record (an editor people stay in), then open (the record itself, as a page or a full-screen workspace). Never asked, never copied from the original. Checkbox clicks never open; the row's name is always a real link.</p>
-      <p class="text-secondary"><b>Why:</b> It differs between lists, and what a click opens today says what Bolster does, not what people need: a quick look suits lists people triage, the full record suits lists people work in.</p>
+      <p>What clicking a row does is the system's, decided by the thing, never copied from the original. A thing with its own full-screen window (a workspace like the job's, opened by Edit or something like it; the model's workspace) opens it: the row, the name link and Open in the ··· menu (named after it: Open job, with the expand icon) all go there, and the record beside the list is Quick look, second in the ··· menu. Anything else peeks: the record beside the list from 1280 up, a side sheet below. Checkbox clicks never open; the row's name is always a real link.</p>
+      <p class="text-secondary"><b>Why:</b> Where a thing has a window of its own, that's where people work on it: a quick look first is a detour on every row. The record beside the list stays a click away for a glance (for now). Lists of things without one are triaged, and a peek suits them.</p>
       
-      <p class="rule-meta"><span class="badge">renderer</span> <span class="text-secondary">· D30, D17, I6, I7, L-source</span></p>
+      <p class="rule-meta"><span class="badge">renderer</span> <span class="text-secondary">· D30, D69, D17, I6, I7, L-source, Product designer, 19 Oct 2026: a thing with its own full-screen window opens it from the row</span></p>
     </div>
   </article>
   <article class="card rule-card" id="L-types">
@@ -350,9 +350,9 @@
   <section class="spec-section">
     <h2>The concept's lists, described</h2>
     <p class="text-secondary">The four lists in the data list concept, written as descriptions and checked when this page was built. A failure here is the concept breaking a rule, which is the point of checking.</p>
-    <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>File</th><th>What it is</th><th>Check</th></tr></thead><tbody><tr><td><code>concept/catalog.json</code></td><td>9 columns · no status · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/customers.json</code></td><td>9 columns · 3 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/invoices.json</code></td><td>8 columns · 4 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/jobs.json</code></td><td>8 columns · 5 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr></tbody></table></div>
+    <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>File</th><th>What it is</th><th>Check</th></tr></thead><tbody><tr><td><code>concept/catalog.json</code></td><td>9 columns · no status · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/customers.json</code></td><td>9 columns · 3 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/invoices.json</code></td><td>8 columns · 4 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/jobs.json</code></td><td>8 columns · 5 statuses · rows open</td><td><span class="badge" data-tone="success">Passes</span></td></tr></tbody></table></div>
   </section>
 </main>
-<script src="specimen.js?v=d4cad560"></script>
+<script src="specimen.js?v=fb14ca66"></script>
 </body>
 </html>
