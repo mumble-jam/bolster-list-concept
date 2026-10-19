@@ -69,13 +69,14 @@
 
   // ---------- when ----------
   const dayDiff = (d) => Math.round((new Date(d).setHours(0, 0, 0, 0) - new Date(TODAY).setHours(0, 0, 0, 0)) / 864e5);
-  const toSunday = (7 - TODAY.getDay()) % 7; // days left in this week, Sunday its last day
+  const { week } = BolsterShell;
+  const toWeekEnd = 6 - week.dayOf(TODAY); // days left in this week, which ends on Sunday (D76)
   const WHEN = [
     { key: "overdue", label: "Overdue", late: true, test: (n) => n < 0 },
     { key: "today", label: "Today", test: (n) => n === 0, due: 0 },
     { key: "tomorrow", label: "Tomorrow", test: (n) => n === 1, due: 1 },
-    { key: "week", label: "This week", test: (n) => n > 1 && n <= toSunday, due: 2 },
-    { key: "later", label: "Later", test: (n) => n > Math.max(1, toSunday), due: Math.max(2, toSunday + 1) },
+    { key: "week", label: "This week", test: (n) => n > 1 && n <= toWeekEnd, due: 2 },
+    { key: "later", label: "Later", test: (n) => n > Math.max(1, toWeekEnd), due: Math.max(2, toWeekEnd + 1) },
     { key: "none", label: "No due date", test: (n) => n == null, due: null },
   ];
   const dueWords = (d) => {
@@ -235,7 +236,7 @@
   let popFor = null, calMonth = null;
   const item = (attrs, label, { icon, hint, on } = {}) => `<button type="button" class="menu-item" role="menuitemradio" aria-checked="${!!on}" ${attrs}>${icon ? `<span class="menu-icon">${icon}</span>` : ""}<span>${esc(label)}</span>${hint ? `<span class="menu-hint">${esc(hint)}</span>` : ""}</button>`; // the menu marks the chosen one
   const targets = () => (popFor.bulk ? [...st.sel].map((id) => tasks.find((t) => t.id === id)) : [tasks.find((t) => t.id === popFor.id)]);
-  const nextMonday = () => (8 - TODAY.getDay()) % 7 || 7;
+  const nextMonday = () => 7 - week.dayOf(TODAY); // next week's first day
   function fillPop() {
     const one = !popFor.bulk && targets()[0];
     if (popFor.kind === "due") {
@@ -246,7 +247,7 @@
       const m = calMonth || new Date(one?.due || TODAY);
       const first = new Date(m.getFullYear(), m.getMonth(), 1), days = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
       const title = first.toLocaleDateString("en-US", { month: "long", year: "numeric" });
-      let cells = Array(first.getDay()).fill("<td></td>");
+      let cells = Array(week.dayOf(first)).fill("<td></td>");
       for (let d = 1; d <= days; d++) {
         const date = new Date(m.getFullYear(), m.getMonth(), d), n = dayDiff(date), sel = cur === n;
         cells.push(`<td${n === 0 ? " data-today" : ""}${sel ? ' data-range="single" aria-selected="true"' : ""}><button type="button" class="calendar-day" data-set-due="${n}" aria-label="${date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}">${d}</button></td>`);
@@ -254,7 +255,7 @@
       while (cells.length % 7) cells.push("<td></td>");
       const weeks = []; for (let i = 0; i < cells.length; i += 7) weeks.push(`<tr>${cells.slice(i, i + 7).join("")}</tr>`);
       html += `<hr class="menu-separator"><div class="todo-cal calendar-month"><div class="todo-cal-nav"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-cal="-1" aria-label="Previous month" data-tip="Previous month">${ic("chevron-left", 14)}</button><h4 class="calendar-title" id="todo-cal-title">${title}</h4><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-cal="1" aria-label="Next month" data-tip="Next month">${ic("chevron-right", 14)}</button></div>
-        <table class="calendar-grid" role="grid" aria-labelledby="todo-cal-title"><thead><tr>${["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"].map((d) => `<th scope="col" abbr="${d}">${d[0]}</th>`).join("")}</tr></thead><tbody>${weeks.join("")}</tbody></table></div>`;
+        <table class="calendar-grid" role="grid" aria-labelledby="todo-cal-title"><thead><tr>${week.names.map((d) => `<th scope="col" abbr="${d}">${d[0]}</th>`).join("")}</tr></thead><tbody>${weeks.join("")}</tbody></table></div>`;
       pop.innerHTML = `<div class="pop-body">${html}</div>`;
     } else if (popFor.kind === "prio") {
       pop.innerHTML = `<div class="pop-body">${[3, 2, 1, 0].map((l) => item(`data-set-prio="${l}"`, PRIO[l], { icon: mark(l), on: one && one.priority === l })).join("")}</div>`;

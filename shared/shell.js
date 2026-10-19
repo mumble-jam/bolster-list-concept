@@ -226,6 +226,15 @@ window.BolsterShell = (() => {
   }
   document.addEventListener("close", (e) => { const region = document.querySelector(".toast-region"); if (region && e.target.contains?.(region)) document.body.append(region); }, true);
 
+  // The week, every page's (D76): it starts on Monday, the working week first and the weekend together at
+  // its end. Whatever draws a month, groups by week or moves by week asks here, never getDay() itself.
+  //   BolsterShell.week.dayOf(date) → 0 for Monday … 6 for Sunday;  week.start(date) → that week's Monday
+  const week = {
+    names: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+    dayOf: (d) => (d.getDay() + 6) % 7,
+    start: (d) => { const x = new Date(d); x.setDate(x.getDate() - week.dayOf(x)); return x; },
+  };
+
   // Where a .pop opens, every page's: under its trigger, its left edge at the trigger's (start) or its right
   // edge at the trigger's right (the default), flipped above when there's no room below; on phones it's a
   // bottom sheet (popover.css), so it's left where the stylesheet puts it.
@@ -328,5 +337,5 @@ window.BolsterShell = (() => {
     return { show: () => set(false), stick };
   }
 
-  return { mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling };
+  return { mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling, week };
 })();

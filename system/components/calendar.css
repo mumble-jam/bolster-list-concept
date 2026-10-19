@@ -2,11 +2,11 @@
    Calendar: one month as a grid (the WAI-ARIA date picker pattern). Days are buttons in cells; the cell
    carries the state: data-range="start|end|in|single" for a span (aria-selected on its ends), data-cap
    where the band starts or stops inside a week, data-today, and disabled days (after today, for a date
-   that can only be in the past). Weeks start on Sunday (US English).
+   that can only be in the past). Weeks start on Monday (D76).
    <div class="calendar-month">
      <h4 class="calendar-title" id="cal-2026-09">September 2026</h4>
      <table class="calendar-grid" role="grid" aria-labelledby="cal-2026-09">
-       <thead><tr><th scope="col" abbr="Sunday">S</th>…</tr></thead>
+       <thead><tr><th scope="col" abbr="Monday">M</th>…</tr></thead>
        <tbody><tr><td></td>…<td data-range="start" aria-selected="true"><button type="button" class="calendar-day"
          data-day="2026-09-08" tabindex="0" aria-label="Tuesday, September 8, 2026">8</button></td>…</tr></tbody>
      </table>

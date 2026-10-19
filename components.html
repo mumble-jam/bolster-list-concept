@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=a44e957b">
-<link rel="stylesheet" href="data-list.css?v=a44e957b">
+<link rel="stylesheet" href="system/bolster.css?v=468828a6">
+<link rel="stylesheet" href="data-list.css?v=468828a6">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -109,7 +109,7 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=a44e957b"></script>
+<script src="shared/icons.js?v=468828a6"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -144,7 +144,7 @@ const C = [
   ["Table card", "Filter chips", "yours", "Field and value in the same grey at rest; the whole chip turns blue on hover; the × only darkens.", "Size, fill and the popover each chip opens."],
   ["Table card", "Filter value pickers", "mine", "Never discussed.", "Option lists with counts, checkbox or radio by filter type, amount ranges, Apply and Clear."],
   ["Table card", "Date range", "yours", "The button came from your Figma sketch; search moved next to it. Then the date range picker research, implemented (14 Oct, D37): presets, a calendar, typing, the button naming its date.", "The research itself, the keyboard, typed formats, the phone sheet's drill-in, the value grammar."],
-  ["Table card", "Calendar", "yours", "Asked for as a component of its own (14 Oct, D37).", "Its states: today, span ends, the band and its caps, days after today."],
+  ["Table card", "Calendar", "yours", "Asked for as a component of its own (14 Oct, D37). Weeks start on Monday, everywhere (19 Oct, D76).", "Its states: today, span ends, the band and its caps, days after today."],
   ["Table card", "Display settings", "yours", "Its icon (table-cells-columns) and tooltip; group by, row height and columns as nested menus with a check by the choice; no Sort by where the headers sort.", "Sort kept in the menu on phones, where the headers are hidden; Reset view."],
   ["Table card", "Count and Clear all", "steered", "A count with the filters (8 Oct); the card's missing chip (9 Oct).", "“31 of 132 jobs”, and the second row only once something narrows the list."],
 
@@ -264,6 +264,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=a44e957b"></script>
+<script src="system/specimens/specimen.js?v=468828a6"></script>
 </body>
 </html>

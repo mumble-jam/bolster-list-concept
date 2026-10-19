@@ -868,14 +868,14 @@
   function monthGrid(first, f) {
     const y = first.getFullYear(), m = first.getMonth(), n = new Date(y, m + 1, 0).getDate(), t = iso(today());
     const id = `cal-${y}-${m + 1}`;
-    const cells = [...Array(first.getDay()).fill(""), ...Array.from({ length: n }, (_, i) => {
+    const cells = [...Array(BolsterShell.week.dayOf(first)).fill(""), ...Array.from({ length: n }, (_, i) => {
       const d = new Date(y, m, i + 1), k = iso(d), off = pastOnly(f) && k > t;
       return `<td${k === t ? " data-today" : ""}><button type="button" class="calendar-day" data-day="${k}" tabindex="-1" aria-label="${dayName(d)}${k === t ? ", today" : ""}"${off ? " disabled" : ""}>${i + 1}</button></td>`;
     })];
     while (cells.length % 7) cells.push("");
     const weeks = [];
     for (let i = 0; i < cells.length; i += 7) weeks.push(`<tr>${cells.slice(i, i + 7).map((c) => c || "<td></td>").join("")}</tr>`);
-    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const days = BolsterShell.week.names; // weeks start on Monday (D76)
     return `<div class="calendar-month"><h4 class="calendar-title" id="${id}">${first.toLocaleDateString("en-US", { month: "long", year: "numeric" })}</h4>
       <table class="calendar-grid" role="grid" aria-labelledby="${id}"><thead><tr>${days.map((w) => `<th scope="col" abbr="${w}">${w[0]}</th>`).join("")}</tr></thead><tbody>${weeks.join("")}</tbody></table></div>`;
   }
@@ -890,7 +890,7 @@
       r ? td.setAttribute("data-range", r) : td.removeAttribute("data-range");
       r === "start" || r === "end" || r === "single" ? td.setAttribute("aria-selected", "true") : td.removeAttribute("aria-selected");
       const last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-      const cap = [(d.getDay() === 0 || d.getDate() === 1) && "start", (d.getDay() === 6 || d.getDate() === last) && "end"].filter(Boolean).join(" ");
+      const col = BolsterShell.week.dayOf(d), cap = [(col === 0 || d.getDate() === 1) && "start", (col === 6 || d.getDate() === last) && "end"].filter(Boolean).join(" ");
       r && r !== "single" && cap ? td.setAttribute("data-cap", cap) : td.removeAttribute("data-cap");
       b.tabIndex = k === dp.focus ? 0 : -1;
     }
@@ -1013,7 +1013,7 @@
     if (!b || !dp) return;
     const d = ymd(b.dataset.day);
     const byMonth = (n) => { const x = new Date(d.getFullYear(), d.getMonth() + n, 1); return new Date(x.getFullYear(), x.getMonth(), Math.min(d.getDate(), new Date(x.getFullYear(), x.getMonth() + 1, 0).getDate())); };
-    const to = { ArrowLeft: addDays(d, -1), ArrowRight: addDays(d, 1), ArrowUp: addDays(d, -7), ArrowDown: addDays(d, 7), Home: addDays(d, -d.getDay()), End: addDays(d, 6 - d.getDay()),
+    const to = { ArrowLeft: addDays(d, -1), ArrowRight: addDays(d, 1), ArrowUp: addDays(d, -7), ArrowDown: addDays(d, 7), Home: addDays(d, -BolsterShell.week.dayOf(d)), End: addDays(d, 6 - BolsterShell.week.dayOf(d)),
       PageUp: byMonth(e.shiftKey ? -12 : -1), PageDown: byMonth(e.shiftKey ? 12 : 1) }[e.key];
     if (!to) return;
     e.preventDefault();
