@@ -272,7 +272,7 @@
             <div class="cluster" style="justify-content:flex-end"><button type="submit" class="button" data-size="sm">Show tasks</button></div></form>`
         : `<div class="pop-head"><h3>${esc(f.label)}</h3></div><div class="pop-body">${f.options().map((o) => `<label class="option"><input type="checkbox" class="checkbox" data-filter-opt="${esc(o.value)}"${v?.includes(o.value) ? " checked" : ""}><span class="option-label">${o.icon ? `<span class="menu-icon">${o.icon}</span>` : ""}${esc(o.label)}</span></label>`).join("")}</div>`;
     } else if (popFor.kind === "display") {
-      pop.innerHTML = `<div class="pop-head"><h3>Group by</h3></div><div class="pop-body">${[["when", "When"], ["job", "Job"]].map(([v, l]) => item(`data-group-by="${v}"`, l, { icon: ic(v === "when" ? "m-calendar" : "m-briefcase", 14), on: st.group === v })).join("")}
+      pop.innerHTML = `<div class="pop-head"><h3>Group by</h3></div><div class="pop-body">${[["when", "Date"], ["job", "Job"]].map(([v, l]) => item(`data-group-by="${v}"`, l, { icon: ic(v === "when" ? "m-calendar" : "m-briefcase", 14), on: st.group === v })).join("")}
         <hr class="menu-separator"><label class="option"><input type="checkbox" class="checkbox" data-show-completed${st.showCompleted ? " checked" : ""}><span class="option-label">Show completed tasks</span></label></div>`;
     }
   }
