@@ -246,7 +246,7 @@
       "source",
       "openJobs"
     ],
-    "timeline": true,
+    "activity": true,
     "openLabel": "Open customer"
   },
   "assumptions": [

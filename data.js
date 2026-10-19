@@ -207,7 +207,7 @@
         declined: { bar: ["Edit", "Duplicate", "Archive", "Delete"], more: [status] },
       }[rows[0].status];
     },
-    // the timeline's dots are the status shapes: each event shows the status it moved the job to
+    // the activity's dots are the status shapes: each event shows the status it moved the job to
     peek: (x) => {
       const h = hash(x.id), S = EST_STATUS;
       const sent = earliest(daysFrom(x.created, 1 + (h % 4)), x.modified);
@@ -238,7 +238,7 @@
       return {
         heading: `${x.job} for ${x.client.name}`, open: "Open job",
         badge: badge(S[x.status]), amount: x.total ? fmt.money(x.total) : null, empty: "No price yet", sub: x.client.address,
-        timeline: ev,
+        activity: ev,
         // the record's two buttons: Bolster's first actions for the status (the rest are under More)
         actions: { draft: [["Edit", "pen"], ["Duplicate", "copy"]], pending: [["Send now", "send"], ["Sign and book now", "file-signature"]], booked: [["Invoice this project", "file-invoice"], ["Review customer", "star"]], "in-progress": [["Invoice this project", "file-invoice"], ["Review customer", "star"]], declined: [["Edit", "pen"], ["Duplicate", "copy"]] }[x.status],
         // the records the job connects to, as links (L-related)
@@ -330,7 +330,7 @@
       return {
         heading: `Invoice to ${x.client.name}`, open: "Open invoice",
         badge: badge(INV_STATUS[x.status]), amount: fmt.money(x.status === "paid" ? x.amount : x.balance), sub: x.status === "paid" ? `${x.number} · paid in full` : x.balance < x.amount ? `${x.number} · balance of ${fmt.money(x.amount)}` : `${x.number} · ${x.job}`,
-        timeline: ev,
+        activity: ev,
         actions: { draft: [["Send", "send"], ["Edit", "pen"]], outstanding: [["Send reminder", "bell"], ["Record payment", "credit-card"]], overdue: [["Send reminder", "bell"], ["Record payment", "credit-card"]], paid: [["Duplicate", "copy"], ["Edit", "pen"]] }[x.status],
         related: [["Client", x.client], ["Job", { name: x.job }]],
         fields: [["Issued", fmt.date(x.issued)], ["Due", fmt.date(x.due)], ["Owner", person(x.owner)]],
@@ -417,7 +417,7 @@
       return {
         heading: x.name, open: "Open customer",
         badge: badge(CL_STATUS[x.status]), amount: x.lifetime ? fmt.money(x.lifetime) : null, empty: "No jobs yet", sub: x.lifetime ? `Lifetime value · since ${fmt.date(x.since)}` : `Lead since ${fmt.date(x.since)}`,
-        timeline: ev,
+        activity: ev,
         actions: [["Message", "message"], ["Create job", "file-plus"]],
         fields: [["Email", esc(x.email)], ["Phone", esc(x.phone)], ["Address", esc(x.address)], ["Owner", person(x.owner)], ["Source", esc(x.source)], ["Open jobs", String(x.openJobs)]],
         doc: null,
@@ -510,7 +510,7 @@
     peek: (x) => ({
       heading: x.name, open: "Edit item",
       badge: `<span class="badge">${esc(x.category)}</span>`, amount: fmt.money(x.price), sub: `per ${x.unit} · cost ${fmt.money(x.cost)} + ${fmt.pct(x.markup)} markup`,
-      timeline: [{ what: "Added to the catalog", meta: `${fmt.date(daysFrom(x.updated, -(30 + (hash(x.id) % 300))))} · from ${x.vendor}` }, { what: "Price updated from vendor list", meta: fmt.date(x.updated) }],
+      activity: [{ what: "Added to the catalog", meta: `${fmt.date(daysFrom(x.updated, -(30 + (hash(x.id) % 300))))} · from ${x.vendor}` }, { what: "Price updated from vendor list", meta: fmt.date(x.updated) }],
       actions: [["Update price", "refresh-cw"], ["Duplicate", "copy"]],
       fields: [["Vendor", esc(x.vendor)], ["Used in", x.usedIn ? fmt.plural(x.usedIn, "estimate", "estimates") : "Unused"], ["Price updated", fmt.ago(x.updated)]],
       // the photo, large at the top (D55), with the credit its licence asks for; the link leaves the app (D40)

@@ -1132,24 +1132,24 @@
   document.addEventListener("close", (e) => { const region = $(".toast-region"); if (e.target.contains?.(region)) document.body.append(region); }, true);
 
   // ---------- the record: beside the list on wide screens, a sheet on narrower ones ----------
-  // As in Mercury: heading and close, status, the amount, a timeline (oldest first, the next step
+  // As in Mercury: heading and close, status, the amount, its activity (oldest first, the next step
   // hollow at the end), two actions and More, the details, then the document
   const splitMQ = matchMedia("(min-width: 1280px)");
   let openId = null;
   const money = (v) => { const i = v.lastIndexOf("."); return i < 0 ? esc(v) : `${esc(v.slice(0, i))}<span class="detail-cents">${esc(v.slice(i))}</span>`; };
-  function timelineHtml(ev) {
+  function activityHtml(ev) {
     const past = ev.filter((e) => !e.next), next = ev.filter((e) => e.next);
     // long histories fold: the first event, "+ n more events", then the last two
     const fold = past.length > 4 ? past.length - 3 : 0;
-    const dot = (e) => e.mark ? `<span class="tl-dot mark" data-mark="${e.mark}" style="--_dot:${e.color}"></span>` : `<span class="tl-dot"${e.tone ? ` data-tone="${e.tone}"` : ""}></span>`;
-    const li = (e, i, all) => `<li${e.next ? " data-next" : ""}${e.fold ? " data-fold hidden" : ""} data-line="${i === all.length - 1 ? "none" : all[i + 1].next ? "dashed" : "solid"}">${e.next ? `<span class="tl-dot" data-next></span>` : dot(e)}<div><p class="tl-what">${esc(e.what)}</p><p class="tl-meta">${esc(e.meta)}</p></div></li>`;
+    const dot = (e) => e.mark ? `<span class="activity-dot mark" data-mark="${e.mark}" style="--_dot:${e.color}"></span>` : `<span class="activity-dot"${e.tone ? ` data-tone="${e.tone}"` : ""}></span>`;
+    const li = (e, i, all) => `<li${e.next ? " data-next" : ""}${e.fold ? " data-fold hidden" : ""} data-line="${i === all.length - 1 ? "none" : all[i + 1].next ? "dashed" : "solid"}">${e.next ? `<span class="activity-dot" data-next></span>` : dot(e)}<div><p class="activity-what">${esc(e.what)}</p><p class="activity-meta">${esc(e.meta)}</p></div></li>`;
     const items = [...past.map((e, i) => (fold && i >= 1 && i < 1 + fold ? { ...e, fold: true } : e)), ...next];
     let html = items.map(li).join("");
     if (fold) {
       const at = html.indexOf("<li", html.indexOf("</li>"));
-      html = html.slice(0, at) + `<li class="tl-more" data-line="dotted"><button type="button" class="link-button" data-tl-more>+ ${fold} more ${fold === 1 ? "event" : "events"}${I.chevR}</button></li>` + html.slice(at);
+      html = html.slice(0, at) + `<li class="activity-more" data-line="dotted"><button type="button" class="link-button" data-activity-more>+ ${fold} more ${fold === 1 ? "event" : "events"}${I.chevR}</button></li>` + html.slice(at);
     }
-    return `<ol class="timeline" aria-label="Activity">${html}</ol>`;
+    return `<ol class="activity" aria-label="Activity">${html}</ol>`;
   }
   function detailHtml(id) {
     const x = cfg.rows.find((r) => r.id === id);
@@ -1165,7 +1165,7 @@
           ${p.badge}
           ${p.amount || p.empty != null ? `<p class="detail-amount${p.amount ? "" : " is-empty"}">${p.amount ? money(p.amount) : esc(p.empty)}</p>` : ""}
           <p class="detail-sub">${esc(p.sub)}</p>
-          ${timelineHtml(p.timeline)}
+          ${activityHtml(p.activity)}
           <div class="detail-actions">${p.actions.map(([l, i]) => `<button type="button" class="button" data-variant="secondary" data-concept-action="${esc(l)}">${i ? ic(`m-${i}`, 14, { optical: true }) : ""}${esc(l)}</button>`).join("")}<button type="button" class="button" data-variant="secondary" data-row-menu="${x.id}" aria-haspopup="menu" aria-expanded="false">More${I.chev}</button></div>
         </div>
         ${p.related?.length ? `<div class="detail-section detail-related"><h3>Related</h3><dl class="detail-fields">${p.related.map(([k, r]) => `<div><dt>${esc(k)}</dt><dd>${r.none ? `<span class="text-secondary">${esc(r.name)}</span>` : `<a href="#${esc(r.id || "")}" class="detail-link" data-concept-action="Open ${esc(k.toLowerCase())}: ${esc(r.name)}">${r.initials ? avatar(r, "sm") : ""}<span>${esc(r.name)}</span></a>`}</dd></div>`).join("")}</dl></div>` : ""}
@@ -1350,7 +1350,7 @@
     if ((el = q("[data-peek]"))) { e.preventDefault(); openPeek(el.dataset.peek, { byKey: e.detail === 0 }); return; }
     if ((el = q("[data-quick]"))) { e.preventDefault(); openPeek(el.dataset.quick, { byKey: e.detail === 0, quick: true }); return; }
     if (q("[data-detail-close]")) return closeDetail();
-    if ((el = q("[data-tl-more]"))) { const ol = el.closest(".timeline"); $$("[data-fold]", ol).forEach((li) => (li.hidden = false)); const first = $("[data-fold]", ol); el.closest("li").remove(); first?.setAttribute("tabindex", "-1"); first?.focus({ preventScroll: true }); return; }
+    if ((el = q("[data-activity-more]"))) { const ol = el.closest(".activity"); $$("[data-fold]", ol).forEach((li) => (li.hidden = false)); const first = $("[data-fold]", ol); el.closest("li").remove(); first?.setAttribute("tabindex", "-1"); first?.focus({ preventScroll: true }); return; }
     if (q("[data-select-done]")) { unpick(); $("#select-mode")?.focus({ preventScroll: true }); return; }
     if ((el = q("[data-select-matching]"))) { const head = el.id === "select-all" || !!el.closest(".select-bar"); rowsWhere().forEach((x) => st.selected.add(x.id)); renderBody(); renderBulk(); (head ? el : $("#bulk-bar .floating-bar-count"))?.focus({ preventScroll: true }); return; }
     if (q("[data-clear-selection]")) { unpick(); $("#select-page")?.focus({ preventScroll: true }); return; }

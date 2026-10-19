@@ -205,7 +205,7 @@ window.BDS_RECIPE = (() => {
 
     // ---------- a row's story (L-sample): its status decides the steps it went through, the steps their
     // dates, in order and never after today, and a field that belongs to a step it didn't reach stays
-    // empty. The record's timeline is the same story.
+    // empty. The record's activity is the same story.
     const lifecycle = (d.status?.values || []).some((v) => v.event);
     const SV = Object.fromEntries((d.status?.values || []).map((v, j) => [v.value, { ...v, from: v.from || (j ? [order[j - 1]] : []) }]));
     const weighted = (list) => { let w = r() * list.reduce((s, v) => s + (WEIGHT[v.stage] || 10), 0); return list.find((v) => (w -= WEIGHT[v.stage] || 10) <= 0)?.value || list[0].value; };
@@ -422,7 +422,7 @@ window.BDS_RECIPE = (() => {
       amount: figure && x[figure.key] ? (figure.type === "money" ? fmt.money(x[figure.key]) : text(x[figure.key])) : null,
       empty: figure ? figure.empty || "–" : null, // no key figure, no figure line
       sub: fill(name.detail, x, asText(x)),
-      timeline: d.record?.timeline === false ? [] : x._story ? [
+      activity: d.record?.activity === false ? [] : x._story ? [
         ...x._story.map(({ status, at }) => {
           const e = SV[status].event || {}, who = e.by && x[e.by] ? x[e.by].name : "", note = e.note ? text(x[e.note]) : "";
           return { what: fill(e.what, x, asText(x)) || SV[status].label, meta: [fmt.date(at), who, note].filter(Boolean).join(" · "), ...(SV[status].stage === "lost" ? { tone: "danger" } : {}) };

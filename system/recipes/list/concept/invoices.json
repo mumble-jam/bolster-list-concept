@@ -261,7 +261,7 @@
       "balance",
       "owner"
     ],
-    "timeline": true,
+    "activity": true,
     "document": "Invoice",
     "openLabel": "Open invoice",
     "related": ["client", "job"]

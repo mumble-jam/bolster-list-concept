@@ -398,7 +398,7 @@
       "modified",
       "source"
     ],
-    "timeline": true,
+    "activity": true,
     "document": "Proposal",
     "openLabel": "Open job",
     "related": ["client"]
