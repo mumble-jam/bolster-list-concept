@@ -51,6 +51,12 @@ window.BDS_RECIPE = (() => {
   // labor) and the subcontractors and shops a drywall business pays
   const COMPANIES = [...VENDORS.filter((v) => v !== "In-house"), "L&W Supply", "Menards", "Fastenal", "Gypsum Supply Co.", "Kowalski Taping", "Metro Scaffold Rental"];
   const LONG = { vendor: ["Northline Commercial Drywall & Acoustical Ceiling Supply", "Great Lakes Insulation and Building Materials Distributors, Inc.", "Hernández-Whitfield Construction Specialties & Fasteners", "Twin Cities Fireproofing, Firestopping and Sealants Co."] };
+  // work a task can be (L-sample): a job's labor, as an estimate names it, or something someone wrote down;
+  // one in twelve gets the longest, as Bolster's estimate items run
+  const LABOR = ["Hang drywall: walls", "Hang drywall: ceilings", "Tape and mud, level 4 finish", "Install batt insulation: exterior walls", "Spray foam the rim joists",
+    "Frame basement partition walls", "Install corner bead", "Sand and prime", "Patch the ceiling after electrical", "Skim coat the stairwell", "Install acoustic ceiling grid"];
+  const LONG_LABOR = ["Labor for installation of tile in thin set mortar - walls: wall trim pieces and edge tile", "Labor for gypsum drywall - 5/8\" type X fire-rated board: garage ceiling and walls, two layers"];
+  const GENERAL = ["Call the client about the change order", "Confirm Monday's board delivery", "Walk-through with the homeowner", "Send photos of the finished ceiling", "Book the scaffold rental", "Order more corner bead", "Check the moisture readings before taping"];
   // what a reason field says (a decline or cancel reason), so the sample reads like one
   const REASONS = ["Price is higher than quoted", "Can't deliver before the start date", "Out of stock", "Wrong items on the order", "Duplicate of another order", "Job was put on hold"];
   // an id in the format the source writes it: “#0003” → #0001, #0002…; a long one (“#29599975514”)
@@ -76,11 +82,13 @@ window.BDS_RECIPE = (() => {
         case "number": return int(1, 40);
         case "percent": return [0.25, 0.3, 0.35, 0.4, 0.5][int(0, 4)];
         case "count": return r() < 0.15 ? 0 : int(1, 24);
-        case "duration": return int(1, 90);
+        // a task's hours are its labor's, a decimal (1.7 h); other work has none
+        case "duration": if (row._work) return row._work.kind === "labor" && r() < 0.7 ? Math.round((0.4 + r() * 9) * 10) / 10 : null; return int(1, 90);
         case "date": case "datetime": return /due|scheduled|start/.test(k) ? daysFrom(TODAY, int(-40, 45)) : daysAgo(int(0, 240));
         case "person": return weighted([[OWNERS[0], 40], [OWNERS[1], 25], [OWNERS[2], 20], [OWNERS[3], 15]]);
         // one row in twelve gets the longest kind of name, so the layout is tested at its worst (L-sample)
-        case "record": return /client|customer/.test(k) ? row._client : recordOf(/vendor|sub|supplier/.test(k) ? (i % 12 === 5 ? LONG.vendor[(i / 12 | 0) % LONG.vendor.length] : pick(COMPANIES)) : `${pick(JOBS)}`);
+        case "record": if (row._work?.kind === "general" && /job|project/.test(k) && r() < 0.3) return null; // a task of one's own may have no job
+          return /client|customer/.test(k) ? row._client : recordOf(/vendor|sub|supplier/.test(k) ? (i % 12 === 5 ? LONG.vendor[(i / 12 | 0) % LONG.vendor.length] : pick(COMPANIES)) : `${pick(JOBS)}`);
         case "address": return /city/.test(k) ? row._client.city : row._client.address;
         case "contact": return { email: row._company ? `office@${row._company.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "").slice(0, 24)}.example` : emailOf(row._client), // a company writes from its own domain
            phone: `(555) ${int(200, 899)}-${String(int(0, 9999)).padStart(4, "0")}` };
@@ -88,14 +96,23 @@ window.BDS_RECIPE = (() => {
         // an item's photo where the sample has one; the rest show the thumbnail's placeholder (D55)
         case "image": return row._item ? PHOTOS[row._item.name]?.[0] ?? null : null;
         case "kinds": { const vs = (f.values || []).map((v) => v.value);
+          // a task holds what its work is: labor (sometimes with its materials), a material item, or nothing
+          if (row._work) return row._work.kind === "general" ? [] : row._work.kind === "materials" ? vs.filter((v) => v === "materials") : vs.filter((v) => v === "labor" || (v === "materials" && r() < 0.3));
           // a company's name says what it brings: a supplier materials, a trade labor, sometimes both
           if (row._company && vs.includes("labor") && vs.includes("materials")) return /Supply|Distributors|Materials|Fasteners|Sealants/.test(row._company) ? (r() < 0.2 ? ["labor", "materials"] : ["materials"]) : r() < 0.3 ? ["labor", "materials"] : ["labor"]; const some = vs.filter(() => r() < 0.45); return some.length ? some : [pick(vs)]; }
-        case "category": if (f.values?.length) return pick(f.values).label; // the model's values, never made up
+        case "category": if (f.values?.length) { // the model's values, never made up
+            // a task's kind is its work's (General, Labor, Material item)
+            const w = row._work && /kind|type|source/.test(k) && f.values.find((v) => v.label.toLowerCase().startsWith(row._work.kind.slice(0, 5)));
+            return w ? w.label : pick(f.values).label; }
           return row._item && /category/.test(k) ? row._item.cat : /source/.test(k) ? pick(SOURCES) : /vendor|supplier/.test(k) ? pick(VENDORS) : /category/.test(k) ? pick(Object.keys(CATALOG)) : /work|trade/.test(k) ? (TRADES.find((t) => row._company?.includes(t.slice(0, 5))) || pick(TRADES)) : /contain|kind/.test(k) ? pick(["Materials", "Labour", "Materials and labour"]) : `${f.label || cap(f.key)} ${"ABC"[int(0, 2)]}`;
         case "name":
           if (/number|code|^id$/.test(k)) return `${(n.one.slice(0, 3) || "rec").toUpperCase()}-${1040 + i}`;
           if (/item|product|material/.test(k) || /item|product|material/.test(n.one)) { row._item = pick(ITEMS); return row._item.name; }
           if (/job|project|quote|estimate/.test(k) || /job|project|quote|estimate/.test(n.one)) return pick(JOBS);
+          // a task is work: mostly a job's labor, some material items, some written by someone
+          if (/task|to-?do/.test(n.one)) { const w = r(); if (w < 0.2) { row._work = { kind: "general" }; return pick(GENERAL); }
+            if (w < 0.35) { row._work = { kind: "materials" }; row._item = pick(ITEMS); return row._item.name; }
+            row._work = { kind: "labor" }; return i % 12 === 5 ? LONG_LABOR[(i / 12 | 0) % LONG_LABOR.length] : pick(LABOR); }
           if (/vendor|sub|supplier|company/.test(k + n.one)) return (row._company = i % 12 === 5 ? LONG.vendor[(i / 12 | 0) % LONG.vendor.length] : company(i)); // one in twelve long (L-sample)
           return row._client.name;
         default: return /reason/.test(k) ? pick(REASONS) : /unit/.test(k) ? row._item?.unit || pick(UNITS) : /job|project|quote/.test(k) ? pick(JOBS) : `${f.label || cap(f.key)} ${i + 1}`;
@@ -116,7 +133,14 @@ window.BDS_RECIPE = (() => {
     if (typeof v === "object") return v.name ?? v.email ?? (Array.isArray(v) ? v.join(", ") : "");
     return String(v);
   };
+  // any cell may be empty (a task with no job, no hours, no one on it): a dash, never a broken cell;
+  // money keeps its own empty ($0.00), flags and kinds stay blank
   function cellOf(c, empty) {
+    const draw = cellType(c, empty), keep = new Set(["money", "flags", "kinds", "status"]);
+    if (keep.has(c.type)) return draw;
+    return (x) => (x[c.key] == null || x[c.key] === "" ? `<span class="text-tertiary">${esc(c.empty || "–")}</span>` : draw(x));
+  }
+  function cellType(c, empty) {
     const none = (s) => `<span class="text-tertiary">${esc(c.empty || s)}</span>`;
     const muted = (s) => `<span class="cell-muted">${esc(s)}</span>`;
     switch (c.type) {
@@ -128,10 +152,10 @@ window.BDS_RECIPE = (() => {
       case "date": return (x) => (x[c.key] ? muted(shortDate(x[c.key])) : none("–"));
       case "datetime": return (x) => !x[c.key] ? none("–") : muted(ageDays(x[c.key]) <= 1 ? `${fmt.ago(x[c.key])} ${x[c.key].toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }).toLowerCase().replace(" ", "")}` : shortDate(x[c.key]));
       case "status": return (x) => badge(empty.statusMap[x[c.key]]);
-      case "person": return (x) => person(x[c.key]);
-      case "record": return (x) => `<span class="cell-person">${avatar(x[c.key], "sm")}${esc(x[c.key].name)}</span>`;
+      case "person": return (x) => (x[c.key] ? person(x[c.key]) : none("–"));
+      case "record": return (x) => (x[c.key] ? `<span class="cell-person">${avatar(x[c.key], "sm")}${esc(x[c.key].name)}</span>` : none("–"));
       case "contact": return (x) => `<div>${esc(x[c.key].email)}</div><div class="cell-sub">${esc(x[c.key].phone)}</div>`;
-      case "flags": return (x) => (x[c.key].length ? `<span class="cluster" style="gap:var(--space-1)">${x[c.key].slice(0, 2).map((f) => `<span class="badge" data-tone="warning">${esc(f)}</span>`).join("")}${x[c.key].length > 2 ? `<span class="badge">+${x[c.key].length - 2}</span>` : ""}</span>` : "");
+      case "flags": return (x) => (x[c.key]?.length ? `<span class="cluster" style="gap:var(--space-1)">${x[c.key].slice(0, 2).map((f) => `<span class="badge" data-tone="warning">${esc(f)}</span>`).join("")}${x[c.key].length > 2 ? `<span class="badge">+${x[c.key].length - 2}</span>` : ""}</span>` : "");
       case "id": case "address": case "category": return (x) => muted(text(x[c.key]));
       case "kinds": return (x) => kindsIcons(c, x[c.key]);
       default: return (x) => (x[c.key] ? esc(text(x[c.key])) : none("–"));
@@ -140,7 +164,7 @@ window.BDS_RECIPE = (() => {
   const sortOf = (c, statusOrder) => {
     if (c.type === "status") return (x) => statusOrder.indexOf(x[c.key]);
     if (NUMERIC.has(c.type)) return (x) => x[c.key] || 0;
-    if (c.type === "date" || c.type === "datetime") return (x) => +x[c.key];
+    if (c.type === "date" || c.type === "datetime") return (x) => (x[c.key] ? +x[c.key] : null);
     if (c.type === "flags") return (x) => x[c.key].length;
     if (c.type === "kinds") return (x) => (x[c.key] || []).join(" ");
     return (x) => text(x[c.key]).toLowerCase();
@@ -204,6 +228,17 @@ window.BDS_RECIPE = (() => {
         return { status: s, at: t };
       });
     }
+    // a status worked out from a date (overdue: to do, past its due date): some rows of the status before
+    // it get a date that has passed and show it; the rest of that status keep a date to come, or none
+    function pastDue(x) {
+      d.status.values.forEach((v, j) => {
+        if (!v.past || !j || x[statusCol] !== d.status.values[j - 1].value) return;
+        if (r() < 0.3) { // past due after its last step, so the story stays in order
+          const last = x._story?.at(-1)?.at, span = last ? Math.max(1, ageDays(last) - 1) : 40;
+          x[statusCol] = v.value; x[v.past] = daysAgo(1 + Math.floor(r() * span)); x._story?.push({ status: v.value, at: x[v.past] }); }
+        else x[v.past] = r() < 0.3 ? null : daysFrom(TODAY, Math.floor(r() * 45));
+      });
+    }
     // the sample checks itself against the lifecycle, and says so on the page if it doesn't hold
     function contradictions(x) {
       const reached = new Set((x._story || []).map((s) => s.status)), out = [];
@@ -227,11 +262,13 @@ window.BDS_RECIPE = (() => {
         // every status gets rows (the first ones go round them), the rest by how common each stage is
         x[statusCol] = i < stored.length * 2 ? stored[i % stored.length].value : weighted(stored);
         story(x);
+        pastDue(x);
       } else if (statusCol) {
         let x2 = r() * stored.reduce((s, v) => s + (WEIGHT[v.stage] || 10), 0);
         x[statusCol] = stored.find((v) => (x2 -= WEIGHT[v.stage] || 10) <= 0)?.value || stored[0].value;
         // a derived status (past due) takes some of the rows of the status listed just before it
-        d.status.values.forEach((v, j) => { if (v.derived && j && x[statusCol] === order[j - 1] && r() < 0.35) x[statusCol] = v.value; });
+        d.status.values.forEach((v, j) => { if (v.derived && !v.past && j && x[statusCol] === order[j - 1] && r() < 0.35) x[statusCol] = v.value; });
+        pastDue(x);
         // a field named for a step in the lifecycle (sent, approved, paid…) stays empty until the row's
         // status has got that far: a draft has no sent date
         const reached = RANK[STAGE_OF[x[statusCol]]] ?? 4, stage = STAGE_OF[x[statusCol]];
@@ -307,7 +344,7 @@ window.BDS_RECIPE = (() => {
     const filters = listed.map((f) => {
       const c = byKey[f.column], base = { key: c.key, label: c.label, pinned: !!f.pinned };
       if (c.type === "status") return { ...base, type: "enum", get: (x) => x[c.key], options: d.status.values.map((v) => ({ value: v.value, label: v.label, html: badge(statusMap[v.value]) })) };
-      if (c.type === "person") return { ...base, type: "enum", get: (x) => x[c.key].id, options: OWNERS.map((o) => ({ value: o.id, label: o.me ? `${o.name} (you)` : o.name, html: `${avatar(o, "sm")}${esc(o.me ? `${o.name} (you)` : o.name)}` })) };
+      if (c.type === "person") return { ...base, type: "enum", get: (x) => x[c.key]?.id, options: OWNERS.map((o) => ({ value: o.id, label: o.me ? `${o.name} (you)` : o.name, html: `${avatar(o, "sm")}${esc(o.me ? `${o.name} (you)` : o.name)}` })) };
       if (c.type === "date" || c.type === "datetime") return { ...base, type: "date", get: (x) => x[c.key] };
       if (NUMERIC.has(c.type)) return { ...base, type: "range", get: (x) => x[c.key], ...(c.type === "money" ? { prefix: "$" } : c.type === "percent" ? { suffix: "%", scale: 100 } : c.unit || c.type === "duration" ? { suffix: `${c.unit || "day"}s` } : {}) };
       if (c.type === "address") return { ...base, type: "enum", get: (x) => text(x[c.key]).split(", ").pop(), options: CITIES.map((v) => ({ value: v, label: v })) };

@@ -182,8 +182,11 @@
   function sorted(rows) {
     const col = cfg.columns.find((c) => c.key === st.sort.key) || cfg.columns[0];
     const dir = st.sort.dir === "asc" ? 1 : -1;
+    // rows with nothing to sort by (no due date yet) go last, whichever way
+    const blank = (v) => v == null || v === "" || Number.isNaN(v);
     return [...rows].sort((a, b) => {
       const x = col.sort(a), y = col.sort(b);
+      if (blank(x) || blank(y)) return blank(x) - blank(y);
       return (typeof x === "string" ? x.localeCompare(y) : x - y) * dir;
     });
   }

@@ -29,7 +29,8 @@
     gap: var(--space-2);
     padding: 0 var(--space-3);
     border-radius: var(--radius-xs);
-    color: var(--color-control-off);
+    /* text, so a text colour: the controls' off colour is for edges (3:1) and fails as a label (4.5:1) */
+    color: var(--color-content-secondary);
     /* same weight in both states, so labels don't shift (fixes the as-is bold jump) */
     font-size: var(--text-sm);
     font-weight: var(--font-weight-medium);
