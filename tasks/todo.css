@@ -94,18 +94,14 @@
   /* selecting: the system's square box in the check's place */
   .todo-row .checkbox { justify-self: center; }
 
-  /* priority, as Linear marks it: bars for Low, Med, High, in Bolster's colours for them (High red, Med
-     orange, Low green); faint dots for none */
+  /* priority, as Linear marks it: bars for Low, Med, High, in grey (the count of bars says it, not a
+     colour); faint dots for none */
   .todo-prio { display: grid; place-items: center; inline-size: var(--space-4); block-size: var(--space-6); padding: 0; border: 0; border-radius: var(--radius-xs); background: none; cursor: pointer; }
   .todo-prio:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
   .prio-mark { display: inline-flex; align-items: flex-end; gap: 2px; block-size: 12px; }
-  .prio-mark i { inline-size: 3px; border-radius: 1px; background: var(--color-line-default); }
-  .prio-mark { --_prio: var(--color-content-secondary); }
-  .prio-mark[data-level="1"] { --_prio: var(--color-feedback-success-accent); }
-  .prio-mark[data-level="2"] { --_prio: var(--color-status-outstanding-dot); }
-  .prio-mark[data-level="3"] { --_prio: var(--color-feedback-danger-accent); }
+  .prio-mark i { inline-size: 3px; border-radius: 1px; background: var(--color-line-strong); }
   .prio-mark i:nth-child(1) { block-size: 5px; } .prio-mark i:nth-child(2) { block-size: 8px; } .prio-mark i:nth-child(3) { block-size: 12px; }
-  .prio-mark[data-level="1"] i:nth-child(-n+1), .prio-mark[data-level="2"] i:nth-child(-n+2), .prio-mark[data-level="3"] i { background: var(--_prio); }
+  .prio-mark[data-level="1"] i:nth-child(-n+1), .prio-mark[data-level="2"] i:nth-child(-n+2), .prio-mark[data-level="3"] i { background: var(--color-content-secondary); }
   .prio-mark[data-level="0"] { align-items: center; }
   .prio-mark[data-level="0"] i { block-size: 3px; inline-size: 3px; border-radius: var(--radius-full); background: var(--color-line-default); }
 
