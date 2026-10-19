@@ -65,7 +65,7 @@
   let nextId = tasks.length + 1;
 
   // ---------- state ----------
-  const st = { group: "when", q: "", showCompleted: true, filters: { kind: ["general", "labor"] }, selecting: false, sel: new Set(), fresh: new Set(), completedOpen: false, adding: null, openId: null };
+  const st = { group: "when", q: "", filters: { kind: ["general", "labor"] }, selecting: false, sel: new Set(), fresh: new Set(), completedOpen: false, adding: null, openId: null };
 
   // ---------- when ----------
   const dayDiff = (d) => Math.round((new Date(d).setHours(0, 0, 0, 0) - new Date(TODAY).setHours(0, 0, 0, 0)) / 864e5);
@@ -92,7 +92,8 @@
 
   // ---------- filters: Bolster's own (its Filter & sort panel, read 19 Oct), picked as on the table card ----------
   // Show (the kinds of task, material items off when the page opens, as Bolster does), Priority, Assignee and
-  // a period of due dates; each set one is a chip. Its Show completed tasks is in Display settings
+  // a period of due dates; each set one is a chip. Its Show completed tasks isn't carried: Completed is always
+  // the last group, folded (T-done)
   const isoDay = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const FILTERS = [
     { key: "kind", label: "Show", icon: "list", get: (t) => t.kind,
@@ -137,7 +138,7 @@
     }
     out.forEach((g) => g.rows.sort((a, b) => a.rank - b.rank));
     const done = shown.filter(inCompleted).sort((a, b) => b.doneAt - a.doneAt);
-    if (done.length && st.showCompleted) out.push({ key: "completed", label: "Completed", rows: done, completed: true });
+    if (done.length) out.push({ key: "completed", label: "Completed", rows: done, completed: true });
     return { out, shown };
   }
 
@@ -289,8 +290,7 @@
             <div class="cluster" style="justify-content:flex-end"><button type="submit" class="button" data-size="sm">Show tasks</button></div></form>`
         : `<div class="pop-head"><h3>${esc(f.label)}</h3></div><div class="pop-body">${f.options().map((o) => `<label class="option"><input type="checkbox" class="checkbox" data-filter-opt="${esc(o.value)}"${v?.includes(o.value) ? " checked" : ""}><span class="option-label">${o.icon ? `<span class="menu-icon">${o.icon}</span>` : ""}${esc(o.label)}</span></label>`).join("")}</div>`;
     } else if (popFor.kind === "display") {
-      pop.innerHTML = `<div class="pop-head"><h3>Group by</h3></div><div class="pop-body">${[["when", "Date"], ["job", "Job"]].map(([v, l]) => item(`data-group-by="${v}"`, l, { icon: ic(v === "when" ? "m-calendar" : "m-briefcase", 14), on: st.group === v })).join("")}
-        <hr class="menu-separator"><label class="option"><input type="checkbox" class="checkbox" data-show-completed${st.showCompleted ? " checked" : ""}><span class="option-label">Show completed tasks</span></label></div>`;
+      pop.innerHTML = `<div class="pop-head"><h3>Group by</h3></div><div class="pop-body">${[["when", "Date"], ["job", "Job"]].map(([v, l]) => item(`data-group-by="${v}"`, l, { icon: ic(v === "when" ? "m-calendar" : "m-briefcase", 14), on: st.group === v })).join("")}</div>`;
     }
   }
   function place() {
@@ -580,7 +580,6 @@
     const fo = e.target.closest("[data-filter-opt]");
     if (fo && popFor) { const k = popFor.id, set = new Set(st.filters[k] || []); fo.checked ? set.add(fo.dataset.filterOpt) : set.delete(fo.dataset.filterOpt);
       const order = filterDef(k).options().map((o) => o.value), vals = order.filter((x) => set.has(x)); vals.length && vals.length < order.length ? (st.filters[k] = vals) : delete st.filters[k]; render(); if (popFor.from && !popFor.from.isConnected) popFor.from = $(`[data-chip="${k}"]`) || $("#add-filter"); place(); return; }
-    if (e.target.matches("[data-show-completed]")) { st.showCompleted = e.target.checked; render(); return; }
     const s = e.target.closest("[data-select]");
     if (s) { s.checked ? st.sel.add(s.dataset.select) : st.sel.delete(s.dataset.select); s.closest(".todo-row").toggleAttribute("data-selected", s.checked); renderBulk(); return; }
   });
