@@ -215,18 +215,8 @@
   }
 
   // ---------- ticking, with undo (T-check) ----------
-  function toast(message, undo) {
-    const t = document.createElement("div");
-    t.className = "toast"; t.dataset.tone = "info"; t.setAttribute("role", "status");
-    t.innerHTML = `<span class="toast-message"></span>${undo ? `<button class="toast-action">Undo</button>` : ""}<button class="toast-close" aria-label="Dismiss" data-tip="Dismiss">×</button>`;
-    $(".toast-message", t).textContent = message;
-    $(".toast-close", t).onclick = () => t.remove();
-    if (undo) $(".toast-action", t).onclick = () => { undo(); t.remove(); };
-    const region = $(".toast-region"), host = [...document.querySelectorAll("dialog:modal")].pop() || document.body;
-    if (region.parentElement !== host) host.append(region);
-    region.append(t);
-    setTimeout(() => t.remove(), 5000);
-  }
+  // the toast is the shell's, every page's (BolsterShell.toast), with Undo where a change can be taken back
+  const toast = (message, undo) => BolsterShell.toast(message, { undo });
   function setDone(ids, done, { say = true } = {}) {
     const list = ids.map((id) => tasks.find((t) => t.id === id)).filter((t) => t.done !== done);
     if (!list.length) return;
@@ -242,7 +232,6 @@
 
   // ---------- pickers: due date, priority, who (T-in-place) ----------
   const pop = $("#pop");
-  const sheet = matchMedia("(max-width: 767px)");
   let popFor = null, calMonth = null;
   const item = (attrs, label, { icon, hint, on } = {}) => `<button type="button" class="menu-item" role="menuitemradio" aria-checked="${!!on}" ${attrs}>${icon ? `<span class="menu-icon">${icon}</span>` : ""}<span>${esc(label)}</span>${hint ? `<span class="menu-hint">${esc(hint)}</span>` : ""}</button>`; // the menu marks the chosen one
   const targets = () => (popFor.bulk ? [...st.sel].map((id) => tasks.find((t) => t.id === id)) : [tasks.find((t) => t.id === popFor.id)]);
@@ -296,14 +285,8 @@
     const a = popFor.from;
     $$("[aria-expanded='true']").forEach((el) => el !== a && el.closest("#pop, .todo-groups, .list-bar, #bulk-bar, .detail") && el.setAttribute("aria-expanded", "false"));
     a?.setAttribute("aria-expanded", "true");
-    if (sheet.matches || !a) { pop.style.left = pop.style.top = ""; return; }
-    const r = a.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
     // what opens from the bar's left (Add filter, a chip) starts at its trigger's left; the rest ends at its right
-    const start = a.id === "add-filter" || !!a.closest(".chip");
-    const left = Math.max(12, Math.min(start ? r.left : r.right - w, innerWidth - w - 12));
-    let top = r.bottom + 4;
-    if (top + h > innerHeight - 12 && r.top - h - 4 > 12) top = r.top - h - 4;
-    pop.style.left = `${left}px`; pop.style.top = `${Math.max(12, top)}px`;
+    BolsterShell.placePopover(pop, a, { start: a?.id === "add-filter" || !!a?.closest(".chip") });
   }
   function openPick(kind, from, { id, bulk = false } = {}) {
     if (pop.matches(":popover-open") && popFor?.from === from) { pop.hidePopover(); return; }
@@ -608,8 +591,6 @@
     if (q("[data-clear-sel]")) { st.sel.clear(); return render({ keepFresh: true }); }
     if (q("[data-select-all]")) { groups().out.flatMap((g) => g.rows).filter((t) => !t.done).forEach((t) => st.sel.add(t.id)); return render({ keepFresh: true }); }
     if (q("#create")) { if (st.selecting) setSelecting(false); st.adding = st.group === "job" ? groups().out[0]?.key : "today"; render({ keepFresh: true }); return; }
-    if ((el = q("[data-open-dialog]"))) return $(`#${el.dataset.openDialog}`).showModal();
-    if ((el = q("dialog [data-close]"))) return el.closest("dialog").close();
     // selecting: a tap on the row ticks its box
     if (st.selecting && (el = q(".todo-row")) && !q("button, a, input")) { const box = $("[data-select]", el); box.checked = !box.checked; box.dispatchEvent(new Event("change", { bubbles: true })); }
   });
@@ -638,16 +619,6 @@
   $("#search").addEventListener("blur", () => { if (!$("#search").value) closeSearch(); });
   $("#search").addEventListener("keydown", (e) => { if (e.key === "Escape") { e.preventDefault(); $("#search").value = ""; st.q = ""; render(); closeSearch(true); } });
   addEventListener("resize", () => popFor && place());
-
-  // theme: auto → light → dark, remembered per browser, as the specimens do
-  (() => {
-    const root = document.documentElement, btn = $("[data-theme-toggle]"), modes = ["auto", "light", "dark"];
-    let mode = "auto";
-    try { mode = localStorage.getItem("bds-theme") || "auto"; } catch {}
-    const show = () => { mode === "auto" ? root.removeAttribute("data-theme") : root.setAttribute("data-theme", mode); btn.textContent = `Theme: ${mode}`; };
-    btn.addEventListener("click", () => { mode = modes[(modes.indexOf(mode) + 1) % 3]; try { localStorage.setItem("bds-theme", mode); } catch {} show(); });
-    show();
-  })();
 
   // trying out: the toolbar on the page instead of a card (on by default, remembered per browser)
   (() => {

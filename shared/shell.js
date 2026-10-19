@@ -205,18 +205,39 @@ window.BolsterShell = (() => {
     root.querySelectorAll("i[data-icon]").forEach((i) => { i.outerHTML = icon(i.dataset.icon, +i.dataset.size || 20, { optical: "optical" in i.dataset }); });
   }
 
-  function toast(message) {
+  // A toast, every page's: BolsterShell.toast("Task completed", { undo: () => … }). With Undo it stays a
+  // little longer. Over an open sheet or dialog (a modal one covers everything outside it) the toasts move
+  // in, and back out when it closes.
+  function toast(message, { undo } = {}) {
     const region = document.querySelector(".toast-region");
     if (!region) return;
     const t = document.createElement("div");
     t.className = "toast";
     t.dataset.tone = "info";
     t.setAttribute("role", "status");
-    t.innerHTML = `<span class="toast-message"></span><button class="toast-close" aria-label="Dismiss" data-tip="Dismiss">×</button>`;
+    t.innerHTML = `<span class="toast-message"></span>${undo ? `<button class="toast-action">Undo</button>` : ""}<button class="toast-close" aria-label="Dismiss" data-tip="Dismiss">×</button>`;
     t.querySelector(".toast-message").textContent = message;
     t.querySelector(".toast-close").onclick = () => t.remove();
+    if (undo) t.querySelector(".toast-action").onclick = () => { undo(); t.remove(); };
+    const host = [...document.querySelectorAll("dialog:modal")].pop() || document.body;
+    if (region.parentElement !== host) host.append(region);
     region.append(t);
-    setTimeout(() => t.remove(), 4000);
+    setTimeout(() => t.remove(), undo ? 5000 : 4000);
+  }
+  document.addEventListener("close", (e) => { const region = document.querySelector(".toast-region"); if (region && e.target.contains?.(region)) document.body.append(region); }, true);
+
+  // Where a .pop opens, every page's: under its trigger, its left edge at the trigger's (start) or its right
+  // edge at the trigger's right (the default), flipped above when there's no room below; on phones it's a
+  // bottom sheet (popover.css), so it's left where the stylesheet puts it.
+  //   BolsterShell.placePopover(pop, trigger, { start: true });
+  const phoneWidth = matchMedia("(max-width: 767px)");
+  function placePopover(pop, a, { start = false } = {}) {
+    if (phoneWidth.matches || !a) { pop.style.left = pop.style.top = ""; return; }
+    const r = a.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+    const left = Math.max(12, Math.min(start ? r.left : r.right - w, innerWidth - w - 12));
+    let top = r.bottom + 4;
+    if (top + h > innerHeight - 12 && r.top - h - 4 > 12) top = r.top - h - 4;
+    pop.style.left = `${left}px`; pop.style.top = `${Math.max(12, top)}px`;
   }
 
   function mount(o) {
@@ -307,5 +328,5 @@ window.BolsterShell = (() => {
     return { show: () => set(false), stick };
   }
 
-  return { mount, setCurrent, label, hydrateIcons, toast, icon, scrolling };
+  return { mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling };
 })();

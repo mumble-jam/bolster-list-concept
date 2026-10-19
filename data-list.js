@@ -1114,22 +1114,8 @@
     if (focus) $$("#table-wrap tbody tr")[before]?.querySelector(".data-table-link")?.focus();
   }
 
-  function toast(message) {
-    const t = document.createElement("div");
-    t.className = "toast";
-    t.dataset.tone = "info";
-    t.setAttribute("role", "status");
-    t.innerHTML = `<span class="toast-message"></span><button class="toast-close" aria-label="Dismiss" data-tip="Dismiss">×</button>`;
-    t.querySelector(".toast-message").textContent = message;
-    t.querySelector(".toast-close").onclick = () => t.remove();
-    // over an open sheet or dialog: a modal one covers everything outside it, so the toasts move in
-    const region = $(".toast-region"), host = [...document.querySelectorAll("dialog:modal")].pop() || document.body;
-    if (region.parentElement !== host) host.append(region);
-    region.append(t);
-    setTimeout(() => t.remove(), 4000);
-  }
-  // and back out when it closes
-  document.addEventListener("close", (e) => { const region = $(".toast-region"); if (e.target.contains?.(region)) document.body.append(region); }, true);
+  // the toast is the shell's, every page's (BolsterShell.toast)
+  const toast = (message) => BolsterShell.toast(message);
 
   // ---------- the record: beside the list on wide screens, a sheet on narrower ones ----------
   // As in Mercury: heading and close, status, the amount, its activity (oldest first, the next step
@@ -1258,9 +1244,11 @@
 
   // the menu: the four lists by hash, and Tasks, the to-do concept beside this one (published at tasks/)
   const TODO = "tasks/";
+  // the calendar concept, beside them; viewed locally for now, so the published copy leaves it out
+  const CALENDAR = null;
   BolsterShell.mount({
     current: "job-list",
-    links: { ...Object.fromEntries(Object.values(configs).map((c) => [c.nav, `#${c.id}`])), tasks: TODO },
+    links: { ...Object.fromEntries(Object.values(configs).map((c) => [c.nav, `#${c.id}`])), tasks: TODO, ...(CALENDAR ? { calendar: CALENDAR } : {}) },
   });
 
   // ---------- events ----------
