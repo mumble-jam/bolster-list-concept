@@ -114,6 +114,9 @@
   .todo-job::before { content: "· "; color: var(--color-content-tertiary); }
   @media (hover: hover) { .todo-job:hover { color: var(--color-content-primary); text-decoration: underline; } }
   .todo-meta { display: none; }
+  /* what it includes: after the job, quieter than it, as Bolster's rows show it */
+  .todo-main .todo-kinds { align-self: center; color: var(--color-content-tertiary); }
+  .todo-meta .todo-kinds { vertical-align: -2px; }
   .todo-row[data-done] .todo-title { color: var(--color-content-tertiary); text-decoration: line-through; }
   .todo-row[data-done] .todo-job, .todo-row[data-done] .todo-side { opacity: 0.6; }
 
@@ -176,7 +179,7 @@
     .todo-prio { grid-column: 2; block-size: var(--space-6); }
     .todo-main { grid-column: 3; display: grid; row-gap: var(--space-0-5); }
     .todo-title { padding: 0; font-size: var(--text-base); line-height: var(--leading-base); }
-    .todo-job, .todo-side { display: none; }
+    .todo-job, .todo-side, .todo-main > .todo-kinds { display: none; }
     .todo-meta { display: block; margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
     .todo-meta [data-late] { color: var(--color-feedback-danger-content); }
     .todo-add { padding-inline-start: var(--space-8); min-block-size: var(--control-height-lg); }

@@ -51,6 +51,8 @@
   const CREATED_BY = ["dc", "hm", "mr", "pn"];
   let tasks = RAW.map(([name, job, kind, hours, due, priority, assignee, doneAgo], i) => ({
     id: `t${i + 1}`, name, job, kind, hours, priority, assignee,
+    // what the item behind it holds, as Bolster's rows show it: labor (some with their materials), a material item's materials, nothing for a task someone wrote
+    includes: kind === "labor" ? (i % 3 === 0 ? ["labor", "materials"] : ["labor"]) : kind === "material" ? ["materials"] : [],
     due: due == null ? null : daysFrom(TODAY, due),
     created: daysFrom(TODAY, -(4 + (i * 3) % 19)), createdBy: CREATED_BY[i % 4],
     done: doneAgo != null, doneAt: doneAgo != null ? daysFrom(TODAY, -doneAgo) : null, doneBy: doneAgo != null ? assignee || "hm" : null,
@@ -138,6 +140,11 @@
   }
 
   // ---------- drawing ----------
+  // what a task includes: the system's kinds (kinds.json, D50, D53), their icons side by side under one
+  // tooltip that names them together, “Labor and materials”
+  const INCLUDES = [{ key: "labor", label: "Labor", icon: "hard-hat" }, { key: "materials", label: "Materials", icon: "box" }];
+  const includesText = (t) => INCLUDES.filter((k) => t.includes?.includes(k.key)).map((k, i) => (i ? k.label.toLowerCase() : k.label)).join(" and ");
+  const includesIcons = (t) => (t.includes?.length ? `<span class="cell-kinds todo-kinds" role="img" aria-label="${includesText(t)}" data-tip="${includesText(t)}">${INCLUDES.filter((k) => t.includes.includes(k.key)).map((k) => ic(k.icon, 14)).join("")}</span>` : "");
   const dueChip = (t) => t.due
     ? `<button type="button" class="todo-due" data-pick="due" data-id="${t.id}"${isLate(t) ? " data-late" : ""} aria-haspopup="menu" aria-expanded="false" aria-label="Due ${esc(dueWords(t.due))}. Change the due date">${ic("calendar", 14)}<span>${esc(dueWords(t.due))}</span></button>`
     : `<button type="button" class="todo-due" data-pick="due" data-id="${t.id}" data-empty aria-haspopup="menu" aria-expanded="false" aria-label="No due date. Set one">${ic("calendar", 14)}<span>Date</span></button>`;
@@ -147,7 +154,7 @@
       ? `<button type="button" class="todo-who" data-pick="who" data-id="${t.id}" aria-haspopup="menu" aria-expanded="false" aria-label="Assigned to ${esc(p.name)}. Change" data-tip="${esc(p.name)}">${avatar(p, "sm")}</button>`
       : `<button type="button" class="todo-who" data-pick="who" data-id="${t.id}" data-empty aria-haspopup="menu" aria-expanded="false" aria-label="No one on it. Assign" data-tip="Assign"><span class="ghost" aria-hidden="true">+</span></button>`;
   };
-  const meta = (t) => [t.due && `<span${isLate(t) ? " data-late" : ""}>${esc(dueWords(t.due))}</span>`, st.group !== "job" && t.job && esc(t.job), t.hours && `${t.hours} h`, t.assignee && (who(t.assignee).me ? "You" : esc(who(t.assignee).name))].filter(Boolean).join(" · ");
+  const meta = (t) => [t.due && `<span${isLate(t) ? " data-late" : ""}>${esc(dueWords(t.due))}</span>`, [st.group !== "job" && t.job && esc(t.job), includesIcons(t)].filter(Boolean).join(" ") || null, t.hours && `${t.hours}\u00a0h`, t.assignee && (who(t.assignee).me ? "You" : esc(who(t.assignee).name))].filter(Boolean).join(" · ");
   function rowHtml(t) {
     const lead = st.selecting
       ? `<input type="checkbox" class="checkbox" data-select="${t.id}" aria-label="Select ${esc(t.name)}"${st.sel.has(t.id) ? " checked" : ""}>`
@@ -158,7 +165,7 @@
       <button type="button" class="todo-prio" data-pick="prio" data-id="${t.id}" aria-haspopup="menu" aria-expanded="false" aria-label="Priority: ${PRIO[t.priority]}. Change" data-tip="${t.priority ? PRIO[t.priority] : "Set priority"}">${mark(t.priority)}</button>
       <div class="todo-main">
         <button type="button" class="todo-title" data-open-task="${t.id}">${esc(t.name)}</button>
-        ${st.group !== "job" && t.job ? `<a class="todo-job" href="../index.html#jobs" data-tip="Open ${esc(t.job)}">${esc(t.job)}</a>` : ""}
+        ${st.group !== "job" && t.job ? `<a class="todo-job" href="../index.html#jobs" data-tip="Open ${esc(t.job)}">${esc(t.job)}</a>` : ""}${includesIcons(t)}
         <p class="todo-meta">${meta(t)}</p>
       </div>
       <div class="todo-side">
@@ -316,7 +323,7 @@
   function addTask(key, name) {
     const g = groups().out.find((x) => x.key === key) || { key };
     const due = key.startsWith("job:") ? null : WHEN.find((w) => w.key === key)?.due;
-    const t = { id: `t${nextId++}`, name, job: key.startsWith("job:") ? key.slice(4) || null : null, kind: "general", hours: null, priority: 0, assignee: null,
+    const t = { id: `t${nextId++}`, name, job: key.startsWith("job:") ? key.slice(4) || null : null, kind: "general", includes: [], hours: null, priority: 0, assignee: null,
       due: due == null ? null : daysFrom(TODAY, due), created: new Date(TODAY), createdBy: ME.id, done: false, doneAt: null, doneBy: null };
     const last = g.rows?.at(-1);
     t.rank = (last ? last.rank : Math.max(0, ...tasks.map((x) => x.rank))) + 5;
@@ -515,6 +522,7 @@
           <div><dt>Assignee</dt><dd><button type="button" class="todo-who" data-pick="who" data-id="${t.id}" aria-haspopup="menu" aria-expanded="false">${p ? `${avatar(p, "sm")}<span>${esc(p.name)}</span>` : `<span class="ghost" aria-hidden="true">+</span><span class="text-secondary">No one</span>`}</button></dd></div>
           <div><dt>Job</dt><dd>${t.job ? `<a class="detail-link" href="../index.html#jobs">${esc(t.job)}</a>` : `<span class="text-secondary">No job</span>`}</dd></div>
           <div><dt>Hours</dt><dd>${t.hours ? `${t.hours} h` : `<span class="text-secondary">–</span>`}</dd></div>
+          <div><dt>Includes</dt><dd>${includesText(t) || `<span class="text-secondary">–</span>`}</dd></div>
           <div><dt>Kind</dt><dd>${{ labor: "Labor, from the job's schedule", general: "Written by someone", material: "Material item" }[t.kind]}</dd></div>
         </dl>
         <div class="detail-section"><ol class="todo-story">${story.map(([w, d]) => `<li>${esc(w)} <time>${esc(fmt.ago(d).toLowerCase())}</time></li>`).join("")}</ol></div>
