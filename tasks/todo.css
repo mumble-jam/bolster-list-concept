@@ -106,7 +106,11 @@
   .prio-mark[data-level="0"] i { block-size: 3px; inline-size: 3px; border-radius: var(--radius-full); background: var(--color-line-default); }
 
   /* the title and its job */
-  .todo-main { min-inline-size: 0; display: flex; align-items: baseline; flex-wrap: wrap; column-gap: var(--space-2); }
+  /* the title and its job flow as text, wrapping as words do: a wrapping flex row aligned on the baseline
+     kept a stale height in some browsers when the list narrowed (the record opening beside it) */
+  .todo-main { min-inline-size: 0; }
+  .todo-main > .todo-title, .todo-main > .todo-job { display: inline; vertical-align: baseline; }
+  .todo-main > .todo-job { margin-inline-start: var(--space-2); }
   .todo-title { padding: var(--space-1) 0; border: 0; background: none; color: var(--color-content-primary); font: inherit; font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); text-align: start; overflow-wrap: anywhere; cursor: pointer; }
   @media (hover: hover) { .todo-title:hover { text-decoration: underline; text-underline-offset: 3px; } }
   .todo-title:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); border-radius: var(--radius-xs); }
