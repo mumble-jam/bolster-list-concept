@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=2f4c9a05">
-<link rel="stylesheet" href="data-list.css?v=2f4c9a05">
+<link rel="stylesheet" href="system/bolster.css?v=5bac4c55">
+<link rel="stylesheet" href="data-list.css?v=5bac4c55">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -108,12 +108,12 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=2f4c9a05"></script>
+<script src="shared/icons.js?v=5bac4c55"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
   ["Foundations", "Warm and cool colour", "yours", "A warmer page (8 Oct); Paper and cement edges from your Figma sketch; warm on every neutral. Then the status quo (13 Oct, D33): warm in light, cool in dark, as the system's own tokens; the Colour switch is gone.", "Which cement step goes where, and the new tokens (card edge, open row, menu hover)."],
-  ["Foundations", "Type", "steered", "Cera Pro and Space Grotesk come from your prototype's tokens; you chose Inter for the published copy.", "Sizes and weights here: the page title, the big card numbers, table text and sub-lines."],
+  ["Foundations", "Type", "steered", "Cera Pro and Space Grotesk come from your prototype's tokens; you chose Inter for the published copy, then Cera Pro itself there too, Bolster's licence covering the web (20 Oct).", "Sizes and weights here: the page title, the big card numbers, table text and sub-lines."],
   ["Foundations", "Icons", "yours", "Font Awesome 6 Pro, with your key: Light at first (Regular for search and help), then Regular in the page and Light only in the app shell (20 Oct, D84); table-cells-columns for display settings; smaller, bolder icons in menus. Icons side by side match in ink and line, not box size, after expand and close looked unbalanced (14 Oct, D41). All the job list's picks approved as the system's icon vocabulary, one meaning one icon, every new page drawing from it (15 Oct, D58).", "Every other pick: filter, calendar, one icon per attribute in menus, the action icons; measuring ink and line, the weight step for smaller icons, the checker."],
   ["Foundations", "Corners", "yours", "Every button 8px (9 Oct). Nested corners share a centre: the inner radius is the outer minus the offset (13 Oct, D35); you chose 16 on cards with controls 8 in, over smaller buttons or a tighter header.", "Menus stay 12 with 4px rows 8 in; dialogs 12; round chips, badges and avatars; the check that finds every break (check-radii.js)."],
   ["Foundations", "Spacing and layout", "steered", "Follow the layout rules from the list research boards (8 Oct).", "The actual gaps and paddings."],
@@ -263,6 +263,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=2f4c9a05"></script>
+<script src="system/specimens/specimen.js?v=5bac4c55"></script>
 </body>
 </html>

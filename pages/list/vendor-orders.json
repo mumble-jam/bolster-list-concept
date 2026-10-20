@@ -1,0 +1,562 @@
+{
+  "recipe": "list",
+  "schemaVersion": 1,
+  "nav": "vendor-orders",
+  "noun": {
+    "one": "vendor order",
+    "many": "vendor orders"
+  },
+  "source": {
+    "product": "Bolster",
+    "page": "https://next.bolsterbuilt.com/100000678-LakesideDrywallInsulation/vendor_orders",
+    "date": "2026-10-15"
+  },
+  "columns": [
+    {
+      "key": "order",
+      "label": "Vendor order",
+      "type": "name",
+      "priority": 1,
+      "title": "{vendor}",
+      "leading": "avatar",
+      "avatarFrom": "vendor",
+      "detail": "{number}"
+    },
+    {
+      "key": "total",
+      "label": "Order total",
+      "type": "money",
+      "priority": 2
+    },
+    {
+      "key": "status",
+      "label": "Status",
+      "type": "status",
+      "priority": 3
+    },
+    {
+      "key": "job",
+      "label": "Job",
+      "type": "record",
+      "priority": 4
+    },
+    {
+      "key": "created",
+      "label": "Date created",
+      "type": "date",
+      "priority": 5
+    },
+    {
+      "key": "includes",
+      "label": "Includes",
+      "type": "kinds",
+      "priority": 6,
+      "values": [
+        {
+          "value": "labor",
+          "label": "Labor",
+          "icon": "hard-hat"
+        },
+        {
+          "value": "materials",
+          "label": "Materials",
+          "icon": "box"
+        }
+      ]
+    },
+    {
+      "key": "createdBy",
+      "label": "Created by",
+      "type": "person",
+      "priority": 7
+    },
+    {
+      "key": "sent",
+      "label": "Sent",
+      "type": "datetime",
+      "priority": 8
+    },
+    {
+      "key": "approved",
+      "label": "Time approved",
+      "type": "datetime",
+      "priority": 9
+    },
+    {
+      "key": "vendor",
+      "label": "Vendor",
+      "type": "record",
+      "priority": 9,
+      "hidden": true
+    },
+    {
+      "key": "client",
+      "label": "Client",
+      "type": "record",
+      "priority": 9,
+      "hidden": true
+    },
+    {
+      "key": "items",
+      "label": "Items",
+      "type": "count",
+      "priority": 9,
+      "hidden": true,
+      "unit": "item"
+    },
+    {
+      "key": "declineReason",
+      "label": "Decline reason",
+      "type": "text",
+      "priority": 9,
+      "hidden": true
+    }
+  ],
+  "fields": [
+    {
+      "key": "number",
+      "label": "Vendor order number",
+      "type": "id",
+      "format": "#0003"
+    }
+  ],
+  "status": {
+    "column": "status",
+    "values": [
+      {
+        "value": "not-sent",
+        "label": "Not sent",
+        "stage": "draft",
+        "event": {
+          "what": "Vendor order created",
+          "at": "created",
+          "by": "createdBy"
+        }
+      },
+      {
+        "value": "awaiting-approval",
+        "label": "Awaiting approval",
+        "stage": "waiting",
+        "event": {
+          "what": "Sent to {vendor}",
+          "at": "sent"
+        }
+      },
+      {
+        "value": "approved",
+        "label": "Approved",
+        "stage": "won",
+        "event": {
+          "what": "Approved by {vendor}",
+          "at": "approved"
+        }
+      },
+      {
+        "value": "paid",
+        "label": "Paid",
+        "stage": "done",
+        "event": {
+          "what": "Marked as paid"
+        }
+      },
+      {
+        "value": "declined",
+        "label": "Declined",
+        "stage": "lost",
+        "event": {
+          "what": "Declined by {vendor}",
+          "note": "declineReason"
+        },
+        "from": [
+          "awaiting-approval"
+        ]
+      },
+      {
+        "value": "cancelled",
+        "label": "Cancelled",
+        "stage": "neutral",
+        "event": {
+          "what": "Cancelled"
+        },
+        "from": [
+          "not-sent",
+          "awaiting-approval",
+          "approved"
+        ]
+      }
+    ]
+  },
+  "summary": {
+    "kind": "lifecycle",
+    "all": {
+      "agg": "sum",
+      "column": "total"
+    },
+    "slices": [
+      {
+        "value": "not-sent",
+        "measure": {
+          "agg": "sum",
+          "column": "total"
+        }
+      },
+      {
+        "value": "awaiting-approval",
+        "measure": {
+          "agg": "sum",
+          "column": "total"
+        }
+      },
+      {
+        "value": "approved",
+        "measure": {
+          "agg": "sum",
+          "column": "total"
+        }
+      },
+      {
+        "value": "paid",
+        "measure": {
+          "agg": "sum",
+          "column": "total"
+        },
+        "window": {
+          "days": 30
+        }
+      }
+    ]
+  },
+  "search": {
+    "columns": [
+      "vendor",
+      "number",
+      "job"
+    ],
+    "hint": "Search by vendor, vendor order number or job"
+  },
+  "dateRange": {
+    "column": "created"
+  },
+  "filters": [
+    {
+      "column": "status",
+      "pinned": true
+    },
+    {
+      "column": "job",
+      "pinned": true
+    },
+    {
+      "column": "vendor",
+      "pinned": true
+    },
+    {
+      "column": "includes"
+    },
+    {
+      "column": "createdBy"
+    },
+    {
+      "column": "total"
+    }
+  ],
+  "sort": {
+    "column": "created",
+    "dir": "desc"
+  },
+  "group": {
+    "options": [
+      "status",
+      "createdBy",
+      "job",
+      "vendor"
+    ],
+    "default": null
+  },
+  "views": [
+    {
+      "id": "all",
+      "label": "All vendor orders",
+      "icon": "list",
+      "filters": {}
+    }
+  ],
+  "rowClick": "peek",
+  "selection": {
+    "enabled": true,
+    "bulk": [
+      "Resend",
+      {
+        "label": "Cancel order",
+        "tone": "danger"
+      }
+    ]
+  },
+  "create": {
+    "label": "Create vendor order"
+  },
+  "export": false,
+  "actions": {
+    "next": {
+      "byStatus": {
+        "not-sent": "Send",
+        "awaiting-approval": "Mark approved",
+        "approved": "Add vendor invoice"
+      }
+    },
+    "byStatus": {
+      "not-sent": {
+        "primary": [
+          "Mark approved",
+          "Add vendor invoice",
+          "Mark as paid"
+        ],
+        "more": [
+          "Preview",
+          "Download PDF",
+          "Duplicate",
+          {
+            "label": "Cancel order",
+            "tone": "danger"
+          },
+          {
+            "label": "Delete",
+            "tone": "danger"
+          }
+        ]
+      },
+      "awaiting-approval": {
+        "primary": [
+          "Resend",
+          "Add vendor invoice",
+          "Mark as paid"
+        ],
+        "more": [
+          "Preview",
+          "Download PDF",
+          "Duplicate",
+          {
+            "label": "Cancel order",
+            "tone": "danger"
+          },
+          {
+            "label": "Delete",
+            "tone": "danger"
+          }
+        ]
+      },
+      "approved": {
+        "primary": [
+          "Resend",
+          "Mark as paid",
+          "Duplicate"
+        ],
+        "more": [
+          "Preview",
+          "Download PDF",
+          {
+            "label": "Cancel order",
+            "tone": "danger"
+          }
+        ]
+      }
+    }
+  },
+  "record": {
+    "openLabel": "Open vendor order",
+    "document": "Vendor order",
+    "fields": [
+      "created",
+      "includes",
+      "createdBy",
+      "sent",
+      "approved",
+      "items",
+      "declineReason"
+    ],
+    "related": [
+      "vendor",
+      "job",
+      "client"
+    ]
+  },
+  "icons": {
+    "fields": {
+      "order": "text",
+      "total": "dollar",
+      "status": "status",
+      "job": "briefcase",
+      "created": "calendar",
+      "includes": "toolbox",
+      "createdBy": "user",
+      "sent": "clock",
+      "approved": "clock",
+      "vendor": "store",
+      "client": "users",
+      "items": "hashtag",
+      "declineReason": "text",
+      "number": "text"
+    },
+    "actions": {
+      "Open": "sidebar-right",
+      "Send": "send",
+      "Mark approved": "circle-check",
+      "Add vendor invoice": "file-invoice",
+      "Resend": "send",
+      "Cancel order": "ban",
+      "Mark as paid": "credit-card",
+      "Preview": "eye",
+      "Download PDF": "file-pdf",
+      "Duplicate": "copy",
+      "Delete": "trash"
+    }
+  },
+  "assumptions": [
+    {
+      "field": "$",
+      "value": "built",
+      "why": "Built by build.mjs from system/model/vendor-order.json and pages/list/vendor-orders.intent.json. Edit those, not this file."
+    },
+    {
+      "field": "columns[key=order].title",
+      "value": "{vendor}",
+      "why": "L-name-first: the model says people know one by vendor, vendor order number and job, in that order; codes go to the second line."
+    },
+    {
+      "field": "columns[key=order].leading",
+      "value": "avatar of vendor",
+      "why": "L-slot: rows are known by their vendor, a company."
+    },
+    {
+      "field": "columns[key=order].detail",
+      "value": "{number}",
+      "why": "L-name-first: job has its own column, so it isn't repeated on the second line; on a phone, where the columns go, the row's bottom line shows it."
+    },
+    {
+      "field": "columns",
+      "value": "Order total, Status, Job, Date created, Includes, Created by, Sent, Time approved shown; Vendor, Client, Items, Decline reason hidden",
+      "why": "L-priority: the key figure, the status, then what the intent says people look at, in order (lookAt); the model's other fields stay available, hidden."
+    },
+    {
+      "field": "summary",
+      "value": "lifecycle: Not sent, Awaiting approval, Approved, Paid (last 30 days)",
+      "why": "L-summary: the page's tasks move vendor orders through 3 statuses, so the summary is the lifecycle; endings count the last 30 days; Declined and Cancelled, rare endings, stay in the Status filter; each adds up order total, the key figure, its count beside."
+    },
+    {
+      "field": "filters",
+      "value": "Status, Job, Vendor pinned",
+      "why": "L-filters: the status (tasks are about statuses) and what tasks find rows by, pinned; kinds, people and the key figure after."
+    },
+    {
+      "field": "sort",
+      "value": "Date created, newest first",
+      "why": "L-sort: what the intent says people look for first."
+    },
+    {
+      "field": "rowClick",
+      "value": "peek",
+      "why": "L-row-click: peek, the system's default; the thing has no full-screen window of its own."
+    },
+    {
+      "field": "record.related",
+      "value": "Vendor, Job, Client",
+      "why": "L-related: the records a vendor order connects to in the model (the job's client through it)."
+    },
+    {
+      "field": "actions",
+      "value": "View vendor, View job left out",
+      "why": "L-related: they're the record's links to those records."
+    },
+    {
+      "field": "selection.bulk",
+      "value": "Resend, Cancel order",
+      "why": "The model's actions that work on several at once; the ones that can't be undone confirm, in red (L-risky)."
+    },
+    {
+      "field": "create.label",
+      "value": "Create vendor order",
+      "why": "L-create: vendor orders are made by the business."
+    },
+    {
+      "field": "actions.next.byStatus",
+      "value": "Send, Mark approved, Add vendor invoice",
+      "why": "L-next-step: the lifecycle's next step for each status; it leads the record and the ··· menu."
+    },
+    {
+      "field": "actions.byStatus",
+      "value": "per status, from the model",
+      "why": "Up to three steps in the record, most used first (the model's order); files, links to related records and the rest under More; what can't be undone last, in red (L-risky)."
+    },
+    {
+      "field": "icons",
+      "value": "from the vocabulary",
+      "why": "L-icons: system/model/icons.json, by meaning, record, type, label or verb. Proposed, waiting for review: Mark approved: circle-check, Preview: eye."
+    }
+  ],
+  "unresolved": [
+    {
+      "field": "columns[key=invoice]",
+      "question": "Bolster has an Invoice/receipt column with a dash on every row. What does it hold (the vendor's invoice as a file, its number, its amount)?"
+    },
+    {
+      "field": "actions.byStatus.paid",
+      "question": "What can people do to a paid order?"
+    },
+    {
+      "field": "actions.byStatus.declined",
+      "question": "What can people do to a declined order: send it again, or only cancel it?"
+    },
+    {
+      "field": "actions.byStatus.cancelled",
+      "question": "What can people do to a cancelled order?"
+    },
+    {
+      "field": "selection.bulk",
+      "question": "Resend and Cancel order work on several orders at once. Do Send, Mark approved, Mark as paid or Download PDF too?"
+    },
+    {
+      "field": "workspace",
+      "question": "Does a vendor order have its own full-screen window, opened by Edit or something like it?",
+      "options": [
+        "Yes, a full-screen window of its own",
+        "No, it has no full-screen window"
+      ],
+      "default": "No, it has no full-screen window",
+      "evidence": "Bolster's list opens an editor on a double click; whether it's full-screen wasn't seen (opening it could save). If it is, a row opens it (L-row-click)."
+    }
+  ],
+  "dropped": [
+    {
+      "what": "A click that only selects the row, and a double click that opens the editor",
+      "why": "L-row-click: the system decides what a click does."
+    },
+    {
+      "what": "The Next step column of buttons",
+      "why": "L-next-step: the steps are in the model's lifecycle and lead each order's record and ··· menu."
+    },
+    {
+      "what": "The status badge and the labor and materials icons inside the name cell",
+      "why": "Status and Includes are columns of their own (L-types, D53)."
+    },
+    {
+      "what": "The amount and item count on the name's second line",
+      "why": "L-name-first: the lines name the order (vendor, number, job); the amount and items aren't how people name one. Order total is a column; Items stays available, hidden."
+    },
+    {
+      "what": "The client's initials and the job's own total in the Job column",
+      "why": "The job's, not the order's."
+    },
+    {
+      "what": "The Sent and Not approved cards",
+      "why": "L-summary: they group statuses; cards come from the tasks."
+    },
+    {
+      "what": "The refresh button, “Search this table…” and the icon-only +",
+      "why": "dropsByDesign (I13, L-search, L-create)."
+    },
+    {
+      "what": "The standing filter that hides one status",
+      "why": "Its value can't be read; every status shows, and any can be filtered."
+    }
+  ]
+}
