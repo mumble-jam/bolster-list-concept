@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=9a69cd44">
-<link rel="stylesheet" href="data-list.css?v=9a69cd44">
+<link rel="stylesheet" href="system/bolster.css?v=ee679287">
+<link rel="stylesheet" href="data-list.css?v=ee679287">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -109,7 +109,7 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=9a69cd44"></script>
+<script src="shared/icons.js?v=ee679287"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -129,7 +129,7 @@ const C = [
   ["Page", "Create on phones", "yours", "The three frames from the floating-button research (D29): Create floats above the tab bar, shrinks to + while you scroll, and gives way to the bulk bar. A transition between the two, the label dissolving into a soft right edge rather than cut (13 Oct).", "The sizes; the morph: 300 ms with the bars, the right edge holding, the soft edge's width and timing, the + growing into the square."],
   ["Page", "Scrolling", "yours", "Research on too many fixed elements, then variant D on desktop and phones: the title scrolls away, the top bar and card header hide on scroll down and come back on scroll up.", "The 300ms slide, and keeping focus out from under the bars."],
   ["Page", "Primary and brand buttons", "yours", "Claude Design-style body, then your values from the button tuner (edge, lines, sheen, shadows, hover lift, press sink, 150ms).", "Nothing: the values are yours."],
-  ["Page", "Secondary, ghost and danger buttons", "steered", "Research asked for (10 Oct, Figma research page); you took all my recommendations: a quieter tactile secondary, no tertiary, a ghost hover that shows, red only for Delete in three weights. Then the field button folded into secondary, lifted on the page and flat on raised surfaces, a picker's value in the button's own weight (20 Oct, D78).", "The values: cement edge and shadow, hover fills, the confirmation wording “Keep jobs”."],
+  ["Page", "Secondary, ghost and danger buttons", "steered", "Research asked for (10 Oct, Figma research page); you took all my recommendations: a quieter tactile secondary, no tertiary, a ghost hover that shows, red only for Delete in three weights. Then the field button folded into secondary, lifted on the page and flat on raised surfaces, its label in regular weight (20 Oct, D78).", "The values: cement edge and shadow, hover fills, the confirmation wording “Keep jobs”."],
 
   ["Status cards", "Status cards", "yours", "Big numbers on top of the table, clickable, never tabs (8 Oct); filter cards on the page; In progress replaces Draft (9 Oct); picking a card shows its chip; then, after the research board: two kinds, KPIs by default and the lifecycle where people work through statuses, no tabs, a money bar for invoices (19 Oct, D67), then no money bar: KPIs are cards (19 Oct, D68).", "The anatomy (label, count, total), the All card and the pressed look; the work-queue rewrite of the rule, cards for flags and categories, the chip named after the card."],
   ["Status cards", "Status marks", "yours", "Shapes, not just colours: empty draft, half pending, solid booked, a slash for declined; then a set that makes room for In progress; In progress in blue (13 Oct).", "The quarter steps (dashed, quarter, half, three quarters), the 12/14px drawing and the other colours."],
@@ -143,7 +143,7 @@ const C = [
   ["Table card", "Search", "yours", "Beside the date range, in the Shopify header; just “Search”; typed words become a chip; matches highlighted in the table (9 Oct).", "Live filtering while you type, the / shortcut, highlighter yellow, and which fields get marked."],
   ["Table card", "Filter chips", "yours", "Field and value in the same grey at rest; the whole chip turns blue on hover; the × only darkens.", "Size, fill and the popover each chip opens."],
   ["Table card", "Filter value pickers", "mine", "Never discussed.", "Option lists with counts, checkbox or radio by filter type, amount ranges, Apply and Clear."],
-  ["Table card", "Date range", "yours", "The button came from your Figma sketch; search moved next to it. Then the date range picker research, implemented (14 Oct, D37): presets, a calendar, typing, the button naming its date. The button is a secondary one now, its value in the button's weight (20 Oct, D78).", "The research itself, the keyboard, typed formats, the phone sheet's drill-in, the value grammar."],
+  ["Table card", "Date range", "yours", "The button came from your Figma sketch; search moved next to it. Then the date range picker research, implemented (14 Oct, D37): presets, a calendar, typing, the button naming its date. The button is a secondary one now, in regular weight (20 Oct, D78).", "The research itself, the keyboard, typed formats, the phone sheet's drill-in, the value grammar."],
   ["Table card", "Calendar", "yours", "Asked for as a component of its own (14 Oct, D37). Weeks start on Monday, everywhere (19 Oct, D76).", "Its states: today, span ends, the band and its caps, days after today."],
   ["Table card", "Display settings", "yours", "Its icon (table-cells-columns) and tooltip; group by, row height and columns as nested menus with a check by the choice; no Sort by where the headers sort.", "Sort kept in the menu on phones, where the headers are hidden; Reset view."],
   ["Table card", "Count and Clear all", "steered", "A count with the filters (8 Oct); the card's missing chip (9 Oct).", "“31 of 132 jobs”, and the second row only once something narrows the list."],
@@ -264,6 +264,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=9a69cd44"></script>
+<script src="system/specimens/specimen.js?v=ee679287"></script>
 </body>
 </html>

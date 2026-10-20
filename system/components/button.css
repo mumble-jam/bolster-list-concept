@@ -9,7 +9,7 @@
    rows. Every button has 8px corners (D33).
    Secondary lifts off the page, and lies flat on anything already raised (a card, a dialog, a popover, a
    menu, a bar): the surface says so once (--button-body), no one picks it (D78). A button that opens a
-   picker reads back what's picked in a .button-value, in the button's own weight: Show: <span class="button-value">
+   picker reads back what's picked in a .button-value: Show: <span class="button-value">
    Everything</span>. It replaces the field button. */
 
 @layer tokens, base, components, utilities;
@@ -218,6 +218,8 @@
     --_sk: 1; --_pa: 0; --_lift: 0px;
     --_bg: var(--color-surface-default); --_bg-hover: var(--color-action-secondary-hover); --_bg-active: var(--color-action-secondary-hover);
     --_fg: var(--color-content-primary); --_fg-hover: var(--color-content-primary);
+    /* regular, lifted or flat, as the field button was: a step quieter than the CTAs' medium (D78) */
+    font-weight: var(--font-weight-regular);
     --_border: color-mix(in oklab, var(--color-action-secondary-edge) calc(var(--_b) * 100%), var(--color-line-card));
     --_border-hover: color-mix(in oklab, var(--color-action-secondary-edge) calc(var(--_b) * 100%), var(--color-line-strong));
     border-block-end-color: color-mix(in oklab, var(--color-action-secondary-edge-bottom) calc(var(--_b) * 100%), var(--_border-state, var(--_border)));
@@ -234,8 +236,8 @@
   .button[data-variant="secondary"]:active:not(:disabled, [aria-disabled="true"]) { --_sk: 0.3; --_pa: 0.08; --_lift: calc(1px * var(--_b)); transition-duration: 30ms; }
   /* open: what it opened (a picker, a tray) is showing */
   .button[data-variant="secondary"][aria-expanded="true"] { --_border: var(--color-action-accent); --_border-hover: var(--color-action-accent); border-block-end-color: var(--color-action-accent); }
-  /* a picker's button reads back what's picked: the value in the button's weight, as every label (your call,
-     20 Oct), the icon quieter and drawn by its height, as the toolbar's are (D41) */
+  /* a picker's button reads back what's picked: the value, the icon quieter and drawn by its height, as the
+     toolbar's are (D41) */
   .button:has(> .button-value) { --_gap: var(--space-2); }
   .button > .button-value { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
   .button:has(> .button-value) > svg { inline-size: auto; block-size: 1rem; color: var(--color-content-secondary); }
