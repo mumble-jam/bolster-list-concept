@@ -111,7 +111,7 @@
      tinted with the page, and the corner is 12 with 4 on the rows, 8 in from the edge, so the curves
      share a centre (D35). Re-pointed inside them, so anything nested picks it up unchanged */
   :is(.pop, .menu) {
-    --color-surface-hover: var(--color-surface-hover-control);
+    --color-surface-hover: var(--color-surface-hover-raised);
     --color-line-default: var(--color-line-card);
     border-color: var(--color-line-card);
     box-shadow: var(--shadow-popover);

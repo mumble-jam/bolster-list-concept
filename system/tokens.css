@@ -176,6 +176,9 @@
     --color-surface-hover: light-dark(var(--color-cement-200), var(--color-pitch-black-900));
     /* hover inside menus, popovers and the table card's header: a step stronger, since it sits on white */
     --color-surface-hover-control: light-dark(var(--color-cement-300), var(--color-pitch-black-900));
+    /* a row's hover inside a menu or popover: a step past the raised surface it sits on (in dark the control's
+       step is the raised surface itself, so it wouldn't show) */
+    --color-surface-hover-raised: light-dark(var(--color-cement-300), var(--color-pitch-black-800));
     /* the row whose record is open beside the list */
     --color-surface-current: light-dark(var(--color-cement-300), var(--color-pitch-black-900));
     --color-surface-selected: light-dark(
