@@ -249,6 +249,51 @@ window.BolsterShell = (() => {
     pop.style.left = `${left}px`; pop.style.top = `${Math.max(12, top)}px`;
   }
 
+
+  // The canvas grid, every page's background (D81, shell.css): the shell puts its two layers in the main area,
+  // sizes the cells from the page header and eases a light toward the pointer, one write per frame, on the
+  // layers alone. data-grid="off" on the root (Concept controls, kept in this browser) turns it off. The
+  // list's grid panel tunes it: canvas.set({ div, trail }); the rest are --net-* properties on the root.
+  const canvas = (() => {
+    const v = { div: 2, trail: 0.8 };
+    let cell = () => {};
+    function start() {
+      const main = document.querySelector(".app-main"), head = main?.querySelector(".page-header");
+      if (!main) return;
+      try { if (localStorage.getItem("bolster-concepts:grid") === "off") document.documentElement.dataset.grid = "off"; } catch {}
+      if (!main.querySelector(":scope > .canvas-layers")) main.insertAdjacentHTML("afterbegin", '<div class="canvas-layers" aria-hidden="true"><div class="canvas-glow"></div><div class="canvas-net"></div></div>');
+      const layers = main.querySelector(":scope > .canvas-layers"), net = layers.querySelector(".canvas-net"), lay = layers.style;
+      cell = () => head && document.documentElement.style.setProperty("--net-cell", `${head.offsetHeight / v.div}px`);
+      if (head) new ResizeObserver(() => cell()).observe(head);
+      const still = matchMedia("(prefers-reduced-motion: reduce)");
+      let px = 0, py = 0, x = 0, y = 0, raf = 0, placed = false, over = false;
+      const tick = () => {
+        raf = 0;
+        const n = net.getBoundingClientRect();
+        // how far the layers have stuck below the top of the page, so the pattern stays on the page
+        lay.setProperty("--_oy", `${Math.round(n.top - main.getBoundingClientRect().top)}px`);
+        if (!over) return;
+        const tx = px - n.left, ty = py - n.top, k = still.matches ? 0 : v.trail;
+        if (!placed) { x = tx; y = ty; placed = true; }
+        x += (tx - x) * (1 - k); y += (ty - y) * (1 - k);
+        lay.setProperty("--_nx", `${x.toFixed(1)}px`); lay.setProperty("--_ny", `${y.toFixed(1)}px`);
+        if (Math.abs(tx - x) + Math.abs(ty - y) > 0.3) go();
+      };
+      const go = () => { if (!raf) raf = requestAnimationFrame(tick); };
+      main.addEventListener("pointermove", (e) => {
+        if (e.pointerType === "touch" || document.documentElement.dataset.grid === "off") return;
+        px = e.clientX; py = e.clientY; over = true;
+        lay.setProperty("--_vis", "1");
+        go();
+      });
+      main.addEventListener("pointerleave", () => { lay.setProperty("--_vis", "0"); over = placed = false; });
+      addEventListener("scroll", go, { passive: true });
+      addEventListener("resize", go);
+      go();
+    }
+    return { start, set: (o) => { Object.assign(v, o); cell(); }, get: () => ({ ...v }) };
+  })();
+
   function mount(o) {
     opts = { ...opts, ...o };
     shell = document.querySelector(".app-shell");
@@ -257,6 +302,7 @@ window.BolsterShell = (() => {
     hydrateIcons();
     setCurrent(opts.current);
     railBehaviour();
+    canvas.start();
 
     const narrow = matchMedia("(max-width: 1023px)");
     const phone = matchMedia("(max-width: 767px)");
@@ -337,5 +383,5 @@ window.BolsterShell = (() => {
     return { show: () => set(false), stick };
   }
 
-  return { mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling, week };
+  return { mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling, week, canvas };
 })();

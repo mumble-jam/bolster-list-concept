@@ -32,7 +32,11 @@
     // inside a modal sheet the tooltip lives in it, or the sheet would cover it
     if (tip.parentElement !== host()) { if (tip.matches(":popover-open")) tip.hidePopover(); host().append(tip); }
     tip.textContent = text;
-    if (!tip.matches(":popover-open")) tip.showPopover();
+    // focus can land while another popover is still opening (a page moving focus as its menu opens or closes),
+    // and the browser refuses a second one mid-show: then the tip comes a frame later, if it's still wanted
+    if (!tip.matches(":popover-open")) {
+      try { tip.showPopover(); } catch { requestAnimationFrame(() => { if (on === el && el.isConnected && !tip.matches(":popover-open")) { tip.showPopover(); place(el); } }); return; }
+    }
     place(el);
   }
   function hide() {

@@ -300,8 +300,11 @@
     fillPop(); pop.showPopover(); place();
     ($("[aria-checked=true]", pop) || $("input, button", pop))?.focus({ preventScroll: true });
   }
-  // at once on closing (beforetoggle): toggle comes later, when another picker may own the popover already
-  pop.addEventListener("beforetoggle", (e) => { if (e.target === pop && e.newState === "closed") { popFor?.from?.setAttribute("aria-expanded", "false"); const f = popFor?.from; popFor = null; if (f?.isConnected && pop.contains(document.activeElement)) f.focus({ preventScroll: true }); } });
+  // closing: the opener's state at once (beforetoggle; toggle comes later, when another picker may own the
+  // popover already), focus back once it's closed (toggle), unless another popover has opened meanwhile
+  let refocus = null;
+  pop.addEventListener("beforetoggle", (e) => { if (e.target === pop && e.newState === "closed") { const f = popFor?.from; f?.setAttribute("aria-expanded", "false"); popFor = null; refocus = f?.isConnected && pop.contains(document.activeElement) ? f : null; } });
+  pop.addEventListener("toggle", (e) => { if (e.target === pop && e.newState === "closed" && refocus && !pop.matches(":popover-open")) refocus.focus({ preventScroll: true }); refocus = null; });
   function apply(change, words) {
     const list = targets();
     list.forEach(change);

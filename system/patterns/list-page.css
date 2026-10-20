@@ -32,7 +32,8 @@
      The page title scrolls away. Scrolling down mid-list hides the top bar and the card header (only the
      column header stays, at the very top); scrolling up a little brings them back, sliding in 300 ms.
      The rail and sidebar take the top bar's place while it's away. Focus is never left under a bar. */
-  .page-header { position: relative; inset-block-start: auto; }
+  /* the page header scrolls away here, so it needn't cover the page: the canvas grid shows behind it (D81) */
+  .page-header { position: relative; inset-block-start: auto; background: transparent; }
   .top-bar, .list-toolbar { transition: translate 300ms var(--ease-out); }
   /* (the rail keeps its own width and shadow animations; the tablet sidebar keeps its slide) */
   .rail { transition: inline-size var(--duration-medium) var(--ease-out), box-shadow var(--duration-medium) var(--ease-out), inset-block-start 300ms var(--ease-out), block-size 300ms var(--ease-out); }

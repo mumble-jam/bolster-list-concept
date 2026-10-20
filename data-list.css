@@ -46,60 +46,6 @@
   .notes li b { font-weight: var(--font-weight-medium); }
   @media (max-width: 767px) { body[data-selecting] .concept-controls { display: none; } }
 
-  /* ---------- trying out: the canvas grid (from the grid tuner, "Mike's") ----------
-     A faint grid on the page, lit around the pointer in a soft, slightly wide ellipse that trails it a
-     little; a quarter of it stays everywhere, so phones (no pointer) still see it. In dark, a soft
-     blue-violet light sits under it. Decoration only: behind the content, hidden from screen readers,
-     ignores the pointer, never on the cards.
-     The cells are half as tall as the page header (the panel can make them a whole, third or quarter) and the pattern starts
-     at the main area's top-right corner, so one line runs exactly along the header's bottom rule.
-     Every number is a --net-* property; the grid panel (Concept controls → Tune the grid) sets them. */
-  @property --_vis { syntax: "<number>"; inherits: true; initial-value: 0; }
-  :root {
-    --net-cell: 32px; --net-w: 1px; --net-r: 260px; --net-ratio: 1.3; --net-core: 10%; --net-peak: 1; --net-base: 0.25;
-    --net-line-la: 0.09; --net-line-d: var(--color-flame-white); --net-line-da: 0.07;
-    --net-glow-l: var(--color-cement-200); --net-glow-la: 0; --net-glow-d: var(--color-blue-print-300); --net-glow-da: 0.12;
-    --net-gr: 420px; --net-fade: 800ms;
-  }
-  /* the page header scrolls away now, so it needn't cover the page: the grid shows behind it */
-  .page-header { background: transparent; }
-  /* Cheap to run: the pointer's position, the fade and the scroll offset are written on the layers alone
-     (two elements, nothing inside them), never on the main area, so the table never restyles; and the
-     layers are one screen tall, stuck to the viewport, so a frame repaints one screen, not the whole page.
-     The grid still scrolls with the page: its pattern is shifted by how far the layers have stuck (--_oy). */
-  .app-main { position: relative; isolation: isolate; }
-  /* on by default; Concept controls can turn it off (data-grid is set from there) */
-  :root:not([data-grid]) .canvas-layers { display: none; }
-  .canvas-layers {
-    position: absolute; inset: 0; z-index: -1; pointer-events: none; overflow: clip;
-    display: grid; grid-template: 1fr / 1fr;
-    --_nx: 50%; --_ny: 0px; --_oy: 0px; --_vis: 0; transition: --_vis var(--net-fade) var(--ease-out);
-  }
-  .canvas-net, .canvas-glow { grid-area: 1 / 1; align-self: start; position: sticky; inset-block-start: 0; block-size: 100dvh; }
-  .canvas-net {
-    /* the light theme's line: cement on the warm page, black on cool, unless the panel picked one */
-    --_line-l: var(--net-line-l, var(--color-cement-950));
-    --_c: light-dark(rgb(from var(--_line-l) r g b / var(--net-line-la)), rgb(from var(--net-line-d) r g b / var(--net-line-da)));
-    background-image: linear-gradient(to left, var(--_c) var(--net-w), transparent var(--net-w)), linear-gradient(to bottom, var(--_c) var(--net-w), transparent var(--net-w));
-    background-size: var(--net-cell) var(--net-cell);
-    /* from the top-right corner; the horizontal lines sit on the header's rule (its last pixel row) */
-    background-position: right 0 top calc(var(--net-w) * -1 - var(--_oy));
-    mask-image:
-      radial-gradient(ellipse calc(var(--net-r) * var(--net-ratio)) var(--net-r) at var(--_nx) var(--_ny),
-        rgb(0 0 0 / calc(var(--net-peak) * var(--_vis))) var(--net-core),
-        rgb(0 0 0 / calc(var(--net-peak) * var(--_vis) * 0.84)) calc(var(--net-core) + (100% - var(--net-core)) * 0.25),
-        rgb(0 0 0 / calc(var(--net-peak) * var(--_vis) * 0.5)) calc(var(--net-core) + (100% - var(--net-core)) * 0.5),
-        rgb(0 0 0 / calc(var(--net-peak) * var(--_vis) * 0.16)) calc(var(--net-core) + (100% - var(--net-core)) * 0.75),
-        transparent),
-      linear-gradient(rgb(0 0 0 / var(--net-base)), rgb(0 0 0 / var(--net-base)));
-  }
-  .canvas-glow {
-    background: radial-gradient(circle var(--net-gr) at var(--_nx) var(--_ny),
-      light-dark(rgb(from var(--net-glow-l) r g b / calc(var(--net-glow-la) * var(--_vis))), rgb(from var(--net-glow-d) r g b / calc(var(--net-glow-da) * var(--_vis)))),
-      light-dark(rgb(from var(--net-glow-l) r g b / calc(var(--net-glow-la) * var(--_vis) * 0.4)), rgb(from var(--net-glow-d) r g b / calc(var(--net-glow-da) * var(--_vis) * 0.4))) 40%,
-      transparent 75%);
-  }
-
   /* tuner panels (the grid, the cards): concept tooling, dressed like the concept controls */
   .tuner-panel {
     position: fixed; inset-inline-start: var(--space-4); inset-block-end: var(--space-4); z-index: var(--z-toast);

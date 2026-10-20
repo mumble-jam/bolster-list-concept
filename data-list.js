@@ -1388,7 +1388,7 @@
     }
     if (t.id === "cc-state") { st.mode = t.value; st.selected.clear(); st.picking = false; render(); }
     if (t.id === "cc-grid") {
-      document.documentElement.toggleAttribute("data-grid", t.checked);
+      if (t.checked) delete document.documentElement.dataset.grid; else document.documentElement.dataset.grid = "off";
       $('[data-tune="net"]').hidden = !t.checked;
       if (!t.checked) tuners.find((x) => x.id === "net")?.close();
       try { localStorage.setItem("bolster-concepts:grid", t.checked ? "on" : "off"); } catch {}
@@ -1625,12 +1625,10 @@ ${JSON.stringify(v)}`;
   }
   document.addEventListener("click", (e) => { const b = e.target.closest("[data-tune]"); if (b) tuners.find((t) => t.id === b.dataset.tune)?.toggle(); });
 
-  // ---------- canvas grid: cells sized from the page header, a light that eases toward the pointer ----------
+  // ---------- canvas grid: the shell's (BolsterShell.canvas, D81); its panel tunes it here ----------
   {
-    const main = $(".app-main"), head = $(".page-header"), root = document.documentElement.style;
-    let grid;
-    const cell = () => root.setProperty("--net-cell", `${head.offsetHeight / grid.v.div}px`);
-    grid = tuner({
+    const root = document.documentElement.style;
+    const grid = tuner({
       id: "net", title: "Grid",
       groups: [
         ["Grid", [["div", "Cells per header height", 1, 4, 1, ""], ["w", "Line width", 0.5, 3, 0.5, "px"]]],
@@ -1647,38 +1645,9 @@ ${JSON.stringify(v)}`;
           "--net-glow-d": v.glowD, "--net-glow-da": v.glowDa, "--net-gr": px("gr"), "--net-fade": `${v.fade}ms` }).forEach(([k, x]) => root.setProperty(k, x));
         // the light line follows the canvas (cement on warm, black on cool) until a colour is picked
         if (v.lineL === def.lineL) root.removeProperty("--net-line-l"); else root.setProperty("--net-line-l", v.lineL);
-        if (grid) cell();
+        BolsterShell.canvas.set({ div: v.div, trail: v.trail });
       },
     });
-    new ResizeObserver(cell).observe(head);
-
-    // the light eases toward the pointer, one write per frame, on the layers only (see the CSS)
-    const layers = $(".canvas-layers"), net = $(".canvas-net"), lay = layers.style;
-    const still = matchMedia("(prefers-reduced-motion: reduce)");
-    let px = 0, py = 0, x = 0, y = 0, raf = 0, placed = false, over = false;
-    const tick = () => {
-      raf = 0;
-      const n = net.getBoundingClientRect();
-      // how far the layers have stuck below the top of the page, so the pattern stays on the page
-      lay.setProperty("--_oy", `${Math.round(n.top - main.getBoundingClientRect().top)}px`);
-      if (!over) return;
-      const tx = px - n.left, ty = py - n.top, k = still.matches ? 0 : grid.v.trail;
-      if (!placed) { x = tx; y = ty; placed = true; }
-      x += (tx - x) * (1 - k); y += (ty - y) * (1 - k);
-      lay.setProperty("--_nx", `${x.toFixed(1)}px`); lay.setProperty("--_ny", `${y.toFixed(1)}px`);
-      if (Math.abs(tx - x) + Math.abs(ty - y) > 0.3) go();
-    };
-    const go = () => { if (!raf) raf = requestAnimationFrame(tick); };
-    main.addEventListener("pointermove", (e) => {
-      if (e.pointerType === "touch" || !document.documentElement.hasAttribute("data-grid")) return;
-      px = e.clientX; py = e.clientY; over = true;
-      lay.setProperty("--_vis", "1");
-      go();
-    });
-    main.addEventListener("pointerleave", () => { lay.setProperty("--_vis", "0"); over = placed = false; });
-    addEventListener("scroll", go, { passive: true });
-    addEventListener("resize", go);
-    go();
   }
 
   // ---------- tactile cards: the CTAs' body for cards, quieter (see the CSS) ----------
@@ -1722,11 +1691,9 @@ ${JSON.stringify(v)}`;
     if (!on) cards.close();
   };
 
-  // the page grid: on unless it was turned off in this browser
+  // the page grid: on unless it was turned off in this browser (the shell reads the same setting)
   {
-    let on = true;
-    try { on = localStorage.getItem("bolster-concepts:grid") !== "off"; } catch {}
-    document.documentElement.toggleAttribute("data-grid", on);
+    const on = document.documentElement.dataset.grid !== "off";
     $("#cc-grid").checked = on;
     $('[data-tune="net"]').hidden = !on;
   }

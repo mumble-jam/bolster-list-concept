@@ -29,7 +29,7 @@
   .cal-arrows { display: inline-flex; }
   .cal-period { margin: 0 0 0 var(--space-1); font-family: var(--font-display, inherit); font-size: var(--text-xl); line-height: var(--leading-xl); font-weight: var(--font-weight-medium); white-space: nowrap; }
   .cal-controls > .button { flex: none; }
-  /* the rule between what's shown and how it's laid out, as the list's toolbar has before display settings */
+  /* the rule between the view and what's shown, and Unscheduled, as the list's toolbar has before display settings */
   .cal-sep { margin-inline: var(--space-1); }
   .cal-count { min-inline-size: 1.25rem; padding-inline: var(--space-1); border-radius: var(--radius-full); background: var(--color-surface-tint); color: var(--color-content-secondary); font-size: var(--text-xs); line-height: var(--leading-xs); text-align: center; font-variant-numeric: tabular-nums; }
 
@@ -222,7 +222,7 @@
     .cal-bar { gap: var(--space-2); }
     .cal-where { inline-size: 100%; }
     .cal-period { font-size: var(--text-lg); line-height: var(--leading-lg); }
-    #pick-view, #tray-toggle span:not(.cal-count) { display: none; }
+    .cal-views, #tray-toggle span:not(.cal-count) { display: none; }
     .cal-controls { inline-size: 100%; }
     .cal-controls > .button { flex: 1 1 0; min-inline-size: 0; }
     #tray-toggle { flex: none; }

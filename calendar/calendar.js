@@ -256,7 +256,7 @@
     const on = KINDS.filter((k) => st.show[k.key]), label = (id, name, text) => { $(`#${id}-text`).textContent = text; $(`#pick-${id}`).setAttribute("aria-label", `${name}: ${text}`); };
     label("show", "Show", on.length === KINDS.length ? "Everything" : on.length ? on.map((k) => k.label).join(", ") : "Nothing");
     label("people", "People", !st.people ? "Everyone" : together(OWNERS.filter((p) => st.people.has(p.id)).map((p) => (p.me ? "You" : p.name.split(" ")[0]))));
-    label("view", "View", VIEWS.find(([v]) => v === st.view)[1]);
+    $$("#views input").forEach((r) => (r.checked = r.value === st.view));
     $("#tray-count").textContent = tray.length || "";
     $("#tray-toggle").setAttribute("aria-label", `Unscheduled: ${tray.length ? `${tray.length} ${tray.length === 1 ? "job" : "jobs"}` : "none"}`);
     renderTray();
@@ -318,14 +318,20 @@
     BolsterShell.placePopover(pop, from, { start });
     ($("h3[tabindex]", pop) || $("input[type=radio]:checked", pop) || $("input, button:not([data-close-pop])", pop) || $("[data-close-pop]", pop))?.focus({ preventScroll: true, focusVisible: byKey });
   }
-  // on closing, at once (beforetoggle, not toggle, which comes later: by then another picker may own the
-  // popover, and the one that opened it would keep its open look)
+  // closing: the opener's state at once (beforetoggle, not toggle, which comes later: by then another picker
+  // may own the popover, and the one that opened it would keep its open look); focus back once it's closed
+  // (toggle: focusing sooner can show a tooltip while the next popover is opening), unless one has opened
+  let refocus = null;
   pop.addEventListener("beforetoggle", (e) => {
     if (e.newState !== "closed") return;
     const from = popFor?.from; popFor = null;
     from?.setAttribute("aria-expanded", "false");
     if (from?.id === "tray-toggle") renderTray();
-    if (from?.isConnected && (pop.contains(document.activeElement) || document.activeElement === document.body)) from.focus({ preventScroll: true });
+    refocus = from?.isConnected && (pop.contains(document.activeElement) || document.activeElement === document.body) ? from : null;
+  });
+  pop.addEventListener("toggle", (e) => {
+    if (e.newState === "closed" && refocus?.isConnected && !pop.matches(":popover-open")) refocus.focus({ preventScroll: true });
+    refocus = null;
   });
   // every popover closes from its corner as well as with Escape or a click outside
   const closeBtn = () => `<button type="button" class="button cal-pop-close" data-variant="ghost" data-size="sm" data-icon-only data-close-pop aria-label="Close" data-tip="Close">${ic("xmark", 16, { optical: true })}</button>`;
@@ -366,9 +372,6 @@
   function checksHtml(title, rows) {
     return `<div class="pop-head"><h3>${title}</h3>${closeBtn()}</div><div class="pop-body">${rows.map((r) => `<label class="option"><input type="checkbox" class="checkbox" ${r.attr}${r.on ? " checked" : ""}><span class="option-label"><span class="menu-icon">${r.icon}</span>${esc(r.label)}</span></label>`).join("")}</div>`;
   }
-  // how the work is laid out (C-views): one at a time, as radios
-  const VIEWS = [["month", "Month"], ["week", "Week"], ["day", "Day"], ["crew", "Crew"]];
-  const viewHtml = () => `<div class="pop-head"><h3>View</h3>${closeBtn()}</div><div class="pop-body" role="radiogroup" aria-label="View">${VIEWS.map(([v, l]) => `<label class="option"><input type="radio" class="radio" name="cal-view" value="${v}" data-view-pick${v === st.view ? " checked" : ""}><span class="option-label">${l}</span></label>`).join("")}</div>`;
   const showHtml = () => checksHtml("Show", KINDS.map((k) => ({ attr: `data-show="${k.key}"`, on: st.show[k.key], icon: ic(k.icon, 14), label: k.label })));
   const peopleChecks = () => checksHtml("People", [OWNERS.find((p) => p.me), ...OWNERS.filter((p) => !p.me)].map((p) => ({ attr: `data-person-pick="${p.id}"`, on: !st.people || st.people.has(p.id), icon: avatar(p, "sm"), label: p.me ? `${p.name} (you)` : p.name })));
   function scheduleHtml(u) {
@@ -481,7 +484,6 @@
     if ((el = q("[data-pick-day]"))) { st.at = el.dataset.pickDay; render(); $(`#ag-${st.at}`)?.scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); return; }
     if ((el = q("#pick-show"))) return openPop("show", el, showHtml, { label: "Show" });
     if ((el = q("#pick-people"))) return openPop("people", el, peopleChecks, { label: "People" });
-    if ((el = q("#pick-view"))) return openPop("view", el, viewHtml, { label: "View" });
     if ((el = q("#tray-toggle"))) {
       if (trayWide.matches) { st.trayOpen = !st.trayOpen; return renderTray(); }
       return openPop("tray", el, trayListHtml, { label: "Unscheduled" });
@@ -493,13 +495,8 @@
     if ((el = q("[data-add-day]"))) return toast(`Concept only: adding on ${f.short(el.dataset.addDay)} isn't wired up.`);
     if (q("#create")) return toast("Concept only: Create event isn't wired up.");
   });
-  // a pick by pointer closes the view picker; arrows move through it, and Escape or Close leave it
-  let pointerPick = false;
-  pop.addEventListener("pointerdown", () => (pointerPick = true));
-  pop.addEventListener("keydown", () => (pointerPick = false));
+  $("#views").addEventListener("change", (e) => { st.view = e.target.value; try { localStorage.setItem("cal-view", st.view); } catch {} render(); });
   document.addEventListener("change", (e) => {
-    const v = e.target.closest("[data-view-pick]");
-    if (v) { st.view = v.value; try { localStorage.setItem("cal-view", st.view); } catch {} render(); if (pointerPick) pop.hidePopover(); else { popFor.from = $("#pick-view"); popFor.from.setAttribute("aria-expanded", "true"); } return; }
     const s = e.target.closest("[data-show]");
     if (s) { st.show[s.dataset.show] = s.checked; render(); popFor.from = $("#pick-show"); popFor.from.setAttribute("aria-expanded", "true"); return; }
     const p = e.target.closest("[data-person-pick]");
