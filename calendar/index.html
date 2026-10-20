@@ -42,14 +42,11 @@
           <h2 class="cal-period" id="period" aria-live="polite"></h2>
         </div>
         <div class="cal-controls">
-          <div class="segmented cal-views" role="radiogroup" aria-label="View" id="views">
-            <label class="segmented-option"><input type="radio" name="view" value="month"> Month</label>
-            <label class="segmented-option"><input type="radio" name="view" value="week"> Week</label>
-            <label class="segmented-option"><input type="radio" name="view" value="day"> Day</label>
-            <label class="segmented-option"><input type="radio" name="view" value="crew"> Crew</label>
-          </div>
-          <button type="button" class="button" data-variant="secondary" data-size="sm" id="pick-show" aria-haspopup="dialog" aria-expanded="false"><i data-icon="layers" data-size="16"></i><span class="button-value" id="show-text">Show</span></button>
-          <button type="button" class="button" data-variant="secondary" data-size="sm" id="pick-people" aria-haspopup="dialog" aria-expanded="false"><i data-icon="user" data-size="16"></i><span class="button-value" id="people-text">Everyone</span></button>
+          <!-- what's shown, then how it's laid out (D80): the pickers read back their value, a rule between -->
+          <button type="button" class="button" data-variant="secondary" data-size="sm" id="pick-show" aria-haspopup="dialog" aria-expanded="false"><span class="button-value" id="show-text">Show</span><i data-icon="chevron-down" data-size="14"></i></button>
+          <button type="button" class="button" data-variant="secondary" data-size="sm" id="pick-people" aria-haspopup="dialog" aria-expanded="false"><span class="button-value" id="people-text">Everyone</span><i data-icon="chevron-down" data-size="14"></i></button>
+          <span class="list-bar-sep cal-sep" aria-hidden="true"></span>
+          <button type="button" class="button" data-variant="secondary" data-size="sm" id="pick-view" aria-haspopup="dialog" aria-expanded="false"><span class="button-value" id="view-text">Month</span><i data-icon="chevron-down" data-size="14"></i></button>
           <button type="button" class="button" data-variant="secondary" data-size="sm" id="tray-toggle" aria-expanded="false" aria-controls="tray" data-tip="Unscheduled"><i data-icon="inbox" data-size="16"></i><span>Unscheduled</span><span class="cal-count" id="tray-count"></span></button>
         </div>
       </div>
@@ -96,7 +93,7 @@
     <section>
       <h3>Adjusted from the research</h3>
       <ul>
-        <li>Show and People read back in their buttons rather than as chips: there are only two, always set, so chips would only repeat them.</li>
+        <li>Show and People read back in their buttons rather than as chips: there are only two, always set, so chips would only repeat them. The view is a button like them (“Month ⌄”) rather than a segmented control, after a rule that parts what's shown from how it's laid out; Unscheduled sits with the view, as a way of looking at the work.</li>
         <li>Day is one column of hours; per-person columns are Crew's job.</li>
         <li>Phones have no Month: the strip and the agenda carry it, and the month is a week away with the arrows.</li>
       </ul>

@@ -122,7 +122,8 @@
 
   <section class="spec-section" id="value">
     <h2>A picker's button reads back what's picked</h2>
-    <p>A button that opens a picker (a popover, a sheet on phones) says what's picked, in a <code>.button-value</code>, its icon quieter and drawn by its height. <code>aria-haspopup</code> names what it opens; while it's open (<code>aria-expanded="true"</code>) its edge is the accent. It replaces the field button.</p>
+    <p>A button that opens a picker (a popover, a sheet on phones) says what's picked, in a <code>.button-value</code>, its icon quieter and drawn by its height. <code>aria-haspopup</code> names what it opens; while it's open (<code>aria-expanded="true"</code>) its edge is the accent. It replaces the field button. A picker that names no icon of its own ends in a chevron, so it reads as one that opens a list.</p>
+    <div class="spec-panel" data-surface="canvas"><div class="cluster"><button class="button" data-variant="secondary" data-size="sm" aria-haspopup="dialog" aria-expanded="false"><span class="button-value">Everything</span><i data-icon="chevron-down" data-size="14"></i></button><button class="button" data-variant="secondary" data-size="sm" aria-haspopup="dialog" aria-expanded="false"><span class="button-value">Month</span><i data-icon="chevron-down" data-size="14"></i></button><span class="spec-note">a picker with a chevron (D80)</span></div></div>
   </section>
 
   <section class="spec-section">
