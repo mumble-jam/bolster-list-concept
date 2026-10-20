@@ -239,7 +239,8 @@
   /* a picker's button reads back what's picked: the value, the icon quieter and drawn by its height, as the
      toolbar's are (D41) */
   .button:has(> .button-value) { --_gap: var(--space-2); }
-  .button > .button-value { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
+  /* cut with an ellipsis when long; room above and below, given back, so the cut never takes a descender */
+  .button > .button-value { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; padding-block: 0.2em; margin-block: -0.2em; }
   .button:has(> .button-value) > svg { inline-size: auto; block-size: 1rem; color: var(--color-content-secondary); }
   .button[data-variant="secondary"]:is(:disabled, [aria-disabled="true"]) { box-shadow: none; translate: none; border-block-end-color: var(--color-surface-disabled); }
   @media (prefers-reduced-motion: reduce) { .button[data-variant="secondary"] { --_lift: 0px !important; } }
