@@ -15,7 +15,8 @@
   .todo-panel .list-chips { display: flex; }
   /* trying out (Concept controls): the toolbar on the page, not a card; the search becomes a field of its
      own there, as the filters beside it are. Not a rule yet */
-  :root[data-todo-bar="surface"] .todo-bar.card { border: 0; border-radius: 0; background: none; background-image: none; box-shadow: none; }
+  /* on the page, the card is only a wrapper: what sits in it reads the page (D78, D83) */
+  :root[data-todo-bar="surface"] .todo-bar.card { border: 0; border-radius: 0; background: none; background-image: none; box-shadow: none; --surface-raised: 0; }
   :root[data-todo-bar="surface"] .todo-bar .list-bar { padding: 0; }
   :root[data-todo-bar="surface"] .todo-bar .list-toolbar { border-radius: 0; }
   /* the search: on the card, the table card's bare field; on the page, an icon on the right that opens into
@@ -25,7 +26,7 @@
      get the row below only when there are some */
   :root[data-todo-bar="surface"] .todo-bar .todo-bar-only { display: block; }
   :root[data-todo-bar="surface"] .todo-bar #bar-count { margin: 0; }
-  :root[data-todo-bar="surface"] .todo-bar .add-filter { inline-size: var(--control-height-sm); padding: 0; justify-content: center; gap: 0; border-color: transparent; background: none; }
+  :root[data-todo-bar="surface"] .todo-bar .add-filter { inline-size: var(--control-height-sm); padding: 0; justify-content: center; gap: 0; border-color: transparent; background: none; --_b: 0; }
   :root[data-todo-bar="surface"] .todo-bar .add-filter span { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   @media (hover: hover) { :root[data-todo-bar="surface"] .todo-bar .add-filter:hover { border-color: transparent; background: var(--color-action-ghost-hover); } }
   :root[data-todo-bar="surface"] .todo-bar .add-filter[aria-expanded="true"] { background: var(--color-action-ghost-hover); }
@@ -36,7 +37,6 @@
   :root[data-todo-bar="surface"] .todo-search-open { display: inline-flex; margin-inline-start: auto; }
   :root[data-todo-bar="surface"] :is(.list-bar[data-search-open], .list-bar:has(input:not(:placeholder-shown))) .todo-search-open { display: none; }
   @media (hover: hover) { :root[data-todo-bar="surface"] .todo-bar .list-search:hover { border-color: var(--color-line-strong); background: var(--color-surface-default); } }
-  :root[data-todo-bar="surface"] .todo-bar .list-bar-sep { background: var(--color-line-default); }
   :root[data-todo-bar="surface"] .todo-bar .list-chips { padding: var(--space-2) 0 0; }
   .todo-groups { display: grid; gap: var(--space-3); }
 

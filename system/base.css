@@ -15,6 +15,12 @@
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }
 
+  /* which surface a thing sits on, said once by the surface: 0 the page, 1 anything raised (a card, a dialog,
+     a popover, a menu, a bar). Buttons read it for their body (D78), a toolbar's rule for its line (D83).
+     data-surface marks one the list doesn't know. */
+  :where(.card, .dialog, .pop, .menu, .floating-bar, .toast, [data-surface="raised"]) { --surface-raised: 1; }
+  :where([data-surface="canvas"]) { --surface-raised: 0; }
+
   html {
     font-family: var(--font-sans);
     -webkit-text-size-adjust: 100%;

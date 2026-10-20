@@ -8,7 +8,7 @@
    hover lifts 1px, a press sinks at once and eases back. Ghost and a quiet danger for toolbars and
    rows. Every button has 8px corners (D33).
    Secondary lifts off the page, and lies flat on anything already raised (a card, a dialog, a popover, a
-   menu, a bar): the surface says so once (--button-body), no one picks it (D78). A button that opens a
+   menu, a bar): the surface says so once (--surface-raised, base.css), no one picks it (D78). A button that opens a
    picker reads back what's picked in a .button-value: Show: <span class="button-value">
    Everything</span>. It replaces the field button. */
 
@@ -209,12 +209,11 @@
   /* in dark a white top line shows at a whisper, and carries the edge */
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --_sec-line: 0.06; } }
   :root[data-theme="dark"] { --_sec-line: 0.06; }
-  /* the surface decides: the page lifts a secondary button, anything raised lays it flat (D78) */
-  :where(.card, .dialog, .pop, .menu, .floating-bar, .toast, [data-surface="raised"]) { --button-body: 0; }
-  :where([data-surface="canvas"]) { --button-body: 1; }
+  /* the surface decides (--surface-raised, base.css): the page lifts a secondary button, anything raised lays
+     it flat (D78) */
   .button[data-variant="secondary"] {
     /* body: 1 lifted (an edge, a darker bottom edge, a white top line, a shadow), 0 flat (the card's edge) */
-    --_b: var(--button-body, 1);
+    --_b: calc(1 - var(--surface-raised, 0));
     --_sk: 1; --_pa: 0; --_lift: 0px;
     --_bg: var(--color-surface-default); --_bg-hover: var(--color-action-secondary-hover); --_bg-active: var(--color-action-secondary-hover);
     --_fg: var(--color-content-primary); --_fg-hover: var(--color-content-primary);

@@ -16,7 +16,7 @@
   /* ---------- concept controls (tooling, not part of the design) ---------- */
   .concept-controls {
     position: fixed; inset-inline-end: var(--space-4); inset-block-end: var(--space-4); z-index: var(--z-toast);
-    --button-body: 0; /* a raised panel: its buttons lie flat (D78) */
+    --surface-raised: 1; /* a raised panel: its buttons lie flat (D78) */
     inline-size: 17rem; max-inline-size: calc(100vw - var(--space-8));
     border: 2px dashed var(--color-action-accent); border-radius: var(--radius-lg);
     background: var(--color-surface-raised); box-shadow: var(--shadow-overlay);

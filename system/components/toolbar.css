@@ -44,7 +44,10 @@
   .list-search:has(input:focus-visible) { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -1px; }
   @media (hover: hover) { .list-search:hover { background: var(--color-surface-hover); } }
   .list-search:has(input:disabled) { opacity: 0.5; cursor: default; }
-  .list-bar-sep { flex: none; align-self: stretch; inline-size: var(--border-width-default); margin-block: var(--space-1); background: var(--color-line-card); }
+  /* the rule between a toolbar's groups: the card's line on a card, a step stronger on the page, where the
+     card's line is too faint on the canvas (D83) */
+  .list-bar-sep { flex: none; align-self: stretch; inline-size: var(--border-width-default); margin-block: var(--space-1);
+    background: color-mix(in oklab, var(--color-line-card) calc(var(--surface-raised, 0) * 100%), var(--color-line-default)); }
   .list-chips { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); padding: 0 var(--space-3) var(--space-3); }
   .list-chips[hidden] { display: none; }
   .filters { display: contents; }
@@ -78,7 +81,7 @@
     .list-bar .button.add-filter { inline-size: var(--control-height-sm); padding: 0; justify-content: center; gap: 0;
       --_bg: transparent; --_bg-hover: var(--color-action-ghost-hover); --_bg-active: var(--color-action-ghost-active);
       --_fg: var(--color-content-secondary); --_fg-hover: var(--color-content-primary);
-      --_border: transparent; --_border-hover: transparent; --button-body: 0; }
+      --_border: transparent; --_border-hover: transparent; --_b: 0; }
     .add-filter span { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   }
   /* the search field's hover sits on white, like a menu's: a step stronger than a row's */
