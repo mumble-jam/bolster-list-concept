@@ -86,14 +86,16 @@
       "label": "Vendor",
       "type": "record",
       "priority": 9,
-      "hidden": true
+      "hidden": true,
+      "party": "company"
     },
     {
       "key": "client",
       "label": "Client",
       "type": "record",
       "priority": 9,
-      "hidden": true
+      "hidden": true,
+      "party": "person"
     },
     {
       "key": "items",

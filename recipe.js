@@ -153,7 +153,8 @@ window.BDS_RECIPE = (() => {
       case "datetime": return (x) => !x[c.key] ? none("–") : muted(ageDays(x[c.key]) <= 1 ? `${fmt.ago(x[c.key])} ${x[c.key].toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }).toLowerCase().replace(" ", "")}` : shortDate(x[c.key]));
       case "status": return (x) => badge(empty.statusMap[x[c.key]]);
       case "person": return (x) => (x[c.key] ? person(x[c.key]) : none("–"));
-      case "record": return (x) => (x[c.key] ? `<span class="cell-person">${avatar(x[c.key], "sm")}${esc(x[c.key].name)}</span>` : none("–"));
+      // a linked person or company leads with its avatar; a job or a quote is its name alone (D87)
+      case "record": return (x) => (x[c.key] ? (c.party ? `<span class="cell-person">${avatar(x[c.key], "sm")}${esc(x[c.key].name)}</span>` : esc(x[c.key].name)) : none("–"));
       case "contact": return (x) => `<div>${esc(x[c.key].email)}</div><div class="cell-sub">${esc(x[c.key].phone)}</div>`;
       case "flags": return (x) => (x[c.key]?.length ? `<span class="cluster" style="gap:var(--space-1)">${x[c.key].slice(0, 2).map((f) => `<span class="badge" data-tone="warning">${esc(f)}</span>`).join("")}${x[c.key].length > 2 ? `<span class="badge">+${x[c.key].length - 2}</span>` : ""}</span>` : "");
       case "id": case "address": case "category": return (x) => muted(text(x[c.key]));
@@ -432,7 +433,7 @@ window.BDS_RECIPE = (() => {
       actions: recordActions(x),
       // the records it connects to, as links (L-related)
       related: [
-        ...(d.record?.related || []).filter((k) => byKey[k] && x[k]).map((k) => [byKey[k].label || cap(k), typeof x[k] === "object" ? x[k] : { name: text(x[k]) }]),
+        ...(d.record?.related || []).filter((k) => byKey[k] && x[k]).map((k) => [byKey[k].label || cap(k), typeof x[k] !== "object" ? { name: text(x[k]) } : byKey[k].party ? x[k] : { id: x[k].id, name: x[k].name }]), // an avatar only for a person or company (D87)
         // lists that point here (a vendor's orders), with a count; an inactive or new record has fewer (L-sample)
         ...(d.record?.has || []).map((h, j) => { const n = x._has?.[j] ?? 0, one = h.thing.replace(/-/g, " "); return [h.label, n ? { name: fmt.plural(n, one, `${one}s`) } : { name: "None yet", none: true }]; }), // counted in the thing's own noun
       ],
