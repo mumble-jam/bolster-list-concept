@@ -247,7 +247,7 @@
     );
     /* secondary and ghost buttons (D33): a cement body in light, the greys in dark */
     --color-action-secondary-edge: light-dark(var(--color-cement-500), var(--color-pitch-black-800));
-    --color-action-secondary-edge-bottom: light-dark(var(--color-cement-700), color-mix(in oklab, var(--color-pitch-black-800), black 35%));
+    --color-action-secondary-edge-bottom: light-dark(var(--color-cement-700), var(--color-pitch-black-900));
     --color-action-secondary-hover: light-dark(var(--color-cement-100), var(--color-pitch-black-900));
     --color-action-ghost-hover: light-dark(var(--color-cement-500), var(--color-pitch-black-800));
     --color-action-ghost-active: light-dark(color-mix(in srgb, var(--color-cement-500), var(--color-cement-700)), var(--color-pitch-black-700));
