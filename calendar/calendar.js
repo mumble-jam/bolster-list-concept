@@ -318,7 +318,9 @@
     BolsterShell.placePopover(pop, from, { start });
     ($("h3[tabindex]", pop) || $("input[type=radio]:checked", pop) || $("input, button:not([data-close-pop])", pop) || $("[data-close-pop]", pop))?.focus({ preventScroll: true, focusVisible: byKey });
   }
-  pop.addEventListener("toggle", (e) => {
+  // on closing, at once (beforetoggle, not toggle, which comes later: by then another picker may own the
+  // popover, and the one that opened it would keep its open look)
+  pop.addEventListener("beforetoggle", (e) => {
     if (e.newState !== "closed") return;
     const from = popFor?.from; popFor = null;
     from?.setAttribute("aria-expanded", "false");

@@ -228,7 +228,8 @@
     #tray-toggle { flex: none; }
     .cal-split:has(> .cal-tray:not([hidden])) { grid-template-columns: minmax(0, 1fr); }
     .cal-tray { display: none !important; }
-    .cal-card { background: none; border: 0; box-shadow: none; overflow: visible; }
+    /* the agenda is on the page, no card around it: as specific as the card's body (card.css) to undo it */
+    .cal-page .cal-card[data-view="agenda"] { background: none; border: 0; box-shadow: none; overflow: visible; }
     .cal-desk { display: none; }
     .cal-phone { display: grid; gap: var(--space-3); }
   }
@@ -258,8 +259,10 @@
   .cal-card-item[data-hue] b svg, .cal-line[data-hue] svg { color: var(--_edge); }
   .cal-card-item[data-kind="busy"] { background: repeating-linear-gradient(135deg, var(--color-surface-sunken) 0 4px, var(--color-surface-default) 4px 8px); }
   .cal-card-item:focus-visible, .cal-line:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
-  /* a phase that only runs through the day, and an empty day: one line each */
-  .cal-line { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--space-1); border: 0; background: none; color: var(--color-content-secondary); font: inherit; font-size: var(--text-sm); line-height: var(--leading-sm); text-align: start; cursor: pointer; }
+  /* a phase that only runs through the day, and an empty day: one line each, in line with the cards' text
+     (a card's padding and its edge), as the day's content; the day's heading stays outside it */
+  .cal-agenda { --_in: calc(var(--space-4) + var(--border-width-default)); }
+  .cal-line { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--_in); border: 0; background: none; color: var(--color-content-secondary); font: inherit; font-size: var(--text-sm); line-height: var(--leading-sm); text-align: start; cursor: pointer; }
   .cal-line svg { color: var(--color-content-tertiary); }
-  .cal-none { margin: 0; padding-inline: var(--space-1); font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-tertiary); }
+  .cal-none { margin: 0; padding-inline: var(--_in); font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-tertiary); }
 }

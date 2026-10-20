@@ -300,7 +300,8 @@
     fillPop(); pop.showPopover(); place();
     ($("[aria-checked=true]", pop) || $("input, button", pop))?.focus({ preventScroll: true });
   }
-  pop.addEventListener("toggle", (e) => { if (e.newState === "closed") { popFor?.from?.setAttribute("aria-expanded", "false"); const f = popFor?.from; popFor = null; if (f?.isConnected && pop.contains(document.activeElement)) f.focus({ preventScroll: true }); } });
+  // at once on closing (beforetoggle): toggle comes later, when another picker may own the popover already
+  pop.addEventListener("beforetoggle", (e) => { if (e.target === pop && e.newState === "closed") { popFor?.from?.setAttribute("aria-expanded", "false"); const f = popFor?.from; popFor = null; if (f?.isConnected && pop.contains(document.activeElement)) f.focus({ preventScroll: true }); } });
   function apply(change, words) {
     const list = targets();
     list.forEach(change);
