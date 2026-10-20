@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=177babe8">
-<link rel="stylesheet" href="specimen.css?v=177babe8">
+<link rel="stylesheet" href="../bolster.css?v=9a69cd44">
+<link rel="stylesheet" href="specimen.css?v=9a69cd44">
 <style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
 </head>
 <body>
@@ -21,7 +21,7 @@
   <p class="spec-intro">Overlays sit on the platform: tooltips are CSS only, menus use the <code>popover</code> attribute, dialogs use <code>&lt;dialog&gt;</code>. That gives Escape to close, focus handling and top-layer stacking for free, fixing the as-is overlays where Escape was ignored and focus fell to the page. Contracts: docs/interactions.md.</p>
 
   <section class="spec-section">
-    <h2>Tooltip</h2>
+    <h2 id="tooltip">Tooltip</h2>
     <p>Hover (150ms delay) or keyboard focus. For icon-only buttons the tooltip is the accessible name, via aria-labelledby.</p>
     <div class="spec-panel">
       <div class="spec-row" style="gap:var(--space-10);padding:var(--space-8) 0">
@@ -52,7 +52,7 @@
   </section>
 
   <section class="spec-section">
-    <h2>Menu</h2>
+    <h2 id="menu">Menu</h2>
     <p>Click the button. Arrow keys move, Escape or a click outside closes and focus returns to the button.</p>
     <div class="spec-panel">
       <div class="spec-row" style="align-items:flex-start;gap:var(--space-10)">
@@ -81,7 +81,7 @@
   </section>
 
   <section class="spec-section">
-    <h2>Dialog</h2>
+    <h2 id="dialog">Dialog</h2>
     <p>Centred modal for forms and filters; sheet for long pickers (bottom sheet on phones); workspace for the job modal. Escape closes all of them; clicking the backdrop closes the sheet (closedby="any").</p>
     <div class="spec-panel">
       <div class="spec-row">
@@ -142,6 +142,6 @@
     </div>
   </dialog>
 </main>
-<script src="specimen.js?v=177babe8"></script>
+<script src="specimen.js?v=9a69cd44"></script>
 </body>
 </html>

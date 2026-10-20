@@ -10,11 +10,11 @@
   const root = new URL("../", script.src); // system/
   const CONCEPT = "../index.html";
   const NAV = [
-    ["Overview", [["Catalog", "index.html"]]],
+    ["Overview", [["Catalog", "index.html"], ["Drafts", "index.html#drafts"]]],
     ["Foundations", [["Tokens", "specimens/tokens.html"], ["App shell", "specimens/shell.html"]]],
     ["Page types", [["List page", "specimens/list-page.html"], ["List recipe", "specimens/list-recipe.html"]]],
     ["List page parts", [["Summary cards", "specimens/summary-cards.html"], ["Table card", "specimens/table-card.html"], ["Record", "specimens/record.html"], ["Floating bar", "specimens/floating-bar.html"], ["Popover", "specimens/popover.html"], ["States", "specimens/states.html"]]],
-    ["Components", [["Button", "specimens/button.html"], ["Badge", "specimens/badge.html"], ["Field", "specimens/field.html"], ["Checkbox, radio, toggle", "specimens/choice.html"], ["Segmented control", "specimens/segmented-control.html"], ["Tabs", "specimens/tabs.html"], ["Tooltip, menu, dialog", "specimens/overlays.html"], ["Data table, cards, avatars, thumbnails", "specimens/data.html"], ["Toast", "specimens/toast.html"], ["Calendar", "specimens/calendar.html"], ["Icon vocabulary", "specimens/icons.html"]]],
+    ["Components", [["Button", "specimens/button.html"], ["Badge", "specimens/badge.html"], ["Field", "specimens/field.html"], ["Search field and chip", "specimens/toolbar.html"], ["Checkbox, radio, toggle", "specimens/choice.html"], ["Segmented control", "specimens/segmented-control.html"], ["Tabs", "specimens/tabs.html"], ["Tooltip, menu, dialog", "specimens/overlays.html"], ["Data table, cards, avatars, thumbnails", "specimens/data.html"], ["Toast", "specimens/toast.html"], ["Calendar", "specimens/calendar.html"], ["Icon vocabulary", "specimens/icons.html"]]],
     ["Live", [["List concept ↗", CONCEPT]]],
   ];
   const here = location.pathname.replace(/\/$/, "/index.html");
@@ -25,7 +25,7 @@
     <p class="spec-nav-note"><span class="badge" data-tone="info">Status quo · Oct 2026</span></p>` +
     NAV.map(([group, items]) => `<p class="sidebar-group">${esc(group)}</p>` + items.map(([label, path]) => {
       const url = new URL(path, root);
-      const on = url.pathname === here;
+      const on = url.pathname === here && !url.hash;
       return `<a class="sidebar-item" href="${url.href}"${on ? ' aria-current="page"' : ""}>${esc(label)}</a>`;
     }).join("")).join("");
   document.body.prepend(nav);

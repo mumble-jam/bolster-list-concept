@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Search field and chip · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=9a69cd44">
+<link rel="stylesheet" href="specimen.css?v=9a69cd44">
+<style>
+  /* specimen only: rows of examples */
+  .spec-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+  .spec-row .list-search { flex: 0 1 16rem; }
+</style>
+<style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../index.html">← Catalog</a>
+  <h1>Search field and chip</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">What a toolbar finds and narrows with, beside its buttons. The search field is bare until hovered or focused; a chip is one filter, set or not. Add filter and the date range beside them are secondary buttons, flat on the card, the date range reading back its value (<a href="button.html#surface">Button</a>, D78: they replaced the field button). Together in the table card's header (D21), the to-do's (D72) and the calendar's (D75).</p>
+
+  <section class="spec-section" id="search">
+    <h2>Search field</h2>
+    <p>Bare in a toolbar: no edge, a hover fill, the focus ring on the whole field. It takes the room left in the row.</p>
+    <div class="spec-panel" data-surface="default">
+      <div class="spec-row">
+        <label class="list-search"><i data-icon="search"></i><input type="search" aria-label="Search" placeholder="Search"></label>
+        <label class="list-search"><i data-icon="search"></i><input type="search" aria-label="Search, filled" value="Lakeside"></label>
+        <label class="list-search"><i data-icon="search"></i><input type="search" aria-label="Search, disabled" placeholder="Search" disabled></label>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section" id="chip">
+    <h2>Chip</h2>
+    <p>One filter of a list. Unset: dashed, with a plus, it opens the filter's picker. Set: solid, the field and its value, and a separate remove button. Hover turns the field and value link blue together; the × goes darker. While its picker is open, its edge is the accent.</p>
+    <div class="spec-panel" data-surface="default">
+      <div class="spec-row">
+        <span class="chip"><button type="button" class="chip-main" aria-haspopup="dialog">+ Status</button></span>
+        <span class="chip" data-active><button type="button" class="chip-main"><span class="chip-field">Status:</span><span class="chip-value">Pending, Booked</span></button><button type="button" class="chip-remove" aria-label="Remove status filter" data-tip="Remove status filter"><i data-icon="xmark" data-size="14"></i></button></span>
+        <span class="chip" data-active data-open><button type="button" class="chip-main" aria-expanded="true"><span class="chip-field">Owner:</span><span class="chip-value">Marco Ruiz</span></button><button type="button" class="chip-remove" aria-label="Remove owner filter" data-tip="Remove owner filter"><i data-icon="xmark" data-size="14"></i></button></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Anatomy</h2>
+    <table class="spec-table">
+      <thead><tr><th>Part</th><th>Class</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Search field</td><td class="spec-label">.list-search</td><td>A <code>label</code> around the icon and the input, so the whole field focuses it (toolbar.css).</td></tr>
+        <tr><td>Chip</td><td class="spec-label">.chip[data-active][data-open]</td><td><code>.chip-main</code> opens the picker; <code>.chip-field</code> and <code>.chip-value</code> inside it; <code>.chip-remove</code> beside it (chip.css, D21).</td></tr>
+      </tbody>
+    </table>
+  </section>
+</main>
+<script src="../../shared/icons.js?v=9a69cd44"></script>
+<script src="specimen.js?v=9a69cd44"></script>
+</body>
+</html>

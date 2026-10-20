@@ -7,12 +7,14 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="bolster.css?v=177babe8">
-<link rel="stylesheet" href="specimens/specimen.css?v=177babe8">
+<link rel="stylesheet" href="bolster.css?v=9a69cd44">
+<link rel="stylesheet" href="specimens/specimen.css?v=9a69cd44">
 <style>
   .cat-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
   .cat-card .card-body { display: grid; gap: var(--space-3); }
   .cat-preview { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); min-height: var(--space-12); pointer-events: none; }
+  .spec-subhead { margin-block: var(--space-5) var(--space-3); font-size: var(--text-base); line-height: var(--leading-base); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
+  .cat-card .card-header .badge { flex: none; }
   .cat-files { font-family: var(--font-mono); font-size: var(--text-xxs); color: var(--color-content-tertiary); }
 </style>
 <style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
@@ -83,14 +85,20 @@
     <h2>Components</h2>
     <div class="cat-grid">
       <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/button.html">Button</a></h3></header>
-        <div class="card-body"><div class="cat-preview" inert><span class="button" data-size="sm">Primary</span><span class="button" data-size="sm" data-variant="brand">Brand</span><span class="button" data-size="sm" data-variant="secondary">Secondary</span></div>
-        <p class="text-secondary">Five roles with a body that lifts and sinks, a quiet danger, four sizes, loading, icon-only.</p><p class="cat-files">components/button.css</p></div></section>
+        <div class="card-body"><div class="cat-preview" inert><span class="button" data-size="sm">Primary</span><span class="button" data-size="sm" data-variant="brand">Brand</span><span class="button" data-size="sm" data-variant="secondary">Secondary</span><span class="button" data-size="sm" data-variant="secondary"><i data-icon="calendar" data-size="16"></i><span class="button-value">Last 90 days</span></span></div>
+        <p class="text-secondary">Five roles with a body that lifts and sinks, a quiet danger, four sizes, loading, icon-only. Secondary is lifted on the page and flat on a card; a picker's button reads back its value (D78).</p><p class="cat-files">components/button.css</p></div></section>
       <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/badge.html">Badge</a></h3></header>
         <div class="card-body"><div class="cat-preview" inert><span class="badge" data-status="booked">Booked</span><span class="badge" data-status="pending">Pending</span><span class="badge" data-tone="danger">Overdue</span></div>
         <p class="text-secondary">Job status with status marks, feedback tones, counts.</p><p class="cat-files">components/badge.css</p></div></section>
       <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/field.html">Field</a></h3></header>
         <div class="card-body"><div class="cat-preview" inert><input class="input" type="text" value="Lakeside Drywall" aria-label="Company name" style="inline-size:12rem"></div>
         <p class="text-secondary">Text, text area, native select, money and search inputs, with label and helper.</p><p class="cat-files">components/field.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/toolbar.html#search">Search field</a></h3></header>
+        <div class="card-body"><div class="cat-preview" inert><label class="list-search" style="flex:0 1 14rem"><i data-icon="search"></i><input type="search" aria-label="Search" placeholder="Search"></label></div>
+        <p class="text-secondary">Bare in a toolbar, a hover fill, the focus ring round the whole field.</p><p class="cat-files">components/toolbar.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/toolbar.html#chip">Chip</a></h3></header>
+        <div class="card-body"><div class="cat-preview" inert><span class="chip"><button type="button" class="chip-main">+ Status</button></span><span class="chip" data-active><button type="button" class="chip-main"><span class="chip-field">Owner:</span><span class="chip-value">Marco Ruiz</span></button><button type="button" class="chip-remove" aria-label="Remove owner filter"><i data-icon="xmark" data-size="14"></i></button></span></div>
+        <p class="text-secondary">One filter of a list: unset dashed with a plus, set solid with its value and a remove button (D21).</p><p class="cat-files">components/chip.css</p></div></section>
       <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/choice.html">Checkbox, radio, toggle</a></h3></header>
         <div class="card-body"><div class="cat-preview" inert><input type="checkbox" class="checkbox" checked><input type="radio" class="radio" checked><input type="checkbox" role="switch" class="toggle" checked></div>
         <p class="text-secondary">Native inputs, one "on" colour.</p><p class="cat-files">components/choice.css</p></div></section>
@@ -100,12 +108,27 @@
       <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/tabs.html">Tabs</a></h3></header>
         <div class="card-body"><div class="cat-preview" inert><div class="tabs" role="tablist" aria-label="Job sections"><button type="button" class="tab" role="tab" aria-selected="true">Overview</button><button type="button" class="tab" role="tab" aria-selected="false">Estimate</button></div></div>
         <p class="text-secondary">Panels of one page, arrow-key navigation.</p><p class="cat-files">components/tabs.css</p></div></section>
-      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/overlays.html">Tooltip, menu, dialog</a></h3></header>
-        <div class="card-body"><div class="cat-preview" inert style="align-items:flex-start"><span class="tooltip-anchor" style="margin-inline-end:4.5rem"><button type="button" class="button" data-variant="ghost" data-icon-only aria-labelledby="cat-tip"><i data-icon="circle-help"></i></button><span class="tooltip" role="tooltip" id="cat-tip" data-side="right" data-state="open">Help</span></span><div class="menu" role="menu" aria-label="Job" data-state="open" style="min-inline-size:9rem"><button type="button" class="menu-item" role="menuitem">Duplicate</button><button type="button" class="menu-item" role="menuitem" data-tone="danger">Delete</button></div></div>
-        <p class="text-secondary">popover and &lt;dialog&gt;: Escape, focus and stacking from the platform.</p><p class="cat-files">tooltip.css · menu.css · dialog.css</p></div></section>
-      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/data.html">Data table, cards, avatars, thumbnails</a></h3></header>
-        <div class="card-body"><div class="cat-preview" inert><span class="avatar" data-color="2">MK</span><span class="avatar" data-color="3">DC</span><span class="thumb"><i data-icon="image" data-size="16"></i><img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Drywall.jpg/120px-Drywall.jpg" alt="" loading="lazy" onerror="this.remove()"></span><span class="thumb"><i data-icon="image" data-size="16"></i></span><span class="badge" data-status="in-progress">In progress</span></div>
-        <p class="text-secondary">Keyboard-reachable rows, cards with a body, avatars for people and thumbnails for things; the first draft's filter cards.</p><p class="cat-files">data-table.css · card.css · avatar.css · thumbnail.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/overlays.html#tooltip">Tooltip</a></h3></header>
+        <div class="card-body"><div class="cat-preview" inert><span class="tooltip-anchor" style="margin-inline-end:4.5rem"><button type="button" class="button" data-variant="ghost" data-icon-only aria-labelledby="cat-tip"><i data-icon="circle-help"></i></button><span class="tooltip" role="tooltip" id="cat-tip" data-side="right" data-state="open">Help</span></span></div>
+        <p class="text-secondary">Names every icon without a label (D52), on hover and focus; drawn by tooltip.js from <code>data-tip</code>.</p><p class="cat-files">components/tooltip.css · tooltip.js</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/overlays.html#menu">Menu</a></h3></header>
+        <div class="card-body"><div class="cat-preview" inert style="align-items:flex-start"><div class="menu" role="menu" aria-label="Job" data-state="open" style="min-inline-size:9rem"><button type="button" class="menu-item" role="menuitem">Duplicate</button><button type="button" class="menu-item" role="menuitem" data-tone="danger">Delete</button></div></div>
+        <p class="text-secondary">Actions in a popover: arrow keys, Escape and focus from the platform; nested menus as a second level on phones (I3, I15).</p><p class="cat-files">components/menu.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/overlays.html#dialog">Dialog</a></h3></header>
+        <div class="card-body"><div class="cat-preview" inert><div class="dialog" data-size="sm" open style="--_w:15rem;margin:0;box-shadow:var(--shadow-raised)"><header class="dialog-header"><h2 style="font-size:var(--text-base);line-height:var(--leading-base)">Archive this job?</h2></header><div class="dialog-footer"><span class="button" data-size="sm" data-variant="secondary">Cancel</span><span class="button" data-size="sm" data-variant="danger">Archive</span></div></div></div>
+        <p class="text-secondary">&lt;dialog&gt;: confirm, picker sheet, filters and the job workspace; focus goes back where it came from (I1, I2, I11).</p><p class="cat-files">components/dialog.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/data.html#data-table">Data table</a></h3></header>
+        <div class="card-body"><div class="cat-preview" inert><span class="badge" data-status="booked">Booked</span><span class="badge" data-status="pending">Pending</span><span class="text-secondary" style="font-variant-numeric:tabular-nums">$28,729.22</span></div>
+        <p class="text-secondary">Rows reachable by keyboard, a link over the whole row, sortable headers, numbers to the right. On a list it sits in the table card.</p><p class="cat-files">components/data-table.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/data.html#cards">Card</a></h3></header>
+        <div class="card-body"><div class="cat-preview" inert><section class="card" style="inline-size:12rem"><header class="card-header"><h3 style="font-size:var(--text-sm);line-height:var(--leading-sm)">Recommended actions</h3></header><div class="card-body text-caption">A hairline and a body.</div></section></div>
+        <p class="text-secondary">The surface things sit on: a header, a body, 16px corners (D35), flat or raised.</p><p class="cat-files">components/card.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/data.html#avatars">Avatar</a></h3></header>
+        <div class="card-body"><div class="cat-preview" inert><span class="avatar" data-color="2">MK</span><span class="avatar" data-color="3">DC</span><span class="avatar" data-color="6">PN</span><span class="avatar" data-size="sm" data-color="1">HM</span></div>
+        <p class="text-secondary">People and companies: initials on one of eight AA colours, three sizes (D13).</p><p class="cat-files">components/avatar.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/data.html#thumbnails">Thumbnail</a></h3></header>
+        <div class="card-body"><div class="cat-preview" inert><span class="thumb"><i data-icon="image" data-size="16"></i><img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Drywall.jpg/120px-Drywall.jpg" alt="" loading="lazy" onerror="this.remove()"></span><span class="thumb"><i data-icon="image" data-size="16"></i></span></div>
+        <p class="text-secondary">Things with pictures: a photo, or a placeholder for one without (L-slot).</p><p class="cat-files">components/thumbnail.css</p></div></section>
       <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/icons.html">Icon vocabulary</a></h3></header>
         <div class="card-body"><div class="cat-preview" inert><i data-icon="m-send" data-size="14"></i><i data-icon="m-circle-check" data-size="14"></i><i data-icon="m-file-invoice" data-size="14"></i><i data-icon="m-calendar" data-size="14"></i><i data-icon="m-store" data-size="14"></i></div>
         <p class="text-secondary">One meaning, one icon: every field and action's icon, from the vocabulary, never per page (D58).</p><p class="cat-files">model/icons.json · recipes/icons.mjs</p></div></section>
@@ -115,6 +138,61 @@
       <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="specimens/calendar.html">Calendar</a></h3></header>
         <div class="card-body"><div class="cat-preview" inert style="justify-content:center"><div class="calendar-month"><h4 class="calendar-title" id="c-cal-2026-10">October 2026</h4><table class="calendar-grid" role="grid" aria-labelledby="c-cal-2026-10"><thead><tr><th scope="col" abbr="Monday">M</th><th scope="col" abbr="Tuesday">T</th><th scope="col" abbr="Wednesday">W</th><th scope="col" abbr="Thursday">T</th><th scope="col" abbr="Friday">F</th><th scope="col" abbr="Saturday">S</th><th scope="col" abbr="Sunday">S</th></tr></thead><tbody><tr><td></td><td></td><td></td><td data-range="in" data-cap="start"><button type="button" class="calendar-day" tabindex="-1" aria-label="Thursday, October 1, 2026">1</button></td><td data-range="in"><button type="button" class="calendar-day" tabindex="-1" aria-label="Friday, October 2, 2026">2</button></td><td data-range="end" aria-selected="true"><button type="button" class="calendar-day" tabindex="0" aria-label="Saturday, October 3, 2026">3</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Sunday, October 4, 2026">4</button></td></tr><tr><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Monday, October 5, 2026">5</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Tuesday, October 6, 2026">6</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Wednesday, October 7, 2026">7</button></td><td data-today><button type="button" class="calendar-day" tabindex="-1" aria-label="Thursday, October 8, 2026, today">8</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Friday, October 9, 2026" disabled>9</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Saturday, October 10, 2026" disabled>10</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Sunday, October 11, 2026" disabled>11</button></td></tr><tr><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Monday, October 12, 2026" disabled>12</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Tuesday, October 13, 2026" disabled>13</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Wednesday, October 14, 2026" disabled>14</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Thursday, October 15, 2026" disabled>15</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Friday, October 16, 2026" disabled>16</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Saturday, October 17, 2026" disabled>17</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Sunday, October 18, 2026" disabled>18</button></td></tr><tr><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Monday, October 19, 2026" disabled>19</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Tuesday, October 20, 2026" disabled>20</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Wednesday, October 21, 2026" disabled>21</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Thursday, October 22, 2026" disabled>22</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Friday, October 23, 2026" disabled>23</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Saturday, October 24, 2026" disabled>24</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Sunday, October 25, 2026" disabled>25</button></td></tr><tr><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Monday, October 26, 2026" disabled>26</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Tuesday, October 27, 2026" disabled>27</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Wednesday, October 28, 2026" disabled>28</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Thursday, October 29, 2026" disabled>29</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Friday, October 30, 2026" disabled>30</button></td><td><button type="button" class="calendar-day" tabindex="-1" aria-label="Saturday, October 31, 2026" disabled>31</button></td><td></td></tr></tbody></table></div></div>
         <p class="text-secondary">A month to click or arrow through, and the date range picker on it: presets, From and To, two months.</p><p class="cat-files">components/calendar.css</p></div></section>
+    </div>
+  </section>
+
+  <section class="spec-section" id="drafts">
+    <h2>Drafts, waiting for your approval</h2>
+    <p>Built and working in a concept, not yet in the system. Each one moves into <code>system/</code> (a component file, a specimen, its D- and I-entry) once you approve it; until then it stays in its concept and can still change.</p>
+    <h3 class="spec-subhead">From the to-do</h3>
+    <div class="cat-grid">
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../concepts/todo/index.html">Round check</a></h3><span class="badge" data-status="draft">Draft</span></header>
+        <div class="card-body"><p class="text-secondary">Completes a task in one click, struck through where it is, with Undo; turns into the square box in Select mode.</p><p class="cat-files">D72, I17 · concepts/todo/todo.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../concepts/todo/index.html">Priority mark</a></h3><span class="badge" data-status="draft">Draft</span></header>
+        <div class="card-body"><p class="text-secondary">Before the title, a task's priority at a glance; a click opens its menu and saves on pick.</p><p class="cat-files">D72, I17 · concepts/todo/todo.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../concepts/todo/index.html">In-place chips</a></h3><span class="badge" data-status="draft">Draft</span></header>
+        <div class="card-body"><p class="text-secondary">The due date and the assignees, set in the row: a menu (a sheet on phones) that saves on pick; empty ones show on hover and focus only.</p><p class="cat-files">D72, I17 · concepts/todo/todo.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../concepts/todo/index.html">Group cards</a></h3><span class="badge" data-status="draft">Draft</span></header>
+        <div class="card-body"><p class="text-secondary">Overdue, Today, Tomorrow, This week, Later, No due date (or by job), each a card with its open count; Completed last, folded. A drop into another day's group gives the task that day.</p><p class="cat-files">D72, I17 · concepts/todo/todo.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../concepts/todo/index.html">Add task</a></h3><span class="badge" data-status="draft">Draft</span></header>
+        <div class="card-body"><p class="text-secondary">At the end of a group, a field that adds with the group's day or job; Enter keeps it for the next.</p><p class="cat-files">I17 · concepts/todo/todo.js</p></div></section>
+    </div>
+    <h3 class="spec-subhead">From the calendar</h3>
+    <div class="cat-grid">
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../concepts/calendar/index.html">Event bar</a></h3><span class="badge" data-status="draft">Draft</span></header>
+        <div class="card-body"><p class="text-secondary">A job's phase across its days: the job's mark and name, its colour (an avatar hue as tint and edge), squared where it carries on past the week; drag to move, drag its end to stretch.</p><p class="cat-files">D75, I18 · concepts/calendar/calendar.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../concepts/calendar/index.html">Appointment and busy time</a></h3><span class="badge" data-status="draft">Draft</span></header>
+        <div class="card-body"><p class="text-secondary">An appointment is its time, then what; busy time from other calendars is hatched and says Busy. In Week and Day, blocks at their hours, side by side where they overlap.</p><p class="cat-files">D75, I18 · concepts/calendar/calendar.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../concepts/calendar/index.html">Month grid</a></h3><span class="badge" data-status="draft">Draft</span></header>
+        <div class="card-body"><p class="text-secondary">Weeks that share the page's height, bars in lanes, then appointments by time; past what fits, “+n more”. Weekends only just tinted.</p><p class="cat-files">D75, D76, I18 · concepts/calendar/calendar.js</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../concepts/calendar/index.html">Week and Day grid</a></h3><span class="badge" data-status="draft">Draft</span></header>
+        <div class="card-body"><p class="text-secondary">An all-day row over the hours (7 to 7), which stretch to the page; the now line across today.</p><p class="cat-files">D75, I18 · concepts/calendar/calendar.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../concepts/calendar/index.html">Crew view</a></h3><span class="badge" data-status="draft">Draft</span></header>
+        <div class="card-body"><p class="text-secondary">People down the side, the week across, each row that person's work; a “No one yet” row for phases nobody has; a drop on a row gives it to them.</p><p class="cat-files">D75, I18 · concepts/calendar/calendar.js</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../concepts/calendar/index.html">Summary popover</a></h3><span class="badge" data-status="draft">Draft</span></header>
+        <div class="card-body"><p class="text-secondary">What, when (“day 2 of 4”), where, who and Open job, with Close in its corner; its Starts and Move are the keyboard's and the phone's way to move.</p><p class="cat-files">D75, I18 · concepts/calendar/calendar.js</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../concepts/calendar/index.html">Unscheduled tray</a></h3><span class="badge" data-status="draft">Draft</span></header>
+        <div class="card-body"><p class="text-secondary">Jobs with no dates beside the calendar (a sheet below 1024), to drag onto a day; its toggle a secondary button with a count.</p><p class="cat-files">D75, I18 · concepts/calendar/calendar.css</p></div></section>
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../concepts/calendar/index.html">Week strip and agenda</a></h3><span class="badge" data-status="draft">Draft</span></header>
+        <div class="card-body"><p class="text-secondary">Phones: a sticky strip of the week's days over an agenda, each day a heading, bars first; it opens at today.</p><p class="cat-files">D75, I18 · concepts/calendar/calendar.css</p></div></section>
+    </div>
+    <h3 class="spec-subhead">Across the concepts</h3>
+    <div class="cat-grid">
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../index.html">The canvas grid</a></h3><span class="badge" data-status="draft">Draft</span></header>
+        <div class="card-body"><p class="text-secondary">A faint grid on the page, lit around the pointer; decoration only, behind the content, never on the cards. On every concept (they load the list's stylesheet), not in the system.</p><p class="cat-files">concepts/data-list/data-list.css</p></div></section>
+    </div>
+    <h3 class="spec-subhead">Other proposals</h3>
+    <div class="spec-panel">
+      <table class="spec-table">
+        <thead><tr><th>What</th><th>Where</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>16 icon picks for vendor orders and tasks (count, kinds, client, job, approve, request a bid, make inactive, complete …)</td><td><a href="specimens/icons.html">Icon vocabulary</a></td><td>Proposed, for your review (D58)</td></tr>
+          <tr><td>L-slot: what sits before a row's name (a thumbnail, an avatar, or nothing)</td><td><a href="specimens/list-recipe.html">List recipe</a></td><td>Proposed rule</td></tr>
+          <tr><td>Pages are described, and the rules are written once</td><td>D31</td><td>Proposed</td></tr>
+          <tr><td>Dark theme: validate in Figma before anyone builds on it</td><td>D14</td><td>Proposed, first pass</td></tr>
+          <tr><td>Primary button hover: invert (the prototype) or darken (the live app)</td><td>D4</td><td>Open</td></tr>
+        </tbody>
+      </table>
     </div>
   </section>
 
@@ -129,19 +207,19 @@
           <tr><td>Navigation: rail, section sidebar, top bar, bottom bar</td><td><a href="specimens/shell.html">App shell</a></td></tr>
           <tr><td>Badge: status pills, tags, counts</td><td><a href="specimens/badge.html">Badge</a> with status tokens</td></tr>
           <tr><td>Data list row: div rows, double-click to open</td><td><a href="specimens/table-card.html">Table card</a> with row links, a record beside the list, rows with four corners on phones</td></tr>
-          <tr><td>Field: four search designs, 40/48px mix</td><td><a href="specimens/field.html">Field</a>, one frame, three sizes</td></tr>
+          <tr><td>Field: four search designs, 40/48px mix</td><td><a href="specimens/field.html">Field</a>, one frame, three sizes; the toolbar's <a href="specimens/toolbar.html#search">search field</a></td></tr>
           <tr><td>Select: tertiary button + bottom-right sheet</td><td>native select, or the <a href="specimens/overlays.html">picker sheet</a> dialog</td></tr>
           <tr><td>Segmented control (SelectButton)</td><td><a href="specimens/segmented-control.html">Segmented control</a></td></tr>
           <tr><td>Checkbox, radio, toggle: three "on" colours, no focus</td><td><a href="specimens/choice.html">Choice controls</a></td></tr>
-          <tr><td>Modal: the job workspace</td><td><a href="specimens/overlays.html">Dialog, workspace variant</a></td></tr>
-          <tr><td>Avatar: generated colours, one failing contrast</td><td><a href="specimens/data.html">Avatar</a>, 8 AA colours</td></tr>
+          <tr><td>Modal: the job workspace</td><td><a href="specimens/overlays.html#dialog">Dialog, workspace variant</a></td></tr>
+          <tr><td>Avatar: generated colours, one failing contrast</td><td><a href="specimens/data.html#avatars">Avatar</a>, 8 AA colours</td></tr>
           <tr><td>Toast: persistent error, misspelled copy</td><td><a href="specimens/toast.html">Toast</a></td></tr>
         </tbody>
       </table>
     </div>
   </section>
 </main>
-<script src="../shared/icons.js?v=177babe8"></script>
-<script src="specimens/specimen.js?v=177babe8"></script>
+<script src="../shared/icons.js?v=9a69cd44"></script>
+<script src="specimens/specimen.js?v=9a69cd44"></script>
 </body>
 </html>

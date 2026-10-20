@@ -1,15 +1,17 @@
 /* Table card header (toolbar): find and narrow a list, inside the table card.
    <div class="list-toolbar" role="search" aria-label="Search and filter">
      <div class="list-bar">
-       <button class="field-button add-filter" aria-haspopup="menu"><svg…/><span>Add filter</span></button>
+       <button class="button add-filter" data-variant="secondary" data-size="sm" aria-haspopup="menu"><svg…/><span>Add filter</span></button>
        <label class="list-search"><svg…/><input type="search" aria-label="Search" placeholder="Search"></label>
-       <button class="field-button date-range" aria-haspopup="dialog"><svg…/><span>All time</span></button>
+       <button class="button date-range-button" data-variant="secondary" data-size="sm" aria-haspopup="dialog"><svg…/><span class="button-value">All time</span></button>
        <span class="list-bar-sep" aria-hidden="true"></span>
        <button class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Display settings">…</button>
      </div>
      <div class="list-chips"><p class="result-count"><strong>12</strong> of 133 jobs</p><div class="filters">…chips…</div></div>
    </div>
-   Sticks under the page header (--list-toolbar-top). Filters as chips: chip.css. As in Shopify (D19, D21) */
+   Sticks under the page header (--list-toolbar-top). Filters as chips: chip.css. As in Shopify (D19, D21).
+   Add filter and the date range are secondary buttons, flat on the card (D78); the date range reads back its
+   value (.button-value). */
 
 @layer tokens, base, components, utilities;
 
@@ -33,7 +35,7 @@
   }
   /* header icons are sized by height, as Font Awesome draws them (1em tall, own width), so a wide
      glyph isn't squeezed into a square and drawn smaller than the rest */
-  .list-search svg, .field-button svg { inline-size: auto; block-size: 1rem; flex: none; }
+  .list-search svg, .list-bar .button:not([data-icon-only]) > svg { inline-size: auto; block-size: 1rem; flex: none; }
   .list-search input {
     flex: 1; min-inline-size: 0; padding: 0; border: 0; background: none; outline: none;
     color: var(--color-content-primary); font: inherit; font-size: var(--text-sm); line-height: var(--leading-sm);
@@ -49,7 +51,7 @@
   .result-count { margin-inline-end: var(--space-2); font-size: var(--text-sm); color: var(--color-content-secondary); white-space: nowrap; font-variant-numeric: tabular-nums; }
   .result-count strong { color: var(--color-content-primary); font-weight: var(--font-weight-medium); }
 
-  /* add filter and the date range (the list's own date filter) share one field-like button */
+  /* the field button, kept only for the estimate concept until it moves to the secondary button (D78) */
   .field-button {
     display: inline-flex; align-items: center; gap: var(--space-2); flex: none;
     block-size: var(--control-height-sm); padding: 0 var(--space-3);
@@ -58,18 +60,18 @@
     font: inherit; font-size: var(--text-sm); white-space: nowrap; cursor: pointer;
   }
   .field-button[hidden] { display: none; }
-  /* the date range names its date once set (Created · Last 30 days); on phones only the value shows, and
-     it gives way before the search field does */
-  .date-range-label { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
-  @media (max-width: 767px) {
-    .field-button.date-range { flex: 0 1 auto; min-inline-size: 0; max-inline-size: 55%; }
-    .date-range-field { display: none; }
-  }
-  .field-button svg { color: var(--color-content-secondary); }
+  .field-button svg { inline-size: auto; block-size: 1rem; flex: none; color: var(--color-content-secondary); }
   @media (hover: hover) { .field-button:hover:not(:disabled) { border-color: var(--color-line-strong); } }
   .field-button[aria-expanded="true"] { border-color: var(--color-action-accent); }
   .field-button:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
   .field-button:disabled { opacity: 0.5; cursor: default; }
+  /* the date range names its date once set (Created · Last 30 days); on phones only the value shows, and
+     it gives way before the search field does */
+  .date-range-label { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
+  @media (max-width: 767px) {
+    .date-range-button { flex: 0 1 auto; min-inline-size: 0; max-inline-size: 55%; }
+    .date-range-field { display: none; }
+  }
 
   @media (max-width: 767px) {
     .add-filter { inline-size: var(--control-height-sm); padding: 0; justify-content: center; gap: 0; }

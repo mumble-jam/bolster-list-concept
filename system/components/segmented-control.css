@@ -15,7 +15,8 @@
     gap: var(--space-0-5);
     block-size: var(--_h);
     padding: var(--space-0-5);
-    border-radius: var(--radius-sm);
+    /* a button's corners, as the buttons and field buttons beside it (D77) */
+    border-radius: var(--radius-md);
     background: var(--color-surface-sunken);
     flex-shrink: 0;
   }
@@ -28,7 +29,8 @@
     justify-content: center;
     gap: var(--space-2);
     padding: 0 var(--space-3);
-    border-radius: var(--radius-xs);
+    /* concentric with the track (D35): its corner less the inset, 8 − 2 */
+    border-radius: calc(var(--radius-md) - var(--space-0-5));
     /* text, so a text colour: the controls' off colour is for edges (3:1) and fails as a label (4.5:1) */
     color: var(--color-content-secondary);
     /* same weight in both states, so labels don't shift (fixes the as-is bold jump) */

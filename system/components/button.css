@@ -6,7 +6,11 @@
    Full width: data-block. Works on <a> too. See docs/decisions.md D4, D5. 
    The CTAs (primary, brand, danger) and secondary have a body: an edge, a light top line, a shadow;
    hover lifts 1px, a press sinks at once and eases back. Ghost and a quiet danger for toolbars and
-   rows. Every button has 8px corners (D33). */
+   rows. Every button has 8px corners (D33).
+   Secondary lifts off the page, and lies flat on anything already raised (a card, a dialog, a popover, a
+   menu, a bar): the surface says so once (--button-body), no one picks it (D78). A button that opens a
+   picker reads back what's picked in a .button-value, in the button's own weight: Show: <span class="button-value">
+   Everything</span>. It replaces the field button. */
 
 @layer tokens, base, components, utilities;
 
@@ -205,23 +209,36 @@
   /* in dark a white top line shows at a whisper, and carries the edge */
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --_sec-line: 0.06; } }
   :root[data-theme="dark"] { --_sec-line: 0.06; }
+  /* the surface decides: the page lifts a secondary button, anything raised lays it flat (D78) */
+  :where(.card, .dialog, .pop, .menu, .floating-bar, .toast, [data-surface="raised"]) { --button-body: 0; }
+  :where([data-surface="canvas"]) { --button-body: 1; }
   .button[data-variant="secondary"] {
+    /* body: 1 lifted (an edge, a darker bottom edge, a white top line, a shadow), 0 flat (the card's edge) */
+    --_b: var(--button-body, 1);
     --_sk: 1; --_pa: 0; --_lift: 0px;
     --_bg: var(--color-surface-default); --_bg-hover: var(--color-action-secondary-hover); --_bg-active: var(--color-action-secondary-hover);
     --_fg: var(--color-content-primary); --_fg-hover: var(--color-content-primary);
-    --_border: var(--color-action-secondary-edge); --_border-hover: var(--color-action-secondary-edge);
-    border-block-end-color: var(--color-action-secondary-edge-bottom);
+    --_border: color-mix(in oklab, var(--color-action-secondary-edge) calc(var(--_b) * 100%), var(--color-line-card));
+    --_border-hover: color-mix(in oklab, var(--color-action-secondary-edge) calc(var(--_b) * 100%), var(--color-line-strong));
+    border-block-end-color: color-mix(in oklab, var(--color-action-secondary-edge-bottom) calc(var(--_b) * 100%), var(--_border-state, var(--_border)));
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / calc(var(--_sec-line) * (1 - var(--_pa) * 8))),
+      inset 0 1px 0 rgb(255 255 255 / calc(var(--_b) * var(--_sec-line) * (1 - var(--_pa) * 8))),
       inset 0 1px 3px rgb(0 0 0 / var(--_pa)),
-      0 1px 2px rgb(from var(--color-shadow-tint) r g b / calc(0.08 * var(--_sk))),
-      0 4px 8px rgb(from var(--color-shadow-tint) r g b / max(0, calc((var(--_sk) - 1) * 0.15)));
+      0 1px 2px rgb(from var(--color-shadow-tint) r g b / calc(var(--_b) * 0.08 * var(--_sk))),
+      0 4px 8px rgb(from var(--color-shadow-tint) r g b / max(0, calc(var(--_b) * (var(--_sk) - 1) * 0.15)));
     translate: 0 var(--_lift);
     transition-property: --_sk, --_pa, translate, background-color, border-color, color;
     transition-duration: 150ms; transition-timing-function: var(--ease-out);
   }
-  @media (hover: hover) { .button[data-variant="secondary"]:hover:not(:disabled, [aria-disabled="true"], [aria-busy="true"]) { --_sk: 1.4; --_lift: -1px; } }
-  .button[data-variant="secondary"]:active:not(:disabled, [aria-disabled="true"]) { --_sk: 0.3; --_pa: 0.08; --_lift: 1px; transition-duration: 30ms; }
+  @media (hover: hover) { .button[data-variant="secondary"]:hover:not(:disabled, [aria-disabled="true"], [aria-busy="true"]) { --_sk: 1.4; --_lift: calc(-1px * var(--_b)); } }
+  .button[data-variant="secondary"]:active:not(:disabled, [aria-disabled="true"]) { --_sk: 0.3; --_pa: 0.08; --_lift: calc(1px * var(--_b)); transition-duration: 30ms; }
+  /* open: what it opened (a picker, a tray) is showing */
+  .button[data-variant="secondary"][aria-expanded="true"] { --_border: var(--color-action-accent); --_border-hover: var(--color-action-accent); border-block-end-color: var(--color-action-accent); }
+  /* a picker's button reads back what's picked: the value in the button's weight, as every label (your call,
+     20 Oct), the icon quieter and drawn by its height, as the toolbar's are (D41) */
+  .button:has(> .button-value) { --_gap: var(--space-2); }
+  .button > .button-value { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
+  .button:has(> .button-value) > svg { inline-size: auto; block-size: 1rem; color: var(--color-content-secondary); }
   .button[data-variant="secondary"]:is(:disabled, [aria-disabled="true"]) { box-shadow: none; translate: none; border-block-end-color: var(--color-surface-disabled); }
   @media (prefers-reduced-motion: reduce) { .button[data-variant="secondary"] { --_lift: 0px !important; } }
   .button[data-variant="ghost"] { --_bg-hover: var(--color-action-ghost-hover); --_bg-active: var(--color-action-ghost-active); }

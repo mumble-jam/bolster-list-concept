@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=177babe8">
-<link rel="stylesheet" href="specimen.css?v=177babe8">
+<link rel="stylesheet" href="../bolster.css?v=9a69cd44">
+<link rel="stylesheet" href="specimen.css?v=9a69cd44">
 <style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
 </head>
 <body>
@@ -22,7 +22,7 @@
 
   <section class="spec-section">
     <h2>Roles and states</h2>
-    <p>Hover, active and focus are pinned with <code>data-state</code> for this page only. Use one primary per view; secondary for everything else, ghost inside toolbars and rows. Tertiary is gone: secondary covers it.</p>
+    <p>Hover, active and focus are pinned with <code>data-state</code> for this page only. Use one primary per view; secondary for everything else, ghost inside toolbars and rows. Tertiary is gone: secondary covers it, lifted on the page and flat on a card (D78).</p>
     <div class="spec-panel">
       <table class="spec-table">
         <thead><tr><th>Role</th><th>Default</th><th>Hover</th><th>Active</th><th>Keyboard focus</th><th>Disabled</th><th>Loading</th></tr></thead>
@@ -101,6 +101,30 @@
     </div>
   </section>
 
+  <section class="spec-section" id="surface">
+    <h2>Secondary: lifted on the page, flat on a card (D78)</h2>
+    <p>The surface decides, never the page that uses it: on the page a secondary button has its body (an edge, a darker bottom edge, a white top line, a small shadow) and lifts when pointed at; on anything already raised (a card, a dialog, a popover, a menu, a bar) it lies flat, with the card's edge. Primary, brand and danger keep their body everywhere: there it is the emphasis.</p>
+    <div class="spec-panel" data-surface="canvas" style="display:grid;gap:var(--space-4)">
+      <div class="cluster">
+        <button class="button" data-variant="secondary" data-size="sm">Today</button>
+        <button class="button" data-variant="secondary" data-size="sm" aria-haspopup="dialog" aria-expanded="false"><i data-icon="layers" data-size="16"></i><span class="button-value">Everything</span></button>
+        <button class="button" data-variant="secondary" data-size="sm" aria-haspopup="dialog" aria-expanded="true"><i data-icon="user" data-size="16"></i><span class="button-value">You, Marco</span></button>
+        <span class="spec-note">on the page</span>
+      </div>
+      <section class="card" style="max-inline-size:40rem"><div class="card-body cluster">
+        <button class="button add-filter" data-variant="secondary" data-size="sm" aria-haspopup="menu" aria-expanded="false"><i data-icon="filter" data-size="16"></i><span>Add filter</span></button>
+        <button class="button" data-variant="secondary" data-size="sm" aria-haspopup="dialog" aria-expanded="false"><i data-icon="calendar" data-size="16"></i><span class="button-value">Last 90 days</span></button>
+        <button class="button" data-variant="secondary" data-size="sm">Send reminder</button>
+        <span class="spec-note">on a card</span>
+      </div></section>
+    </div>
+  </section>
+
+  <section class="spec-section" id="value">
+    <h2>A picker's button reads back what's picked</h2>
+    <p>A button that opens a picker (a popover, a sheet on phones) says what's picked, in a <code>.button-value</code>, in the weight every button label has, its icon quieter and drawn by its height. <code>aria-haspopup</code> names what it opens; while it's open (<code>aria-expanded="true"</code>) its edge is the accent. It replaces the field button.</p>
+  </section>
+
   <section class="spec-section">
     <h2>Icons side by side (D41)</h2>
     <p class="spec-intro">A button's size sets its icon's box, but glyphs fill their boxes differently: × draws 62 % of it, the expand arrows all of it. Icons that sit together match their ink and line instead. One drawn smaller goes a weight up so its line stays as thick, and keeps its own size through <code>--icon-size</code> (<code>ic(name, size, { optical: true })</code>, or <code>data-optical</code> in a specimen). <code>scripts/check-icons.js</code> measures a page.</p>
@@ -123,6 +147,8 @@
       <li>Don't override a button's height, radius or colours locally. If a variant is missing, add it here (the audit found 257 of 364 buttons with local overrides).</li>
       <li>Show an action only when it applies. A disabled button needs a reason nearby.</li>
       <li>A row or card that opens something is a link, not a button: see Data table and Card.</li>
+      <li>Secondary is lifted on the page and flat on anything raised: the surface decides (D78). Never pick a flat or a raised one by hand.</li>
+      <li>A button that opens a picker shows the value in a <code>.button-value</code>; its own name (Add filter) stays a command.</li>
       <li>Red is for what can't be undone. Where Delete is one action of several it's a quiet danger (red text, fills red when pointed at); the filled red danger is only the confirmation's final button.</li>
     </ul>
   </section>
@@ -134,10 +160,11 @@
 &lt;button class="button" data-variant="ghost" data-icon-only aria-label="Refresh"&gt;&lt;svg …/&gt;&lt;/button&gt;
 &lt;a class="button" data-variant="secondary" href="/jobs"&gt;View jobs&lt;/a&gt;
 &lt;button class="button" data-variant="ghost" data-tone="danger"&gt;Delete&lt;/button&gt;
-&lt;button class="button" aria-busy="true"&gt;Saving…&lt;/button&gt;</code>
+&lt;button class="button" aria-busy="true"&gt;Saving…&lt;/button&gt;
+&lt;button class="button" data-variant="secondary" data-size="sm" aria-haspopup="dialog" aria-expanded="false"&gt;&lt;svg …/&gt;&lt;span class="button-value"&gt;Last 90 days&lt;/span&gt;&lt;/button&gt;</code>
   </section>
 </main>
-<script src="../../shared/icons.js?v=177babe8"></script>
-<script src="specimen.js?v=177babe8"></script>
+<script src="../../shared/icons.js?v=9a69cd44"></script>
+<script src="specimen.js?v=9a69cd44"></script>
 </body>
 </html>

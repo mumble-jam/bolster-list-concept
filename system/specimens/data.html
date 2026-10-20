@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=177babe8">
-<link rel="stylesheet" href="specimen.css?v=177babe8">
+<link rel="stylesheet" href="../bolster.css?v=9a69cd44">
+<link rel="stylesheet" href="specimen.css?v=9a69cd44">
 <style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
 </head>
 <body>
@@ -21,7 +21,7 @@
   <p class="spec-intro">Lists are real tables. Each row's name is a link stretched across the row: one click, Enter or a screen reader's link list opens it (as-is rows only opened on double click and weren't reachable by keyboard). Selecting is a checkbox; the bulk bar appears when anything is selected.</p>
 
   <section class="spec-section">
-    <h2>Filter cards</h2>
+    <h2 id="filter-cards">Filter cards</h2>
     <p>The first draft, for pages that aren't lists yet. On list pages, <a href="summary-cards.html">summary cards</a> replace them: a status card can be pressed again to clear, and the insight card carries a figure. One tab stop; arrow keys switch.</p>
     <div class="spec-panel" data-surface="canvas">
       <div class="filter-cards" role="radiogroup" aria-label="Filter proposals">
@@ -34,7 +34,7 @@
   </section>
 
   <section class="spec-section">
-    <h2>Data table</h2>
+    <h2 id="data-table">Data table</h2>
     <p>The table on its own. On a list page it sits in the <a href="table-card.html">table card</a>, which adds the header, pinned columns, sideways scroll and phone rows; bulk actions move to the <a href="floating-bar.html">floating bar</a>.</p>
     <div class="spec-panel" style="padding:0">
       <div style="padding:var(--space-3)"><div class="bulk-bar" role="toolbar" aria-label="Bulk actions"><span class="bulk-bar-count">1 selected</span><button class="button" data-variant="ghost" data-size="sm" style="--_fg:var(--color-content-inverse)">Send</button><button class="button" data-variant="ghost" data-size="sm" style="--_fg:var(--color-content-inverse)">Sign and book</button><button class="button" data-variant="ghost" data-size="sm" style="--_fg:var(--color-content-inverse)">Archive</button></div></div>
@@ -66,7 +66,7 @@
   </section>
 
   <section class="spec-section">
-    <h2>Cards</h2>
+    <h2 id="cards">Cards</h2>
     <div class="spec-panel" data-surface="canvas">
       <div class="spec-grid">
         <section class="card"><header class="card-header"><h3>Recommended actions</h3><button class="button" data-variant="ghost" data-size="sm">Go to pipeline</button></header><div class="card-body text-secondary">Default: hairline border.</div></section>
@@ -77,7 +77,7 @@
   </section>
 
   <section class="spec-section">
-    <h2>Avatars</h2>
+    <h2 id="avatars">Avatars</h2>
     <p>Eight colours, all with white initials above 4.5:1 (as-is generated colours included a bright green that failed). Pick by a stable hash of the person's id.</p>
     <div class="spec-panel">
       <div class="spec-row">
@@ -87,7 +87,7 @@
     </div>
   </section>
   <section class="spec-section">
-    <h2>Thumbnails</h2>
+    <h2 id="thumbnails">Thumbnails</h2>
     <p>A photo of a thing, such as a catalog item (D55). What sits before a row's name is a slot: an avatar for a person or company (round), a thumbnail for a thing (square), an icon, or nothing, page by page. The photo lies over a placeholder, the image icon on a quiet tint, so while it loads, where there's none, or when its link breaks, the placeholder shows. A list with photos keeps them on phones, down the left of each item; a list without any drops the slot there, as it drops avatars.</p>
     <div class="spec-panel">
       <div class="spec-row"><span class="thumb"><i data-icon="image" data-size="16"></i><img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Drywall.jpg/120px-Drywall.jpg" alt="" loading="lazy" onerror="this.remove()"></span><span class="thumb"><i data-icon="image" data-size="16"></i></span><span class="thumb"><i data-icon="image" data-size="16"></i><img src="https://thumb.wikimedia.org/wikipedia/commons/thumb/0/00/Missing.jpg/120px-Missing.jpg" alt="" loading="lazy" onerror="this.remove()"></span><span class="spec-note">photo · empty · broken link</span></div>
@@ -95,7 +95,7 @@
     </div>
   </section>
 </main>
-<script src="../../shared/icons.js?v=177babe8"></script>
-<script src="specimen.js?v=177babe8"></script>
+<script src="../../shared/icons.js?v=9a69cd44"></script>
+<script src="specimen.js?v=9a69cd44"></script>
 </body>
 </html>
