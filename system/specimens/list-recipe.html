@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=c37f7768">
-<link rel="stylesheet" href="specimen.css?v=c37f7768">
+<link rel="stylesheet" href="../bolster.css?v=4d5dcfbf">
+<link rel="stylesheet" href="specimen.css?v=4d5dcfbf">
 <style>
   .rule-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr)); }
   .rule-head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
@@ -31,7 +31,7 @@
   <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
 </header>
 <main class="spec-main">
-  <p class="spec-intro">How any list page in Bolster is described, and the rules it follows. One set of files serves two readers: this page (the back office, for people) and the <code>bolster-page</code> skill (the front office, for Claude), which explores a live page (or reads a screenshot) and, with a short survey, turns it into a page description. 27 rules, 26 decided and 1 proposed. Generated from <code>system/recipes/list/rules.json</code> and <code>schema.json</code> by <code>scripts/build-rules.mjs</code>; don't edit it by hand.</p>
+  <p class="spec-intro">How any list page in Bolster is described, and the rules it follows. One set of files serves two readers: this page (the back office, for people) and the <code>bolster-page</code> skill (the front office, for Claude), which explores a live page (or reads a screenshot) and, with a short survey, turns it into a page description. 27 rules, 27 decided and 0 proposed. Generated from <code>system/recipes/list/rules.json</code> and <code>schema.json</code> by <code>scripts/build-rules.mjs</code>; don't edit it by hand.</p>
 
   <section class="spec-section">
     <h2>How a page gets made</h2>
@@ -116,12 +116,12 @@
     </div>
   </article>
   <article class="card rule-card" id="L-slot">
-    <header class="card-header rule-head"><h3><code>L-slot</code> The slot before the name shows who or what the row is known by</h3><span class="badge" data-tone="warning">Proposed</span></header>
+    <header class="card-header rule-head"><h3><code>L-slot</code> The slot before the name shows the thing itself: its picture, or its face</h3><span class="badge" data-tone="success">Decided</span></header>
     <div class="card-body rule-body">
-      <p>What sits before a row's name is a slot (leading), filled from the model, not from what the original draws there: a thumbnail when the thing has pictures (a placeholder for rows without one); otherwise an avatar when the row is a person or company, or is known by one (its title leads with a customer or vendor: the avatar is theirs); otherwise nothing. An icon only when the model gives the thing one. Never by habit, never because another list has one.</p>
-      <p class="text-secondary"><b>Why:</b> The slot helps a scanning eye find a row by who or what it's about. Filled for any other reason it's decoration, and filled by copying it carries the original's accidents.</p>
+      <p>What sits before a row's name is a slot (leading), filled from the model, not from what the original draws there: a thumbnail when the thing has pictures (a placeholder for rows without one); otherwise an avatar when the row is itself a person or company (a customer, a sub or vendor); otherwise nothing. A row that is only named after a person or company (a job after its client, an order after its vendor) takes no avatar: the name already says who, and the slot would only repeat it. An icon only when the model gives the thing one. Never by habit, never because another list has one.</p>
+      <p class="text-secondary"><b>Why:</b> The slot helps a scanning eye find a row by what it is. Initials beside a name the row already leads with repeat it and cost every row the width; filled for any other reason it's decoration, and filled by copying it carries the original's accidents.</p>
       
-      <p class="rule-meta"><span class="badge">check</span> <span class="text-secondary">· D55, L-source, Product designer, 15 Oct 2026</span></p>
+      <p class="rule-meta"><span class="badge">check</span> <span class="text-secondary">· D55, D86, L-source, Product designer, 15 and 20 Oct 2026</span></p>
     </div>
   </article>
   <article class="card rule-card" id="L-status-stage">
@@ -349,9 +349,9 @@
   <section class="spec-section">
     <h2>The concept's lists, described</h2>
     <p class="text-secondary">The four lists in the data list concept, written as descriptions and checked when this page was built. A failure here is the concept breaking a rule, which is the point of checking.</p>
-    <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>File</th><th>What it is</th><th>Check</th></tr></thead><tbody><tr><td><code>concept/catalog.json</code></td><td>9 columns · no status · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/customers.json</code></td><td>9 columns · 3 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/invoices.json</code></td><td>8 columns · 4 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/jobs.json</code></td><td>8 columns · 5 statuses · rows open</td><td><span class="badge" data-tone="success">Passes</span></td></tr></tbody></table></div>
+    <div class="spec-panel table-scroll"><table class="spec-table"><thead><tr><th>File</th><th>What it is</th><th>Check</th></tr></thead><tbody><tr><td><code>concept/catalog.json</code></td><td>9 columns · no status · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/customers.json</code></td><td>9 columns · 3 statuses · rows peek</td><td><span class="badge" data-tone="success">Passes</span></td></tr><tr><td><code>concept/invoices.json</code></td><td>8 columns · 4 statuses · rows peek</td><td><span class="badge" data-tone="danger">Fails</span> <span class="text-secondary">L-slot         the avatar is of “client”, which the rows are named after but aren't; an avatar shows only when the row is itself a person or company</span></td></tr><tr><td><code>concept/jobs.json</code></td><td>8 columns · 5 statuses · rows open</td><td><span class="badge" data-tone="danger">Fails</span> <span class="text-secondary">L-slot         the avatar is of “client”, which the rows are named after but aren't; an avatar shows only when the row is itself a person or company</span></td></tr></tbody></table></div>
   </section>
 </main>
-<script src="specimen.js?v=c37f7768"></script>
+<script src="specimen.js?v=4d5dcfbf"></script>
 </body>
 </html>

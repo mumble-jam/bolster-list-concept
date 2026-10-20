@@ -18,8 +18,7 @@
       "type": "name",
       "priority": 1,
       "title": "{vendor}",
-      "leading": "avatar",
-      "avatarFrom": "vendor",
+      "leading": "none",
       "detail": "{number}"
     },
     {
@@ -424,8 +423,8 @@
     },
     {
       "field": "columns[key=order].leading",
-      "value": "avatar of vendor",
-      "why": "L-slot: rows are known by their vendor, a company."
+      "value": "none",
+      "why": "L-slot: vendor orders are named after their vendor, a company, but aren't one: the name already says who."
     },
     {
       "field": "columns[key=order].detail",

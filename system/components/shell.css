@@ -84,6 +84,7 @@
     align-items: stretch;
     padding: var(--space-3) var(--space-2);
     overflow: hidden;
+    border-inline-end: var(--border-width-default) solid var(--color-line-rail);
     background: var(--color-surface-chrome);
     transition: inline-size var(--duration-medium) var(--ease-out), box-shadow var(--duration-medium) var(--ease-out);
   }

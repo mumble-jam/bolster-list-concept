@@ -140,7 +140,8 @@
     .list-panel .data-table tbody tr { --_row-bg: var(--color-surface-default); }
     @media (hover: hover) { .list-panel .data-table tbody tr:hover { --_row-bg: var(--color-surface-hover); } }
     .list-panel .data-table tbody tr:is([data-selected], :has(.data-table-select :checked)) { --_row-bg: var(--color-surface-selected); }
-    .list-panel .data-table tbody tr[data-open] { --_row-bg: var(--color-surface-current); }
+    /* a ticked row stays the selection's colour while its record is open too: the open row shows by its edge */
+    .list-panel .data-table tbody tr[data-open]:not([data-selected], :has(.data-table-select :checked)) { --_row-bg: var(--color-surface-current); }
     .list-panel .data-table tbody tr[data-id] { cursor: pointer; }
     /* above the cells that scroll under them, and above the controls in those cells (z 1) */
     .list-panel .data-table :is(th, td):is(.data-table-select, [data-primary]) { position: sticky; z-index: 2; }
@@ -280,7 +281,7 @@
   }
   @media (max-width: 767px) and (prefers-reduced-motion: reduce) { .data-table tbody tr { transition: none; } }
 
-  /* the row whose record is open */
-  .data-table tbody tr[data-open] td { background: var(--color-surface-current); }
+  /* the row whose record is open; ticked as well, it keeps the selection's colour and shows open by its edge */
+  .data-table tbody tr[data-open]:not([data-selected], :has(.data-table-select :checked)) td { background: var(--color-surface-current); }
   .data-table tbody tr[data-open] td:first-child { box-shadow: inset 3px 0 0 var(--color-action-accent); }
 }

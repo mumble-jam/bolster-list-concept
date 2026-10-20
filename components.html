@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=c37f7768">
-<link rel="stylesheet" href="data-list.css?v=c37f7768">
+<link rel="stylesheet" href="system/bolster.css?v=4d5dcfbf">
+<link rel="stylesheet" href="data-list.css?v=4d5dcfbf">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -108,7 +108,7 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=c37f7768"></script>
+<script src="shared/icons.js?v=4d5dcfbf"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -149,7 +149,7 @@ const C = [
 
   ["Table", "Column headers and sorting", "mine", "You reported jumps when sorting, which made the rule that focus stays put; then the header lagging in Chrome and losing its pinned cells in Safari (14 Oct, D38), both bugs.", "Header style, sort arrows, sticky header and how it follows the scroll, hover-revealed arrow."],
   ["Table", "Rows", "mine", "You reported the hover lag between the first cell and the rest.", "Avatar and two-line name, row heights, hover, selected colour, the open row's blue edge."],
-  ["Table", "Thumbnails", "steered", "What sits before the name is a slot: an avatar, a thumbnail, anything else, or nothing; the job list keeps its avatar, the catalog gets photos with a placeholder where there's none or a link breaks (15 Oct, D55). The photo shows large at the top of the item's record, not as a link (15 Oct).", "The rounded square and its sizes, the image icon on a tint, picking and crediting 25 open-licence photos, the broken-link fallback, the column of photos on phones."],
+  ["Table", "Thumbnails", "steered", "What sits before the name is a slot: an avatar, a thumbnail, anything else, or nothing; the job list keeps its avatar, the catalog gets photos with a placeholder where there's none or a link breaks (15 Oct, D55). Then avatars only where the row is itself a person or company (customers, subs and vendors); a job, an invoice or an order named after one shows none (20 Oct, L-slot decided, D86). The photo shows large at the top of the item's record, not as a link (15 Oct).", "The rounded square and its sizes, the image icon on a tint, picking and crediting 25 open-licence photos, the broken-link fallback, the column of photos on phones."],
   ["Table", "Sideways scroll", "yours", "Scroll sideways once columns reach their content width (9 Oct).", "Pinned checkbox and name, the edge rule once scrolled, the fade on the right."],
   ["Table", "Column widths", "steered", "A status must never clip, as a rule (9 Oct).", "Measuring every value, every status and the header offscreen."],
   ["Table", "Status badges", "steered", "The marks inside them are yours, and they're the job list's own: other lists show a plain badge and a dot on the card (14 Oct, D49). No dot on any status badge: a dot isn't an icon, icons show on demand (15 Oct, D61).", "The badge itself: pill, tint and text."],
@@ -263,6 +263,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=c37f7768"></script>
+<script src="system/specimens/specimen.js?v=4d5dcfbf"></script>
 </body>
 </html>

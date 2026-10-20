@@ -166,7 +166,7 @@
     // phones (L-phone-row): the number and last activity on the overline, the address under the name
     phone: { over: (x) => fmt.ago(x.modified), where: (x) => esc(x.client.address) },
     columns: [
-      { key: "job", label: "Job", m: "title", required: true, sort: (x) => `${x.job} ${x.client.name}`, render: (x) => main(x.id, `${x.client.name} · ${x.job}`, x.client.address, x.client) },
+      { key: "job", label: "Job", m: "title", required: true, sort: (x) => `${x.job} ${x.client.name}`, render: (x) => main(x.id, `${x.client.name} · ${x.job}`, x.client.address) },
       { key: "status", label: "Status", w: "6.5rem", m: "badge", sort: (x) => Object.keys(EST_STATUS).indexOf(x.status), render: (x) => badge(EST_STATUS[x.status]) },
       { key: "owner", label: "Owner", w: "12.5rem", hideBelow: "lg", sort: (x) => x.owner.name, render: (x) => person(x.owner) },
       { key: "source", label: "Source", w: "7rem", hidden: true, hideBelow: "lg", sort: (x) => x.source, render: (x) => `<span class="cell-muted">${esc(x.source)}</span>` },
@@ -287,7 +287,7 @@
     statusMap: INV_STATUS,
     phone: { over: (x) => `${esc(x.number)} · ${x.status === "overdue" ? `<span class="cell-danger">${ageDays(x.due)} days late</span>` : x.status === "paid" ? `Paid in ${x.paidIn} days` : `Due ${fmt.date(x.due)}`}`, where: (x) => esc(x.job) },
     columns: [
-      { key: "number", label: "Invoice", m: "title", required: true, sort: (x) => x.client.name, render: (x) => main(x.id, x.client.name, `${x.number} · ${x.job}`, x.client) },
+      { key: "number", label: "Invoice", m: "title", required: true, sort: (x) => x.client.name, render: (x) => main(x.id, x.client.name, `${x.number} · ${x.job}`) },
       { key: "status", label: "Status", w: "7.5rem", m: "badge", sort: (x) => Object.keys(INV_STATUS).indexOf(x.status), render: (x) => badge(INV_STATUS[x.status]) },
       { key: "issued", label: "Issued", w: "5rem", hideBelow: "lg", sort: (x) => +x.issued, render: (x) => `<span class="cell-muted">${fmt.date(x.issued)}</span>` },
       { key: "due", label: "Due", w: "8rem", m: "sub", sort: (x) => +x.due, render: (x) => (x.status === "overdue" ? `<span class="cell-danger">${ageDays(x.due)} days late</span>` : x.status === "paid" ? `<span class="cell-muted">Paid in ${x.paidIn} days</span>` : `<span class="cell-muted">${fmt.date(x.due)}</span>`) },

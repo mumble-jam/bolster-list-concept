@@ -231,6 +231,8 @@
     --color-line-focus: light-dark(var(--color-blue-print-500), var(--color-blue-print-300));
     --color-line-chrome: var(--color-pitch-black-800);
     --color-line-sidebar: light-dark(var(--color-cement-400), var(--color-pitch-black-900));
+    /* the rail's edge against the section sidebar: none in light (dark on paper is edge enough), the top bar's line in dark, where both are near black */
+    --color-line-rail: light-dark(transparent, var(--color-line-chrome));
 
     /* ---------- action ---------- */
     /* Primary is Bolster's black button with highlighter text (D4); in dark it flips to yellow. */

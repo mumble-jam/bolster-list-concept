@@ -19,8 +19,7 @@
       "priority": 1,
       "title": "{client} · {job}",
       "detail": "{address}",
-      "leading": "avatar",
-      "avatarFrom": "client"
+      "leading": "none"
     },
     {
       "key": "status",
