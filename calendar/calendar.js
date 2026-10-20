@@ -155,11 +155,23 @@
   const weekdayHead = (start, n, lead = "") => `<div class="cal-head" aria-hidden="true">${lead}${Array.from({ length: n }, (_, i) => { const d = add(start, i); return `<div${d === T ? " data-today" : ""}>${day(d).toLocaleDateString("en-GB", { weekday: "short" })}${n < 7 || lead ? `<span class="cal-head-num">${day(d).getDate()}</span>` : ""}</div>`; }).join("")}</div>`;
 
   // ---------- Month ----------
+  // how many lines a month's day fits: the weeks share the screen's height, so taller rows fit more before
+  // “+n more” (five at the least, the 8.75rem a week keeps); measured after each draw and on resize
+  let monthLines = 5;
+  function fitMonth() {
+    const w = $("#cal[data-view='month'] .cal-week"), date = w?.querySelector(".cal-date");
+    if (!w || !date) return;
+    const cs = getComputedStyle(w), rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const lane = parseFloat(cs.getPropertyValue("--_lane")) * rem, gap = parseFloat(cs.rowGap) || 0;
+    const room = w.getBoundingClientRect().bottom - parseFloat(cs.paddingBlockEnd) - date.getBoundingClientRect().bottom - gap;
+    const lines = Math.max(5, Math.floor((room + gap) / (lane + gap)));
+    if (lines !== monthLines) { monthLines = lines; render(); }
+  }
   function monthHtml() {
     const a = day(st.at), first = iso(new Date(a.getFullYear(), a.getMonth(), 1)), last = iso(new Date(a.getFullYear(), a.getMonth() + 1, 0));
     const start = weekStart(first), end = add(weekStart(last), 6);
     let weeks = "";
-    for (let w = start; w <= end; w = add(w, 7)) weeks += weekRow({ start: w, spans: spansIn(w, add(w, 6)), things: (d) => dayThings(d), month: a.getMonth() });
+    for (let w = start; w <= end; w = add(w, 7)) weeks += weekRow({ start: w, spans: spansIn(w, add(w, 6)), things: (d) => dayThings(d), month: a.getMonth(), lines: monthLines, maxLanes: Math.max(3, monthLines - 2) });
     return `<div style="--_cols:repeat(7, minmax(0, 1fr))">${weekdayHead(start, 7)}</div>${weeks}`;
   }
 
@@ -248,6 +260,7 @@
     $("#tray-toggle").setAttribute("aria-label", `Unscheduled: ${tray.length ? `${tray.length} ${tray.length === 1 ? "job" : "jobs"}` : "none"}`);
     renderTray();
     $("#go-today").setAttribute("aria-label", `Today, ${f.long(T)}`);
+    if (cal.dataset.view === "month") fitMonth();
   }
   function renderTray() {
     $("#tray-list").innerHTML = tray.length ? tray.map((u) => `<li><button type="button" class="cal-tray-item" data-tray="${u.id}" data-hue="${hueOf(u.job)}" aria-haspopup="dialog"><b>${esc(u.job)}</b><span>${esc(u.phase)} · ${u.days} ${u.days === 1 ? "day" : "days"} · ${esc(u.client)}</span></button></li>`).join("")
@@ -502,7 +515,7 @@
   phone.addEventListener("change", render);
   trayWide.addEventListener("change", renderTray);
   finePointer.addEventListener("change", render);
-  addEventListener("resize", () => popFor && BolsterShell.placePopover(pop, popFor.from));
+  addEventListener("resize", () => { fitMonth(); if (popFor) BolsterShell.placePopover(pop, popFor.from); });
 
   // what hides and sticks as you scroll is the shell's (BolsterShell.scrolling): this page says where the
   // calendar starts, and that a drag counts as in use
