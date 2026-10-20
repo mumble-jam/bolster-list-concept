@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=5bac4c55">
-<link rel="stylesheet" href="specimen.css?v=5bac4c55">
+<link rel="stylesheet" href="../bolster.css?v=c37f7768">
+<link rel="stylesheet" href="specimen.css?v=c37f7768">
 <style>
   /* specimen only: popovers drawn in place, not in the top layer */
   .spec-panel .pop { position: static; max-block-size: none; }
@@ -42,7 +42,7 @@
 
   <section class="spec-section">
     <h2>Display settings and a nested menu</h2>
-    <p>Each setting shows its current value and opens its own menu, with a check by the choice.</p>
+    <p>Each setting shows its current value and opens its own menu, with a check by the choice. An item keeps the icon column only when items beside it have icons, so their labels line up (Change status under Open and Edit, below); in a menu of its own with no icons, there's no empty column.</p>
     <div class="spec-panel" data-surface="canvas">
       <div class="spec-row" style="align-items:flex-start">
         <div class="pop" role="menu" aria-label="Display settings" style="inline-size:auto;min-inline-size:16rem">
@@ -53,8 +53,8 @@
           </div>
         </div>
         <div class="pop submenu" role="menu" aria-label="Row height">
-          <button type="button" class="menu-item" role="menuitemradio" aria-checked="true"><span class="menu-icon"></span>Comfortable<i data-icon="check" data-size="14"></i></button>
-          <button type="button" class="menu-item" role="menuitemradio" aria-checked="false"><span class="menu-icon"></span>Compact</button>
+          <button type="button" class="menu-item" role="menuitemradio" aria-checked="true"><span class="submenu-label">Comfortable</span><i data-icon="check" data-size="14"></i></button>
+          <button type="button" class="menu-item" role="menuitemradio" aria-checked="false"><span class="submenu-label">Compact</span></button>
         </div>
       </div>
     </div>
@@ -78,7 +78,7 @@
     </div>
   </section>
 </main>
-<script src="../../shared/icons.js?v=5bac4c55"></script>
-<script src="specimen.js?v=5bac4c55"></script>
+<script src="../../shared/icons.js?v=c37f7768"></script>
+<script src="specimen.js?v=c37f7768"></script>
 </body>
 </html>

@@ -581,8 +581,10 @@
     const n = st.selected.size, what = n === 1 ? `1 ${cfg.noun[0]}` : `${fmt.count(n)} ${cfg.noun[1]}`;
     const item = (a) => (a === "Open" || a === QUICK) && peek ? openItem(a, peek)
       : `<button type="button" class="menu-item" role="menuitem"${destructive(a) ? ' data-tone="danger"' : ""} ${risky(a) && bulk ? `data-confirm="${esc(a)}"` : `data-concept-action="${esc(a)}${bulk ? ` ${what}` : ""}"`}>${mi(actionIcon(a))}${esc(a)}</button>`;
+    // an item keeps the icon column only beside items that have icons, so labels line up: in the flat menu its
+    // section sits under Open and Edit; in its own submenu nothing has an icon, so no empty column
     const sectionItems = (g) => g.items.map((i) => g.current === undefined ? item(i)
-      : `<button type="button" class="menu-item" role="menuitemradio" aria-checked="${i === g.current}" data-concept-action="${esc(g.label)} to ${esc(i.toLowerCase())}${bulk ? ` for ${what}` : ""}"><span class="menu-icon"></span>${esc(i)}${i === g.current ? I.check : ""}</button>`).join("");
+      : `<button type="button" class="menu-item" role="menuitemradio" aria-checked="${i === g.current}" data-concept-action="${esc(g.label)} to ${esc(i.toLowerCase())}${bulk ? ` for ${what}` : ""}">${nested ? "" : '<span class="menu-icon"></span>'}${esc(i)}${i === g.current ? I.check : ""}</button>`).join("");
     const plain = list.filter((a) => typeof a === "string" && !risky(a));
     const groups = list.filter((a) => typeof a !== "string");
     const danger = list.filter((a) => typeof a === "string" && risky(a));
