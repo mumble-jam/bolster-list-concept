@@ -10,10 +10,10 @@
 <link rel="apple-touch-icon" href="../shared/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../system/bolster.css?v=e5c64595">
-<link rel="stylesheet" href="../shared/shell.css?v=e5c64595">
-<link rel="stylesheet" href="../data-list.css?v=e5c64595">
-<link rel="stylesheet" href="calendar.css?v=e5c64595">
+<link rel="stylesheet" href="../system/bolster.css?v=0b742f90">
+<link rel="stylesheet" href="../shared/shell.css?v=0b742f90">
+<link rel="stylesheet" href="../data-list.css?v=0b742f90">
+<link rel="stylesheet" href="calendar.css?v=0b742f90">
 <style>:root { --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif; }</style>
 </head>
 <body>
@@ -51,7 +51,8 @@
           <button type="button" class="button" data-variant="secondary" data-size="sm" id="pick-show" aria-haspopup="dialog" aria-expanded="false"><span class="button-value" id="show-text">Show</span><i data-icon="chevron-down" data-size="14"></i></button>
           <button type="button" class="button" data-variant="secondary" data-size="sm" id="pick-people" aria-haspopup="dialog" aria-expanded="false"><span class="button-value" id="people-text">Everyone</span><i data-icon="chevron-down" data-size="14"></i></button>
           <span class="list-bar-sep cal-sep" aria-hidden="true"></span>
-          <button type="button" class="button" data-variant="secondary" data-size="sm" id="tray-toggle" aria-expanded="false" aria-controls="tray" data-tip="Unscheduled"><i data-icon="inbox" data-size="16"></i><span>Unscheduled</span><span class="cal-count" id="tray-count"></span></button>
+          <!-- Unscheduled: an icon after the rule, as display settings is on the list (D82); its count is in its name -->
+          <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only id="tray-toggle" aria-expanded="false" aria-controls="tray" aria-label="Unscheduled" data-tip="Unscheduled"><i data-icon="calendar-circle-minus" data-size="16"></i></button>
         </div>
       </div>
 
@@ -90,7 +91,7 @@
         <li><b>A full day says how many more (C-more).</b> Spans first, then appointments by time; past what fits, “+n more” opens the day's list.</li>
         <li><b>A click opens a summary (C-open).</b> What, when (with “day 2 of 4” on a running phase), where, who, and the step: Open job. The full record is one step further.</li>
         <li><b>Moving is dragging; the drop is the save (C-move).</b> Drag to another day (in Week and Day, another time too; in Crew, onto another person), drag a bar's end to stretch it; Undo in the toast. The summary's dates are the keyboard's and the phone's way. Busy time doesn't move.</li>
-        <li><b>Undated work waits beside (C-unscheduled).</b> Unscheduled opens a tray of jobs with no dates; drag one onto a day, or open it to pick a start.</li>
+        <li><b>Undated work waits beside (C-unscheduled).</b> Unscheduled (a calendar with a circled minus, after the rule, its count in its tooltip) opens a tray of jobs with no dates; drag one onto a day, or open it to pick a start.</li>
         <li><b>On phones, an agenda (C-phone).</b> A week strip over the days, each with a heading: spans first, appointments by time, a phase that only runs through a day as one line, an empty day as one line. A tap opens the summary as a sheet; no dragging.</li>
       </ol>
     </section>
@@ -123,10 +124,10 @@
     </div>
   </div>
 </details>
-<script src="../shared/icons.js?v=e5c64595"></script>
-<script src="../shared/shell.js?v=e5c64595"></script>
-<script src="../system/specimens/specimen.js?v=e5c64595"></script>
-<script src="../data.js?v=e5c64595"></script>
-<script src="calendar.js?v=e5c64595"></script>
+<script src="../shared/icons.js?v=0b742f90"></script>
+<script src="../shared/shell.js?v=0b742f90"></script>
+<script src="../system/specimens/specimen.js?v=0b742f90"></script>
+<script src="../data.js?v=0b742f90"></script>
+<script src="calendar.js?v=0b742f90"></script>
 </body>
 </html>

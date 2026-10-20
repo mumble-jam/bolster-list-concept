@@ -257,8 +257,8 @@
     label("show", "Show", on.length === KINDS.length ? "Everything" : on.length ? on.map((k) => k.label).join(", ") : "Nothing");
     label("people", "People", !st.people ? "Everyone" : together(OWNERS.filter((p) => st.people.has(p.id)).map((p) => (p.me ? "You" : p.name.split(" ")[0]))));
     $$("#views input").forEach((r) => (r.checked = r.value === st.view));
-    $("#tray-count").textContent = tray.length || "";
-    $("#tray-toggle").setAttribute("aria-label", `Unscheduled: ${tray.length ? `${tray.length} ${tray.length === 1 ? "job" : "jobs"}` : "none"}`);
+    const unscheduled = `Unscheduled, ${tray.length ? `${tray.length} ${tray.length === 1 ? "job" : "jobs"}` : "none"}`;
+    $("#tray-toggle").setAttribute("aria-label", unscheduled); $("#tray-toggle").dataset.tip = unscheduled;
     renderTray();
     $("#go-today").setAttribute("aria-label", `Today, ${f.long(T)}`);
     if (cal.dataset.view === "month") fitMonth();

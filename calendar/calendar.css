@@ -31,7 +31,9 @@
   .cal-controls > .button { flex: none; }
   /* the rule between the view and what's shown, and Unscheduled, as the list's toolbar has before display settings */
   .cal-sep { margin-inline: var(--space-1); }
-  .cal-count { min-inline-size: 1.25rem; padding-inline: var(--space-1); border-radius: var(--radius-full); background: var(--color-surface-tint); color: var(--color-content-secondary); font-size: var(--text-xs); line-height: var(--leading-xs); text-align: center; font-variant-numeric: tabular-nums; }
+  /* Unscheduled's icon is wider than tall: drawn by its height, as the list draws display settings', so it
+     isn't squeezed into a square and drawn smaller than the rest (D41) */
+  #tray-toggle > svg { inline-size: auto; block-size: 1rem; }
 
   /* ---------- the calendar and the tray beside it ---------- */
   .cal-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); align-items: start; }
@@ -222,7 +224,7 @@
     .cal-bar { gap: var(--space-2); }
     .cal-where { inline-size: 100%; }
     .cal-period { font-size: var(--text-lg); line-height: var(--leading-lg); }
-    .cal-views, #tray-toggle span:not(.cal-count) { display: none; }
+    .cal-views { display: none; }
     .cal-controls { inline-size: 100%; }
     .cal-controls > .button { flex: 1 1 0; min-inline-size: 0; }
     #tray-toggle { flex: none; }
