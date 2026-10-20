@@ -8,6 +8,9 @@
 
 window.BolsterShell = (() => {
   const icon = window.BolsterIcons;
+  // the app shell's own chrome (top bar, rail, section sidebar, bottom bar) draws Light; the page draws Regular
+  // (D84): its own icons are the l- copies, where an icon has one (search and help are Regular in both)
+  const chrome = (k, ...a) => icon(`l-${k}`, ...a) || icon(k, ...a);
   const ASSETS = new URL("./assets/", document.currentScript.src).href;
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
@@ -97,21 +100,21 @@ window.BolsterShell = (() => {
 
   function topBar() {
     return `<header class="top-bar bs-top">
-      <button class="bs-icon-btn bs-hamburger" type="button" data-toggle-sidebar aria-label="Open menu" data-tip="Menu">${icon("menu")}</button>
+      <button class="bs-icon-btn bs-hamburger" type="button" data-toggle-sidebar aria-label="Open menu" data-tip="Menu">${chrome("menu")}</button>
       <a class="bs-logo" href="#" data-not-built="home" aria-label="Bolster home" data-tip="Home"><img src="${ASSETS}bolster-mark.svg" alt=""></a>
-      <button class="bs-company" type="button" popovertarget="bs-company-menu" aria-haspopup="menu">${esc(COMPANY)}${icon("chevron-down", 16)}</button>
+      <button class="bs-company" type="button" popovertarget="bs-company-menu" aria-haspopup="menu">${esc(COMPANY)}${chrome("chevron-down", 16)}</button>
       <div class="menu" id="bs-company-menu" popover role="menu" aria-label="Company">
-        <button class="menu-item" role="menuitem" data-not-built="switch-company">${icon("arrow-left-right", 16)}Switch company</button>
-        <button class="menu-item" role="menuitem" data-not-built="company-settings">${icon("briefcase", 16)}Company settings</button>
+        <button class="menu-item" role="menuitem" data-not-built="switch-company">${chrome("arrow-left-right", 16)}Switch company</button>
+        <button class="menu-item" role="menuitem" data-not-built="company-settings">${chrome("briefcase", 16)}Company settings</button>
       </div>
-      <button class="top-bar-search" type="button" data-not-built="search" data-tip="Search">${icon("search", 16)}<span>Search customers, jobs, invoices, files…</span><kbd>⌘K</kbd></button>
+      <button class="top-bar-search" type="button" data-not-built="search" data-tip="Search">${chrome("search", 16)}<span>Search customers, jobs, invoices, files…</span><kbd>⌘K</kbd></button>
       <div class="bs-top-actions">
-        <button class="bs-icon-btn" type="button" aria-label="Help" data-not-built="help" data-tip="Help">${icon("circle-help", 18, { optical: true })}</button>
+        <button class="bs-icon-btn" type="button" aria-label="Help" data-not-built="help" data-tip="Help">${chrome("circle-help", 18, { optical: true })}</button>
         <button class="bs-icon-btn bs-assistant" type="button" aria-label="Ask Bolton" data-not-built="assistant" data-tip="Ask Bolton"><img src="${ASSETS}bolton-head.svg" alt=""></button>
         <button class="bs-avatar" type="button" popovertarget="bs-user-menu" aria-haspopup="menu" aria-label="${esc(USER.name)}" data-tip="Your account"><span class="avatar" data-color="${USER.color}" aria-hidden="true">${USER.initials}</span></button>
         <div class="menu" id="bs-user-menu" popover role="menu" aria-label="Account">
-          <button class="menu-item" role="menuitem" data-not-built="profile">${icon("user", 16)}Edit profile</button>
-          <button class="menu-item" role="menuitem" data-not-built="users">${icon("users", 16)}Manage users</button>
+          <button class="menu-item" role="menuitem" data-not-built="profile">${chrome("user", 16)}Edit profile</button>
+          <button class="menu-item" role="menuitem" data-not-built="users">${chrome("users", 16)}Manage users</button>
           <hr class="menu-separator">
           <button class="menu-item" role="menuitem" data-not-built="logout">Log out</button>
         </div>
@@ -124,7 +127,7 @@ window.BolsterShell = (() => {
   const pinIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" stroke="currentColor" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="18" y="18" width="476" height="476" rx="52"/><line x1="148" y1="18" x2="148" y2="494"/><path stroke-width="44" d="${PIN_CHEVRON.out}"/></svg>`;
 
   function rail() {
-    const item = (s) => `<a class="rail-item" ${sectionHref(s)} data-section="${s.id}">${icon(s.icon)}<span class="rail-label">${esc(s.label)}</span></a>`;
+    const item = (s) => `<a class="rail-item" ${sectionHref(s)} data-section="${s.id}">${chrome(s.icon)}<span class="rail-label">${esc(s.label)}</span></a>`;
     return `<nav class="rail" aria-label="Main">${NAV.main.map(item).join("")}<span class="rail-spacer"></span>${NAV.bottom.map(item).join("")}<hr class="rail-separator"><button class="rail-item bs-pin" type="button" aria-pressed="false">${pinIcon}<span class="rail-label">Pin sidebar</span></button></nav>`;
   }
 
@@ -166,25 +169,25 @@ window.BolsterShell = (() => {
   function moreHtml() {
     const cur = sectionOf(opts.current)?.id;
     const row = (s) => itemsOf(s).length
-      ? `<button type="button" class="sidebar-item" data-more-section="${s.id}"${s.id === cur ? ' aria-current="true"' : ""}>${icon(s.icon, 18)}<span>${esc(s.label)}</span><span class="bs-chev">${icon("chevron-right", 14)}</span></button>`
-      : `<a class="sidebar-item" ${sectionHref(s)}${s.id === cur ? ' aria-current="page"' : ""}>${icon(s.icon, 18)}<span>${esc(s.label)}</span></a>`;
+      ? `<button type="button" class="sidebar-item" data-more-section="${s.id}"${s.id === cur ? ' aria-current="true"' : ""}>${chrome(s.icon, 18)}<span>${esc(s.label)}</span><span class="bs-chev">${chrome("chevron-right", 14)}</span></button>`
+      : `<a class="sidebar-item" ${sectionHref(s)}${s.id === cur ? ' aria-current="page"' : ""}>${chrome(s.icon, 18)}<span>${esc(s.label)}</span></a>`;
     // a page can add its own entries at the end (data-more-entry="Label" on the element they open)
-    const extra = [...document.querySelectorAll("[data-more-entry]")].map((el) => `<button type="button" class="sidebar-item" data-more-open="${el.id}">${icon(el.dataset.moreIcon || "sliders", 18)}<span>${esc(el.dataset.moreEntry)}</span></button>`).join("");
+    const extra = [...document.querySelectorAll("[data-more-entry]")].map((el) => `<button type="button" class="sidebar-item" data-more-open="${el.id}">${chrome(el.dataset.moreIcon || "sliders", 18)}<span>${esc(el.dataset.moreEntry)}</span></button>`).join("");
     return `<h2 class="sidebar-title">Menu</h2>${NAV.main.map(row).join("")}<hr class="bs-sep">${NAV.bottom.map(row).join("")}${extra ? `<hr class="bs-sep">${extra}` : ""}`;
   }
-  const backRow = `<button type="button" class="sidebar-item bs-back" data-more-back>${icon("chevron-left", 14)}<span>All of the menu</span></button>`;
+  const backRow = `<button type="button" class="sidebar-item bs-back" data-more-back>${chrome("chevron-left", 14)}<span>All of the menu</span></button>`;
 
   function sidebarHtml(section) {
-    const link = (x) => `<a class="sidebar-item" ${linkAttrs(x.id)} data-item="${x.id}"${x.id === opts.current ? ' aria-current="page"' : ""}>${icon(x.icon, 18)}<span>${esc(x.label)}</span></a>`;
+    const link = (x) => `<a class="sidebar-item" ${linkAttrs(x.id)} data-item="${x.id}"${x.id === opts.current ? ' aria-current="page"' : ""}>${chrome(x.icon, 18)}<span>${esc(x.label)}</span></a>`;
     let body = "";
     if (section.items) body = section.items.map((x) => (x === "-" ? `<hr class="bs-sep">` : link(x))).join("");
-    if (section.groups) body = section.groups.map((g) => `<details class="bs-group"${g.closed && !g.items.some((x) => x.id === opts.current) ? "" : " open"}><summary class="sidebar-group">${esc(g.label)}${icon("chevron-down", 14)}</summary>${g.items.map(link).join("")}</details>`).join("");
+    if (section.groups) body = section.groups.map((g) => `<details class="bs-group"${g.closed && !g.items.some((x) => x.id === opts.current) ? "" : " open"}><summary class="sidebar-group">${esc(g.label)}${chrome("chevron-down", 14)}</summary>${g.items.map(link).join("")}</details>`).join("");
     return `<h2 class="sidebar-title">${esc(section.label)}</h2>${body}`;
   }
 
   function bottomBar() {
     const byId = (id) => sections.find((s) => s.id === id);
-    return `<nav class="bottom-bar" aria-label="Main">${NAV.phone.map((id) => { const s = byId(id); return `<a class="bottom-bar-item" ${sectionHref(s)} data-section="${s.id}">${icon(s.icon)}${esc(s.label)}</a>`; }).join("")}<a class="bottom-bar-item" href="#" data-toggle-sidebar data-section="more">${icon("ellipsis")}More</a></nav>`;
+    return `<nav class="bottom-bar" aria-label="Main">${NAV.phone.map((id) => { const s = byId(id); return `<a class="bottom-bar-item" ${sectionHref(s)} data-section="${s.id}">${chrome(s.icon)}${esc(s.label)}</a>`; }).join("")}<a class="bottom-bar-item" href="#" data-toggle-sidebar data-section="more">${chrome("ellipsis")}More</a></nav>`;
   }
 
   function setCurrent(itemId) {

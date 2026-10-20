@@ -109,13 +109,13 @@
   /* the title and its job flow as text, wrapping as words do: a wrapping flex row aligned on the baseline
      kept a stale height in some browsers when the list narrowed (the record opening beside it) */
   .todo-main { min-inline-size: 0; }
-  .todo-main > .todo-title, .todo-main > .todo-job { display: inline; vertical-align: baseline; }
-  .todo-main > .todo-job { margin-inline-start: var(--space-2); }
+  .todo-main > .todo-title, .todo-main > .todo-sep, .todo-main > .todo-job { display: inline; vertical-align: baseline; }
+  /* the dot parts the title from its job, outside the link, so it isn't underlined with it */
+  .todo-main > .todo-sep { margin-inline: var(--space-2) var(--space-1); font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-tertiary); }
   .todo-title { padding: var(--space-1) 0; border: 0; background: none; color: var(--color-content-primary); font: inherit; font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); text-align: start; overflow-wrap: anywhere; cursor: pointer; }
   @media (hover: hover) { .todo-title:hover { text-decoration: underline; text-underline-offset: 3px; } }
   .todo-title:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); border-radius: var(--radius-xs); }
   .todo-job { font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); text-decoration: none; white-space: nowrap; }
-  .todo-job::before { content: "· "; color: var(--color-content-tertiary); }
   @media (hover: hover) { .todo-job:hover { color: var(--color-content-primary); text-decoration: underline; } }
   .todo-meta { display: none; }
   .todo-row[data-done] .todo-title { color: var(--color-content-tertiary); text-decoration: line-through; }
@@ -185,7 +185,8 @@
     .todo-prio { grid-column: 2; block-size: var(--space-6); }
     .todo-main { grid-column: 3; display: grid; row-gap: var(--space-0-5); }
     .todo-title { padding: 0; font-size: var(--text-base); line-height: var(--leading-base); }
-    .todo-job, .todo-side { display: none; }
+    /* the job is in the line under the title here: the link and its dot go (as specific as the rule that shows them) */
+    .todo-main > :is(.todo-sep, .todo-job), .todo-side { display: none; }
     .todo-meta { display: block; margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
     .todo-meta [data-late] { color: var(--color-feedback-danger-content); }
     .todo-add { padding-inline-start: var(--space-8); min-block-size: var(--control-height-lg); }

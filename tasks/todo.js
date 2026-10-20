@@ -171,7 +171,7 @@
       ${lead}
       <button type="button" class="todo-prio" data-pick="prio" data-id="${t.id}" aria-haspopup="menu" aria-expanded="false" aria-label="Priority: ${PRIO[t.priority]}. Change" data-tip="${t.priority ? PRIO[t.priority] : "Set priority"}">${mark(t.priority)}</button>
       <div class="todo-main">
-        <button type="button" class="todo-title" data-open-task="${t.id}">${esc(t.name)}</button>${st.group !== "job" && t.job ? `<a class="todo-job" href="../index.html#jobs" data-tip="Open ${esc(t.job)}">${esc(t.job)}</a>` : ""}
+        <button type="button" class="todo-title" data-open-task="${t.id}">${esc(t.name)}</button>${st.group !== "job" && t.job ? `<span class="todo-sep" aria-hidden="true">·</span><a class="todo-job" href="../index.html#jobs" data-tip="Open ${esc(t.job)}">${esc(t.job)}</a>` : ""}
         <p class="todo-meta">${meta(t)}</p>
       </div>
       <div class="todo-side">
