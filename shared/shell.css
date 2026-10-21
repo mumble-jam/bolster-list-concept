@@ -110,7 +110,10 @@
     .bs-sidebar .bs-nav-bottom > .bs-sep.bs-fold { display: none; }
     .bs-sidebar button.bs-fold { margin-block-start: var(--space-2); color: var(--_ink-3); }
   }
-  .bs-gap { block-size: var(--space-1); }
+  /* between a section's groups of pages, a hairline as faint as the menu can carry, from where their names start
+     to the row's end, with a little air either side */
+  .bs-gap { block-size: var(--border-width-default); margin-block: calc(var(--space-1) + 2px); margin-inline: calc(var(--space-2) * 2 + 1.75rem) var(--space-2);
+    background: color-mix(in oklab, var(--color-content-on-chrome) 9%, transparent); }
 
   /* motion (D88): what you open eases in; nothing moves for what was open on arrival, nor with reduced motion */
   @media (prefers-reduced-motion: no-preference) {
@@ -150,7 +153,22 @@
   .bs-loader { position: fixed; inset: 0; z-index: calc(var(--z-modal) + 2); display: grid; place-items: center; background: var(--color-surface-canvas); transition: opacity var(--duration-medium) var(--ease-out); }
   .bs-loader[hidden] { display: none; }
   .bs-loader[data-leaving] { opacity: 0; }
-  .bs-loader-line { display: inline-block; }
+  .bs-loader-line { display: inline-block; white-space: nowrap; }
+  .bs-loader-line.bs-wrap { white-space: normal; }
+  /* while a line types, its caret is what's working: the dots wait for it */
+  .bs-typing + .dash-loader-dots { visibility: hidden; }
+  /* the line's ways in (loader.js, concept controls): a ticker's two lines in one slot, clipped above and below;
+     the typed line's caret; the decoded line's unsettled letters, quieter; letter by letter */
+  .bs-roll { display: inline-grid; overflow-y: clip; padding-block: 0.15em; margin-block: -0.15em; vertical-align: bottom; }
+  .bs-roll > span { grid-area: 1 / 1; }
+  .bs-typing::after { content: ""; display: inline-block; inline-size: 1.5px; block-size: 1.05em; margin-inline-start: 1px; vertical-align: -0.15em; background: currentColor; animation: bs-caret 0.9s steps(1) infinite; }
+  @keyframes bs-caret { 50% { opacity: 0; } }
+  .bs-scramble { color: var(--color-content-tertiary); }
+  .bs-ch { display: inline-block; animation: bs-ch 460ms cubic-bezier(0.2, 0.8, 0, 1) calc(var(--i) * 18ms) both; }
+  @keyframes bs-ch { from { opacity: 0; translate: 0 0.45em; filter: blur(2px); } }
+  @media (prefers-reduced-motion: reduce) { .bs-ch, .bs-typing::after { animation: none; } }
+  .bs-cc-loader { display: grid; gap: var(--space-3); padding-block-end: var(--space-3); border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
+  .bs-cc-loader input[type="range"] { inline-size: 100%; margin: 0; accent-color: var(--color-control-on); }
   /* a page in the slot draws no shell of its own (shell.js, ?embed=settings) */
   :root[data-embed] .app-shell { display: block; min-block-size: 100dvh; }
   :root[data-embed] .concept-controls { display: none; }
@@ -184,7 +202,7 @@
     .app-shell:not([data-sidebar-hidden]) .bs-logo { inline-size: var(--shell-sidebar-width); justify-items: start; padding-inline-start: calc(var(--shell-rail-width) / 2 - 0.875rem); }
     /* the logo stays put as the top bar slides away only over the rail; over the sidebar it goes with the bar */
     :root[data-chrome-hidden] .app-shell:not([data-sidebar-hidden]) .bs-logo { translate: none; box-shadow: none; }
-    .app-shell:not([data-sidebar-hidden]) .bs-logo { box-shadow: 0 1px 0 var(--color-surface-chrome); position: relative; z-index: 1; }
+    /* the top bar's rule runs on under the logo, over the menu (your call, 21 Oct, back from the design pass) */
     .app-shell[data-sidebar-hidden] { grid-template-columns: var(--_rail-column) 0 minmax(0, 1fr); }
     .app-shell[data-sidebar-hidden] .sidebar { display: none; }
     /* folded, a section's pages in a navigation popup beside the rail (shell.js, placed by hand): the menu's dark,
@@ -212,7 +230,9 @@
     }
     .bs-navpop-title { padding: var(--space-1) var(--space-2) var(--space-2); font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); color: var(--_ink); }
     .bs-navpop-group { display: grid; gap: 1px; }
-    .bs-navpop-group + .bs-navpop-group { margin-block-start: var(--space-2); }
+    .bs-navpop-group + .bs-navpop-group { margin-block-start: var(--space-2); padding-block-start: calc(var(--space-2) - 1px); position: relative; }
+    .bs-navpop-group + .bs-navpop-group::before { content: ""; position: absolute; inset-block-start: 0; inset-inline: calc(var(--space-2) * 2 + 1.25rem) var(--space-2);
+      border-block-start: var(--border-width-default) solid color-mix(in oklab, var(--color-content-on-chrome) 9%, transparent); }
     .bs-navpop-link {
       display: flex; align-items: center; gap: var(--space-2); min-block-size: 2rem; padding-inline: var(--space-2) var(--space-4);
       border-radius: var(--radius-sm); font-size: var(--text-sm); color: var(--_ink-2); text-decoration: none; white-space: nowrap;

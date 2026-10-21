@@ -446,8 +446,33 @@ window.BolsterShell = (() => {
     // the concept controls, on every page that has them: a new loading screen each press, or a slow one
     const cc = document.querySelector("#concept-controls .concept-body");
     if (cc) {
-      cc.insertAdjacentHTML("afterbegin", `<div class="cluster"><button class="button" data-variant="secondary" data-size="sm" data-loading>Show a loading screen</button><button class="button" data-variant="secondary" data-size="sm" data-loading="slow">Show a slow load</button></div>`);
-      cc.addEventListener("click", (e) => { const b = e.target.closest("[data-loading]"); if (!b) return; cc.closest("details").open = false; loading({ slow: b.dataset.loading === "slow" }); });
+      // and how its line comes in, how often a new one does, and which drawing: a change plays it again, the
+      // controls left open under it to try the next (D90)
+      const get = (k, d) => { try { return localStorage.getItem(`bolster-concepts:loader-${k}`) || d; } catch { return d; } };
+      const WAYS = [["rise", "Rise, fading up"], ["roll", "Roll, like a ticker"], ["type", "Typed"], ["scramble", "Decoded"], ["wave", "Letter by letter"], ["blur", "Into focus"], ["none", "No animation"]];
+      const every = get("every", "2.1");
+      cc.insertAdjacentHTML("afterbegin", `<div class="bs-cc-loader">
+        <div class="field" data-size="sm"><label class="field-label" for="cc-loader-text">Loading screen: how a line comes in</label>
+          <div class="select"><select class="input" id="cc-loader-text" data-loader-set="text">${WAYS.map(([v, l]) => `<option value="${v}"${v === get("text", "rise") ? " selected" : ""}>${l}</option>`).join("")}</select></div></div>
+        <div class="field" data-size="sm"><label class="field-label" for="cc-loader-every">A new line every <output for="cc-loader-every">${(+every).toFixed(1)} s</output></label>
+          <input type="range" id="cc-loader-every" data-loader-set="every" min="1" max="4" step="0.1" value="${every}"></div>
+        <div class="field" data-size="sm"><label class="field-label" for="cc-loader-drawing">Drawing</label>
+          <div class="select"><select class="input" id="cc-loader-drawing" data-loader-set="drawing"><option value="any">Any, at random</option></select></div></div>
+        <div class="cluster"><button class="button" data-variant="secondary" data-size="sm" data-loading>Show a loading screen</button><button class="button" data-variant="secondary" data-size="sm" data-loading="slow">Show a slow load</button></div></div>`);
+      // the drawings' names are Anna's (tape.js): listed once the controls first open
+      cc.closest("details").addEventListener("toggle", () => fetchLoader().then(() => {
+        const sel = cc.querySelector("#cc-loader-drawing");
+        if (sel.options.length > 1) return;
+        const names = Object.fromEntries(window.BolsterTape.OPTIONS);
+        sel.insertAdjacentHTML("beforeend", window.BolsterLoader.SHORTLIST.map((id) => `<option value="${id}"${id === get("drawing", "any") ? " selected" : ""}>${esc(names[id] || id)}</option>`).join(""));
+      }), { once: true });
+      cc.addEventListener("click", (e) => { const b = e.target.closest("[data-loading]"); if (b) loading({ slow: b.dataset.loading === "slow" }); });
+      cc.addEventListener("input", (e) => { if (e.target.id === "cc-loader-every") cc.querySelector("output[for=cc-loader-every]").textContent = `${(+e.target.value).toFixed(1)} s`; });
+      cc.addEventListener("change", (e) => {
+        const k = e.target.dataset?.loaderSet; if (!k) return;
+        try { localStorage.setItem(`bolster-concepts:loader-${k}`, e.target.value); } catch {}
+        loading();
+      });
     }
 
     const narrow = matchMedia("(max-width: 1023px)");

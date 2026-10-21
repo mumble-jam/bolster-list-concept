@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=ef8fcdc3">
-<link rel="stylesheet" href="data-list.css?v=ef8fcdc3">
+<link rel="stylesheet" href="system/bolster.css?v=e24a0bad">
+<link rel="stylesheet" href="data-list.css?v=e24a0bad">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -108,7 +108,7 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=ef8fcdc3"></script>
+<script src="shared/icons.js?v=e24a0bad"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -122,7 +122,7 @@ const C = [
   ["Shell", "Top bar", "yours", "As in Bolster; your Bolster and Bolton assets; Bolton's head sized to the help icon, then 10% bigger, then Bolster's own size, 28 tall (21 Oct); all three corner circles the same size; the ⌘K keycap softened to a 4 px corner (14 Oct).", "The keycap itself, placed by the field's padding rather than nested in its corner (D35 doesn't reach it)."],
   ["Shell", "Rail", "yours", "Then folded into one sidebar with every section, accordions for the ones with pages, the rail only when it's hidden (21 Oct, trying out, D88). Folded, a section's pages open beside it, first as the menu component, then as a navigation popup of their own, “more explicit about being a navigation menu”, first light with guide lines, then on the menu's dark with the icons back and no lines; a chevron on a section's row; pinned, a section's rows as tall as the rail's (21 Oct). Bolster's item sizes, its bottom part, hover to expand (8 Oct); the logo stays when collapsed (9 Oct, trying out).", "Pinning the rail open; the popup's notch on the row and its lift off the rail."],
   ["Shell", "Section sidebar", "yours", "Then folded into one sidebar with every section, accordions for the ones with pages, the rail only when it's hidden (21 Oct, trying out, D88). Bolster's sizes, but with the border colour you preferred over Bolster's; as wide as its longest item plus 48; follows Cool; warm hover on its collapse button.", "Its hover and current-item tones."],
-  ["Shell", "Loading screen", "steered", "Anna's drawings, her shortlist of 16 (20 Oct, her branch); you asked for them shuffled at random with playful lines about the trade, some jargon but not too much, like a game's loading screen (21 Oct, D90).", "The lines, a line every 2 s from the drawing's trade or the site and office, when it plays, loading it only then."],
+  ["Shell", "Loading screen", "steered", "Anna's drawings, her shortlist of 16 (20 Oct, her branch); you asked for them shuffled at random with playful lines about the trade, some jargon but not too much, like a game's loading screen; then ways for the line to come in, with controls (21 Oct, D90).", "The lines, a line every 2 s from the drawing's trade or the site and office, when it plays, loading it only then; the six ways a line comes in."],
   ["Shell", "Favicon", "yours", "Bolster's mark in white instead of yellow.", "The black tile behind it and the PNG fallback."],
 
   ["Page", "Page header", "steered", "Its title scrolls away (variant D).", "Its contents: the hide-menu button, the title, Export and Create job."],
@@ -264,6 +264,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=ef8fcdc3"></script>
+<script src="system/specimens/specimen.js?v=e24a0bad"></script>
 </body>
 </html>
