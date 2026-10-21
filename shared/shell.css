@@ -115,7 +115,7 @@
     /* a section's pages fade and settle in one after another as it opens, as Shopify's do */
     .bs-acc[data-anim][open] .bs-sub { animation: bs-in 280ms cubic-bezier(0.2, 0.8, 0, 1) calc(var(--i, 0) * 18ms + 30ms) both; }
     /* the folded rail's dropdown comes out of the rail, not down from above */
-    @starting-style { .bs-flymenu:popover-open { opacity: 0; transform: translateX(-6px); } }
+    @starting-style { .bs-navpop:popover-open { opacity: 0; transform: translateX(-6px); } }
     /* the floating button turns from ☰ to ✕ and back */
     .bs-menu-fab > svg { transition: opacity 160ms var(--ease-out), rotate 220ms cubic-bezier(0.2, 0.8, 0, 1), scale 220ms cubic-bezier(0.2, 0.8, 0, 1); }
     .bs-menu-fab:active { scale: 0.96; }
@@ -136,11 +136,24 @@
   .bs-settings .dialog-header { min-block-size: 0; padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); }
   .bs-settings .bs-settings-nav { position: static; flex: none; inline-size: 16rem; block-size: auto; overflow-y: auto; padding: var(--space-3) var(--space-2); translate: none; box-shadow: none; }
   .bs-settings-page { flex: 1; min-inline-size: 0; padding: var(--space-8); }
+  /* the page slot (D89): a built page fills it, as the app's page area; the navigation folds away beside it */
+  .bs-settings-page[data-frame] { display: flex; padding: 0; }
+  .bs-settings-frame { flex: 1; inline-size: 100%; block-size: 100%; border: 0; display: block; background: var(--color-surface-canvas); }
+  .bs-settings .bs-settings-nav { transition: margin-inline-start 280ms cubic-bezier(0.2, 0.8, 0, 1), visibility 0s; }
+  .bs-settings[data-nav-hidden] .bs-settings-nav { margin-inline-start: -16rem; visibility: hidden; transition: margin-inline-start 280ms cubic-bezier(0.2, 0.8, 0, 1), visibility 0s linear 280ms; }
+  @media (prefers-reduced-motion: reduce) { .bs-settings .bs-settings-nav { transition: none; } }
+  /* a page in the slot draws no shell of its own (shell.js, ?embed=settings) */
+  :root[data-embed] .app-shell { display: block; min-block-size: 100dvh; }
+  :root[data-embed] .concept-controls { display: none; }
   .bs-settings-page h3 { margin: 0 0 var(--space-2); font-family: var(--font-display); font-size: var(--text-2xl); line-height: var(--leading-xl); font-weight: var(--font-weight-medium); }
   .bs-settings-page .button { margin-block-start: var(--space-4); }
   @media (max-width: 767px) {
     .bs-settings .dialog-body { flex-direction: column; }
     .bs-settings .bs-settings-nav { inline-size: auto; max-block-size: 45dvh; border-inline-end: 0; border-block-end: var(--border-width-default) solid var(--color-line-sidebar); }
+    .bs-settings[data-nav-hidden] .bs-settings-nav { display: none; }
+    /* a page in the slot (D89) gets the whole window; its header's button swaps the navigation in for it */
+    .bs-settings:not([data-nav-hidden]):has(.bs-settings-page[data-frame]) .bs-settings-nav { flex: 1; max-block-size: none; border-block-end: 0; }
+    .bs-settings:not([data-nav-hidden]) .bs-settings-page[data-frame] { display: none; }
     .bs-settings-page { padding: var(--space-5) var(--space-4); }
   }
   .bs-sep { margin: var(--space-2) 0; border: 0; border-block-start: var(--border-width-default) solid var(--color-line-sidebar); }
@@ -165,10 +178,36 @@
     .app-shell:not([data-sidebar-hidden]) .bs-logo { box-shadow: 0 1px 0 var(--color-surface-chrome); position: relative; z-index: 1; }
     .app-shell[data-sidebar-hidden] { grid-template-columns: var(--_rail-column) 0 minmax(0, 1fr); }
     .app-shell[data-sidebar-hidden] .sidebar { display: none; }
-    /* folded, a section's pages as a dropdown beside the rail (shell.js): the menu component, placed by hand */
-    .bs-flymenu { position: fixed; margin: 0; inset: auto; position-area: none; min-inline-size: 13rem; }
-    .bs-flymenu .menu-item { text-decoration: none; color: var(--color-content-primary); }
-    .bs-flymenu .menu-item[aria-current="page"] { background: var(--color-surface-hover); font-weight: var(--font-weight-medium); }
+    /* folded, a section's pages in a navigation popup beside the rail (shell.js, placed by hand): it hangs off
+       the section's row by a notch, the row lit; the section's name, then its pages as the open sidebar lists
+       them, text in groups along a guide line, the page you're on marked on the line */
+    .bs-navpop {
+      --_in: calc(var(--inset-menu) - var(--border-width-default));
+      position: fixed; inset: auto; margin: 0; overflow: visible;
+      min-inline-size: 12rem; padding: var(--_in);
+      border: var(--border-width-default) solid var(--color-line-default); border-radius: var(--radius-md);
+      background: var(--color-surface-raised); color: var(--color-content-primary); box-shadow: var(--shadow-overlay);
+    }
+    .bs-navpop::before {
+      content: ""; position: absolute; inset-inline-start: -0.375rem; inset-block-start: calc(var(--_notch, 1.25rem) - 0.3125rem);
+      inline-size: 0.625rem; block-size: 0.625rem; rotate: 45deg; border-radius: 0 0 0 2px;
+      background: var(--color-surface-raised); border: var(--border-width-default) solid var(--color-line-default); border-block-start: 0; border-inline-end: 0;
+    }
+    .bs-navpop-title { padding: var(--space-1) var(--space-2) var(--space-2); font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); }
+    .bs-navpop-group { position: relative; display: grid; gap: 1px; margin-inline-start: var(--space-2); padding-inline-start: var(--space-1); }
+    .bs-navpop-group::before { content: ""; position: absolute; inset-block: var(--space-1); inset-inline-start: 0; border-inline-start: var(--border-width-default) solid var(--color-line-default); }
+    .bs-navpop-group + .bs-navpop-group { margin-block-start: var(--space-2); }
+    .bs-navpop-link {
+      position: relative; display: flex; align-items: center; min-block-size: 2rem; padding-inline: var(--space-2) var(--space-4);
+      border-radius: var(--radius-sm); font-size: var(--text-sm); color: var(--color-content-secondary); text-decoration: none; white-space: nowrap;
+      transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+    }
+    @media (hover: hover) { .bs-navpop-link:hover { background: var(--color-surface-hover-raised); color: var(--color-content-primary); } }
+    .bs-navpop-link:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
+    .bs-navpop-link[aria-current="page"] { color: var(--color-content-primary); font-weight: var(--font-weight-medium); }
+    .bs-navpop-link[aria-current="page"]::before { content: ""; position: absolute; inset-inline-start: calc(-1 * var(--space-1) - 0.5px); inset-block: var(--space-2); inline-size: 2px; border-radius: 1px; background: var(--color-content-primary); }
+    /* the section's row stays lit while its pages are out */
+    .rail-item[data-flying] { background: var(--color-surface-chrome-hover); color: var(--color-content-on-chrome); }
   }
 
   /* ---------- narrower screens ---------- */
@@ -185,14 +224,20 @@
     .app-shell { grid-template-rows: 1fr; grid-template-areas: "main"; }
     .bs-top { display: none; }
     .bs-sidebar { inset-block: 0; }
-    /* the foot leaves room for the floating button under it */
-    .bs-nav-bottom { padding-block-end: calc(var(--space-20, 5rem) + env(safe-area-inset-bottom)); }
+    /* rows a touch target tall and the type a step up, as Shopify's phone menu (44 and 16; 32 and 14 on desktop);
+       icons a step up in the same 28px column, so a section's pages stay in line with the labels */
+    .bs-sidebar .sidebar-item { min-block-size: var(--touch-target-min); font-size: var(--text-base); line-height: var(--leading-base, 1.5rem); }
+    .bs-sidebar .sidebar-item > svg { block-size: 1.25rem; }
+    .bs-sidebar .bs-bolton { block-size: 1.375rem; }
+    /* the foot ends at the screen's edge: the button moved aside with the page, nothing to leave room for */
+    .bs-nav-bottom { padding-block-end: calc(var(--space-3) + env(safe-area-inset-bottom)); }
     .bs-menu-fab {
       position: fixed; z-index: calc(var(--z-modal) + 1); inset-inline-start: var(--space-4); inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom));
       display: inline-grid; place-items: center; inline-size: 3.5rem; block-size: 3.5rem;
       border: var(--border-width-default) solid var(--color-line-chrome); border-radius: var(--radius-lg);
       background: var(--color-surface-chrome); color: var(--color-content-on-chrome); cursor: pointer;
-      filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.18));
+      /* lifted a step above Create: a close contact shadow and a wider, deeper fall */
+      filter: drop-shadow(0 2px 4px rgb(0 0 0 / 0.16)) drop-shadow(0 12px 24px rgb(0 0 0 / 0.28));
     }
     .bs-menu-fab > svg { grid-area: 1 / 1; inline-size: 1.25rem; block-size: 1.25rem; }
     .bs-menu-fab[aria-expanded="true"] > svg:first-child { opacity: 0; rotate: 90deg; scale: 0.6; }

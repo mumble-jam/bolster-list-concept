@@ -1468,7 +1468,7 @@
   const topBar = $(".top-bar");
   const html = document.documentElement;
   // the page header gone under the top bar: on phones, while selecting, the compact bar stands in (D39)
-  const headOut = () => html.toggleAttribute("data-head-out", $(".page-header").getBoundingClientRect().bottom < topBar.offsetHeight);
+  const headOut = () => html.toggleAttribute("data-head-out", $(".page-header").getBoundingClientRect().bottom < (topBar?.offsetHeight || 0)); // no top bar in the Settings window's slot (D89)
   headOut();
   const chrome = BolsterShell.scrolling({
     into: (top) => $(".list-panel").getBoundingClientRect().top < top,

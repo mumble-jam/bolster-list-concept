@@ -146,15 +146,18 @@ window.BolsterShell = (() => {
       timer = setTimeout(() => rail.toggleAttribute("data-expanded", on), delay);
     };
 
-    // folded (D88), a section's pages open as a dropdown beside it as you point at it, the menu component (as
-    // display settings' is): its name, its pages with their icons, the one you're on marked; pointing away from
-    // both, Escape or a choice closes it
-    const flyout = document.createElement("div");
-    flyout.className = "menu bs-flymenu"; flyout.setAttribute("popover", "manual"); flyout.setAttribute("role", "menu");
+    // folded (D88), a section's pages open beside it as you point at it: a navigation popup, not an action menu.
+    // It hangs off the section's row by a notch (the row stays lit), names the section, and lists its pages as
+    // the open sidebar does, text only, in their groups along a guide line, the page you're on marked on the
+    // line; pointing away from both, Escape or a choice closes it
+    const flyout = document.createElement("nav");
+    flyout.className = "bs-navpop"; flyout.setAttribute("popover", "manual"); flyout.dataset.surface = "raised";
     shell.append(flyout);
-    let flyTimer, flyFor = null;
+    let flyTimer, flyFor = null, lit = null;
+    const light = (item) => { lit?.removeAttribute("data-flying"); lit = item; item?.setAttribute("data-flying", ""); };
     const hidden = () => shell.hasAttribute("data-sidebar-hidden") && desktop.matches;
-    const close = () => { if (flyout.matches(":popover-open")) flyout.hidePopover(); flyFor = null; };
+    const close = () => { if (flyout.matches(":popover-open")) flyout.hidePopover(); flyFor = null; light(null); };
+    const groups = (items) => items.reduce((g, x) => (x === "-" ? g.push([]) : g.at(-1).push(x), g), [[]]).filter((g) => g.length);
     const fly = (item, delay = 0) => {
       clearTimeout(flyTimer);
       flyTimer = setTimeout(() => {
@@ -162,16 +165,19 @@ window.BolsterShell = (() => {
         if (!s || !hidden() || !s.items) return close();
         if (flyFor !== s.id) {
           flyout.setAttribute("aria-label", s.label);
-          flyout.innerHTML = `<p class="pop-section">${esc(s.label)}</p>${s.items.map((x) => (x === "-" ? `<hr class="menu-separator">`
-            : `<a class="menu-item" role="menuitem" ${linkAttrs(x.id)}${x.id === opts.current ? ' aria-current="page"' : ""}><span class="menu-icon">${icon(x.icon, 14)}</span>${esc(x.label)}</a>`)).join("")}`;
+          flyout.innerHTML = `<p class="bs-navpop-title">${esc(s.label)}</p>${groups(s.items).map((g) => `<div class="bs-navpop-group">${g.map((x) =>
+            `<a class="bs-navpop-link" ${linkAttrs(x.id)}${x.id === opts.current ? ' aria-current="page"' : ""}>${esc(x.label)}</a>`).join("")}</div>`).join("")}`;
           flyFor = s.id;
         }
+        light(item);
         if (!flyout.matches(":popover-open")) flyout.showPopover();
-        // beside the rail as it stands open, its top in line with the section's row, kept on screen
+        // beside the rail as it stands open, its top near the section's row, kept on screen; the notch on the row
         const r = item.getBoundingClientRect(), rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
         const open = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--shell-rail-expanded-width")) * rem; // the rail's width as it stands open
-        flyout.style.left = `${Math.round(rail.getBoundingClientRect().left + open + 4)}px`;
-        flyout.style.top = `${Math.round(Math.max(8, Math.min(r.top - 4, innerHeight - flyout.offsetHeight - 8)))}px`;
+        const top = Math.round(Math.max(8, Math.min(r.top - 8, innerHeight - flyout.offsetHeight - 8)));
+        flyout.style.left = `${Math.round(rail.getBoundingClientRect().left + open + 8)}px`; // the notch's tip on the rail's edge
+        flyout.style.top = `${top}px`;
+        flyout.style.setProperty("--_notch", `${Math.round(r.top + r.height / 2 - top)}px`);
       }, delay);
     };
     rail.addEventListener("pointerover", (e) => { if (e.pointerType !== "mouse" || !hidden()) return; const item = e.target.closest(".rail-item[data-section]"); if (item) fly(item, rail.hasAttribute("data-expanded") ? 60 : 200); });
@@ -229,8 +235,18 @@ window.BolsterShell = (() => {
     const show = (id) => {
       const x = all.find((i) => i.id === id) || all[0];
       d.querySelectorAll("[data-settings-page]").forEach((b) => (b.dataset.settingsPage === x.id ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current")));
-      const built = opts.links[x.id];
-      d.querySelector(".bs-settings-page").innerHTML = `<h3>${esc(x.label)}</h3>${built ? `<p class="text-secondary">${esc(x.label)} is a page of its own in this prototype.</p><a class="button" data-variant="secondary" href="${built}" data-close-settings>Open ${esc(x.label.toLowerCase())}</a>` : `<p class="text-secondary">${esc(x.label)} isn't part of this prototype yet.</p>`}`;
+      const built = opts.links[x.id], slot = d.querySelector(".bs-settings-page");
+      // a built page sits in the slot as it does in the app (D89); the rest say they aren't built yet
+      if (built) {
+        const u = new URL(built, location.href); u.searchParams.delete("d"); u.searchParams.set("embed", "settings");
+        if (slot.querySelector("iframe")?.dataset.page !== x.id) {
+          slot.innerHTML = `<iframe class="bs-settings-frame" title="${esc(x.label)}" data-page="${x.id}" src="${u.href}"></iframe>`;
+          // the page takes the window's theme, when one is picked
+          slot.querySelector("iframe").addEventListener("load", (e) => { const t = document.documentElement.dataset.theme; try { if (t) e.target.contentDocument.documentElement.dataset.theme = t; } catch {} });
+        }
+        if (matchMedia("(max-width: 767px)").matches) d.setAttribute("data-nav-hidden", ""); // on phones the page takes the window
+      } else slot.innerHTML = `<h3>${esc(x.label)}</h3><p class="text-secondary">${esc(x.label)} isn't part of this prototype yet.</p>`;
+      slot.toggleAttribute("data-frame", !!built);
     };
     show(pageId);
     if (!d.open) d.showModal();
@@ -254,6 +270,7 @@ window.BolsterShell = (() => {
     opts.current = itemId;
     const section = sectionOf(itemId);
     const side = shell.querySelector(".sidebar");
+    if (!side) return; // embedded: no menu to mark
     side.setAttribute("aria-label", "Main");
     side.innerHTML = navHtml();
     shell.querySelectorAll("[data-item]").forEach((a) => (a.dataset.item === itemId ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current")));
@@ -353,9 +370,34 @@ window.BolsterShell = (() => {
     return { start, set: (o) => { Object.assign(v, o); cell(); }, get: () => ({ ...v }) };
   })();
 
+  // A page can sit in the Settings window's page slot (?embed=settings, D89): the slot is the shell's page area
+  // in miniature, so the page builds as everywhere, with no menu, rail or top bar of its own; its header's
+  // button folds the window's navigation, as Collapse menu folds the app's
+  const EMBED = new URLSearchParams(location.search).get("embed") === "settings";
+  const host = () => { try { return window.parent !== window ? window.parent.BolsterShell : null; } catch { return null; } };
+  function mountEmbedded() {
+    document.documentElement.setAttribute("data-embed", "settings");
+    hydrateIcons();
+    canvas.start();
+    const title = document.querySelector(".page-title");
+    if (title && host()) {
+      title.insertAdjacentHTML("afterbegin", `<button class="button page-tool bs-embed-fold" data-variant="ghost" data-size="sm" data-icon-only type="button"></button>`);
+      const btn = title.querySelector(".bs-embed-fold");
+      const sync = (hidden) => { const l = hidden ? "Show settings menu" : "Hide settings menu"; btn.innerHTML = foldIcon(hidden ? "out" : "in"); btn.setAttribute("aria-label", l); btn.dataset.tip = l; };
+      sync(host().settingsNav());
+      btn.addEventListener("click", () => sync(host().settingsNav("toggle")));
+    }
+    // Escape with nothing open in the page closes the window around it
+    addEventListener("keydown", (e) => { if (e.key === "Escape" && !e.defaultPrevented && !document.querySelector(":popover-open, dialog[open]")) host()?.closeSettings(); });
+  }
+  // the Settings window's side of it: fold its navigation, say whether it's folded, close
+  function settingsNav(op) { const d = document.getElementById("bs-settings"); if (!d) return false; if (op === "toggle") d.toggleAttribute("data-nav-hidden"); return d.hasAttribute("data-nav-hidden"); }
+  function closeSettings() { document.getElementById("bs-settings")?.close(); }
+
   function mount(o) {
     opts = { ...opts, ...o };
     shell = document.querySelector(".app-shell");
+    if (EMBED) return mountEmbedded();
     shell.insertAdjacentHTML("afterbegin", `${topBar()}${rail()}<nav class="sidebar bs-sidebar" aria-label="Main"></nav>`);
     // no tab bar and no top bar on phones (D88): a floating menu button opens the same sidebar, and closes it
     shell.insertAdjacentHTML("beforeend", `<button class="bs-menu-fab" type="button" data-toggle-sidebar aria-label="Menu" aria-expanded="false" data-tip="Menu">${chrome("menu", 20)}${chrome("xmark", 20)}</button>`);
@@ -442,7 +484,8 @@ window.BolsterShell = (() => {
   // --list-toolbar-top is the top bar's height, --list-head-top that plus the page's sticky toolbar, if any.
   //   const chrome = BolsterShell.scrolling({ into: (top) => el.getBoundingClientRect().top < top, toolbar, busy, onScroll });
   function scrolling({ into, toolbar = null, busy = () => false, onScroll = () => {} }) {
-    const html = document.documentElement, top = document.querySelector(".top-bar"), DOWN = 24, UP = 6;
+    // embedded in the Settings window there's no top bar: nothing sits above the page
+    const html = document.documentElement, top = document.querySelector(".top-bar") || document.createElement("div"), DOWN = 24, UP = 6;
     const set = (hidden) => { if (html.hasAttribute("data-chrome-hidden") !== hidden) html.toggleAttribute("data-chrome-hidden", hidden); };
     // what sticks under the top bar sits that far down; on phones the top bar is a footer (D88), so nothing
     // is above, unless the selection's bar has taken the top (D39) while rows are ticked
@@ -476,5 +519,5 @@ window.BolsterShell = (() => {
     return { show: () => set(false), stick };
   }
 
-  return { mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling, week, canvas };
+  return { mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling, week, canvas, settingsNav, closeSettings };
 })();
