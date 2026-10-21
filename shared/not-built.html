@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Not built yet · Bolster</title>
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../system/bolster.css?v=44c05bbf">
+<link rel="stylesheet" href="shell.css?v=44c05bbf">
+</head>
+<body>
+<!-- A page the prototype doesn't have yet, in the app shell all the same (D89): its name in the page header, the
+     system's empty state on a card. Settings opens it in its page slot (?embed=settings); on its own it has the
+     whole shell. not-built.html?p=<item id>&t=<its name>&i=<its icon> -->
+<div class="app-shell">
+  <main class="app-main">
+    <header class="page-header"><div class="page-title"><h1 id="page-title">Not built yet</h1></div></header>
+    <div class="app-content list-page">
+      <section class="card"><div class="state"><span class="state-icon" id="nb-icon"></span><h3 id="nb-head">Not built yet</h3><p id="nb-text"></p></div></section>
+    </div>
+  </main>
+</div>
+<script src="icons.js?v=44c05bbf"></script>
+<script src="shell.js?v=44c05bbf"></script>
+<script>
+  const q = new URLSearchParams(location.search), id = q.get("p") || "";
+  const name = q.get("t") || BolsterShell.label(id) || "This page";
+  document.title = `${name} · Bolster`;
+  document.getElementById("page-title").textContent = name;
+  document.getElementById("nb-text").textContent = `${name} isn't part of this prototype yet.`;
+  document.getElementById("nb-icon").innerHTML = `<i data-icon="${(q.get("i") || "inbox").replace(/[^a-z0-9-]/g, "")}" data-size="24"></i>`;
+  BolsterShell.mount({ current: id, links: {} });
+</script>
+</body>
+</html>

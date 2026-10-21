@@ -236,17 +236,22 @@ window.BolsterShell = (() => {
       const x = all.find((i) => i.id === id) || all[0];
       d.querySelectorAll("[data-settings-page]").forEach((b) => (b.dataset.settingsPage === x.id ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current")));
       const built = opts.links[x.id], slot = d.querySelector(".bs-settings-page");
-      // a built page sits in the slot as it does in the app (D89); the rest say they aren't built yet
-      if (built) {
-        const u = new URL(built, location.href); u.searchParams.delete("d"); u.searchParams.set("embed", "settings");
+      // a page sits in the slot as it does in the app (D89)
+      // one that isn't built yet is a page all the same: its name in the header, the empty state (not-built.html)
+      {
+        const u = built ? new URL(built, location.href) : new URL(`${SHARED}not-built.html`);
+        if (built) u.searchParams.delete("d"); else { u.searchParams.set("p", x.id); u.searchParams.set("t", x.label); u.searchParams.set("i", x.icon || "inbox"); }
+        u.searchParams.set("embed", "settings");
         if (slot.querySelector("iframe")?.dataset.page !== x.id) {
           slot.innerHTML = `<iframe class="bs-settings-frame" title="${esc(x.label)}" data-page="${x.id}" src="${u.href}"></iframe>`;
           // the page takes the window's theme, when one is picked
           slot.querySelector("iframe").addEventListener("load", (e) => { const t = document.documentElement.dataset.theme; try { if (t) e.target.contentDocument.documentElement.dataset.theme = t; } catch {} });
         }
-        if (matchMedia("(max-width: 767px)").matches) d.setAttribute("data-nav-hidden", ""); // on phones the page takes the window
-      } else slot.innerHTML = `<h3>${esc(x.label)}</h3><p class="text-secondary">${esc(x.label)} isn't part of this prototype yet.</p>`;
-      slot.toggleAttribute("data-frame", !!built);
+        // on phones the page and the list of pages take turns at the window: the page once one is picked, the list
+        // when Settings opens on none in particular
+        if (matchMedia("(max-width: 767px)").matches) d.toggleAttribute("data-nav-hidden", !!id);
+      }
+      slot.toggleAttribute("data-frame", true);
     };
     show(pageId);
     if (!d.open) d.showModal();
