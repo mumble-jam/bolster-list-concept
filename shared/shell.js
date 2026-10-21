@@ -363,8 +363,16 @@ window.BolsterShell = (() => {
     try { if (localStorage.getItem(FOLD_KEY)) shell.setAttribute("data-sidebar-hidden", ""); } catch {}
     hydrateIcons();
     setCurrent(opts.current);
-    // a section you open eases its pages in (shell.css); one that's open on arrival, or redrawn, doesn't
-    shell.querySelector(".sidebar").addEventListener("toggle", (e) => { if (e.target.matches?.(".bs-acc")) e.target.toggleAttribute("data-anim", e.newState === "open"); }, true);
+    // a section you open eases its pages in (shell.css); one open on arrival or redrawn doesn't: a details
+    // created open fires toggle too, so only a toggle right after a click on a section's row counts
+    const side = shell.querySelector(".sidebar");
+    let picked = -Infinity;
+    side.addEventListener("click", (e) => { if (e.target.closest(".bs-acc > summary")) picked = performance.now(); }, true);
+    side.addEventListener("toggle", (e) => {
+      if (!e.target.matches?.(".bs-acc") || performance.now() - picked > 400) return;
+      e.target.setAttribute("data-touched", "");
+      e.target.toggleAttribute("data-anim", e.newState === "open");
+    }, true);
     railBehaviour();
     canvas.start();
 

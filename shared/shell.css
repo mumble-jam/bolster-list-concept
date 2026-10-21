@@ -69,7 +69,9 @@
   .bs-sub[aria-current="page"] { color: var(--color-content-primary); }
   /* an accordion eases open where the browser can animate to its height; elsewhere it just opens */
   .bs-acc { interpolate-size: allow-keywords; }
-  .bs-acc::details-content { block-size: 0; overflow: clip; transition: block-size var(--duration-medium) var(--ease-out), content-visibility var(--duration-medium) allow-discrete; }
+  .bs-acc::details-content { block-size: 0; overflow: clip; }
+  /* only a section you've opened or closed moves: one open on arrival is simply there */
+  .bs-acc[data-touched]::details-content { transition: block-size var(--duration-medium) var(--ease-out), content-visibility var(--duration-medium) allow-discrete; }
   .bs-acc[open]::details-content { block-size: auto; }
   @media (prefers-reduced-motion: reduce) { .bs-acc::details-content { transition: none; } }
   /* the menu is the chrome's, dark in both themes like the top bar and the rail, as Shopify's is, at every
