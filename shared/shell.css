@@ -69,6 +69,26 @@
   .bs-acc::details-content { block-size: 0; overflow: clip; transition: block-size var(--duration-medium) var(--ease-out), content-visibility var(--duration-medium) allow-discrete; }
   .bs-acc[open]::details-content { block-size: auto; }
   @media (prefers-reduced-motion: reduce) { .bs-acc::details-content { transition: none; } }
+  /* the menu is the chrome's, dark in both themes like the top bar and the rail, as Shopify's is, at every
+     width (the one that opens over the page on phones too): the chrome's ink, a section's pages muted, the
+     pill the rail's selected fill; an edge only where the page is dark too (D85) */
+  @media all {
+    :is(.bs-sidebar, .bs-flyout) { background: var(--color-surface-chrome); border-inline-end-color: var(--color-line-rail); color: var(--color-content-on-chrome); }
+    :is(.bs-sidebar, .bs-flyout) .sidebar-item { color: var(--color-content-on-chrome); }
+    :is(.bs-sidebar, .bs-flyout) :is(.bs-sub, .sidebar-group) { color: var(--color-content-on-chrome-muted); }
+    :is(.bs-sidebar, .bs-flyout) .sidebar-item > svg { color: var(--color-content-on-chrome-muted); }
+    :is(.bs-sidebar, .bs-flyout) .sidebar-item[aria-current="page"] { background: var(--color-surface-chrome-selected); box-shadow: none; color: var(--color-content-on-chrome); }
+    :is(.bs-sidebar, .bs-flyout) .sidebar-item[aria-current="page"] > svg { color: var(--color-content-on-chrome); }
+    @media (hover: hover) { :is(.bs-sidebar, .bs-flyout) .sidebar-item:hover { background: var(--color-surface-chrome-hover); color: var(--color-content-on-chrome); } }
+    :is(.bs-sidebar, .bs-flyout) :is(.bs-sep, .sidebar-title) { border-color: var(--color-line-chrome); }
+    .bs-flyout { border-inline-start: var(--border-width-default) solid var(--color-line-chrome); }
+  }
+  .bs-menu-fab { display: none; }
+  /* what the top bar holds joins the menu on phones (search, help, Bolton, your account) */
+  .bs-phone { display: none; }
+  @media (max-width: 767px) { .bs-sidebar .bs-phone { display: flex; } .bs-sidebar details.bs-phone { display: block; } }
+  .bs-sidebar .bs-bolton { inline-size: 1.75rem; block-size: 1.25rem; object-fit: contain; flex: none; }
+  .bs-sidebar summary .avatar { margin-inline: calc((1.75rem - var(--avatar-size-sm, 1.5rem)) / 2); flex: none; }
   /* a page's own entries (Concept controls) join the menu on phones only */
   .bs-extra { display: none; }
   @media (max-width: 767px) { .bs-sidebar .bs-extra { display: flex; } }
@@ -121,25 +141,32 @@
   @media (max-width: 767px) {
     .bs-company { display: none; }
     .bs-top .top-bar-search { margin-inline-start: auto; }
-    /* phones (D88): no tab bar; the top bar is a footer, in thumb reach, its menu button opening the same
-       sidebar; it slides down out of the way as you scroll, and gives its place to the bulk bar while rows
-       are ticked, as the tab bar did */
+    /* phones (D88): no tab bar and no top bar; one floating menu button, bottom left across from Create, opens
+       the same sidebar over the page (search, help, Bolton and your account in it) and closes it; while rows
+       are ticked it steps aside for the bulk bar */
     .app-shell { grid-template-rows: 1fr; grid-template-areas: "main"; }
-    .bs-top {
-      position: fixed; inset: auto 0 0; z-index: var(--z-shell);
-      block-size: calc(var(--shell-bottom-bar-height) + env(safe-area-inset-bottom)); padding-block-end: env(safe-area-inset-bottom);
-      border-block-end: 0; border-block-start: var(--border-width-default) solid var(--color-line-chrome);
+    .bs-top { display: none; }
+    .bs-sidebar { inset-block: 0; inline-size: min(20rem, calc(100vw - var(--space-12))); padding-block-end: calc(var(--space-20, 5rem) + env(safe-area-inset-bottom)); }
+    .bs-menu-fab {
+      position: fixed; z-index: calc(var(--z-modal) + 1); inset-inline-start: var(--space-4); inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom));
+      display: inline-grid; place-items: center; inline-size: 3.5rem; block-size: 3.5rem;
+      border: var(--border-width-default) solid var(--color-line-chrome); border-radius: var(--radius-lg);
+      background: var(--color-surface-chrome); color: var(--color-content-on-chrome); cursor: pointer;
+      filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.18));
     }
-    :root[data-chrome-hidden] .bs-top { translate: 0 100%; }
-    body[data-selecting] .bs-top { visibility: hidden; }
-    .app-main { padding-block-end: calc(var(--shell-bottom-bar-height) + env(safe-area-inset-bottom)); }
-    .bs-sidebar { inset-block: 0 calc(var(--shell-bottom-bar-height) + env(safe-area-inset-bottom)); }
-    :root[data-chrome-hidden] .bs-sidebar { inset-block-start: 0; }
+    .bs-menu-fab > svg { grid-area: 1 / 1; inline-size: 1.25rem; block-size: 1.25rem; }
+    .bs-menu-fab[aria-expanded="true"] > svg:first-child, .bs-menu-fab:not([aria-expanded="true"]) > svg:last-child { display: none; }
+    .bs-menu-fab:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+    body[data-selecting] .bs-menu-fab { display: none; }
+    /* Create sits at the foot now, with nothing under it */
+    .button[data-float] { inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom)); }
     /* the selection's bar still takes the top while rows are ticked (D39), at the bar's own height */
     body[data-selecting] .select-bar:not([hidden]) { block-size: var(--shell-top-bar-height); }
   }
 
   /* ---------- page header tools: hide menu, refresh ---------- */
   .page-title .page-tool { color: var(--color-content-secondary); }
-  @media (max-width: 1023px) { .page-title [data-collapse-sidebar] { display: none; } }
+  /* folding is desktop's: narrower, the rail is always there and the sidebar opens over the page */
+  @media (max-width: 1023px) { .bs-fold { display: none; } }
+  .bs-sidebar .bs-fold > svg, .rail .bs-fold > svg { block-size: 1rem; }
 }

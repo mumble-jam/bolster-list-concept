@@ -124,11 +124,16 @@ window.BolsterShell = (() => {
   }
 
 
+  // the menu folds and unfolds from its own foot (D88), with the old pin's icon: Bolster's own, a panel with a
+  // chevron that points the way the menu will move
+  const foldIcon = (dir) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" stroke="currentColor" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="18" y="18" width="476" height="476" rx="52"/><line x1="148" y1="18" x2="148" y2="494"/><path stroke-width="44" d="${dir === "in" ? "M362 168 L262 256 L362 344" : "M262 168 L362 256 L262 344"}"/></svg>`;
+  const FOLD_KEY = "bolster-concepts:menu-folded";
+
   function rail() {
     const item = (s) => s.id === "settings"
       ? `<button class="rail-item" type="button" data-open-settings data-section="${s.id}">${chrome(s.icon)}<span class="rail-label">${esc(s.label)}</span></button>`
       : `<a class="rail-item" ${sectionHref(s)} data-section="${s.id}">${chrome(s.icon)}<span class="rail-label">${esc(s.label)}</span></a>`;
-    return `<nav class="rail" aria-label="Main">${NAV.main.map(item).join("")}<span class="rail-spacer"></span>${NAV.bottom.map(item).join("")}</nav>`;
+    return `<nav class="rail" aria-label="Main">${NAV.main.map(item).join("")}<span class="rail-spacer"></span>${NAV.bottom.map(item).join("")}<hr class="rail-separator bs-fold"><button class="rail-item bs-fold" type="button" data-collapse-sidebar>${foldIcon("out")}<span class="rail-label">Expand menu</span></button></nav>`;
   }
 
   // The rail widens over the page on hover, after a short pause so passing the mouse across it
@@ -188,7 +193,12 @@ window.BolsterShell = (() => {
       return `<a class="sidebar-item" ${sectionHref(s)} data-section="${s.id}"${s.id === cur ? ' aria-current="page"' : ""}>${head}</a>`;
     };
     const extra = [...document.querySelectorAll("[data-more-entry]")].map((el) => `<button type="button" class="sidebar-item bs-extra" data-more-open="${el.id}">${chrome(el.dataset.moreIcon || "sliders", 18)}<span>${esc(el.dataset.moreEntry)}</span></button>`).join("");
-    return `<div class="bs-nav-main">${NAV.main.map(row).join("")}</div><div class="bs-nav-bottom">${NAV.bottom.map(row).join("")}${extra}</div>`;
+    // phones have no top bar (D88): its search, help, Bolton and your account are in the menu
+    const search = `<button type="button" class="sidebar-item bs-phone" data-not-built="search">${chrome("search", 16)}<span>Search</span></button>`;
+    const you = `<button type="button" class="sidebar-item bs-phone" data-not-built="help">${chrome("circle-help", 18)}<span>Help</span></button>`
+      + `<button type="button" class="sidebar-item bs-phone" data-not-built="assistant"><img class="bs-bolton" src="${ASSETS}bolton-head.svg" alt=""><span>Ask Bolton</span></button>`
+      + `<details class="bs-acc bs-phone" name="bs-nav"><summary class="sidebar-item"><span class="avatar" data-size="sm" data-color="${USER.color}" aria-hidden="true">${USER.initials}</span><span>${esc(USER.name)}</span></summary><div class="bs-acc-body">${[["profile", "Edit profile"], ["users", "Manage users"], ["logout", "Log out"]].map(([id, l]) => `<a class="sidebar-item bs-sub" href="#" data-not-built="${id}"><span>${l}</span></a>`).join("")}</div></details>`;
+    return `<div class="bs-nav-main">${search}${NAV.main.map(row).join("")}</div><div class="bs-nav-bottom">${NAV.bottom.map(row).join("")}${you}${extra}<hr class="bs-sep bs-fold"><button type="button" class="sidebar-item bs-fold" data-collapse-sidebar>${foldIcon("in")}<span>Collapse menu</span></button></div>`;
   }
 
   // Settings, a full-screen window with its own navigation (D88), as the job's workspace is
@@ -334,8 +344,10 @@ window.BolsterShell = (() => {
     opts = { ...opts, ...o };
     shell = document.querySelector(".app-shell");
     shell.insertAdjacentHTML("afterbegin", `${topBar()}${rail()}<nav class="sidebar bs-sidebar" aria-label="Main"></nav>`);
-    // no tab bar on phones (D88): the menu button opens the same sidebar
+    // no tab bar and no top bar on phones (D88): a floating menu button opens the same sidebar, and closes it
+    shell.insertAdjacentHTML("beforeend", `<button class="bs-menu-fab" type="button" data-toggle-sidebar aria-label="Menu" aria-expanded="false" data-tip="Menu">${chrome("menu", 20)}${chrome("xmark", 20)}</button>`);
     document.body.insertAdjacentHTML("beforeend", settingsHtml());
+    try { if (localStorage.getItem(FOLD_KEY)) shell.setAttribute("data-sidebar-hidden", ""); } catch {}
     hydrateIcons();
     setCurrent(opts.current);
     railBehaviour();
@@ -343,6 +355,9 @@ window.BolsterShell = (() => {
 
     const narrow = matchMedia("(max-width: 1023px)");
     const phone = matchMedia("(max-width: 767px)");
+    // however the menu closes (a link, a tap outside, Escape), its buttons say so: the floating one shows ☰ again
+    new MutationObserver(() => { const open = shell.querySelector(".sidebar").hasAttribute("data-open"); shell.querySelectorAll("[data-toggle-sidebar]").forEach((b) => b.setAttribute("aria-expanded", open)); })
+      .observe(shell.querySelector(".sidebar"), { attributes: true, attributeFilter: ["data-open"] });
     document.addEventListener("click", (e) => {
       const nb = e.target.closest("[data-not-built]");
       if (nb) {
@@ -379,11 +394,11 @@ window.BolsterShell = (() => {
         if (el) { el.open = true; el.querySelector("summary")?.focus(); }
         return;
       }
+      // the menu's foot folds it to the icon rail and unfolds it again (desktop), remembered in this browser
       if (e.target.closest("[data-collapse-sidebar]")) {
-        if (narrow.matches) shell.querySelector(".sidebar").toggleAttribute("data-open");
-        else shell.toggleAttribute("data-sidebar-hidden");
-        const btn = e.target.closest("[data-collapse-sidebar]");
-        btn.setAttribute("aria-label", shell.hasAttribute("data-sidebar-hidden") ? "Show menu" : "Hide menu");
+        const folded = shell.toggleAttribute("data-sidebar-hidden");
+        try { folded ? localStorage.setItem(FOLD_KEY, "1") : localStorage.removeItem(FOLD_KEY); } catch {}
+        shell.querySelector(folded ? ".rail .bs-fold" + ".rail-item" : ".bs-sidebar button.bs-fold")?.focus({ preventScroll: true });
         return;
       }
       if (e.target.closest(".sidebar a[href^='#']:not([href='#'])")) shell.querySelector(".sidebar").removeAttribute("data-open");
