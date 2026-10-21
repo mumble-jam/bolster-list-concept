@@ -63,6 +63,10 @@
   @media (hover: hover) { :is(.bs-sidebar, .bs-settings-nav) .sidebar-item:hover { background: var(--color-surface-sidebar-hover); } }
   :is(.bs-sidebar, .bs-settings-nav) .sidebar-item[aria-current="page"] { background: var(--color-surface-default); box-shadow: var(--shadow-raised); }
   :is(.bs-sidebar, .bs-settings-nav) .sidebar-item:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
+  /* Settings' icons a step quieter than their names; the page you're on, and the one you point at, in full ink */
+  .bs-settings-nav .sidebar-item > svg { color: var(--color-content-secondary); transition: color var(--duration-fast) var(--ease-standard); }
+  .bs-settings-nav .sidebar-item[aria-current="page"] > svg { color: var(--color-content-primary); }
+  @media (hover: hover) { .bs-settings-nav .sidebar-item:hover > svg { color: var(--color-content-primary); } }
   .bs-acc-body { display: grid; padding-block-end: var(--space-1); }
   /* a section's pages: no icon, in line with the section's label (its padding, the 28px icon column, the gap) */
   .bs-sub { padding-inline-start: calc(var(--space-2) * 2 + 1.75rem); color: var(--color-content-secondary); }
