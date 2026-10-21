@@ -101,7 +101,7 @@ window.BolsterShell = (() => {
   function topBar() {
     return `<header class="top-bar bs-top">
       <button class="bs-icon-btn bs-hamburger" type="button" data-toggle-sidebar aria-label="Open menu" data-tip="Menu">${chrome("menu")}</button>
-      <a class="bs-logo" href="#" data-not-built="home" aria-label="Bolster home" data-tip="Home"><img src="${ASSETS}bolster-mark.svg" alt=""></a>
+      <a class="bs-logo" href="#" data-not-built="home" aria-label="Bolster home" data-tip="Home">${LOGO}</a>
       <button class="bs-company" type="button" popovertarget="bs-company-menu" aria-haspopup="menu">${esc(COMPANY)}${chrome("chevron-down", 16)}</button>
       <div class="menu" id="bs-company-menu" popover role="menu" aria-label="Company">
         <button class="menu-item" role="menuitem" data-not-built="switch-company">${chrome("arrow-left-right", 16)}Switch company</button>
@@ -122,6 +122,55 @@ window.BolsterShell = (() => {
     </header>`;
   }
 
+
+  // The logo grows from the mark into the wordmark as the menu opens, and back as it closes (D91): both stand on one
+  // yellow plate with a notch at its bottom right, nearly the same width at the same height, so the plate stretches
+  // to the right and the notch rides out with it; the mark's cut-out turns into the B; the other letters rise into
+  // place one after another as the plate reaches them. Drawn in the wordmark's units (32 tall); one number, from 0
+  // (the mark) to 1 (the wordmark), draws it all. Settled in a playground (21 Oct): the menu's ease-out, 420ms.
+  const LETTERS = ["M8.25391 6.30725H16.3611C19.6264 6.30725 22.0888 8.91092 22.0888 11.7915C22.0888 13.5364 21.12 15.1429 19.5984 15.9181C21.4246 16.6384 22.5317 18.4383 22.5317 20.4607C22.5317 23.2303 20.1523 25.9724 16.7766 25.9724H8.25391V6.30725ZM16.0015 14.5056C17.5785 14.5056 18.5193 13.2595 18.5193 12.0129C18.5193 10.7113 17.5785 9.52022 16.0015 9.52022H11.685V14.5056H16.0015ZM16.444 22.7314C17.9935 22.7314 18.9623 21.6238 18.9623 20.2662C18.9623 18.8536 18.0769 17.718 16.3062 17.718H11.685V22.7308H16.444V22.7314Z", "M23.3047 18.2998C23.3047 13.7852 26.957 10.2399 31.4398 10.2399C35.9227 10.2399 39.575 13.7852 39.575 18.2998C39.575 22.7033 35.9227 26.3596 31.4398 26.3596C26.957 26.3596 23.3047 22.7033 23.3047 18.2998ZM36.1439 18.2998C36.1439 15.3362 34.0411 13.5083 31.4398 13.5083C28.8666 13.5083 26.7913 15.3362 26.7913 18.2998C26.7913 21.1523 28.8666 23.0912 31.4398 23.0912C34.0411 23.0912 36.1439 21.1523 36.1439 18.2998Z", "M41.0137 6.30725H44.4448V25.9444H41.0137V6.30725Z", "M45.9941 21.4574H49.4527C49.4802 22.4545 50.4764 23.1743 51.7493 23.1743C53.1051 23.1743 53.963 22.5095 53.963 21.5123C53.963 20.2382 52.6072 19.9613 51.2235 19.6014C48.3456 18.8812 46.2982 17.6906 46.2982 14.893C46.2982 12.2618 48.6777 10.2125 51.8047 10.2125C54.8209 10.2125 57.3112 12.2899 57.3112 15.004L53.8527 14.9765C53.8527 13.9518 52.8839 13.37 51.8047 13.37C50.6982 13.37 49.7574 13.9238 49.7574 14.8655C49.7574 16.0011 51.0857 16.278 52.4689 16.6379C54.5168 17.1642 57.3387 17.8565 57.3387 21.4574C57.3387 24.1715 54.7929 26.3598 51.6939 26.3598C48.429 26.3598 45.9941 24.144 45.9941 21.4574Z", "M59.8852 13.8683H57.5332V10.6278H59.8852V6.30725H63.3438V10.6278H65.7787V13.8683H63.3438V22.7034H65.6958V25.9444H59.8847V13.8683H59.8852Z", "M66.2752 18.2169C66.2752 13.7299 69.9276 10.2125 74.6041 10.2125C79.2807 10.2125 82.9331 13.7299 82.9331 18.3279C82.9331 18.5773 82.9056 19.0202 82.8222 19.4355H69.983C70.3705 21.5403 72.335 23.1193 74.6596 23.1193C76.4857 23.1193 78.0078 22.2606 78.7274 20.7096H82.5461C81.467 24.0055 78.4233 26.3598 74.6047 26.3598C69.9276 26.3598 66.2752 22.7034 66.2752 18.2169ZM79.0864 16.8044C78.7818 14.9765 76.9836 13.453 74.5482 13.453C72.1133 13.453 70.2871 14.8655 70.0379 16.8044H79.0864Z", "M84.3438 10.6281H93.558V13.8685H87.8303V25.9446H84.3438V10.6281Z", "M95.2227 12.2596C95.2227 11.3508 95.9615 10.6179 96.8628 10.6179C97.7706 10.6179 98.5166 11.3503 98.5166 12.2596C98.5166 13.1683 97.7706 13.9007 96.8628 13.9007C95.9615 13.9007 95.2227 13.1683 95.2227 12.2596ZM98.1082 12.2596C98.1082 11.5761 97.545 11.0267 96.8628 11.0267C96.1799 11.0267 95.631 11.5761 95.631 12.2596C95.631 12.943 96.1799 13.4996 96.8628 13.4996C97.545 13.499 98.1082 12.9425 98.1082 12.2596ZM96.3347 11.4212H96.9187C97.2563 11.4283 97.5308 11.675 97.5308 12.0343C97.5308 12.2947 97.3688 12.4568 97.1789 12.5343L97.5028 13.098H97.0878L96.792 12.5557H96.6866V13.098H96.3347V11.4212ZM96.9396 12.2947C97.0735 12.2804 97.1789 12.1958 97.1789 12.0343C97.1789 11.8579 97.0735 11.7739 96.9396 11.7667H96.6794V12.2953H96.9396V12.2947Z"];
+  const LS = 32 / 491, MARK = { w: 381 * LS, n: 258 * LS, nw: 113 * LS }, WORD = { w: 104, n: 20.0563, nw: 7.4803 };
+  const LOGO = `<svg class="bs-logo-svg" viewBox="0 0 104 32" aria-hidden="true"><defs><clipPath id="bs-logo-clip"><path class="bs-logo-clip"/></clipPath></defs><path class="bs-logo-plate"/>`
+    + `<g clip-path="url(#bs-logo-clip)">${LETTERS.map((d) => `<path class="bs-logo-letter" d="${d}"/>`).join("")}</g>`
+    + `<g class="bs-logo-cut"><path d="M150 92h214v78H233v271h-83z" transform="scale(${LS}) translate(-62 -10)"/></g></svg>`;
+  function logoMotion() {
+    const svg = shell.querySelector(".bs-logo-svg"), rail = shell.querySelector(".rail");
+    if (!svg || !rail) return;
+    const clamp = (x) => Math.min(1, Math.max(0, x)), lerp = (a, b, t) => a + (b - a) * t;
+    const plate = svg.querySelector(".bs-logo-plate"), clip = svg.querySelector(".bs-logo-clip"), cut = svg.querySelector(".bs-logo-cut");
+    const ls = [...svg.querySelectorAll(".bs-logo-letter")];
+    let box, cb; // measured once it's on screen (a hidden logo has no boxes)
+    const draw = (e) => {
+      if (!box) { box = ls.map((l) => l.getBBox()); cb = cut.getBBox(); if (!cb.width) box = null; }
+      const w = lerp(MARK.w, WORD.w, e), n = lerp(MARK.n, WORD.n, e), nw = lerp(MARK.nw, WORD.nw, e), d = `M0 0H${w}V${n}H${w - nw}V32H0Z`;
+      plate.setAttribute("d", d); clip.setAttribute("d", d);
+      if (!box) return;
+      // the cut-out turns into the B: moved and stretched onto the B's box as it fades, the B coming up through it
+      const k = clamp(e / 0.45), B = box[0];
+      cut.setAttribute("transform", `translate(${lerp(cb.x, B.x, k)} ${lerp(cb.y, B.y, k)}) scale(${lerp(1, B.width / cb.width, k)} ${lerp(1, B.height / cb.height, k)}) translate(${-cb.x} ${-cb.y})`);
+      cut.style.opacity = 1 - k; ls[0].style.opacity = clamp((k - 0.25) / 0.75);
+      // the rest rise one after another as the plate's edge reaches each
+      ls.slice(1).forEach((l, i) => { const b = box[i + 1], a = clamp((w - nw * 0.5 - b.x) / b.width * 0.9 - 0.1); l.style.opacity = a; l.setAttribute("transform", a < 1 ? `translate(0 ${(1 - a) * 4})` : ""); });
+    };
+    // the menu's ease-out, cubic-bezier(0.2, 0.8, 0, 1)
+    const ease = (t) => { let u = t; for (let i = 0; i < 8; i++) { const x = 3 * (1 - u) ** 2 * u * 0.2 + u ** 3 - t, dx = 3 * (1 - u) ** 2 * 0.2 + 6 * (1 - u) * u * -0.2 + 3 * u ** 2; if (Math.abs(x) < 1e-5 || !dx) break; u = clamp(u - x / dx); } return 3 * (1 - u) ** 2 * u * 0.8 + 3 * (1 - u) * u ** 2 + u ** 3; };
+    const open = () => !shell.hasAttribute("data-sidebar-hidden") || rail.hasAttribute("data-expanded");
+    let e = open() ? 1 : 0, to = e, raf;
+    draw(e);
+    const go = () => {
+      if (open() === !!to) return;
+      to = open() ? 1 : 0; cancelAnimationFrame(raf);
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) { e = to; return draw(e); }
+      const e0 = e, t0 = performance.now(), D = 420 * Math.max(0.35, Math.abs(to - e0));
+      const tick = (now) => { const k = clamp((now - t0) / D); e = e0 + (to - e0) * ease(k); draw(e); if (k < 1) raf = requestAnimationFrame(tick); };
+      raf = requestAnimationFrame(tick);
+    };
+    const watch = new MutationObserver(go);
+    watch.observe(shell, { attributes: true, attributeFilter: ["data-sidebar-hidden"] });
+    watch.observe(rail, { attributes: true, attributeFilter: ["data-expanded"] });
+    // measured late: draw again once it can be (the top bar shows from 1024 wide)
+    addEventListener("resize", () => { if (!box) draw(e); });
+  }
 
   // the menu folds and unfolds from its own foot (D88), with the old pin's icon: Bolster's own, a panel with a
   // chevron that points the way the menu will move
@@ -449,6 +498,7 @@ window.BolsterShell = (() => {
       e.target.toggleAttribute("data-anim", e.newState === "open");
     }, true);
     railBehaviour();
+    logoMotion();
     canvas.start();
     let seen = false; try { seen = sessionStorage.getItem(LOADED_KEY) === "1"; sessionStorage.setItem(LOADED_KEY, "1"); } catch {}
     if (!seen) loading();

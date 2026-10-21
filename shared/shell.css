@@ -6,12 +6,18 @@
   /* ---------- top bar ---------- */
   /* logo sits in a cell as wide as the rail, so it lines up with the rail icons */
   .bs-logo {
-    display: grid; place-items: center; flex: none; align-self: stretch;
+    display: flex; align-items: center; flex: none; align-self: stretch; overflow: clip;
     inline-size: var(--shell-rail-width);
+    /* the mark (28 tall, 22 wide) centred on the rail's icons; the wordmark grows from the same spot (D91) */
+    padding-inline-start: calc((var(--shell-rail-width) - 1.75rem * 381 / 491) / 2);
     margin-inline-start: calc(var(--space-3) * -1);
     border-inline-end: var(--border-width-default) solid var(--color-line-chrome);
   }
-  .bs-logo img { block-size: 1.75rem; inline-size: auto; }
+  /* the logo's box is the whole word's: it keeps its size and the cell clips it while the menu is folded */
+  .bs-logo-svg { flex: none; block-size: 1.75rem; inline-size: calc(1.75rem * 104 / 32); max-width: none; overflow: visible; }
+  .bs-logo-plate { fill: #FBFF00; }
+  .bs-logo-letter { fill: #000; }
+  .bs-logo-cut { fill: var(--color-surface-chrome); }
   .bs-logo:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -4px; }
 
   /* company switcher: 32 tall, 14px medium, 6px gap */
@@ -203,7 +209,12 @@
     .app-shell:not([data-sidebar-hidden]) { --_rail-column: 0px; }
     .app-shell:not([data-sidebar-hidden]) > .rail { display: none; }
     /* the logo's cell is as wide as the sidebar under it, the mark where the rail's icons are */
-    .app-shell:not([data-sidebar-hidden]) .bs-logo { inline-size: var(--shell-sidebar-width); justify-items: start; padding-inline-start: calc(var(--shell-rail-width) / 2 - 0.875rem); }
+    .app-shell:not([data-sidebar-hidden]) .bs-logo { inline-size: var(--shell-sidebar-width); }
+    /* the folded rail widens over the page as you point at it, and the logo's cell with it, over the top bar, so the
+       mark has room to grow into the wordmark (D91); both at the menu's ease-out, 420ms, the logo's own pace */
+    .app-shell[data-sidebar-hidden] .rail, .app-shell[data-sidebar-hidden] .bs-logo { transition-duration: 420ms; transition-timing-function: cubic-bezier(0.2, 0.8, 0, 1); }
+    .app-shell[data-sidebar-hidden] .bs-logo { position: relative; z-index: 1; transition-property: inline-size, margin, translate, border-color; }
+    .app-shell[data-sidebar-hidden]:has(> .rail[data-expanded]) .bs-logo { inline-size: var(--shell-rail-expanded-width); margin-inline-end: calc(var(--shell-rail-width) - var(--shell-rail-expanded-width)); }
     /* the logo stays put as the top bar slides away only over the rail; over the sidebar it goes with the bar */
     :root[data-chrome-hidden] .app-shell:not([data-sidebar-hidden]) .bs-logo { translate: none; box-shadow: none; }
     /* the top bar's rule runs on under the logo, over the menu (your call, 21 Oct, back from the design pass) */
