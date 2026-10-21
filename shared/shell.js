@@ -232,7 +232,7 @@ window.BolsterShell = (() => {
   }
   function openSettings(pageId) {
     const d = document.getElementById("bs-settings"), all = sections.find((x) => x.id === "settings").groups.flatMap((g) => g.items);
-    const show = (id) => {
+    const show = (id, picked) => {
       const x = all.find((i) => i.id === id) || all[0];
       d.querySelectorAll("[data-settings-page]").forEach((b) => (b.dataset.settingsPage === x.id ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current")));
       const built = opts.links[x.id], slot = d.querySelector(".bs-settings-page");
@@ -247,17 +247,18 @@ window.BolsterShell = (() => {
           // the page takes the window's theme, when one is picked
           slot.querySelector("iframe").addEventListener("load", (e) => { const t = document.documentElement.dataset.theme; try { if (t) e.target.contentDocument.documentElement.dataset.theme = t; } catch {} });
         }
-        // on phones the page and the list of pages take turns at the window: the page once one is picked, the list
-        // when Settings opens on none in particular
-        if (matchMedia("(max-width: 767px)").matches) d.toggleAttribute("data-nav-hidden", !!id);
+        // on phones the page and the list of pages take turns at the window: the page once one is picked
+        if (picked && matchMedia("(max-width: 767px)").matches) d.setAttribute("data-nav-hidden", "");
       }
       slot.toggleAttribute("data-frame", true);
     };
+    // it always opens with its list of pages out, however it was left
+    if (!d.open) d.removeAttribute("data-nav-hidden");
     show(pageId);
     if (!d.open) d.showModal();
     d.onclick = (e) => {
       const b = e.target.closest("[data-settings-page]");
-      if (b) show(b.dataset.settingsPage);
+      if (b) show(b.dataset.settingsPage, true);
       if (e.target.closest("[data-close-settings]")) d.close();
     };
   }
@@ -391,6 +392,9 @@ window.BolsterShell = (() => {
       const sync = (hidden) => { const l = hidden ? "Show settings menu" : "Hide settings menu"; btn.innerHTML = foldIcon(hidden ? "out" : "in"); btn.setAttribute("aria-label", l); btn.dataset.tip = l; };
       sync(host().settingsNav());
       btn.addEventListener("click", () => sync(host().settingsNav("toggle")));
+      // the window can show or hide its list without this page (it opens with it out): the button follows
+      const win = window.parent.document.getElementById("bs-settings");
+      if (win) new MutationObserver(() => sync(win.hasAttribute("data-nav-hidden"))).observe(win, { attributes: true, attributeFilter: ["data-nav-hidden"] });
     }
     // Escape with nothing open in the page closes the window around it
     addEventListener("keydown", (e) => { if (e.key === "Escape" && !e.defaultPrevented && !document.querySelector(":popover-open, dialog[open]")) host()?.closeSettings(); });
