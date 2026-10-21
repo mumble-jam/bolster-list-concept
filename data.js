@@ -83,6 +83,13 @@
     CLIENTS.push({ id: `c${CLIENTS.length + 1}`, name, initials: initials(name), color: (hash(name) % 8) + 1, city, address: `${int(12, 980)} ${pick(STREETS)}, ${city}` });
   }
 
+  // each site job its own colour, the same on every page that shows it (the calendar, the pipeline): the
+  // system's avatar hues (D13), in turn, skipping its black and grey. Colour says which job, never what kind
+  const JOB_HUES = new Map();
+  const jobHue = (job) => { if (!JOB_HUES.has(job)) JOB_HUES.set(job, (JOB_HUES.size % 6) + 2); return JOB_HUES.get(job); };
+  ["Lakeside kitchen", "Garage drywall", "Basement finish", "Attic insulation", "Stairwell skim coat", "Office build-out",
+    "Fire-rated walls", "Popcorn ceiling removal", "Crawl space insulation", "Water damage repair"].forEach(jobHue);
+
   const emailOf = (c) => `${c.name.split(" ")[0].toLowerCase()}@${c.name.split(" ").slice(-1)[0].toLowerCase().replace(/[^a-z]/g, "")}.example`;
   const latest = (a, b) => (+a > +b ? a : b);
   const earliest = (a, b) => (+a < +b ? a : b);
@@ -538,7 +545,7 @@
   window.BDS_CONCEPT = {
     TODAY, fmt, esc, ageDays, attrIcons, actionIcons,
     // the parts recipe.js builds a list from a page description with
-    kit: { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, thumb, person, main, PHOTOS, photoAt, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf, MIN_SAMPLE },
+    kit: { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, thumb, person, main, PHOTOS, photoAt, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf, MIN_SAMPLE, jobHue },
     configs: { jobs: estimatesConfig, invoices: invoicesConfig, customers: clientsConfig, catalog: itemsConfig },
   };
 })();

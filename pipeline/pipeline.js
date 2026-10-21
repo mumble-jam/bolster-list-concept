@@ -1,0 +1,497 @@
+// Pipeline concept: direction A of the “Pipeline boards · research” board (Figma, 21 Oct), “One lifecycle, made
+// honest”: one board from the first enquiry to the paid invoice, people (leads, their visits) on one side and jobs
+// on the other, said plainly; stages as shapes, colour only for the job's own and for stuck; the next step on
+// every card; moving by dragging, where a stage that needs something asks for it. Made-up data.
+(() => {
+  const { TODAY, esc, fmt, kit } = window.BDS_CONCEPT;
+  const { OWNERS, avatar, jobHue } = kit;
+  const ic = (n, s = 16, o) => window.BolsterIcons(n, s, o);
+  const $ = (s, el = document) => el.querySelector(s);
+  const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+  const say = (t) => { $("#live").textContent = t; };
+
+  BolsterShell.mount({ current: "pipeline", links: { pipeline: "index.html", calendar: "../calendar/", tasks: "../tasks/", "job-list": "../index.html#jobs", "vendor-orders": "../index.html?d=pages/list/vendor-orders.json", invoices: "../index.html#invoices", "leads-and-customers": "../index.html#customers", catalog: "../index.html#catalog" } });
+
+  // ---------- days: offsets from today; ISO only where a date field needs one ----------
+  const DAY = 864e5;
+  const dateOf = (n) => new Date(+TODAY + n * DAY);
+  const iso = (n) => { const d = dateOf(n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+  const offset = (s) => Math.round((new Date(`${s}T12:00:00`) - TODAY) / DAY);
+  const short = (n) => (n === 0 ? "today" : n === 1 ? "tomorrow" : dateOf(n).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }));
+  const ago = (n) => (n <= 0 ? "today" : n === 1 ? "yesterday" : `${n} days ago`);
+  const cap = (s) => s[0].toUpperCase() + s.slice(1);
+  const money = (n) => fmt.whole(n);
+  const who = (id) => OWNERS.find((o) => o.id === id);
+  const nameOf = (p) => (p.me ? "You" : p.name);
+
+  // ---------- the stages: two kinds of record (P-kinds), each stage's groups in the order they need doing (P-groups) ----------
+  // a job's stage is drawn with the job list's marks (D49), filling a quarter at a time; a person's with an icon
+  const STAGES = [
+    { key: "leads", label: "Leads", kind: "person", icon: "user", groups: [["new", "New"], ["talking", "Talking"]] },
+    { key: "visits", label: "Appointments", kind: "person", icon: "calendar-check", groups: [["visited", "Visited"], ["today", "Today"], ["coming", "Coming up"]] },
+    { key: "pending", label: "Pending", kind: "job", mark: "quarter", dot: "var(--color-status-pending-mark)", groups: [["drafts", "Drafts"], ["unsent", "Never sent"], ["changed", "Changes not sent yet"], ["sent", "Sent"]] },
+    { key: "booked", label: "Booked", kind: "job", mark: "half", dot: "var(--color-status-booked-dot)", groups: [["unscheduled", "Not scheduled"], ["scheduled", "Scheduled"]] },
+    { key: "progress", label: "In progress", kind: "job", mark: "three", dot: "var(--color-status-in-progress-mark)", groups: [["done", "Work done"], ["underway", "Underway"]] },
+    { key: "invoices", label: "Invoices", kind: "job", mark: "full", dot: "var(--color-status-outstanding-dot)", groups: [["overdue", "Overdue"], ["unsent", "Not sent"], ["sent", "Sent"], ["paid", "Paid"]] },
+  ];
+  const stageOf = (key) => STAGES.find((s) => s.key === key);
+  const groupLabel = (r) => stageOf(r.stage).groups.find(([g]) => g === r.group)[1];
+
+  // ---------- sample: at is the day it got where it is (0 today, -3 three days ago) ----------
+  let seq = 0;
+  const person = (stage, group, name, ask, place, source, at, owner, extra = {}) => ({ id: `r${++seq}`, kind: "person", stage, group, name, ask, place, source, at, owner, ...extra });
+  const job = (stage, group, name, client, place, value, at, owner, extra = {}) => ({ id: `r${++seq}`, kind: "job", stage, group, name, client, place, value, at, owner, ...extra });
+  let records = [
+    person("leads", "new", "Joe Johnson", "Basement, about 900 sq ft to hang and finish", "4 Alder Way", "Website", 0, "hm"),
+    person("leads", "new", "Elena Sorensen", "Soundproofing a home office", "19 Summit Avenue", "Google", -3, "dc"),
+    person("leads", "talking", "Kenji Tran", "Garage ceiling with a water stain", "8 Willow Way", "Referral, from the Hales", -1, "hm"),
+    person("leads", "talking", "Harbor View HOA", "Hallway patching on three floors", "1 Harbor Road", "Repeat client", -5, "mr"),
+    // the calendar's estimate visits and measures: the same people, the same times
+    person("visits", "visited", "Cameron Ashby", "Kitchen drywall after a remodel", "60 Oak Avenue", "Home Depot", -2, "hm", { visit: { day: -2, time: "10:00", what: "Estimate visit" } }),
+    person("visits", "today", "Lucia Delgado", "Kitchen ceiling, cracks along the seams", "7 Pine Court", "Website", 0, "hm", { visit: { day: 0, time: "9:00", what: "Estimate visit" } }),
+    person("visits", "coming", "Drew Whitaker", "Attic insulation, R-49", "22 Ridge Road", "Google", -1, "hm", { visit: { day: 4, time: "10:00", what: "Measure" } }),
+    person("visits", "coming", "Sage Fontaine", "Bathroom, moisture-resistant board", "5 Lake Drive", "Yard sign", -2, "hm", { visit: { day: 5, time: "8:30", what: "Measure" } }),
+    job("pending", "drafts", "Ceiling repair", "Okafor", "33 Mill Lane", 0, -1, "dc"),
+    job("pending", "drafts", "Spray foam", "Abernathy", "70 Orchard Lane", 6850, -3, "pn"),
+    job("pending", "unsent", "Bathroom remodel", "Pike", "12 Lakeview Drive", 14200, -4, "hm"),
+    job("pending", "changed", "Kitchen drywall", "Ferreira", "51 Elm Avenue", 9480, -2, "dc"),
+    job("pending", "sent", "Blown-in insulation", "Mbeki", "6 Birch Street", 3950, -2, "mr"),
+    job("pending", "sent", "Gym acoustic panels", "Brightwater Schools", "300 School Road", 186400, -5, "hm"),
+    job("pending", "sent", "Skim coat", "Hollis", "27 Pine Court", 2600, -9, "pn"),
+    // the calendar's jobs: booked ones on their days, the unscheduled tray's here with no dates
+    job("booked", "unscheduled", "Water damage repair", "Calloway", "17 Bay Street", 11900, -1, "hm"),
+    job("booked", "unscheduled", "Popcorn ceiling removal", "Lindqvist", "31 Cedar Street", 4100, -3, "dc"),
+    job("booked", "unscheduled", "Crawl space insulation", "Marsh", "12 Fern Road", 5600, -12, "pn"),
+    job("booked", "scheduled", "Basement finish", "Brennan", "3 Elm Street", 18600, -6, "pn", { start: 4, end: 20 }),
+    job("booked", "scheduled", "Stairwell skim coat", "Galloway", "9 Mill Lane", 2150, -8, "mr", { start: 6, end: 7 }),
+    job("booked", "scheduled", "Office build-out", "Northgate Property Group", "200 Harbor Way, suite 4", 64800, -14, "mr", { start: 12, end: 22 }),
+    job("booked", "scheduled", "Fire-rated walls", "Pinecrest Builders", "Lot 12, Pinecrest", 22300, -10, "dc", { start: 19, end: 21 }),
+    job("progress", "done", "Garage drywall", "Ortiz", "88 Quarry Road", 8400, -2, "pn", { start: -9, end: -2 }),
+    job("progress", "underway", "Lakeside kitchen", "Hale residence", "14 Birch Lane", 27450, -3, "mr", { start: -3, end: 13 }),
+    job("progress", "underway", "Attic insulation", "Novak", "41 Hill Road", 4800, 0, "dc", { start: 0, end: 1 }),
+    job("invoices", "overdue", "Unit turnover drywall", "Oakline Rentals", "Unit 3B, 40 River Road", 12940, -23, "hm", { invoice: "Final invoice", due: -9 }),
+    job("invoices", "unsent", "Basement soundproofing", "Ruiz-Ortega", "9 Summit Avenue", 9300, 0, "mr", { invoice: "Final invoice" }),
+    job("invoices", "sent", "Treatment rooms soundproofing", "Summit Dental Studio", "2 Main Street", 7200, -8, "dc", { invoice: "Progress invoice", due: 6 }),
+    job("invoices", "paid", "Skylight drywall return", "Kowalski", "60 Hillcrest Road", 1850, -2, "pn", { invoice: "Final invoice" }),
+  ];
+  // what left the board (P-closed), with its reason, to reopen
+  let lost = [
+    { rec: job("pending", "sent", "Ceiling tiles", "Fairview Café", "8 Market Square", 5400, -20, "dc"), reason: "Went with someone else", at: -6 },
+    { rec: person("leads", "talking", "Morgan Reese", "Garage insulation, one wall", "3 Quarry Road", "Google", -15, "pn"), reason: "Not a fit", at: -12 },
+  ];
+  const byId = (id) => records.find((r) => r.id === id);
+
+  // ---------- what a card says about time, and when it's stuck (P-stuck) ----------
+  // stuck turns the line red and says what's waiting; the limits are the company's to set, assumed here
+  const LIMIT = { "leads/new": 2, "visits/visited": 2, "pending/unsent": 3, "pending/sent": 7, "booked/unscheduled": 7, "progress/done": 3 };
+  // on the card, short: what's waiting and for how long, the same shape everywhere ("No reply, 9 days"); the summary
+  // says it in full
+  function when(r, full = false) {
+    const n = -r.at, over = n >= (LIMIT[`${r.stage}/${r.group}`] ?? Infinity);
+    const late = (text, long) => ({ text: full ? long : text, late: true }), ok = (text) => ({ text, late: false });
+    const days = (k) => `${k} ${k === 1 ? "day" : "days"}`;
+    switch (`${r.stage}/${r.group}`) {
+      case "leads/new": return over ? late(`Not contacted, ${days(n)}`, `New ${ago(n)}, not contacted yet`) : ok(`New ${ago(n)}`);
+      case "leads/talking": return ok(`Contacted ${ago(n)}`);
+      case "visits/visited": return over ? late(`No job, ${days(n)}`, `Visited ${ago(n)}, no job yet`) : ok(`Visited ${ago(n)}`);
+      case "visits/today": return ok(full ? `${r.visit.what} today, ${r.visit.time}` : `Today, ${r.visit.time}`);
+      case "visits/coming": return ok(full ? `${r.visit.what} ${short(r.visit.day)}, ${r.visit.time}` : `${cap(short(r.visit.day))}, ${r.visit.time}`);
+      case "pending/drafts": return ok(`Started ${ago(n)}`);
+      case "pending/unsent": return over ? late(`Not sent, ${days(n)}`, `Ready ${ago(n)}, never sent`) : ok(`Ready ${ago(n)}`);
+      case "pending/changed": return ok(full ? `Changed ${ago(n)}, not sent` : `Changed ${ago(n)}`);
+      case "pending/sent": return over ? late(`No reply, ${days(n)}`, `Sent ${ago(n)}, no reply since`) : ok(`Sent ${ago(n)}`);
+      case "booked/unscheduled": return over ? late(`No dates, ${days(n)}`, `Booked ${ago(n)}, no dates yet`) : ok(`Booked ${ago(n)}`);
+      case "booked/scheduled": return r.start < 0 ? late(`Not started, ${days(-r.start)}`, `Was to start ${short(r.start)}`) : ok(`Starts ${short(r.start)}`);
+      case "progress/underway": return ok(full ? `${cap(short(r.start))} to ${short(r.end)}` : r.start === 0 ? "Started today" : `To ${short(r.end)}`);
+      case "progress/done": return over ? late(`Not invoiced, ${days(n)}`, `Done ${ago(n)}, not invoiced yet`) : ok(`Done ${ago(n)}`);
+      case "invoices/unsent": return ok(full ? `Created ${ago(n)}, not sent` : `Created ${ago(n)}`);
+      case "invoices/sent": return ok(r.reminded ? "Reminded today" : `Due ${short(r.due)}`);
+      case "invoices/overdue": return late(`Overdue, ${days(-r.due)}`, `Due ${short(r.due)}, overdue by ${days(-r.due)}${r.reminded ? ", reminded today" : ""}`);
+      case "invoices/paid": return ok(`Paid ${ago(n)}`);
+    }
+    return ok("");
+  }
+
+  // ---------- each card's steps: the first is its next step, on the card (P-next); the rest in its summary ----------
+  const STEP = {
+    create: "Create job", visit: "Book visit", finish: "Finish estimate", send: "Send estimate", resend: "Send changes",
+    book: "Mark as booked", schedule: "Schedule", start: "Mark as started", complete: "Mark work done", invoice: "Invoice",
+    sendInvoice: "Send invoice", pay: "Record payment", remind: "Send reminder", lose: "Mark as lost",
+  };
+  function steps(r) {
+    switch (`${r.stage}/${r.group}`) {
+      case "leads/new": case "leads/talking": return ["create", "visit", "lose"];
+      case "visits/visited": case "visits/today": return ["create", "lose"];
+      case "visits/coming": return [null, "create", "lose"];
+      case "pending/drafts": return ["finish", "lose"];
+      case "pending/unsent": return ["send", "lose"];
+      case "pending/changed": return ["resend", "book", "lose"];
+      case "pending/sent": return ["book", "lose"];
+      case "booked/unscheduled": return ["schedule", "start"];
+      case "booked/scheduled": return r.start <= 0 ? ["start"] : [null, "start"];
+      case "progress/underway": return r.end <= 0 ? ["complete", "invoice"] : [null, "complete", "invoice"];
+      case "progress/done": return ["invoice"];
+      case "invoices/unsent": return ["sendInvoice", "pay"];
+      case "invoices/sent": return ["pay", "remind"];
+      case "invoices/overdue": return ["remind", "pay"];
+    }
+    return [null];
+  }
+
+  // ---------- where a card may go (P-move): the next stage or back one; why not, said as you drag over ----------
+  const ORDER = STAGES.map((s) => s.key);
+  function canGo(r, to) {
+    if (to === r.stage) return { ok: false, same: true };
+    const a = ORDER.indexOf(r.stage), b = ORDER.indexOf(to), target = stageOf(to);
+    if (r.kind === "job" && target.kind === "person") return { ok: false, why: "A job doesn't go back to being a lead" };
+    if (r.stage === "invoices") return { ok: false, why: "An invoice changes in the invoice" };
+    if (r.kind === "person" && target.kind === "job" && to !== "pending") return { ok: false, why: "Create the job first, in Pending" };
+    if (r.kind === "person" && to === "pending") return { ok: true, step: "create" };
+    if (Math.abs(b - a) > 1) return { ok: false, why: `One stage at a time: ${stageOf(ORDER[a + Math.sign(b - a)]).label} first` };
+    if (to === "visits") return { ok: true, step: "visit" };
+    if (to === "leads") return { ok: true, step: "unvisit" };
+    if (to === "booked" && r.stage === "pending") return { ok: true, step: "book" };
+    if (to === "progress") return { ok: true, step: "start" };
+    if (to === "invoices") return { ok: true, step: "invoice" };
+    if (to === "pending") return { ok: true, step: "unbook" };
+    if (to === "booked") return { ok: true, step: "unstart" };
+    return { ok: false, why: "Not from here" };
+  }
+  const canLose = (r) => r.stage === "leads" || r.stage === "visits" || r.stage === "pending";
+
+  // ---------- filters: search, and whose ----------
+  const st = { q: "", people: null, folded: new Set(), tab: "leads" };
+  try { st.folded = new Set(JSON.parse(localStorage.getItem("pl-folded") || "[]")); } catch {}
+  const keepFolded = () => { try { localStorage.setItem("pl-folded", JSON.stringify([...st.folded])); } catch {} };
+  const shown = (r) => (!st.people || st.people.has(r.owner)) && (!st.q || `${r.name} ${r.client || ""} ${r.place} ${r.ask || ""}`.toLowerCase().includes(st.q));
+  const filtered = () => st.q || st.people;
+
+  // ---------- a column's line under its name (P-money): what its money adds up, in full ----------
+  function figure(stage, rows) {
+    const total = (list) => list.reduce((s, r) => s + r.value, 0);
+    const n = (g) => rows.filter((r) => r.group === g).length;
+    switch (stage.key) {
+      case "leads": return rows.length ? [n("new") && `${n("new")} new`, n("talking") && `${n("talking")} talking`].filter(Boolean).join(", ") : "";
+      case "visits": return rows.length ? [n("visited") && `${n("visited")} visited`, n("today") && `${n("today")} today`, n("coming") && `${n("coming")} coming up`].filter(Boolean).join(", ") : "";
+      case "pending": {
+        const quoted = total(rows.filter((r) => r.group === "sent" || r.group === "changed")), unsent = n("drafts") + n("unsent");
+        return `${money(quoted)} quoted${unsent ? ` · ${unsent} not sent yet` : ""}`;
+      }
+      case "booked": case "progress": return `${money(total(rows))} contracted`;
+      case "invoices": {
+        const owed = total(rows.filter((r) => r.group !== "paid")), over = total(rows.filter((r) => r.group === "overdue"));
+        return `${money(owed)} owed${over ? ` · <span class="pl-late">${money(over)} overdue</span>` : ""}`;
+      }
+    }
+    return "";
+  }
+
+  // ---------- drawing ----------
+  const markOf = (s, size = "") => (s.kind === "job" ? `<span class="mark${size}" data-mark="${s.mark}" style="--_dot:${s.dot}" aria-hidden="true"></span>` : ic(s.icon, 14, { optical: true }));
+  function card(r) {
+    const w = when(r), [next] = steps(r), hue = r.kind === "job" ? jobHue(r.name) : null;
+    const title = r.kind === "job" ? r.name : r.name;
+    const sub = r.kind === "job" ? `${r.client} · ${r.invoice || r.place}` : r.ask;
+    const label = `${r.kind === "job" ? `${r.name}, ${r.client}` : r.name}, ${stageOf(r.stage).label}, ${groupLabel(r)}${r.kind === "job" ? `, ${r.value ? money(r.value) : "no price yet"}` : ""}. ${w.text}`;
+    return `<article class="pl-card" data-id="${r.id}" data-kind="${r.kind}"${hue ? ` data-hue="${hue}"` : ""}${w.late ? " data-late" : ""}${r.group === "paid" ? " data-past" : ""}>
+      <h4 class="pl-card-title"><button type="button" class="pl-open" data-open="${r.id}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(label)}">${ic(r.kind === "job" ? "briefcase" : "user", 14, { optical: true })}<span>${esc(title)}</span></button>${r.kind === "job" ? `<span class="pl-value">${r.value ? money(r.value) : '<span class="pl-none">No price yet</span>'}</span>` : ""}</h4>
+      <p class="pl-card-sub">${esc(sub)}</p>
+      <div class="pl-card-foot"><span class="pl-when">${avatar(who(r.owner), "xs")}${w.late ? ic("clock", 12, { optical: true }) : ""}<span>${esc(w.text)}</span></span>${next ? `<button type="button" class="button pl-next" data-variant="secondary" data-size="sm" data-step="${next}" data-for="${r.id}" aria-label="${esc(`${STEP[next]}: ${r.name}`)}">${STEP[next]}</button>` : ""}</div>
+    </article>`;
+  }
+  function column(s) {
+    const rows = records.filter((r) => r.stage === s.key && shown(r));
+    const groups = s.groups.map(([g, label]) => {
+      const list = rows.filter((r) => r.group === g).sort((a, b) => (s.key === "booked" && g === "scheduled" ? a.start - b.start : a.at - b.at));
+      if (!list.length) return "";
+      const key = `${s.key}/${g}`, folded = st.folded.has(key), late = list.filter((r) => when(r).late).length;
+      return `<section class="pl-group" data-group="${key}"><h4 class="pl-group-head"><button type="button" class="pl-group-toggle" data-fold="${key}" aria-expanded="${!folded}" aria-controls="g-${s.key}-${g}">${ic("chevron-down", 12, { optical: true })}<span>${esc(label)}</span><span class="pl-n">${list.length}</span>${late ? `<span class="pl-late pl-group-late">${late} stuck</span>` : ""}</button></h4>
+        <div class="pl-cards" id="g-${s.key}-${g}"${folded ? " hidden" : ""}>${list.map(card).join("")}</div></section>`;
+    }).join("");
+    const empty = `<p class="pl-empty">${filtered() ? "No matches" : "Nothing here"}</p>`;
+    return `<section class="pl-col" id="col-${s.key}" data-stage="${s.key}" data-kind="${s.kind}" aria-labelledby="h-${s.key}">
+      <header class="pl-col-head"><h3 id="h-${s.key}">${markOf(s)}<span>${esc(s.label)}</span><span class="pl-n">${rows.length}</span></h3>
+        <a class="button" data-variant="ghost" data-size="sm" data-icon-only href="../index.html#${s.kind === "job" ? (s.key === "invoices" ? "invoices" : "jobs") : "customers"}" aria-label="${esc(`View ${s.label.toLowerCase()} in a list`)}" data-tip="View in list">${ic("list", 16, { optical: true })}</a>
+        <p class="pl-figure">${figure(s, rows) || "&nbsp;"}</p></header>
+      <div class="pl-col-body" tabindex="-1">${groups || empty}</div></section>`;
+  }
+  const board = $("#board");
+  function render() {
+    const keep = $$(".pl-col-body", board).map((b) => b.scrollTop), left = board.scrollLeft;
+    const people = STAGES.filter((s) => s.kind === "person"), jobs = STAGES.filter((s) => s.kind === "job");
+    // People and Jobs over their columns, the seam between them where a person becomes a job (P-kinds, P-cross)
+    board.innerHTML = `<p class="pl-kind" data-kind="person">${ic("user", 12, { optical: true })}People, no job yet</p><p class="pl-kind" data-kind="job">${ic("briefcase", 12, { optical: true })}Jobs</p>
+      ${people.map(column).join("")}<div class="pl-seam" aria-hidden="true"></div>${jobs.map(column).join("")}`;
+    $$(".pl-col-body", board).forEach((b, i) => (b.scrollTop = keep[i] || 0));
+    board.scrollLeft = left;
+    const n = records.filter(shown).length;
+    $("#count").textContent = filtered() ? `${fmt.plural(n, "card", "cards")} match` : "";
+    $("#tabs").innerHTML = STAGES.map((s) => `<button type="button" data-tab="${s.key}"${s.key === st.tab ? ' aria-current="true"' : ""}>${markOf(s)}<span>${esc(s.label)}</span><span class="pl-n">${records.filter((r) => r.stage === s.key && shown(r)).length}</span></button>`).join("");
+    const p = !st.people ? "Everyone" : OWNERS.filter((o) => st.people.has(o.id)).map((o) => (o.me ? "You" : o.name.split(" ")[0])).join(", ");
+    $("#people-text").textContent = p; $("#pick-people").setAttribute("aria-label", `People: ${p}`);
+    $("#lost-text").textContent = `Lost${lost.length ? ` · ${lost.length}` : ""}`;
+    $("#pick-lost").setAttribute("aria-label", `Lost, ${lost.length ? fmt.plural(lost.length, "card", "cards") : "none"}`);
+    fit();
+  }
+  // on wider screens the board fills the screen down to its bottom edge, each column scrolling on its own
+  const phone = matchMedia("(max-width: 767px)");
+  function fit() {
+    if (phone.matches) return board.style.removeProperty("--pl-h");
+    board.style.setProperty("--pl-h", `${Math.max(360, innerHeight - board.getBoundingClientRect().top - scrollY - 24)}px`);
+  }
+
+  // ---------- changes, every one with Undo ----------
+  function change(mutate, message) {
+    const was = structuredClone({ records, lost });
+    mutate();
+    render();
+    say(message);
+    BolsterShell.toast(message, { undo: () => { ({ records, lost } = was); render(); say("Undone"); } });
+  }
+  const set = (r, stage, group, extra = {}) => Object.assign(r, { stage, group, at: 0 }, extra);
+
+  // ---------- the steps: some move at once (with Undo), some ask first in a short dialog ----------
+  const dlg = $("#step");
+  function ask({ title, body, submit, onSubmit, tone }) {
+    dlg.innerHTML = `<form method="dialog" class="pl-step"><header class="dialog-header"><h2 id="step-title">${title}</h2>
+      <button type="button" class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close-step data-tip="Close">${ic("xmark", 16, { optical: true })}</button></header>
+      <div class="dialog-body">${body}</div>
+      <footer class="dialog-footer"><button type="button" class="button" data-variant="ghost" data-close-step>Cancel</button><button type="submit" class="button"${tone ? ` data-variant="${tone}"` : ""}>${submit}</button></footer></form>`;
+    dlg.querySelector("form").onsubmit = (e) => { e.preventDefault(); const v = Object.fromEntries(new FormData(e.target)); dlg.close(); onSubmit(v); };
+    dlg.showModal();
+    dlg.querySelector("input:not([type=radio]), input:checked, select")?.focus();
+  }
+  const field = (id, label, input, help = "") => `<div class="field"><label class="field-label" for="${id}">${label}</label>${input}${help ? `<p class="field-helper">${help}</p>` : ""}</div>`;
+  const moneyInput = (id, v) => `<div class="input-group"><span class="input-adornment">$</span><input class="input" id="${id}" name="${id}" inputmode="decimal" data-numeric value="${v.toLocaleString("en-US")}" required></div>`;
+  const amount = (s) => Math.round(parseFloat(String(s).replace(/[^0-9.]/g, "")) || 0);
+
+  function run(step, r) {
+    if (pop.matches(":popover-open")) pop.hidePopover();
+    const s = (k) => stageOf(k).label;
+    switch (step) {
+      case "create": return ask({
+        title: `Create a job for ${esc(r.name)}`, submit: "Create job",
+        body: `${field("j-name", "Name this job", `<input class="input" id="j-name" name="name" value="${esc(r.place)}" placeholder="Use the address or the customer's name if you're not sure" required>`)}
+          <p class="pl-step-note">${ic("briefcase", 14, { optical: true })}<span>It starts in ${s("pending")} as a draft estimate. ${esc(r.name)} is a customer from now on, so they leave ${s(r.stage)}.</span></p>`,
+        onSubmit: (v) => change(() => {
+          records = records.filter((x) => x !== r);
+          records.push(job("pending", "drafts", v.name.trim() || r.place, r.name, r.place, 0, 0, r.owner));
+        }, `${v.name.trim() || r.place} created for ${r.name}, in ${s("pending")}`),
+      });
+      case "visit": return ask({
+        title: `Book a visit with ${esc(r.name)}`, submit: "Book visit",
+        body: `${field("v-what", "What for", `<div class="select"><select class="input" id="v-what" name="what"><option>Estimate visit</option><option>Measure</option></select></div>`)}
+          <div class="pl-step-row">${field("v-day", "Day", `<input class="input" type="date" id="v-day" name="day" value="${iso(1)}" required>`)}${field("v-time", "Time", `<input class="input" type="time" id="v-time" name="time" step="900" value="09:00" required>`)}</div>
+          <p class="pl-step-note">${ic("calendar-check", 14, { optical: true })}<span>It goes on the calendar too.</span></p>`,
+        onSubmit: (v) => { const d = offset(v.day); change(() => set(r, "visits", d < 0 ? "visited" : d === 0 ? "today" : "coming", { visit: { day: d, time: v.time.replace(/^0/, ""), what: v.what } }), `Visit with ${r.name} booked for ${short(d)}, ${v.time.replace(/^0/, "")}`); },
+      });
+      case "unvisit": return change(() => { set(r, "leads", "talking"); delete r.visit; }, `${r.name} back in ${s("leads")}, visit cancelled`);
+      case "finish": return BolsterShell.toast(`Concept only: ${r.name}'s estimate opens in the job.`);
+      case "send": case "resend": return change(() => set(r, "pending", "sent"), `${step === "send" ? "Estimate" : "Changes"} sent to ${r.client}`);
+      case "book": return ask({
+        title: `Mark ${esc(r.name)} as booked`, submit: "Mark as booked",
+        body: `${field("b-value", "Contract", moneyInput("b-value", r.value), `The estimate's total. Change it if ${esc(r.client)} signed for something else.`)}
+          ${field("b-start", "Starts", `<input class="input" type="date" id="b-start" name="start" value="">`, "Leave it empty to schedule it later.")}`,
+        onSubmit: (v) => { const start = v.start ? offset(v.start) : null; change(() => set(r, "booked", start == null ? "unscheduled" : "scheduled", { value: amount(v["b-value"]), ...(start == null ? {} : { start, end: start + 4 }) }), `${r.name} booked${start == null ? ", not scheduled yet" : `, starting ${short(start)}`}`); },
+      });
+      case "unbook": return change(() => { set(r, "pending", "sent"); delete r.start; delete r.end; }, `${r.name} back in ${s("pending")}`);
+      case "schedule": return ask({
+        title: `Schedule ${esc(r.name)}`, submit: "Schedule",
+        body: `<div class="pl-step-row">${field("s-start", "Starts", `<input class="input" type="date" id="s-start" name="start" value="${iso(4)}" required>`)}${field("s-days", "Working days", `<input class="input" type="number" id="s-days" name="days" min="1" max="60" value="3" data-numeric required>`)}</div>
+          <p class="pl-step-note">${ic("calendar", 14, { optical: true })}<span>It goes on the calendar, in ${esc(r.name)}'s colour.</span></p>`,
+        onSubmit: (v) => { const start = offset(v.start); change(() => set(r, "booked", "scheduled", { start, end: start + Math.max(1, +v.days) - 1 }), `${r.name} scheduled from ${short(start)}`); },
+      });
+      // started today, keeping the length it was scheduled for (four days if it had none)
+      case "start": return change(() => set(r, "progress", "underway", { start: 0, end: r.start != null ? r.end - r.start : 4 }), `${r.name} started today`);
+      case "unstart": return change(() => { set(r, "booked", "unscheduled"); delete r.start; delete r.end; }, `${r.name} back in ${s("booked")}, not scheduled`);
+      case "complete": return change(() => set(r, "progress", "done", { end: 0 }), `${r.name}: work done`);
+      case "invoice": return ask({
+        title: `Invoice ${esc(r.name)}`, submit: "Create invoice",
+        body: `${field("i-amount", "Final invoice", moneyInput("i-amount", r.value), "What's left of the contract. Payments taken so far come off it in the invoice.")}`,
+        onSubmit: (v) => change(() => set(r, "invoices", "unsent", { value: amount(v["i-amount"]), invoice: "Final invoice" }), `Invoice for ${r.name} created, not sent yet`),
+      });
+      case "sendInvoice": return change(() => set(r, "invoices", "sent", { due: 14 }), `Invoice sent to ${r.client}, due ${short(14)}`);
+      case "pay": return change(() => set(r, "invoices", "paid"), `${r.name}: paid in full`);
+      case "remind": return change(() => (r.reminded = true), `Reminder sent to ${r.client}`);
+      case "lose": return ask({
+        title: `Mark ${esc(r.name)} as lost`, submit: "Mark as lost",
+        body: `<fieldset class="pl-reasons"><legend class="field-label">Why</legend>${["Price", "Timing", "Went with someone else", "No reply", "Not a fit"].map((x, i) => `<label class="choice"><input type="radio" class="radio" name="reason" value="${x}"${i ? "" : " checked"}> ${x}</label>`).join("")}</fieldset>
+          <p class="pl-step-note">${ic("ban", 14, { optical: true })}<span>It leaves the board and waits under Lost, to reopen.</span></p>`,
+        onSubmit: (v) => change(() => { records = records.filter((x) => x !== r); lost.unshift({ rec: r, reason: v.reason, at: 0 }); }, `${r.name} marked as lost: ${v.reason.toLowerCase()}`),
+      });
+    }
+  }
+  const moveTo = (r, to) => { const g = canGo(r, to); if (g.ok) run(g.step, r); };
+
+  // ---------- the summary, the pickers: one shared popover ----------
+  const pop = $("#pop");
+  let popFor = null, byKey = false;
+  function openPop(kind, from, fill, { start = false, label } = {}) {
+    if (pop.matches(":popover-open") && popFor?.from === from && popFor.kind === kind) { pop.hidePopover(); return; }
+    if (pop.matches(":popover-open")) pop.hidePopover();
+    popFor = { kind, from };
+    pop.dataset.kind = kind;
+    pop.setAttribute("role", "dialog");
+    pop.setAttribute("aria-label", label || kind);
+    pop.innerHTML = fill();
+    pop.showPopover();
+    from?.setAttribute("aria-expanded", "true");
+    BolsterShell.placePopover(pop, from, { start });
+    ($("h3[tabindex]", pop) || $("input, button:not([data-close-pop])", pop))?.focus({ preventScroll: true, focusVisible: byKey });
+  }
+  let refocus = null;
+  pop.addEventListener("beforetoggle", (e) => {
+    if (e.newState !== "closed") return;
+    const from = popFor?.from; popFor = null;
+    from?.setAttribute("aria-expanded", "false");
+    refocus = from?.isConnected && (pop.contains(document.activeElement) || document.activeElement === document.body) ? from : null;
+  });
+  pop.addEventListener("toggle", (e) => {
+    if (e.newState === "closed" && refocus?.isConnected && !pop.matches(":popover-open") && !dlg.open) refocus.focus({ preventScroll: true });
+    refocus = null;
+  });
+  const closeBtn = () => `<button type="button" class="button cal-pop-close" data-variant="ghost" data-size="sm" data-icon-only data-close-pop aria-label="Close" data-tip="Close">${ic("xmark", 16, { optical: true })}</button>`;
+  const dd = (term, html) => `<dt>${term}</dt><dd>${html}</dd>`;
+  function summaryHtml(r) {
+    const s = stageOf(r.stage), w = when(r, true), [next, ...more] = steps(r), hue = r.kind === "job" ? jobHue(r.name) : null;
+    const moves = STAGES.map((t) => ({ t, g: canGo(r, t.key) })).filter((x) => x.g.ok);
+    return `<div class="cal-sum pl-sum"${hue ? ` data-hue="${hue}"` : ""}><div class="cal-sum-top"><p class="cal-sum-kind">${markOf(s)}${esc(s.label)} · ${esc(groupLabel(r))}</p>${closeBtn()}</div>
+      <h3 tabindex="-1">${esc(r.name)}</h3>
+      <p class="cal-sum-when${w.late ? " pl-late" : ""}">${esc(w.text)}</p>
+      <dl>${r.kind === "job" ? dd("Client", esc(r.client)) + dd(r.invoice ? "Invoice" : r.stage === "pending" ? "Estimate" : "Contract", r.value ? money(r.value) : "No price yet") : dd("Asked for", esc(r.ask)) + dd("Source", esc(r.source))}
+        ${dd("Where", esc(r.place))}${dd("Owner", `${avatar(who(r.owner), "sm")}<span>${esc(who(r.owner).me ? `${who(r.owner).name} (you)` : who(r.owner).name)}</span>`)}</dl>
+      ${moves.length ? `<form class="cal-sum-move" data-move="${r.id}"><div class="field" data-size="sm"><label class="field-label" for="mv-to">Move to</label><div class="select"><select class="input" id="mv-to" name="to">${moves.map(({ t }) => `<option value="${t.key}">${esc(t.label)}</option>`).join("")}</select></div></div><button type="submit" class="button" data-variant="secondary" data-size="sm">Move</button></form>` : ""}
+      <div class="cal-sum-actions pl-sum-actions">${next ? `<button type="button" class="button" data-size="sm" data-step="${next}" data-for="${r.id}">${STEP[next]}</button>` : ""}${more.filter((x) => x !== "lose").map((x) => `<button type="button" class="button" data-variant="secondary" data-size="sm" data-step="${x}" data-for="${r.id}">${STEP[x]}</button>`).join("")}
+        <a class="button" data-variant="ghost" data-size="sm" href="../index.html#${r.kind === "job" ? "jobs" : "customers"}">${r.kind === "job" ? "Open job" : "Open lead"}</a>${more.includes("lose") ? `<button type="button" class="button pl-lose" data-variant="ghost" data-size="sm" data-step="lose" data-for="${r.id}">${STEP.lose}</button>` : ""}</div></div>`;
+  }
+  function peopleHtml() {
+    const rows = [OWNERS.find((p) => p.me), ...OWNERS.filter((p) => !p.me)];
+    return `<div class="pop-head"><h3>People</h3>${closeBtn()}</div><div class="pop-body">${rows.map((p) => `<label class="option"><input type="checkbox" class="checkbox" data-person-pick="${p.id}"${!st.people || st.people.has(p.id) ? " checked" : ""}><span class="option-label"><span class="menu-icon">${avatar(p, "sm")}</span>${esc(p.me ? `${p.name} (you)` : p.name)}</span></label>`).join("")}</div>`;
+  }
+  function lostHtml() {
+    return `<div class="pop-head"><h3>Lost</h3>${closeBtn()}</div><div class="pop-body pl-lost">${lost.length ? lost.map((x, i) => `<div class="pl-lost-row"><p><b>${esc(x.rec.name)}</b><span>${esc(x.rec.kind === "job" ? x.rec.client : "Lead")} · ${esc(x.reason)} · ${ago(-x.at)}</span></p><button type="button" class="button" data-variant="secondary" data-size="sm" data-reopen="${i}" aria-label="${esc(`Reopen ${x.rec.name}`)}">Reopen</button></div>`).join("") : `<p class="pl-empty">Nothing lost.</p>`}</div>`;
+  }
+
+  // ---------- dragging: onto a stage, or onto Mark as lost (P-move) ----------
+  // Mouse and pen only: on touch a press scrolls, and phones move cards from the summary (P-phone).
+  let drag = null, swallow = false;
+  const ghost = $("#ghost"), dropbar = $("#dropbar");
+  function targetAt(x, y) {
+    const el = document.elementFromPoint(x, y);
+    if (el?.closest?.("[data-drop-lost]")) return { lost: true };
+    const col = el?.closest?.(".pl-col");
+    return col ? { stage: col.dataset.stage } : null;
+  }
+  document.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0 || e.pointerType === "touch" || phone.matches) return;
+    const el = e.target.closest(".pl-card");
+    if (!el || e.target.closest(".pl-next")) return;
+    drag = { id: el.dataset.id, x: e.clientX, y: e.clientY, started: false };
+  });
+  document.addEventListener("pointermove", (e) => {
+    if (!drag) return;
+    const r = byId(drag.id);
+    if (!drag.started) {
+      if (Math.hypot(e.clientX - drag.x, e.clientY - drag.y) < 5) return;
+      drag.started = true;
+      if (pop.matches(":popover-open")) pop.hidePopover();
+      document.documentElement.setAttribute("data-pl-dragging", "");
+      $(`.pl-card[data-id="${drag.id}"]`)?.setAttribute("data-dragging-item", "");
+      $$(".pl-col", board).forEach((c) => { const g = canGo(r, c.dataset.stage); c.dataset.drop = g.same ? "home" : g.ok ? "yes" : "no"; });
+      dropbar.hidden = !canLose(r);
+      ghost.hidden = false;
+    }
+    const t = targetAt(e.clientX, e.clientY);
+    $$(".pl-col[data-over], [data-drop-lost][data-over]").forEach((x) => x.removeAttribute("data-over"));
+    let line = "Drop on a stage";
+    if (t?.lost && canLose(r)) { $("[data-drop-lost]").setAttribute("data-over", ""); line = "Mark as lost, with a reason"; drag.to = { lost: true }; }
+    else if (t?.stage) {
+      const g = canGo(r, t.stage), s = stageOf(t.stage);
+      $(`#col-${t.stage}`).setAttribute("data-over", "");
+      line = g.same ? "Where it is now" : g.ok ? (g.step === "create" ? `Create its job, in ${s.label}` : g.step === "visit" ? "Book a visit" : g.step === "book" ? "Mark as booked: contract and start" : g.step === "invoice" ? "Invoice it" : `Move to ${s.label}`) : g.why;
+      drag.to = g.ok ? { stage: t.stage } : null;
+    } else drag.to = null;
+    ghost.innerHTML = `<b>${esc(r.name)}</b><span>${esc(line)}</span>`;
+    ghost.style.translate = `${Math.min(e.clientX + 14, innerWidth - ghost.offsetWidth - 8)}px ${e.clientY + 14}px`;
+    // near the board's edge, it scrolls to the stages beyond
+    const b = board.getBoundingClientRect(), edge = 64;
+    board.scrollLeft += e.clientX < b.left + edge ? -14 : e.clientX > b.right - edge ? 14 : 0;
+  });
+  function endDrag() {
+    $$("[data-over], [data-drop]").forEach((x) => { x.removeAttribute("data-over"); x.removeAttribute("data-drop"); });
+    $$("[data-dragging-item]").forEach((x) => x.removeAttribute("data-dragging-item"));
+    document.documentElement.removeAttribute("data-pl-dragging");
+    ghost.hidden = true; dropbar.hidden = true;
+    drag = null;
+  }
+  document.addEventListener("pointerup", () => {
+    if (!drag) return;
+    const d = drag;
+    if (!d.started) { drag = null; return; }
+    swallow = true; setTimeout(() => (swallow = false), 0);
+    endDrag();
+    const r = byId(d.id);
+    if (d.to?.lost) return run("lose", r);
+    if (d.to?.stage) moveTo(r, d.to.stage);
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && drag?.started) { endDrag(); say("Move cancelled"); } });
+  document.addEventListener("click", (e) => { if (swallow) { swallow = false; e.preventDefault(); e.stopImmediatePropagation(); } }, true);
+
+  // ---------- events ----------
+  document.addEventListener("click", (e) => {
+    const q = (s) => e.target.closest(s);
+    let el;
+    byKey = e.detail === 0;
+    if (q("[data-close-pop]")) return pop.hidePopover();
+    if (q("[data-close-step]")) return dlg.close();
+    if ((el = q("[data-step]"))) return run(el.dataset.step, byId(el.dataset.for));
+    if ((el = q("[data-open]"))) return openPop("summary", el, () => summaryHtml(byId(el.dataset.open)), { label: byId(el.dataset.open).name });
+    if ((el = q("[data-fold]"))) {
+      const k = el.dataset.fold, folded = !st.folded.has(k);
+      folded ? st.folded.add(k) : st.folded.delete(k); keepFolded();
+      el.setAttribute("aria-expanded", String(!folded)); $(`#${el.getAttribute("aria-controls")}`).hidden = folded;
+      return;
+    }
+    if ((el = q("[data-tab]"))) { st.tab = el.dataset.tab; $(`#col-${st.tab}`)?.scrollIntoView({ inline: "start", block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); return tabs(); }
+    if ((el = q("#pick-people"))) return openPop("people", el, peopleHtml, { label: "People" });
+    if ((el = q("#pick-lost"))) return openPop("lost", el, lostHtml, { label: "Lost" });
+    if ((el = q("[data-reopen]"))) {
+      const x = lost[+el.dataset.reopen];
+      pop.hidePopover();
+      return change(() => { lost = lost.filter((y) => y !== x); records.push(x.rec); }, `${x.rec.name} reopened, in ${stageOf(x.rec.stage).label}`);
+    }
+    if (q("#create")) return BolsterShell.toast("Concept only: Add lead isn't wired up.");
+  });
+  document.addEventListener("submit", (e) => {
+    const mv = e.target.closest("[data-move]");
+    if (!mv) return;
+    e.preventDefault();
+    const r = byId(mv.dataset.move), to = e.target.to.value;
+    pop.hidePopover();
+    moveTo(r, to);
+  });
+  document.addEventListener("change", (e) => {
+    const p = e.target.closest("[data-person-pick]");
+    if (!p) return;
+    const ids = $$("[data-person-pick]", pop).filter((x) => x.checked).map((x) => x.dataset.personPick);
+    st.people = ids.length && ids.length < OWNERS.length ? new Set(ids) : null;
+    render(); popFor.from = $("#pick-people"); popFor.from.setAttribute("aria-expanded", "true");
+  });
+  $("#search").addEventListener("input", (e) => { st.q = e.target.value.trim().toLowerCase(); render(); });
+
+  // phones: the tab of the stage in view follows the swipe
+  const tabs = () => $$("#tabs [data-tab]").forEach((t) => { t.toggleAttribute("aria-current", t.dataset.tab === st.tab); if (t.dataset.tab === st.tab) t.scrollIntoView({ inline: "nearest", block: "nearest" }); });
+  board.addEventListener("scroll", () => {
+    if (!phone.matches) return;
+    const left = board.getBoundingClientRect().left;
+    const near = $$(".pl-col", board).reduce((a, c) => (Math.abs(c.getBoundingClientRect().left - left) < Math.abs(a.getBoundingClientRect().left - left) ? c : a));
+    if (near.dataset.stage !== st.tab) { st.tab = near.dataset.stage; tabs(); }
+  }, { passive: true });
+
+  phone.addEventListener("change", render);
+  addEventListener("resize", () => { fit(); if (popFor) BolsterShell.placePopover(pop, popFor.from); });
+  // what hides and sticks as you scroll is the shell's: this page says where the board starts, and that a drag is in use
+  BolsterShell.scrolling({ into: (top) => board.getBoundingClientRect().top < top, busy: () => !!drag?.started });
+  render();
+  BolsterShell.hydrateIcons();
+})();

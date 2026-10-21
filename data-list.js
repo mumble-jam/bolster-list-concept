@@ -1248,12 +1248,13 @@
   const TODO = "tasks/";
   // the calendar concept, beside them (published at calendar/)
   const CALENDAR = "calendar/";
+  const PIPELINE = "pipeline/";
   // vendor orders, the page built from its model and intent (pages/list), drawn by recipe.js; once it's
   // loaded it's one of the lists here, and its own link (#description) takes over
   const VENDOR_ORDERS = "index.html?d=pages/list/vendor-orders.json";
   BolsterShell.mount({
     current: "job-list",
-    links: { "vendor-orders": VENDOR_ORDERS, ...Object.fromEntries(Object.values(configs).map((c) => [c.nav, `#${c.id}`])), tasks: TODO, ...(CALENDAR ? { calendar: CALENDAR } : {}) },
+    links: { "vendor-orders": VENDOR_ORDERS, ...Object.fromEntries(Object.values(configs).map((c) => [c.nav, `#${c.id}`])), tasks: TODO, ...(CALENDAR ? { calendar: CALENDAR } : {}), pipeline: PIPELINE },
   });
 
   // ---------- events ----------

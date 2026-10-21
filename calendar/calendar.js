@@ -10,7 +10,7 @@
   const toast = (message, undo) => BolsterShell.toast(message, { undo });
   const say = (t) => { $("#live").textContent = t; };
 
-  BolsterShell.mount({ current: "calendar", links: { calendar: "index.html", tasks: "../tasks/", "job-list": "../index.html#jobs", "vendor-orders": "../index.html?d=pages/list/vendor-orders.json", invoices: "../index.html#invoices", "leads-and-customers": "../index.html#customers", catalog: "../index.html#catalog" } });
+  BolsterShell.mount({ current: "calendar", links: { calendar: "index.html", tasks: "../tasks/", pipeline: "../pipeline/", "job-list": "../index.html#jobs", "vendor-orders": "../index.html?d=pages/list/vendor-orders.json", invoices: "../index.html#invoices", "leads-and-customers": "../index.html#customers", catalog: "../index.html#catalog" } });
 
   // ---------- days: ISO dates, read at noon so a clock change never moves one ----------
   const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -84,12 +84,10 @@
     ["Crawl space insulation", "Marsh", "12 Fern Road", "Vapour barrier", 2],
     ["Water damage repair", "Calloway", "17 Bay Street", "Demolition and dry-out", 4],
   ].map(([job, client, place, phase, days]) => ({ id: `u${++seq}`, job, client, place, phase, days }));
-  // each job its own colour, so its phases read as one across the month, the week and the crew: the
-  // system's avatar hues (D13), in turn, skipping its black and grey. Colour says which job, never what
-  // kind: the job's name is on every bar
-  const hues = new Map();
-  const hueOf = (job) => { if (!hues.has(job)) hues.set(job, (hues.size % 6) + 2); return hues.get(job); };
-  [...PHASES.map((p) => p[0]), ...tray.map((u) => u.job)].forEach(hueOf);
+  // each job its own colour, so its phases read as one across the month, the week and the crew, and the job
+  // keeps it on the pipeline: the shared sample's (kit.jobHue). Colour says which job, never what kind: the
+  // job's name is on every bar
+  const hueOf = kit.jobHue;
   const byId = (id) => items.find((x) => x.id === id);
   const endOf = (sp) => add(sp.start, sp.days - 1);
   const workDays = (sp) => { let n = 0; for (let i = 0; i < sp.days; i++) if (!isOff(add(sp.start, i))) n++; return n; };

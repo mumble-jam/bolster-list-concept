@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolster pipeline concept</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="../shared/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../shared/assets/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../shared/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../system/bolster.css?v=dd77acd0">
+<link rel="stylesheet" href="../shared/shell.css?v=dd77acd0">
+<link rel="stylesheet" href="../data-list.css?v=dd77acd0">
+<link rel="stylesheet" href="../calendar/calendar.css?v=dd77acd0">
+<link rel="stylesheet" href="pipeline.css?v=dd77acd0">
+</head>
+<body>
+<div class="app-shell">
+  <main class="app-main">
+    <header class="page-header">
+      <div class="page-title">
+        <h1 id="page-title">Pipeline</h1>
+      </div>
+      <div class="page-header-actions">
+        <button class="button" data-float id="create" data-tip="Add lead"><span class="float-label">Add lead</span></button>
+      </div>
+    </header>
+
+    <div class="app-content list-page pl-page" data-width="full">
+      <!-- the toolbar on the page, as the calendar has it: what's shown on the left, whose and what's closed on the right -->
+      <div class="pl-bar" role="toolbar" aria-label="Pipeline">
+        <div class="field pl-search" data-size="sm"><div class="input-group"><span class="input-adornment"><i data-icon="search" data-size="16"></i></span><input class="input" type="search" id="search" aria-label="Search the pipeline" placeholder="Search by name, client or address" enterkeyhint="search" autocomplete="off"></div></div>
+        <p class="result-count" id="count" aria-live="polite"></p>
+        <div class="pl-controls">
+          <button type="button" class="button" data-variant="secondary" data-size="sm" id="pick-people" aria-haspopup="dialog" aria-expanded="false"><span class="button-value" id="people-text">Everyone</span><i data-icon="chevron-down" data-size="14"></i></button>
+          <span class="list-bar-sep" aria-hidden="true"></span>
+          <!-- what left the board: lost leads and jobs, with their reasons, to reopen (P-closed) -->
+          <button type="button" class="button" data-variant="ghost" data-size="sm" id="pick-lost" aria-haspopup="dialog" aria-expanded="false"><i data-icon="ban" data-size="16"></i><span id="lost-text">Lost</span></button>
+        </div>
+      </div>
+      <!-- phones: one stage at a time, picked here or by swiping (P-phone) -->
+      <nav class="pl-tabs" id="tabs" aria-label="Stages"></nav>
+      <section class="pl-board" id="board" aria-labelledby="page-title"></section>
+    </div>
+  </main>
+</div>
+<!-- while a card is dragged, what it can be dropped on besides a stage -->
+<div class="pl-dropbar" id="dropbar" hidden><div class="pl-drop-lost" data-drop-lost><i data-icon="ban" data-size="16"></i>Mark as lost</div></div>
+<div class="pop" id="pop" popover></div>
+<div class="cal-ghost" id="ghost" aria-hidden="true" hidden></div>
+<dialog class="dialog" id="step" aria-labelledby="step-title" data-size="sm"></dialog>
+<div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
+<p class="visually-hidden" id="live" aria-live="polite"></p>
+<dialog class="dialog notes" id="notes" aria-labelledby="notes-title">
+  <header class="dialog-header"><h2 id="notes-title">About this concept</h2>
+    <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close data-tip="Close"><i data-icon="xmark" data-size="16"></i></button></header>
+  <div class="dialog-body">
+    <section>
+      <h3>What it is</h3>
+      <p class="text-secondary">Bolster's Pipeline (Jobs → Pipeline) as direction A of the “Pipeline boards · research” board in Figma, “One lifecycle, made honest” (picked 21 Oct), with the answers to its questions. One board from the first enquiry to the paid invoice. Made-up sample data.</p>
+    </section>
+    <section>
+      <h3>Principles</h3>
+      <ol>
+        <li><b>One board, two kinds of record, said plainly (P-kinds).</b> Leads and Appointments hold people with no job yet; from Pending jobs on, every card is a job. The board says so over its columns, and the cards look it: a person's card is their name and what they asked for, a job's is the job, its client and its money.</li>
+        <li><b>A person becomes a job in one step (P-cross).</b> Create job, on the card or by dragging it onto Pending jobs, asks only for the job's name and makes a draft estimate. The person leaves the leads: they're a customer with a job now.</li>
+        <li><b>Stages say what they are with a shape (P-colour).</b> The jobs' stages carry the job list's marks, filling a quarter at a time (D49): a quarter for Pending, half for Booked, three quarters for In progress, full for Invoices, their colour only backing the shape; the people's stages, an icon. No coloured rules, no tinted groups, no dot on every group. Colour on the board means two things only: a job's own (the calendar's, D75) at its card's edge, so it's the same job on both pages; and red for something stuck.</li>
+        <li><b>Red means stuck, and says why (P-stuck).</b> Every card says how long it's been where it is; past its stage's limit, that line turns red and says what's waiting: “No reply for 9 days”. Limits, until settings have them: a new lead 2 days, a visit with no job 2 days, an estimate never sent 3 days, a sent one 7, a booked job with no dates 7, finished work not invoiced 3, an invoice past its due date.</li>
+        <li><b>The next step is on the card (P-next).</b> Each card shows its one next step as a button, always, not on hover: Create job, Send estimate, Mark as booked, Schedule, Mark as started, Invoice, Record payment. Opening the card shows the rest.</li>
+        <li><b>Sub-statuses are groups inside their stage (P-groups).</b> Drafts, Never sent, Changes not sent yet, Sent; Not scheduled, Scheduled; Underway, Work done; Not sent, Sent, Overdue, Paid. Each folds, with its count, and what needs doing comes first. Within a group, the order is the date's, never your own.</li>
+        <li><b>A column's money says what it adds up (P-money).</b> Quoted (sent estimates) on Pending jobs, with how many aren't sent yet; contracted on Booked and In progress; owed on Invoices, with what's overdue. In full, never “3M”. Weighted odds aren't Bolster's yet; people stages show none.</li>
+        <li><b>Moving is dragging; a drop that needs something asks for it (P-move).</b> A card goes to the next stage or back one. Where the next stage needs something (a visit's time, the job's name, the contract and start, the invoice's amount) the drop opens a short dialog; otherwise it moves, with Undo. Stages a card can't go to say why as you drag over them. While dragging, Mark as lost waits at the foot. The card's summary does the same from the keyboard and on phones.</li>
+        <li><b>What leaves the board (P-closed).</b> Booked is won. Lost leads and jobs leave with a reason (price, timing, went with someone else, no reply, not a fit) and wait under Lost, to reopen; paid invoices stay a week, then the job lives in the job list.</li>
+        <li><b>On phones, a stage at a time (P-phone).</b> Stages as tabs with their counts, swiped or picked; cards full width, their next step on them; no dragging, Move to in the summary.</li>
+      </ol>
+    </section>
+    <section>
+      <h3>Adjusted from the research</h3>
+      <ul>
+        <li>The research split the board into Selling and Doing. Leads and jobs being different records matters more: the board is split into People and Jobs instead, and Selling and Doing are left to the stages' marks.</li>
+        <li>Invoices joins as the last stage (it's on Bolster's stage list); the research's board ended at In progress.</li>
+        <li>Moves go one stage either way, so nothing skips the step that asks for what it needs.</li>
+      </ul>
+    </section>
+    <section>
+      <h3>Open questions</h3>
+      <ul>
+        <li>Never sent and Drafts: are these different (a draft still being priced, and a finished one not sent)? Assumed so.</li>
+        <li>Who may see the money: assumed everyone with access to estimates; crews would see counts only.</li>
+        <li>An appointment for a customer who already has a job: assumed it stays on the calendar, not here.</li>
+        <li>The stuck limits, per company, in settings.</li>
+        <li>The board as one tab stop with arrow keys between cards isn't built: each card is a button of its own.</li>
+      </ul>
+    </section>
+  </div>
+</dialog>
+<details class="concept-controls" id="concept-controls" data-more-entry="Concept controls" data-more-icon="sliders">
+  <summary><span class="concept-tag">Concept</span> Controls</summary>
+  <div class="concept-body">
+    <button class="button" data-variant="secondary" data-size="sm" data-open-dialog="notes">About this concept</button>
+    <div class="cluster" style="justify-content:space-between">
+      <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+    </div>
+  </div>
+</details>
+<script src="../shared/icons.js?v=dd77acd0"></script>
+<script src="../shared/shell.js?v=dd77acd0"></script>
+<script src="../system/specimens/specimen.js?v=dd77acd0"></script>
+<script src="../data.js?v=dd77acd0"></script>
+<script src="pipeline.js?v=dd77acd0"></script>
+</body>
+</html>
