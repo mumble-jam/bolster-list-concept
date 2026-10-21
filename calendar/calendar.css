@@ -235,11 +235,22 @@
     .cal-desk { display: none; }
     .cal-phone { display: grid; gap: var(--space-3); }
   }
-  .cal-strip { position: sticky; inset-block-start: var(--list-toolbar-top, 0px); z-index: 3; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1); padding: calc(var(--space-2) - var(--border-width-default)); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-xl); background: var(--color-surface-default); transition: inset-block-start var(--duration-medium) var(--ease-standard); }
-  /* with the bars away it sits a little below the screen's edge, the page's canvas above it so the days
-     scrolling under don't show in the gap */
-  :root[data-chrome-hidden] .cal-strip { inset-block-start: var(--space-2); }
-  .cal-strip::before { content: ""; position: absolute; inset-inline: calc(-1 * var(--space-4)); inset-block-end: 100%; block-size: var(--space-4); background: var(--color-surface-canvas); }
+  .cal-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: var(--space-1); padding: calc(var(--space-2) - var(--border-width-default)); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-xl); background: var(--color-surface-default); }
+  /* the week as a header (calendar.js, stripHeader): once the strip has scrolled away, a shorter copy comes down
+     from the top edge, the screen's width, a hairline under it; each day's letter beside its date on one line, the
+     dot for something on under the date; days still a touch target tall. It moves away again as the strip returns */
+  .cal-strip[data-header] {
+    position: fixed; inset-inline: 0; inset-block-start: var(--list-toolbar-top, 0px); z-index: 3;
+    gap: 0; padding: env(safe-area-inset-top, 0px) var(--space-2) 0; border: 0; border-block-end: var(--border-width-default) solid var(--color-line-card); border-radius: 0;
+    box-shadow: var(--shadow-raised); translate: 0 calc(-100% - 4px); visibility: hidden;
+    transition: translate var(--duration-medium) cubic-bezier(0.2, 0.8, 0, 1), visibility 0s linear var(--duration-medium);
+  }
+  .cal-strip[data-header][data-shown] { translate: none; visibility: visible; transition: translate var(--duration-medium) cubic-bezier(0.2, 0.8, 0, 1), visibility 0s; }
+  @media (prefers-reduced-motion: reduce) { .cal-strip[data-header] { transition: none; } }
+  .cal-strip[data-header] button { grid-template: "l n" auto ". d" 4px / auto auto; align-items: center; justify-content: center; gap: 2px var(--space-1); padding: var(--space-1-5, 6px) 0 var(--space-1); }
+  .cal-strip[data-header] small { grid-area: l; }
+  .cal-strip[data-header] b { grid-area: n; inline-size: 1.75rem; block-size: 1.75rem; font-size: var(--text-sm); }
+  .cal-strip[data-header] i { grid-area: d; justify-self: center; }
   .cal-strip button { display: grid; justify-items: center; gap: 2px; padding: var(--space-1) 0 var(--space-1-5, 6px); border: 0; border-radius: var(--radius-md); background: none; color: var(--color-content-primary); font: inherit; cursor: pointer; min-block-size: var(--touch-target-min); }
   .cal-strip small { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
   .cal-strip b { display: grid; place-items: center; inline-size: 2rem; block-size: 2rem; border-radius: var(--radius-full); font-size: var(--text-base); font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; }
@@ -250,7 +261,8 @@
   .cal-strip i[data-none] { background: none; }
   .cal-strip button:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
   .cal-agenda { display: grid; gap: var(--space-4); }
-  .cal-agenda-day { display: grid; gap: var(--space-2); scroll-margin-block-start: calc(var(--list-toolbar-top, 0px) + 6rem); }
+  /* a day picked lands under the week's header */
+  .cal-agenda-day { display: grid; gap: var(--space-2); scroll-margin-block-start: calc(var(--list-toolbar-top, 0px) + 3.75rem + env(safe-area-inset-top, 0px)); }
   .cal-agenda-day h3 { margin: 0; padding-inline: var(--space-1); font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
   .cal-agenda-day h3[data-today] { color: var(--color-content-primary); }
   .cal-card-item { display: grid; gap: 2px; inline-size: 100%; padding: var(--space-3) var(--space-4); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-xl); background: var(--color-surface-default); color: var(--color-content-primary); font: inherit; text-align: start; cursor: pointer; }

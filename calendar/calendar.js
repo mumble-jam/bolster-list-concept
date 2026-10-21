@@ -239,7 +239,9 @@
       const word = f.dayWord(d);
       days += `<section class="cal-agenda-day" id="ag-${d}" aria-labelledby="agh-${d}"><h3 id="agh-${d}"${d === T ? " data-today" : ""}>${word ? `${word} · ` : ""}${esc(f.short(d))}</h3>${cards.join("") || `<p class="cal-none">Nothing on${isOff(d) ? " · day off" : ""}</p>`}</section>`;
     }
-    return `<div class="cal-phone"><nav class="cal-strip" aria-label="Days of the week">${strip}</nav><div class="cal-agenda">${days}</div></div>`;
+    // the week again as a header: once the strip has scrolled away, a shorter copy comes down from the screen's top
+    // edge, the width of the screen (stripHeader); only one of the two takes taps and focus at a time
+    return `<div class="cal-phone"><nav class="cal-strip" aria-label="Days of the week">${strip}</nav><nav class="cal-strip" data-header aria-label="Days of the week" inert>${strip}</nav><div class="cal-agenda">${days}</div></div>`;
   }
 
   // ---------- drawing ----------
@@ -256,6 +258,7 @@
     const cal = $("#cal");
     cal.dataset.view = phone.matches ? "agenda" : st.view;
     cal.innerHTML = phone.matches ? phoneHtml() : `<div class="cal-desk">${st.view === "month" ? monthHtml() : st.view === "week" ? timeHtml(7) : st.view === "day" ? timeHtml(1) : crewHtml()}</div>`;
+    if (phone.matches) stripHeader(); // a day picked from the header keeps it down
     $("#period").textContent = periodText();
     // the pickers read back their value; their names say what each picks
     const on = KINDS.filter((k) => st.show[k.key]), label = (id, name, text) => { $(`#${id}-text`).textContent = text; $(`#pick-${id}`).setAttribute("aria-label", `${name}: ${text}`); };
@@ -534,6 +537,16 @@
   // what hides and sticks as you scroll is the shell's (BolsterShell.scrolling): this page says where the
   // calendar starts, and that a drag counts as in use
   BolsterShell.scrolling({ into: (top) => $("#cal").getBoundingClientRect().top < top, busy: () => !!drag?.started });
+  // phones: the week's header shows once the strip's days have gone under the top of the screen
+  const stripHeader = () => {
+    const full = $(".cal-strip:not([data-header])"), head = $(".cal-strip[data-header]");
+    if (!full || !head) return;
+    const top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--list-toolbar-top")) || 0;
+    const on = full.getBoundingClientRect().bottom < top + head.offsetHeight * 0.5;
+    if (on === head.hasAttribute("data-shown")) return;
+    head.toggleAttribute("data-shown", on); head.inert = !on; full.inert = on;
+  };
+  addEventListener("scroll", stripHeader, { passive: true });
   render();
   // on phones the agenda opens at today, earlier days a scroll up
   // (after load: the browser puts a reloaded page back where it was, after this script runs)
