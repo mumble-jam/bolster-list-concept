@@ -153,8 +153,30 @@ window.BolsterShell = (() => {
     };
     try { if (localStorage.getItem(PIN_KEY)) setPinned(true); } catch {}
 
+    // trying out: with the section sidebar hidden, a category's own pages open beside the expanded rail as you
+    // point at it (the second level, on hover, and only then); pointing away from both closes it
+    const flyout = document.createElement("nav");
+    flyout.className = "bs-flyout"; flyout.hidden = true; flyout.setAttribute("aria-label", "Section");
+    shell.append(flyout);
+    let flyTimer, flyFor = null;
+    const hidden = () => shell.hasAttribute("data-sidebar-hidden") && desktop.matches;
+    const fly = (id, delay = 0) => {
+      clearTimeout(flyTimer);
+      flyTimer = setTimeout(() => {
+        const s = id && sections.find((x) => x.id === id);
+        if (!s || !hidden() || !(s.items || s.groups)) { flyout.hidden = true; flyFor = null; return; }
+        if (flyFor !== id) { flyout.innerHTML = sidebarHtml(s); flyFor = id; }
+        flyout.hidden = false;
+      }, delay);
+    };
+    rail.addEventListener("pointerover", (e) => { if (e.pointerType !== "mouse" || !hidden()) return; const item = e.target.closest(".rail-item[data-section]"); if (item) fly(item.dataset.section, rail.hasAttribute("data-expanded") ? 60 : 200); });
+    flyout.addEventListener("pointerenter", () => { clearTimeout(flyTimer); expand(true); });
+    flyout.addEventListener("pointerleave", (e) => { if (!rail.contains(e.relatedTarget)) { fly(null, 150); expand(false, 150); } });
+    flyout.addEventListener("click", (e) => { if (e.target.closest("a")) { fly(null); expand(false); } });
+    addEventListener("keydown", (e) => { if (e.key === "Escape" && !flyout.hidden) { fly(null); expand(false); } });
+
     rail.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") expand(true, 150); });
-    rail.addEventListener("pointerleave", () => expand(false, 100));
+    rail.addEventListener("pointerleave", (e) => { if (flyout.contains(e.relatedTarget)) return; expand(false, 100); fly(null, 100); });
     rail.addEventListener("focusin", () => { if (rail.querySelector(":focus-visible")) expand(true); });
     rail.addEventListener("focusout", (e) => { if (!rail.contains(e.relatedTarget)) expand(false); });
     rail.addEventListener("keydown", (e) => { if (e.key === "Escape") expand(false); });

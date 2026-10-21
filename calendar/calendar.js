@@ -106,7 +106,12 @@
   ];
   let VIEW = "month";
   try { VIEW = localStorage.getItem("cal-view") || "month"; } catch {}
-  const st = { view: VIEW, at: T, show: { job: true, appt: true, busy: true }, people: null, trayOpen: false };
+  // Unscheduled opens beside the calendar the first time (from 1024 wide; a sheet below it never opens on
+  // its own), then stays as it was last left, in this browser
+  let TRAY = true;
+  try { TRAY = localStorage.getItem("cal-tray") !== "closed"; } catch {}
+  const st = { view: VIEW, at: T, show: { job: true, appt: true, busy: true }, people: null, trayOpen: TRAY };
+  const keepTray = () => { try { localStorage.setItem("cal-tray", st.trayOpen ? "open" : "closed"); } catch {} };
   const shown = (it) => st.show[it.kind] && (!st.people || it.who.some((p) => st.people.has(p)));
   const spansIn = (a, b, filter = () => true) => items.filter((it) => it.kind === "job" && shown(it) && it.start <= b && endOf(it) >= a && filter(it));
   const dayThings = (s, filter = () => true) => items.filter((it) => it.kind !== "job" && shown(it) && it.date === s && filter(it)).sort((a, b) => a.from - b.from);
@@ -485,10 +490,10 @@
     if ((el = q("#pick-show"))) return openPop("show", el, showHtml, { label: "Show" });
     if ((el = q("#pick-people"))) return openPop("people", el, peopleChecks, { label: "People" });
     if ((el = q("#tray-toggle"))) {
-      if (trayWide.matches) { st.trayOpen = !st.trayOpen; return renderTray(); }
+      if (trayWide.matches) { st.trayOpen = !st.trayOpen; keepTray(); return renderTray(); }
       return openPop("tray", el, trayListHtml, { label: "Unscheduled" });
     }
-    if (q("[data-close-tray]")) { st.trayOpen = false; renderTray(); return $("#tray-toggle").focus(); }
+    if (q("[data-close-tray]")) { st.trayOpen = false; keepTray(); renderTray(); return $("#tray-toggle").focus(); }
     if ((el = q("[data-tray]"))) { const u = tray.find((x) => x.id === el.dataset.tray); return openPop("schedule", trayWide.matches ? el : $("#tray-toggle"), () => scheduleHtml(u), { label: `Schedule ${u.job}` }); }
     if ((el = q("[data-more]"))) { const d = el.dataset.more, person = el.dataset.person; return openPop("more", el, () => moreHtml(d, person), { start: true, label: f.long(d) }); }
     if ((el = q("[data-item]"))) { const from = pop.contains(el) && popFor ? popFor.from : el; if (pop.contains(el)) pop.hidePopover(); return openSummary(el.dataset.item, from.isConnected ? from : el); }

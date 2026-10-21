@@ -33,8 +33,9 @@
     color: var(--color-content-on-chrome-muted); cursor: pointer;
   }
   .bs-icon-btn svg { inline-size: var(--icon-size, 1.25rem); block-size: var(--icon-size, 1.25rem); }
-  /* Bolton's head drawn at about the (?) icon's size, so the two read as a pair */
-  .bs-assistant img { block-size: 1.375rem; inline-size: auto; }
+  /* Bolton's head at Bolster's own size: 28 tall in the 36 circle, as the product draws it (its head fills its
+     28px image), bigger than the (?) beside it */
+  .bs-assistant img { block-size: 1.75rem; inline-size: auto; }
   /* all three corner circles share one size: help, assistant, avatar */
   .bs-avatar .avatar { inline-size: 100%; block-size: 100%; }
   @media (hover: hover) {
@@ -69,6 +70,11 @@
   @media (min-width: 1024px) {
     .app-shell[data-sidebar-hidden] { grid-template-columns: var(--_rail-column) 0 minmax(0, 1fr); }
     .app-shell[data-sidebar-hidden] .sidebar { display: none; }
+    /* trying out: the hidden sidebar's second level, beside the expanded rail on hover (shell.js) */
+    .bs-flyout { position: fixed; z-index: var(--z-popover); inset-block: var(--shell-top-bar-height) 0; inset-inline-start: var(--shell-rail-expanded-width);
+      inline-size: var(--shell-sidebar-width); overflow-y: auto; padding: 0 var(--space-2) var(--space-3);
+      border-inline-end: var(--border-width-default) solid var(--color-line-sidebar); background: var(--color-surface-sidebar); box-shadow: var(--shadow-overlay); }
+    .bs-flyout[hidden] { display: none; }
   }
 
   /* ---------- narrower screens ---------- */
