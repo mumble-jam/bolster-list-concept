@@ -1,5 +1,7 @@
-// Bolster app shell for concepts: top bar, icon rail, section sidebar and phone tab bar,
-// with the live product's sections and labels (read from next.bolsterbuilt.com, Oct 2026).
+// Bolster app shell for concepts: top bar, one sidebar with every section (the ones with pages as
+// accordions), an icon rail when it's hidden, and Settings as a full-screen window (trying out, D88);
+// the live product's sections and labels (read from next.bolsterbuilt.com, Oct 2026). On phones the
+// top bar is a footer, and its menu button opens the same sidebar.
 // Usage, in a page that has <div class="app-shell"><main class="app-main">…</main></div>:
 //   BolsterShell.mount({ current: "job-list", links: { "job-list": "#jobs" } });
 //   BolsterShell.setCurrent("invoices");
@@ -79,7 +81,6 @@ window.BolsterShell = (() => {
       ] },
       { id: "switch-company", label: "Switch company", icon: "arrow-left-right" },
     ],
-    phone: ["getting-started", "dashboard", "jobs", "customers"],
   };
 
   const sections = [...NAV.main, ...NAV.bottom];
@@ -105,7 +106,7 @@ window.BolsterShell = (() => {
       <button class="bs-company" type="button" popovertarget="bs-company-menu" aria-haspopup="menu">${esc(COMPANY)}${chrome("chevron-down", 16)}</button>
       <div class="menu" id="bs-company-menu" popover role="menu" aria-label="Company">
         <button class="menu-item" role="menuitem" data-not-built="switch-company">${chrome("arrow-left-right", 16)}Switch company</button>
-        <button class="menu-item" role="menuitem" data-not-built="company-settings">${chrome("briefcase", 16)}Company settings</button>
+        <button class="menu-item" role="menuitem" data-open-settings="company-settings">${chrome("briefcase", 16)}Company settings</button>
       </div>
       <button class="top-bar-search" type="button" data-not-built="search" data-tip="Search">${chrome("search", 16)}<span>Search customers, jobs, invoices, files…</span><kbd>⌘K</kbd></button>
       <div class="bs-top-actions">
@@ -122,36 +123,24 @@ window.BolsterShell = (() => {
     </header>`;
   }
 
-  // Bolster's own pin icon (not Font Awesome): a panel with a chevron that points the way it will move
-  const PIN_CHEVRON = { out: "M262 168 L362 256 L262 344", in: "M362 168 L262 256 L362 344" };
-  const pinIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" stroke="currentColor" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="18" y="18" width="476" height="476" rx="52"/><line x1="148" y1="18" x2="148" y2="494"/><path stroke-width="44" d="${PIN_CHEVRON.out}"/></svg>`;
 
   function rail() {
-    const item = (s) => `<a class="rail-item" ${sectionHref(s)} data-section="${s.id}">${chrome(s.icon)}<span class="rail-label">${esc(s.label)}</span></a>`;
-    return `<nav class="rail" aria-label="Main">${NAV.main.map(item).join("")}<span class="rail-spacer"></span>${NAV.bottom.map(item).join("")}<hr class="rail-separator"><button class="rail-item bs-pin" type="button" aria-pressed="false">${pinIcon}<span class="rail-label">Pin sidebar</span></button></nav>`;
+    const item = (s) => s.id === "settings"
+      ? `<button class="rail-item" type="button" data-open-settings data-section="${s.id}">${chrome(s.icon)}<span class="rail-label">${esc(s.label)}</span></button>`
+      : `<a class="rail-item" ${sectionHref(s)} data-section="${s.id}">${chrome(s.icon)}<span class="rail-label">${esc(s.label)}</span></a>`;
+    return `<nav class="rail" aria-label="Main">${NAV.main.map(item).join("")}<span class="rail-spacer"></span>${NAV.bottom.map(item).join("")}</nav>`;
   }
 
   // The rail widens over the page on hover, after a short pause so passing the mouse across it
   // doesn't flash it open; keyboard focus opens it straight away. Pinned, it stays wide.
-  const PIN_KEY = "bolster-concepts:rail-pinned";
   function railBehaviour() {
     const rail = shell.querySelector(".rail");
-    const pin = rail.querySelector(".bs-pin");
     const desktop = matchMedia("(min-width: 1024px)");
-    const pinned = () => shell.hasAttribute("data-rail-pinned") && desktop.matches;
     let timer;
     const expand = (on, delay = 0) => {
       clearTimeout(timer);
-      timer = setTimeout(() => rail.toggleAttribute("data-expanded", on && !pinned()), delay);
+      timer = setTimeout(() => rail.toggleAttribute("data-expanded", on), delay);
     };
-    const setPinned = (on) => {
-      shell.toggleAttribute("data-rail-pinned", on);
-      pin.setAttribute("aria-pressed", on);
-      pin.querySelector(".rail-label").textContent = on ? "Unpin sidebar" : "Pin sidebar";
-      pin.querySelector("path").setAttribute("d", on ? PIN_CHEVRON.in : PIN_CHEVRON.out);
-      try { on ? localStorage.setItem(PIN_KEY, "1") : localStorage.removeItem(PIN_KEY); } catch {}
-    };
-    try { if (localStorage.getItem(PIN_KEY)) setPinned(true); } catch {}
 
     // trying out: with the section sidebar hidden, a category's own pages open beside the expanded rail as you
     // point at it (the second level, on hover, and only then); pointing away from both closes it
@@ -181,23 +170,53 @@ window.BolsterShell = (() => {
     rail.addEventListener("focusout", (e) => { if (!rail.contains(e.relatedTarget)) expand(false); });
     rail.addEventListener("keydown", (e) => { if (e.key === "Escape") expand(false); });
     rail.addEventListener("click", (e) => {
-      if (e.target.closest(".bs-pin")) { setPinned(!shell.hasAttribute("data-rail-pinned")); expand(false); return; }
       if (e.target.closest(".rail-item")) expand(false);
     });
   }
 
-  // phones have no rail, so More (and the menu button) open every first-level item here instead of
-  // the current section's items; one with items drills in, with a way back
-  function moreHtml() {
+
+  // The one sidebar (D88): every section; one with pages is an accordion (one open at a time, the current
+  // page's open on arrival), its pages as text in line with the labels; Settings opens its own window.
+  // A page can add entries for phones at the end (data-more-entry="Label" on the element they open).
+  function navHtml() {
     const cur = sectionOf(opts.current)?.id;
-    const row = (s) => itemsOf(s).length
-      ? `<button type="button" class="sidebar-item" data-more-section="${s.id}"${s.id === cur ? ' aria-current="true"' : ""}>${chrome(s.icon, 18)}<span>${esc(s.label)}</span><span class="bs-chev">${chrome("chevron-right", 14)}</span></button>`
-      : `<a class="sidebar-item" ${sectionHref(s)}${s.id === cur ? ' aria-current="page"' : ""}>${chrome(s.icon, 18)}<span>${esc(s.label)}</span></a>`;
-    // a page can add its own entries at the end (data-more-entry="Label" on the element they open)
-    const extra = [...document.querySelectorAll("[data-more-entry]")].map((el) => `<button type="button" class="sidebar-item" data-more-open="${el.id}">${chrome(el.dataset.moreIcon || "sliders", 18)}<span>${esc(el.dataset.moreEntry)}</span></button>`).join("");
-    return `<h2 class="sidebar-title">Menu</h2>${NAV.main.map(row).join("")}<hr class="bs-sep">${NAV.bottom.map(row).join("")}${extra ? `<hr class="bs-sep">${extra}` : ""}`;
+    const page = (x) => `<a class="sidebar-item bs-sub" ${linkAttrs(x.id)} data-item="${x.id}"${x.id === opts.current ? ' aria-current="page"' : ""}><span>${esc(x.label)}</span></a>`;
+    const row = (s) => {
+      const head = `${chrome(s.icon, 18)}<span>${esc(s.label)}</span>`;
+      if (s.id === "settings") return `<button type="button" class="sidebar-item" data-open-settings>${head}</button>`;
+      if (s.items) return `<details class="bs-acc" name="bs-nav"${s.id === cur ? " open" : ""}><summary class="sidebar-item">${head}</summary><div class="bs-acc-body">${s.items.map((x) => (x === "-" ? `<span class="bs-gap" aria-hidden="true"></span>` : page(x))).join("")}</div></details>`;
+      return `<a class="sidebar-item" ${sectionHref(s)} data-section="${s.id}"${s.id === cur ? ' aria-current="page"' : ""}>${head}</a>`;
+    };
+    const extra = [...document.querySelectorAll("[data-more-entry]")].map((el) => `<button type="button" class="sidebar-item bs-extra" data-more-open="${el.id}">${chrome(el.dataset.moreIcon || "sliders", 18)}<span>${esc(el.dataset.moreEntry)}</span></button>`).join("");
+    return `<div class="bs-nav-main">${NAV.main.map(row).join("")}</div><div class="bs-nav-bottom">${NAV.bottom.map(row).join("")}${extra}</div>`;
   }
-  const backRow = `<button type="button" class="sidebar-item bs-back" data-more-back>${chrome("chevron-left", 14)}<span>All of the menu</span></button>`;
+
+  // Settings, a full-screen window with its own navigation (D88), as the job's workspace is
+  function settingsHtml() {
+    const s = sections.find((x) => x.id === "settings");
+    const nav = s.groups.map((g) => `<p class="sidebar-group">${esc(g.label)}</p>${g.items.map((x) => `<button type="button" class="sidebar-item" data-settings-page="${x.id}">${icon(x.icon, 18)}<span>${esc(x.label)}</span></button>`).join("")}`).join("");
+    return `<dialog class="dialog bs-settings" data-variant="workspace" id="bs-settings" aria-labelledby="bs-settings-t">
+      <header class="dialog-header"><h2 id="bs-settings-t">Settings</h2>
+        <button class="button" data-variant="ghost" data-size="sm" data-icon-only data-close aria-label="Close settings" data-tip="Close settings" style="--_fg:var(--color-content-on-chrome-muted);--_fg-hover:var(--color-content-on-chrome);--_bg-hover:var(--color-surface-chrome-hover)">${icon("xmark", 16)}</button></header>
+      <div class="dialog-body"><nav class="sidebar bs-settings-nav" aria-label="Settings">${nav}</nav><section class="bs-settings-page" aria-live="polite"></section></div>
+    </dialog>`;
+  }
+  function openSettings(pageId) {
+    const d = document.getElementById("bs-settings"), all = sections.find((x) => x.id === "settings").groups.flatMap((g) => g.items);
+    const show = (id) => {
+      const x = all.find((i) => i.id === id) || all[0];
+      d.querySelectorAll("[data-settings-page]").forEach((b) => (b.dataset.settingsPage === x.id ? b.setAttribute("aria-current", "page") : b.removeAttribute("aria-current")));
+      const built = opts.links[x.id];
+      d.querySelector(".bs-settings-page").innerHTML = `<h3>${esc(x.label)}</h3>${built ? `<p class="text-secondary">${esc(x.label)} is a page of its own in this prototype.</p><a class="button" data-variant="secondary" href="${built}" data-close-settings>Open ${esc(x.label.toLowerCase())}</a>` : `<p class="text-secondary">${esc(x.label)} isn't part of this prototype yet.</p>`}`;
+    };
+    show(pageId);
+    if (!d.open) d.showModal();
+    d.onclick = (e) => {
+      const b = e.target.closest("[data-settings-page]");
+      if (b) show(b.dataset.settingsPage);
+      if (e.target.closest("[data-close-settings]")) d.close();
+    };
+  }
 
   function sidebarHtml(section) {
     const link = (x) => `<a class="sidebar-item" ${linkAttrs(x.id)} data-item="${x.id}"${x.id === opts.current ? ' aria-current="page"' : ""}>${chrome(x.icon, 18)}<span>${esc(x.label)}</span></a>`;
@@ -207,23 +226,15 @@ window.BolsterShell = (() => {
     return `<h2 class="sidebar-title">${esc(section.label)}</h2>${body}`;
   }
 
-  function bottomBar() {
-    const byId = (id) => sections.find((s) => s.id === id);
-    return `<nav class="bottom-bar" aria-label="Main">${NAV.phone.map((id) => { const s = byId(id); return `<a class="bottom-bar-item" ${sectionHref(s)} data-section="${s.id}">${chrome(s.icon)}${esc(s.label)}</a>`; }).join("")}<a class="bottom-bar-item" href="#" data-toggle-sidebar data-section="more">${chrome("ellipsis")}More</a></nav>`;
-  }
 
   function setCurrent(itemId) {
     opts.current = itemId;
     const section = sectionOf(itemId);
     const side = shell.querySelector(".sidebar");
-    side.setAttribute("aria-label", section?.label || "Section");
-    side.innerHTML = section ? sidebarHtml(section) : "";
+    side.setAttribute("aria-label", "Main");
+    side.innerHTML = navHtml();
     shell.querySelectorAll("[data-item]").forEach((a) => (a.dataset.item === itemId ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current")));
-    const onPhoneBar = NAV.phone.includes(section?.id);
-    shell.querySelectorAll("[data-section]").forEach((a) => {
-      const on = a.dataset.section === section?.id || (a.dataset.section === "more" && a.classList.contains("bottom-bar-item") && !onPhoneBar);
-      on ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current");
-    });
+    shell.querySelectorAll(".rail [data-section]").forEach((a) => (a.dataset.section === section?.id ? a.setAttribute("aria-current", "page") : a.removeAttribute("aria-current")));
   }
 
   function hydrateIcons(root = document) {
@@ -322,8 +333,9 @@ window.BolsterShell = (() => {
   function mount(o) {
     opts = { ...opts, ...o };
     shell = document.querySelector(".app-shell");
-    shell.insertAdjacentHTML("afterbegin", `${topBar()}${rail()}<nav class="sidebar bs-sidebar" aria-label="Section"></nav>`);
-    shell.insertAdjacentHTML("beforeend", bottomBar());
+    shell.insertAdjacentHTML("afterbegin", `${topBar()}${rail()}<nav class="sidebar bs-sidebar" aria-label="Main"></nav>`);
+    // no tab bar on phones (D88): the menu button opens the same sidebar
+    document.body.insertAdjacentHTML("beforeend", settingsHtml());
     hydrateIcons();
     setCurrent(opts.current);
     railBehaviour();
@@ -341,17 +353,24 @@ window.BolsterShell = (() => {
         return;
       }
       const side0 = shell.querySelector(".sidebar");
-      // the menu button and More: specimen.js has just toggled the overlay; fill it for this width
+      // Settings, from the sidebar, the rail or the company menu: its own window (D88)
+      const set = e.target.closest("[data-open-settings]");
+      if (set) {
+        e.preventDefault();
+        set.closest("[popover]")?.hidePopover();
+        side0.removeAttribute("data-open");
+        shell.querySelectorAll("[data-toggle-sidebar]").forEach((b) => b.setAttribute("aria-expanded", false));
+        openSettings(set.dataset.openSettings);
+        return;
+      }
+      // the menu button: specimen.js has just toggled the overlay; it's the same sidebar at every width
       if (e.target.closest("[data-toggle-sidebar]")) {
         e.preventDefault();
         const open = side0.hasAttribute("data-open");
-        if (open) { side0.innerHTML = phone.matches ? moreHtml() : sidebarHtml(sectionOf(opts.current)); side0.setAttribute("aria-label", phone.matches ? "Menu" : sectionOf(opts.current)?.label || "Section"); }
+        if (open) side0.innerHTML = navHtml();
         shell.querySelectorAll("[data-toggle-sidebar]").forEach((b) => b.setAttribute("aria-expanded", open));
         return;
       }
-      const drill = e.target.closest("[data-more-section]");
-      if (drill) { side0.innerHTML = backRow + sidebarHtml(sections.find((x) => x.id === drill.dataset.moreSection)); side0.querySelector("[data-more-back]").focus(); return; }
-      if (e.target.closest("[data-more-back]")) { side0.innerHTML = moreHtml(); side0.querySelector(".sidebar-item")?.focus(); return; }
       const extra = e.target.closest("[data-more-open]");
       if (extra) {
         side0.removeAttribute("data-open");
@@ -383,14 +402,21 @@ window.BolsterShell = (() => {
   function scrolling({ into, toolbar = null, busy = () => false, onScroll = () => {} }) {
     const html = document.documentElement, top = document.querySelector(".top-bar"), DOWN = 24, UP = 6;
     const set = (hidden) => { if (html.hasAttribute("data-chrome-hidden") !== hidden) html.toggleAttribute("data-chrome-hidden", hidden); };
+    // what sticks under the top bar sits that far down; on phones the top bar is a footer (D88), so nothing
+    // is above, unless the selection's bar has taken the top (D39) while rows are ticked
+    const phone = matchMedia("(max-width: 767px)");
+    const selectTop = () => document.body.hasAttribute("data-selecting") && html.hasAttribute("data-head-out") && !html.hasAttribute("data-chrome-hidden") && !!document.querySelector(".select-bar:not([hidden])");
     const stick = () => {
-      const h = top.offsetHeight;
+      const h = !phone.matches ? top.offsetHeight : selectTop() ? top.offsetHeight : 0;
       html.style.setProperty("--list-toolbar-top", `${h}px`);
       html.style.setProperty("--list-head-top", `${h + (toolbar && !toolbar.hidden ? toolbar.offsetHeight : 0)}px`);
     };
     new ResizeObserver(stick).observe(top);
     if (toolbar) new ResizeObserver(stick).observe(toolbar);
     addEventListener("resize", stick);
+    phone.addEventListener("change", stick);
+    new MutationObserver(stick).observe(html, { attributes: true, attributeFilter: ["data-head-out", "data-chrome-hidden"] });
+    new MutationObserver(stick).observe(document.body, { attributes: true, attributeFilter: ["data-selecting"] });
     stick();
     const inUse = () => !!document.querySelector(":popover-open, dialog[open], .sidebar[data-open]") || !!document.activeElement?.closest?.(".top-bar") || !!toolbar?.contains(document.activeElement) || busy();
     let lastY = scrollY, travel = 0;
@@ -398,7 +424,7 @@ window.BolsterShell = (() => {
       onScroll();
       const y = scrollY, dy = y - lastY;
       lastY = y;
-      if (!into(top.offsetHeight) || inUse()) { travel = 0; return set(false); }
+      if (!into(phone.matches ? 0 : top.offsetHeight) || inUse()) { travel = 0; return set(false); }
       travel = Math.sign(dy) === Math.sign(travel) ? travel + dy : dy;
       if (travel > DOWN) set(true);
       else if (travel < -UP) set(false);

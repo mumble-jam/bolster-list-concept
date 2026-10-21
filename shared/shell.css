@@ -48,13 +48,43 @@
   .bs-hamburger { display: none; }
   #bs-company-menu, #bs-user-menu { color: var(--color-content-primary); }
 
-  /* ---------- section sidebar ---------- */
-  .bs-sidebar { scrollbar-width: thin; }
-  /* the phone menu: sections as rows, the ones with items drill in */
-  .bs-sidebar button.sidebar-item { inline-size: 100%; border: 0; background: none; font-family: inherit; text-align: start; cursor: pointer; }
-  .bs-sidebar .sidebar-item[aria-current="true"] { background: var(--color-surface-default); box-shadow: var(--shadow-raised); }
-  .bs-sidebar .bs-chev { display: inline-flex; margin-inline-start: auto; color: var(--color-content-tertiary); }
-  .bs-sidebar .bs-back { color: var(--color-content-secondary); }
+  /* ---------- the one sidebar (trying out, D88) ----------
+     Every section in one list, as Shopify's admin has it: a section with pages is an accordion (one open at
+     a time, the current page's open on arrival), its pages as text in line with the labels, quieter; the
+     pill marks the page you're on. Messages, Files, Settings and Switch company sit at the foot. */
+  .bs-sidebar { display: flex; flex-direction: column; padding-block-start: var(--space-3); scrollbar-width: thin; }
+  .bs-nav-bottom { margin-block-start: auto; padding-block-start: var(--space-3); }
+  :is(.bs-sidebar, .bs-settings-nav) :is(button, summary).sidebar-item { inline-size: 100%; border: 0; background: none; font-family: inherit; text-align: start; cursor: pointer; list-style: none; }
+  .bs-acc > summary::-webkit-details-marker { display: none; }
+  @media (hover: hover) { :is(.bs-sidebar, .bs-settings-nav) .sidebar-item:hover { background: var(--color-surface-sidebar-hover); } }
+  :is(.bs-sidebar, .bs-settings-nav) .sidebar-item[aria-current="page"] { background: var(--color-surface-default); box-shadow: var(--shadow-raised); }
+  :is(.bs-sidebar, .bs-settings-nav) .sidebar-item:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
+  .bs-acc-body { display: grid; padding-block-end: var(--space-1); }
+  /* a section's pages: no icon, in line with the section's label (its padding, the 28px icon column, the gap) */
+  .bs-sub { padding-inline-start: calc(var(--space-2) * 2 + 1.75rem); color: var(--color-content-secondary); }
+  .bs-sub[aria-current="page"] { color: var(--color-content-primary); }
+  .bs-gap { block-size: var(--space-2); }
+  /* an accordion eases open where the browser can animate to its height; elsewhere it just opens */
+  .bs-acc { interpolate-size: allow-keywords; }
+  .bs-acc::details-content { block-size: 0; overflow: clip; transition: block-size var(--duration-medium) var(--ease-out), content-visibility var(--duration-medium) allow-discrete; }
+  .bs-acc[open]::details-content { block-size: auto; }
+  @media (prefers-reduced-motion: reduce) { .bs-acc::details-content { transition: none; } }
+  /* a page's own entries (Concept controls) join the menu on phones only */
+  .bs-extra { display: none; }
+  @media (max-width: 767px) { .bs-sidebar .bs-extra { display: flex; } }
+
+  /* ---------- Settings, a full-screen window with its own navigation (D88) ---------- */
+  /* a 48 header, Close 8 in from the top and the end, so its corner shares the window's (D35) */
+  .bs-settings .dialog-header { min-block-size: 0; padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); }
+  .bs-settings .bs-settings-nav { position: static; flex: none; inline-size: 16rem; block-size: auto; overflow-y: auto; padding: var(--space-3) var(--space-2); translate: none; box-shadow: none; }
+  .bs-settings-page { flex: 1; min-inline-size: 0; padding: var(--space-8); }
+  .bs-settings-page h3 { margin: 0 0 var(--space-2); font-family: var(--font-display); font-size: var(--text-2xl); line-height: var(--leading-xl); font-weight: var(--font-weight-medium); }
+  .bs-settings-page .button { margin-block-start: var(--space-4); }
+  @media (max-width: 767px) {
+    .bs-settings .dialog-body { flex-direction: column; }
+    .bs-settings .bs-settings-nav { inline-size: auto; max-block-size: 45dvh; border-inline-end: 0; border-block-end: var(--border-width-default) solid var(--color-line-sidebar); }
+    .bs-settings-page { padding: var(--space-5) var(--space-4); }
+  }
   .bs-sep { margin: var(--space-2) 0; border: 0; border-block-start: var(--border-width-default) solid var(--color-line-sidebar); }
 
   /* settings groups: 12px medium label with a small chevron, collapsible */
@@ -66,8 +96,14 @@
   .bs-group > summary:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
   @media (hover: hover) { .bs-group > summary:hover { color: var(--color-content-primary); } }
 
-  /* hide the section sidebar from the page header (desktop) */
+  /* desktop: the sidebar is the menu; hidden (the page header's button), the icon rail takes its place */
   @media (min-width: 1024px) {
+    .app-shell:not([data-sidebar-hidden]) { --_rail-column: 0px; }
+    .app-shell:not([data-sidebar-hidden]) > .rail { display: none; }
+    /* the logo's cell is as wide as the sidebar under it, the mark where the rail's icons are */
+    .app-shell:not([data-sidebar-hidden]) .bs-logo { inline-size: var(--shell-sidebar-width); justify-items: start; padding-inline-start: calc(var(--shell-rail-width) / 2 - 0.875rem); }
+    /* the logo stays put as the top bar slides away only over the rail; over the sidebar it goes with the bar */
+    :root[data-chrome-hidden] .app-shell:not([data-sidebar-hidden]) .bs-logo { translate: none; box-shadow: none; }
     .app-shell[data-sidebar-hidden] { grid-template-columns: var(--_rail-column) 0 minmax(0, 1fr); }
     .app-shell[data-sidebar-hidden] .sidebar { display: none; }
     /* trying out: the hidden sidebar's second level, beside the expanded rail on hover (shell.js) */
@@ -85,6 +121,22 @@
   @media (max-width: 767px) {
     .bs-company { display: none; }
     .bs-top .top-bar-search { margin-inline-start: auto; }
+    /* phones (D88): no tab bar; the top bar is a footer, in thumb reach, its menu button opening the same
+       sidebar; it slides down out of the way as you scroll, and gives its place to the bulk bar while rows
+       are ticked, as the tab bar did */
+    .app-shell { grid-template-rows: 1fr; grid-template-areas: "main"; }
+    .bs-top {
+      position: fixed; inset: auto 0 0; z-index: var(--z-shell);
+      block-size: calc(var(--shell-bottom-bar-height) + env(safe-area-inset-bottom)); padding-block-end: env(safe-area-inset-bottom);
+      border-block-end: 0; border-block-start: var(--border-width-default) solid var(--color-line-chrome);
+    }
+    :root[data-chrome-hidden] .bs-top { translate: 0 100%; }
+    body[data-selecting] .bs-top { visibility: hidden; }
+    .app-main { padding-block-end: calc(var(--shell-bottom-bar-height) + env(safe-area-inset-bottom)); }
+    .bs-sidebar { inset-block: 0 calc(var(--shell-bottom-bar-height) + env(safe-area-inset-bottom)); }
+    :root[data-chrome-hidden] .bs-sidebar { inset-block-start: 0; }
+    /* the selection's bar still takes the top while rows are ticked (D39), at the bar's own height */
+    body[data-selecting] .select-bar:not([hidden]) { block-size: var(--shell-top-bar-height); }
   }
 
   /* ---------- page header tools: hide menu, refresh ---------- */
