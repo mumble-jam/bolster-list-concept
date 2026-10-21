@@ -169,61 +169,72 @@
   // ---------- a column's line under its name (P-money): what its money adds up, in full ----------
   function figure(stage, rows) {
     const total = (list) => list.reduce((s, r) => s + r.value, 0);
-    const n = (g) => rows.filter((r) => r.group === g).length;
     switch (stage.key) {
-      case "leads": return rows.length ? [n("new") && `${n("new")} new`, n("talking") && `${n("talking")} talking`].filter(Boolean).join(", ") : "";
-      case "visits": return rows.length ? [n("visited") && `${n("visited")} visited`, n("today") && `${n("today")} today`, n("coming") && `${n("coming")} coming up`].filter(Boolean).join(", ") : "";
-      case "pending": {
-        const quoted = total(rows.filter((r) => r.group === "sent" || r.group === "changed")), unsent = n("drafts") + n("unsent");
-        return `${money(quoted)} quoted${unsent ? ` · ${unsent} not sent yet` : ""}`;
-      }
+      case "pending": return `${money(total(rows.filter((r) => r.group === "sent" || r.group === "changed")))} quoted`;
       case "booked": case "progress": return `${money(total(rows))} contracted`;
-      case "invoices": {
-        const owed = total(rows.filter((r) => r.group !== "paid")), over = total(rows.filter((r) => r.group === "overdue"));
-        return `${money(owed)} owed${over ? ` · <span class="pl-late">${money(over)} overdue</span>` : ""}`;
-      }
+      case "invoices": return `${money(total(rows.filter((r) => r.group !== "paid")))} owed`;
     }
     return "";
   }
 
   // ---------- drawing ----------
   const markOf = (s, size = "") => (s.kind === "job" ? `<span class="mark${size}" data-mark="${s.mark}" style="--_dot:${s.dot}" aria-hidden="true"></span>` : ic(s.icon, 14, { optical: true }));
+  // three ways to draw a card, to compare (Concept controls): Quiet (the default), Compact and Footer
+  let LAYOUT = "quiet";
+  try { LAYOUT = localStorage.getItem("pl-cards") || "quiet"; } catch {}
+  if (!["quiet", "compact", "footer"].includes(LAYOUT)) LAYOUT = "quiet";
   function card(r) {
-    const w = when(r), [next] = steps(r), hue = r.kind === "job" ? jobHue(r.name) : null;
-    const title = r.kind === "job" ? r.name : r.name;
-    const sub = r.kind === "job" ? `${r.client} · ${r.invoice || r.place}` : r.ask;
-    const label = `${r.kind === "job" ? `${r.name}, ${r.client}` : r.name}, ${stageOf(r.stage).label}, ${groupLabel(r)}${r.kind === "job" ? `, ${r.value ? money(r.value) : "no price yet"}` : ""}. ${w.text}`;
-    return `<article class="pl-card" data-id="${r.id}" data-kind="${r.kind}"${hue ? ` data-hue="${hue}"` : ""}${w.late ? " data-late" : ""}${r.group === "paid" ? " data-past" : ""}>
-      <h4 class="pl-card-title"><button type="button" class="pl-open" data-open="${r.id}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(label)}">${ic(r.kind === "job" ? "briefcase" : "user", 14, { optical: true })}<span>${esc(title)}</span></button>${r.kind === "job" ? `<span class="pl-value">${r.value ? money(r.value) : '<span class="pl-none">No price yet</span>'}</span>` : ""}</h4>
-      <p class="pl-card-sub">${esc(sub)}</p>
-      <div class="pl-card-foot"><span class="pl-when">${avatar(who(r.owner), "xs")}${w.late ? ic("clock", 12, { optical: true }) : ""}<span>${esc(w.text)}</span></span>${next ? `<button type="button" class="button pl-next" data-variant="secondary" data-size="sm" data-step="${next}" data-for="${r.id}" aria-label="${esc(`${STEP[next]}: ${r.name}`)}">${STEP[next]}</button>` : ""}</div>
-    </article>`;
+    const w = when(r), [next] = steps(r), hue = r.kind === "job" ? jobHue(r.name) : null, job = r.kind === "job";
+    const label = `${job ? `${r.name}, ${r.client}` : r.name}, ${stageOf(r.stage).label}, ${groupLabel(r)}${job ? `, ${r.value ? money(r.value) : "no price yet"}` : ""}. ${w.text}`;
+    const attrs = `class="pl-card" data-id="${r.id}" data-kind="${r.kind}"${hue ? ` data-hue="${hue}"` : ""}${w.late ? " data-late" : ""}${r.group === "paid" ? " data-past" : ""}`;
+    // a job's colour, the calendar's, as a dot before its name; a person has none
+    const dot = hue ? '<span class="pl-dot" aria-hidden="true"></span>' : "";
+    const open = (inner) => `<button type="button" class="pl-open" data-open="${r.id}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(label)}">${inner}</button>`;
+    const value = job ? `<span class="pl-value">${r.value ? money(r.value) : '<span class="pl-none">No price</span>'}</span>` : "";
+    const stepAria = next ? `aria-label="${esc(`${STEP[next]}: ${r.name}`)}" data-step="${next}" data-for="${r.id}"` : "";
+    const who2 = avatar(who(r.owner), "xs");
+    if (LAYOUT === "compact") {
+      // two lines: the name and its money; who it's for and how long it's been, the owner and the next step as an icon
+      const line = job ? `${esc(r.client)} · <span class="pl-when-text">${esc(w.text)}</span>` : `<span class="pl-when-text">${esc(w.text)}</span>`;
+      return `<article ${attrs}><div class="pl-row">${open(`${dot}<span>${esc(r.name)}</span>`)}${value}</div>
+        <div class="pl-row pl-meta"><p class="pl-line">${line}</p>${who2}${next ? `<button type="button" class="button pl-next" data-variant="ghost" data-size="sm" data-icon-only ${stepAria} data-tip="${STEP[next]}">${ic("chevron-right", 14, { optical: true })}</button>` : '<span class="pl-next-slot" aria-hidden="true"></span>'}</div></article>`;
+    }
+    if (LAYOUT === "footer") {
+      // the card's facts on top, quiet; its next step as a strip across its foot, the one thing on it that acts
+      const sub = job ? `${r.client} · ${r.invoice || r.place}` : r.ask;
+      return `<article ${attrs}><div class="pl-row">${open(`${dot}<span>${esc(r.name)}</span>`)}${value}</div>
+        <p class="pl-line pl-sub">${esc(sub)}</p><p class="pl-line pl-when-text pl-meta">${esc(w.text)}</p>
+        ${next ? `<button type="button" class="pl-next pl-strip" ${stepAria}><span>${STEP[next]}</span>${ic("chevron-right", 12, { optical: true })}</button>` : ""}</article>`;
+    }
+    // Quiet: the name and its money, who or what it's for, then how long it's been beside the next step as a link;
+    // the owner is in the summary (and People picks whose)
+    const sub = job ? `${r.client} · ${r.invoice || r.place}` : r.ask;
+    return `<article ${attrs}><div class="pl-row">${open(`${dot}<span>${esc(r.name)}</span>`)}${value}</div>
+      <p class="pl-line pl-sub">${esc(sub)}</p>
+      <div class="pl-row pl-meta"><p class="pl-line pl-when-text">${esc(w.text)}</p>${next ? `<button type="button" class="pl-next pl-link" ${stepAria}>${STEP[next]}${ic("chevron-right", 12, { optical: true })}</button>` : ""}</div></article>`;
   }
   function column(s) {
     const rows = records.filter((r) => r.stage === s.key && shown(r));
     const groups = s.groups.map(([g, label]) => {
       const list = rows.filter((r) => r.group === g).sort((a, b) => (s.key === "booked" && g === "scheduled" ? a.start - b.start : a.at - b.at));
       if (!list.length) return "";
-      const key = `${s.key}/${g}`, folded = st.folded.has(key), late = list.filter((r) => when(r).late).length;
-      return `<section class="pl-group" data-group="${key}"><h4 class="pl-group-head"><button type="button" class="pl-group-toggle" data-fold="${key}" aria-expanded="${!folded}" aria-controls="g-${s.key}-${g}">${ic("chevron-down", 12, { optical: true })}<span>${esc(label)}</span><span class="pl-n">${list.length}</span>${late ? `<span class="pl-late pl-group-late">${late} stuck</span>` : ""}</button></h4>
+      const key = `${s.key}/${g}`, folded = st.folded.has(key);
+      return `<section class="pl-group" data-group="${key}"><h4 class="pl-group-head"><button type="button" class="pl-group-toggle" data-fold="${key}" aria-expanded="${!folded}" aria-controls="g-${s.key}-${g}">${ic("chevron-down", 12, { optical: true })}<span>${esc(label)}</span><span class="pl-n">${list.length}</span></button></h4>
         <div class="pl-cards" id="g-${s.key}-${g}"${folded ? " hidden" : ""}>${list.map(card).join("")}</div></section>`;
     }).join("");
     const empty = `<p class="pl-empty">${filtered() ? "No matches" : "Nothing here"}</p>`;
     return `<section class="pl-col" id="col-${s.key}" data-stage="${s.key}" data-kind="${s.kind}" aria-labelledby="h-${s.key}">
-      <header class="pl-col-head"><h3 id="h-${s.key}">${markOf(s)}<span>${esc(s.label)}</span><span class="pl-n">${rows.length}</span></h3>
-        <a class="button" data-variant="ghost" data-size="sm" data-icon-only href="../index.html#${s.kind === "job" ? (s.key === "invoices" ? "invoices" : "jobs") : "customers"}" aria-label="${esc(`View ${s.label.toLowerCase()} in a list`)}" data-tip="View in list">${ic("list", 16, { optical: true })}</a>
-        <p class="pl-figure">${figure(s, rows) || "&nbsp;"}</p></header>
+      <header class="pl-col-head"><h3 id="h-${s.key}">${markOf(s)}<span>${esc(s.label)}</span><span class="pl-n">${rows.length}</span></h3>${s.kind === "job" ? `<p class="pl-figure">${figure(s, rows)}</p>` : ""}</header>
       <div class="pl-col-body" tabindex="-1">${groups || empty}</div></section>`;
   }
   const board = $("#board");
   function render() {
-    const keep = $$(".pl-col-body", board).map((b) => b.scrollTop), left = board.scrollLeft;
+    const left = board.scrollLeft, top = board.scrollTop;
     const people = STAGES.filter((s) => s.kind === "person"), jobs = STAGES.filter((s) => s.kind === "job");
     // People and Jobs over their columns, the seam between them where a person becomes a job (P-kinds, P-cross)
     board.innerHTML = `<p class="pl-kind" data-kind="person">${ic("user", 12, { optical: true })}People, no job yet</p><p class="pl-kind" data-kind="job">${ic("briefcase", 12, { optical: true })}Jobs</p>
       ${people.map(column).join("")}<div class="pl-seam" aria-hidden="true"></div>${jobs.map(column).join("")}`;
-    $$(".pl-col-body", board).forEach((b, i) => (b.scrollTop = keep[i] || 0));
-    board.scrollLeft = left;
+    board.scrollLeft = left; board.scrollTop = top;
     const n = records.filter(shown).length;
     $("#count").textContent = filtered() ? `${fmt.plural(n, "card", "cards")} match` : "";
     $("#tabs").innerHTML = STAGES.map((s) => `<button type="button" data-tab="${s.key}"${s.key === st.tab ? ' aria-current="true"' : ""}>${markOf(s)}<span>${esc(s.label)}</span><span class="pl-n">${records.filter((r) => r.stage === s.key && shown(r)).length}</span></button>`).join("");
@@ -233,7 +244,7 @@
     $("#pick-lost").setAttribute("aria-label", `Lost, ${lost.length ? fmt.plural(lost.length, "card", "cards") : "none"}`);
     fit();
   }
-  // on wider screens the board fills the screen down to its bottom edge, each column scrolling on its own
+  // on wider screens the board fills the screen down to its bottom edge and scrolls as one, both ways
   const phone = matchMedia("(max-width: 767px)");
   function fit() {
     if (phone.matches) return board.style.removeProperty("--pl-h");
@@ -413,9 +424,10 @@
     } else drag.to = null;
     ghost.innerHTML = `<b>${esc(r.name)}</b><span>${esc(line)}</span>`;
     ghost.style.translate = `${Math.min(e.clientX + 14, innerWidth - ghost.offsetWidth - 8)}px ${e.clientY + 14}px`;
-    // near the board's edge, it scrolls to the stages beyond
+    // near the board's edges, it scrolls to the stages beyond and the cards below
     const b = board.getBoundingClientRect(), edge = 64;
     board.scrollLeft += e.clientX < b.left + edge ? -14 : e.clientX > b.right - edge ? 14 : 0;
+    board.scrollTop += e.clientY < b.top + edge ? -14 : e.clientY > b.bottom - edge ? 14 : 0;
   });
   function endDrag() {
     $$("[data-over], [data-drop]").forEach((x) => { x.removeAttribute("data-over"); x.removeAttribute("data-drop"); });
@@ -477,6 +489,9 @@
     st.people = ids.length && ids.length < OWNERS.length ? new Set(ids) : null;
     render(); popFor.from = $("#pick-people"); popFor.from.setAttribute("aria-expanded", "true");
   });
+  $("#cc-cards").value = LAYOUT;
+  $("#cc-cards").addEventListener("change", (e) => { LAYOUT = e.target.value; try { localStorage.setItem("pl-cards", LAYOUT); } catch {} board.dataset.cards = LAYOUT; render(); });
+  board.dataset.cards = LAYOUT;
   $("#search").addEventListener("input", (e) => { st.q = e.target.value.trim().toLowerCase(); render(); });
 
   // phones: the tab of the stage in view follows the swipe
