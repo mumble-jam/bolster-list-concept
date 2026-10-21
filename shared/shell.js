@@ -79,7 +79,6 @@ window.BolsterShell = (() => {
         { label: "Your settings", closed: true, items: [{ id: "your-profile", label: "Profile", icon: "user-cog" }] },
         { label: "Import tools", closed: true, items: [{ id: "imports", label: "Imports", icon: "upload" }] },
       ] },
-      { id: "switch-company", label: "Switch company", icon: "arrow-left-right" },
     ],
   };
 
@@ -147,27 +146,39 @@ window.BolsterShell = (() => {
       timer = setTimeout(() => rail.toggleAttribute("data-expanded", on), delay);
     };
 
-    // trying out: with the section sidebar hidden, a category's own pages open beside the expanded rail as you
-    // point at it (the second level, on hover, and only then); pointing away from both closes it
-    const flyout = document.createElement("nav");
-    flyout.className = "bs-flyout"; flyout.hidden = true; flyout.setAttribute("aria-label", "Section");
+    // folded (D88), a section's pages open as a dropdown beside it as you point at it, the menu component (as
+    // display settings' is): its name, its pages with their icons, the one you're on marked; pointing away from
+    // both, Escape or a choice closes it
+    const flyout = document.createElement("div");
+    flyout.className = "menu bs-flymenu"; flyout.setAttribute("popover", "manual"); flyout.setAttribute("role", "menu");
     shell.append(flyout);
     let flyTimer, flyFor = null;
     const hidden = () => shell.hasAttribute("data-sidebar-hidden") && desktop.matches;
-    const fly = (id, delay = 0) => {
+    const close = () => { if (flyout.matches(":popover-open")) flyout.hidePopover(); flyFor = null; };
+    const fly = (item, delay = 0) => {
       clearTimeout(flyTimer);
       flyTimer = setTimeout(() => {
-        const s = id && sections.find((x) => x.id === id);
-        if (!s || !hidden() || !(s.items || s.groups)) { flyout.hidden = true; flyFor = null; return; }
-        if (flyFor !== id) { flyout.innerHTML = sidebarHtml(s); flyFor = id; }
-        flyout.hidden = false;
+        const s = item && sections.find((x) => x.id === item.dataset.section);
+        if (!s || !hidden() || !s.items) return close();
+        if (flyFor !== s.id) {
+          flyout.setAttribute("aria-label", s.label);
+          flyout.innerHTML = `<p class="pop-section">${esc(s.label)}</p>${s.items.map((x) => (x === "-" ? `<hr class="menu-separator">`
+            : `<a class="menu-item" role="menuitem" ${linkAttrs(x.id)}${x.id === opts.current ? ' aria-current="page"' : ""}><span class="menu-icon">${icon(x.icon, 14)}</span>${esc(x.label)}</a>`)).join("")}`;
+          flyFor = s.id;
+        }
+        if (!flyout.matches(":popover-open")) flyout.showPopover();
+        // beside the rail as it stands open, its top in line with the section's row, kept on screen
+        const r = item.getBoundingClientRect(), rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+        const open = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--shell-rail-expanded-width")) * rem; // the rail's width as it stands open
+        flyout.style.left = `${Math.round(rail.getBoundingClientRect().left + open + 4)}px`;
+        flyout.style.top = `${Math.round(Math.max(8, Math.min(r.top - 4, innerHeight - flyout.offsetHeight - 8)))}px`;
       }, delay);
     };
-    rail.addEventListener("pointerover", (e) => { if (e.pointerType !== "mouse" || !hidden()) return; const item = e.target.closest(".rail-item[data-section]"); if (item) fly(item.dataset.section, rail.hasAttribute("data-expanded") ? 60 : 200); });
+    rail.addEventListener("pointerover", (e) => { if (e.pointerType !== "mouse" || !hidden()) return; const item = e.target.closest(".rail-item[data-section]"); if (item) fly(item, rail.hasAttribute("data-expanded") ? 60 : 200); });
     flyout.addEventListener("pointerenter", () => { clearTimeout(flyTimer); expand(true); });
     flyout.addEventListener("pointerleave", (e) => { if (!rail.contains(e.relatedTarget)) { fly(null, 150); expand(false, 150); } });
-    flyout.addEventListener("click", (e) => { if (e.target.closest("a")) { fly(null); expand(false); } });
-    addEventListener("keydown", (e) => { if (e.key === "Escape" && !flyout.hidden) { fly(null); expand(false); } });
+    flyout.addEventListener("click", (e) => { if (e.target.closest("a")) { close(); expand(false); } });
+    addEventListener("keydown", (e) => { if (e.key === "Escape" && flyout.matches(":popover-open")) { close(); expand(false); } });
 
     rail.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") expand(true, 150); });
     rail.addEventListener("pointerleave", (e) => { if (flyout.contains(e.relatedTarget)) return; expand(false, 100); fly(null, 100); });
@@ -198,7 +209,8 @@ window.BolsterShell = (() => {
     const you = `<button type="button" class="sidebar-item bs-phone" data-not-built="help">${chrome("circle-help", 18)}<span>Help</span></button>`
       + `<button type="button" class="sidebar-item bs-phone" data-not-built="assistant"><img class="bs-bolton" src="${ASSETS}bolton-head.svg" alt=""><span>Ask Bolton</span></button>`
       + `<details class="bs-acc bs-phone" name="bs-nav"><summary class="sidebar-item"><span class="avatar" data-size="sm" data-color="${USER.color}" aria-hidden="true">${USER.initials}</span><span>${esc(USER.name)}</span></summary><div class="bs-acc-body">${[["profile", "Edit profile"], ["users", "Manage users"], ["logout", "Log out"]].map(([id, l]) => `<a class="sidebar-item bs-sub" href="#" data-not-built="${id}"><span>${l}</span></a>`).join("")}</div></details>`;
-    return `<div class="bs-nav-main">${search}${NAV.main.map(row).join("")}</div><div class="bs-nav-bottom">${NAV.bottom.map(row).join("")}${you}${extra}<hr class="bs-sep bs-fold"><button type="button" class="sidebar-item bs-fold" data-collapse-sidebar>${foldIcon("in")}<span>Collapse menu</span></button></div>`;
+    // the foot (Messages, Files, Settings, folding) stays put; everything above scrolls under it
+    return `<div class="bs-nav-main">${search}${NAV.main.map(row).join("")}${you}${extra}</div><div class="bs-nav-bottom">${NAV.bottom.map(row).join("")}<hr class="bs-sep bs-fold"><button type="button" class="sidebar-item bs-fold" data-collapse-sidebar>${foldIcon("in")}<span>Collapse menu</span></button></div>`;
   }
 
   // Settings, a full-screen window with its own navigation (D88), as the job's workspace is

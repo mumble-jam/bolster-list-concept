@@ -52,8 +52,12 @@
      Every section in one list, as Shopify's admin has it: a section with pages is an accordion (one open at
      a time, the current page's open on arrival), its pages as text in line with the labels, quieter; the
      pill marks the page you're on. Messages, Files, Settings and Switch company sit at the foot. */
-  .bs-sidebar { display: flex; flex-direction: column; padding-block-start: var(--space-3); scrollbar-width: thin; }
-  .bs-nav-bottom { margin-block-start: auto; padding-block-start: var(--space-3); }
+  .bs-sidebar { display: flex; flex-direction: column; padding-block: var(--space-3) 0; scrollbar-width: thin; }
+  /* the foot stays put at the bottom, and the rest scrolls under it */
+  .bs-nav-bottom { position: sticky; inset-block-end: 0; z-index: 1; margin: auto calc(var(--space-2) * -1) 0; padding: var(--space-2) var(--space-2) var(--space-3);
+    border-block-start: var(--border-width-default) solid var(--color-line-chrome); background: var(--color-surface-chrome); }
+  .bs-nav-main { padding-block-end: var(--space-3); }
+  .bs-sidebar .bs-nav-bottom > .bs-sep.bs-fold { margin-block: var(--space-2); }
   :is(.bs-sidebar, .bs-settings-nav) :is(button, summary).sidebar-item { inline-size: 100%; border: 0; background: none; font-family: inherit; text-align: start; cursor: pointer; list-style: none; }
   .bs-acc > summary::-webkit-details-marker { display: none; }
   @media (hover: hover) { :is(.bs-sidebar, .bs-settings-nav) .sidebar-item:hover { background: var(--color-surface-sidebar-hover); } }
@@ -73,15 +77,14 @@
      width (the one that opens over the page on phones too): the chrome's ink, a section's pages muted, the
      pill the rail's selected fill; an edge only where the page is dark too (D85) */
   @media all {
-    :is(.bs-sidebar, .bs-flyout) { background: var(--color-surface-chrome); border-inline-end-color: var(--color-line-rail); color: var(--color-content-on-chrome); }
-    :is(.bs-sidebar, .bs-flyout) .sidebar-item { color: var(--color-content-on-chrome); }
-    :is(.bs-sidebar, .bs-flyout) :is(.bs-sub, .sidebar-group) { color: var(--color-content-on-chrome-muted); }
-    :is(.bs-sidebar, .bs-flyout) .sidebar-item > svg { color: var(--color-content-on-chrome-muted); }
-    :is(.bs-sidebar, .bs-flyout) .sidebar-item[aria-current="page"] { background: var(--color-surface-chrome-selected); box-shadow: none; color: var(--color-content-on-chrome); }
-    :is(.bs-sidebar, .bs-flyout) .sidebar-item[aria-current="page"] > svg { color: var(--color-content-on-chrome); }
-    @media (hover: hover) { :is(.bs-sidebar, .bs-flyout) .sidebar-item:hover { background: var(--color-surface-chrome-hover); color: var(--color-content-on-chrome); } }
-    :is(.bs-sidebar, .bs-flyout) :is(.bs-sep, .sidebar-title) { border-color: var(--color-line-chrome); }
-    .bs-flyout { border-inline-start: var(--border-width-default) solid var(--color-line-chrome); }
+    .bs-sidebar { background: var(--color-surface-chrome); border-inline-end-color: var(--color-line-rail); color: var(--color-content-on-chrome); }
+    .bs-sidebar .sidebar-item { color: var(--color-content-on-chrome); }
+    .bs-sidebar :is(.bs-sub, .sidebar-group) { color: var(--color-content-on-chrome-muted); }
+    .bs-sidebar .sidebar-item > svg { color: var(--color-content-on-chrome-muted); }
+    .bs-sidebar .sidebar-item[aria-current="page"] { background: var(--color-surface-chrome-selected); box-shadow: none; color: var(--color-content-on-chrome); }
+    .bs-sidebar .sidebar-item[aria-current="page"] > svg { color: var(--color-content-on-chrome); }
+    @media (hover: hover) { .bs-sidebar .sidebar-item:hover { background: var(--color-surface-chrome-hover); color: var(--color-content-on-chrome); } }
+    .bs-sidebar :is(.bs-sep, .sidebar-title) { border-color: var(--color-line-chrome); }
   }
   .bs-menu-fab { display: none; }
   /* what the top bar holds joins the menu on phones (search, help, Bolton, your account) */
@@ -126,11 +129,10 @@
     :root[data-chrome-hidden] .app-shell:not([data-sidebar-hidden]) .bs-logo { translate: none; box-shadow: none; }
     .app-shell[data-sidebar-hidden] { grid-template-columns: var(--_rail-column) 0 minmax(0, 1fr); }
     .app-shell[data-sidebar-hidden] .sidebar { display: none; }
-    /* trying out: the hidden sidebar's second level, beside the expanded rail on hover (shell.js) */
-    .bs-flyout { position: fixed; z-index: var(--z-popover); inset-block: var(--shell-top-bar-height) 0; inset-inline-start: var(--shell-rail-expanded-width);
-      inline-size: var(--shell-sidebar-width); overflow-y: auto; padding: 0 var(--space-2) var(--space-3);
-      border-inline-end: var(--border-width-default) solid var(--color-line-sidebar); background: var(--color-surface-sidebar); box-shadow: var(--shadow-overlay); }
-    .bs-flyout[hidden] { display: none; }
+    /* folded, a section's pages as a dropdown beside the rail (shell.js): the menu component, placed by hand */
+    .bs-flymenu { position: fixed; margin: 0; inset: auto; position-area: none; min-inline-size: 13rem; }
+    .bs-flymenu .menu-item { text-decoration: none; color: var(--color-content-primary); }
+    .bs-flymenu .menu-item[aria-current="page"] { background: var(--color-surface-hover); font-weight: var(--font-weight-medium); }
   }
 
   /* ---------- narrower screens ---------- */
@@ -146,7 +148,9 @@
        are ticked it steps aside for the bulk bar */
     .app-shell { grid-template-rows: 1fr; grid-template-areas: "main"; }
     .bs-top { display: none; }
-    .bs-sidebar { inset-block: 0; inline-size: min(20rem, calc(100vw - var(--space-12))); padding-block-end: calc(var(--space-20, 5rem) + env(safe-area-inset-bottom)); }
+    .bs-sidebar { inset-block: 0; inline-size: min(20rem, calc(100vw - var(--space-12))); }
+    /* the foot leaves room for the floating button under it */
+    .bs-nav-bottom { padding-block-end: calc(var(--space-20, 5rem) + env(safe-area-inset-bottom)); }
     .bs-menu-fab {
       position: fixed; z-index: calc(var(--z-modal) + 1); inset-inline-start: var(--space-4); inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom));
       display: inline-grid; place-items: center; inline-size: 3.5rem; block-size: 3.5rem;
