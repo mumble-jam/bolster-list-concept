@@ -3,10 +3,13 @@
    (Oct 2026). Semantic tokens only. Pairs with shell.js. */
 
 @layer concept {
+  /* the folded rail opens as wide as the menu is pinned (D92), so opening it on hover and pinning it are the same
+     menu: the logo's cell, its fold button and the rows stay where they are when you pin or fold it */
+  :root { --shell-rail-expanded-width: var(--shell-sidebar-width); }
   /* ---------- top bar ---------- */
   /* logo sits in a cell as wide as the rail, so it lines up with the rail icons */
   .bs-logo {
-    display: flex; align-items: center; flex: none; align-self: stretch; overflow: clip;
+    display: flex; align-items: center; gap: var(--space-2); flex: none; align-self: stretch; overflow: clip;
     inline-size: var(--shell-rail-width);
     /* the mark (28 tall, 22 wide) centred on the rail's icons; the wordmark grows from the same spot (D91) */
     padding-inline-start: calc((var(--shell-rail-width) - 1.75rem * 381 / 491) / 2);
@@ -18,7 +21,21 @@
   .bs-logo-plate { fill: #FBFF00; }
   .bs-logo-letter { fill: #000; }
   .bs-logo-cut { fill: var(--color-surface-chrome); }
-  .bs-logo:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -4px; }
+  .bs-logo-link { display: flex; align-items: center; flex: none; align-self: stretch; border-radius: var(--radius-sm); }
+  .bs-logo-link:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+  /* folding the menu, at the logo cell's far end (D92): its right edge in line with the menu's rows (the menu's 8 in,
+     past the cell's edge), the menu's shape (a row's corners, 32 square), the chrome's quiet ink; it rides the edge
+     out as the folded rail opens, and the cell clips it while the rail is shut */
+  .bs-pin {
+    display: inline-grid; place-items: center; flex: none; margin-inline: auto calc(var(--space-2) - var(--border-width-default));
+    inline-size: 2rem; block-size: 2rem; padding: 0; border: 0; border-radius: var(--radius-md); background: none;
+    color: var(--color-content-on-chrome-muted); cursor: pointer;
+    transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
+  }
+  .bs-pin > svg { inline-size: 1rem; block-size: 1rem; }
+  @media (hover: hover) { .bs-pin:hover { background: var(--color-surface-chrome-hover); color: var(--color-content-on-chrome); } }
+  .bs-pin:active { background: color-mix(in oklab, var(--color-content-on-chrome) 13%, transparent); transition-duration: 30ms; }
+  .bs-pin:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
 
   /* company switcher: 32 tall, 14px medium, 6px gap */
   .bs-company {
@@ -63,7 +80,6 @@
   .bs-nav-bottom { position: sticky; inset-block-end: 0; z-index: 1; margin: auto calc(var(--space-2) * -1) 0; padding: var(--space-2) var(--space-2) var(--space-3);
     border-block-start: var(--border-width-default) solid var(--color-line-chrome); background: var(--color-surface-chrome); }
   .bs-nav-main { padding-block-end: var(--space-3); }
-  .bs-sidebar .bs-nav-bottom > .bs-sep.bs-fold { margin-block: var(--space-2); }
   :is(.bs-sidebar, .bs-settings-nav) :is(button, summary).sidebar-item { inline-size: 100%; border: 0; background: none; font-family: inherit; text-align: start; cursor: pointer; list-style: none; }
   .bs-acc > summary::-webkit-details-marker { display: none; }
   @media (hover: hover) { :is(.bs-sidebar, .bs-settings-nav) .sidebar-item:hover { background: var(--color-surface-sidebar-hover); } }
@@ -116,9 +132,6 @@
     @media (hover: hover) { .bs-sidebar .sidebar-item:not([aria-current="page"]):hover { background: var(--_hover); color: var(--_ink); } .bs-sidebar .sidebar-item:hover > svg { color: var(--_ink); } }
     .bs-sidebar .sidebar-item:active:not([aria-current="page"]) { background: var(--_pill); transition-duration: 30ms; }
     .bs-sidebar :is(.bs-sep, .sidebar-title) { border-color: var(--color-line-chrome); }
-    /* folding is a quiet row at the very foot, under the foot's one rule */
-    .bs-sidebar .bs-nav-bottom > .bs-sep.bs-fold { display: none; }
-    .bs-sidebar button.bs-fold { margin-block-start: var(--space-2); color: var(--_ink-3); }
   }
   /* between a section's groups of pages, a hairline as faint as the menu can carry, from where their names start
      to the row's end, with a little air either side */
@@ -323,6 +336,5 @@
   /* ---------- page header tools: hide menu, refresh ---------- */
   .page-title .page-tool { color: var(--color-content-secondary); }
   /* folding is desktop's: narrower, the rail is always there and the sidebar opens over the page */
-  @media (max-width: 1023px) { .bs-fold { display: none; } }
-  .bs-sidebar .bs-fold > svg, .rail .bs-fold > svg { block-size: 1rem; }
+  @media (max-width: 1023px) { .bs-pin { display: none; } }
 }

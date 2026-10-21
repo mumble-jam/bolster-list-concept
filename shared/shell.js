@@ -101,7 +101,7 @@ window.BolsterShell = (() => {
   function topBar() {
     return `<header class="top-bar bs-top">
       <button class="bs-icon-btn bs-hamburger" type="button" data-toggle-sidebar aria-label="Open menu" data-tip="Menu">${chrome("menu")}</button>
-      <a class="bs-logo" href="#" data-not-built="home" aria-label="Bolster home" data-tip="Home">${LOGO}</a>
+      <div class="bs-logo"><a class="bs-logo-link" href="#" data-not-built="home" aria-label="Bolster home" data-tip="Home">${LOGO}</a>${pinButton()}</div>
       <button class="bs-company" type="button" popovertarget="bs-company-menu" aria-haspopup="menu">${esc(COMPANY)}${chrome("chevron-down", 16)}</button>
       <div class="menu" id="bs-company-menu" popover role="menu" aria-label="Company">
         <button class="menu-item" role="menuitem" data-not-built="switch-company">${chrome("arrow-left-right", 16)}Switch company</button>
@@ -176,12 +176,20 @@ window.BolsterShell = (() => {
   // chevron that points the way the menu will move
   const foldIcon = (dir) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="none" stroke="currentColor" stroke-width="36" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="18" y="18" width="476" height="476" rx="52"/><line x1="148" y1="18" x2="148" y2="494"/><path stroke-width="44" d="${dir === "in" ? "M362 168 L262 256 L362 344" : "M262 168 L362 256 L262 344"}"/></svg>`;
   const FOLD_KEY = "bolster-concepts:menu-folded";
+  // the menu folds and stays open from the logo's cell (D92), at its far end, in line with the menu's rows: open,
+  // it folds the menu to the rail; folded, it shows as the rail opens under the pointer and keeps it open
+  const pinButton = () => `<button class="bs-pin" type="button" data-collapse-sidebar></button>`;
+  function syncPin() {
+    const b = shell?.querySelector(".bs-pin"); if (!b) return;
+    const folded = shell.hasAttribute("data-sidebar-hidden"), label = folded ? "Keep menu open" : "Collapse menu";
+    b.innerHTML = foldIcon(folded ? "out" : "in"); b.setAttribute("aria-label", label); b.dataset.tip = label;
+  }
 
   function rail() {
     const item = (s) => s.id === "settings"
       ? `<button class="rail-item" type="button" data-open-settings data-section="${s.id}">${chrome(s.icon)}<span class="rail-label">${esc(s.label)}</span></button>`
       : `<a class="rail-item" ${sectionHref(s)} data-section="${s.id}">${chrome(s.icon)}<span class="rail-label">${esc(s.label)}</span>${s.items ? `<span class="bs-rail-more" aria-hidden="true">${chrome("chevron-right", 12)}</span>` : ""}</a>`; // a chevron where a section has pages (D88)
-    return `<nav class="rail" aria-label="Main">${NAV.main.map(item).join("")}<span class="rail-spacer"></span>${NAV.bottom.map(item).join("")}<hr class="rail-separator bs-fold"><button class="rail-item bs-fold" type="button" data-collapse-sidebar>${foldIcon("out")}<span class="rail-label">Expand menu</span></button></nav>`;
+    return `<nav class="rail" aria-label="Main">${NAV.main.map(item).join("")}<span class="rail-spacer"></span>${NAV.bottom.map(item).join("")}</nav>`;
   }
 
   // The rail widens over the page on hover, after a short pause so passing the mouse across it
@@ -235,10 +243,19 @@ window.BolsterShell = (() => {
     flyout.addEventListener("click", (e) => { if (e.target.closest("a")) { close(); expand(false); } });
     addEventListener("keydown", (e) => { if (e.key === "Escape" && flyout.matches(":popover-open")) { close(); expand(false); } });
 
+    // the logo's cell above it is the rail's too (D92): pointing at it opens the rail, the pointer can go from one to
+    // the other (to Keep menu open) without it closing, and the keyboard opens it on the way to that button
+    const cell = shell.querySelector(".bs-logo");
+    const ours = (el) => rail.contains(el) || cell?.contains(el);
     rail.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") expand(true, 150); });
-    rail.addEventListener("pointerleave", (e) => { if (flyout.contains(e.relatedTarget)) return; expand(false, 100); fly(null, 100); });
+    rail.addEventListener("pointerleave", (e) => { if (flyout.contains(e.relatedTarget)) return; fly(null, 100); if (!cell?.contains(e.relatedTarget)) expand(false, 100); });
     rail.addEventListener("focusin", () => { if (rail.querySelector(":focus-visible")) expand(true); });
-    rail.addEventListener("focusout", (e) => { if (!rail.contains(e.relatedTarget)) expand(false); });
+    rail.addEventListener("focusout", (e) => { if (!ours(e.relatedTarget)) expand(false); });
+    cell?.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" && hidden()) expand(true, 150); });
+    cell?.addEventListener("pointerleave", (e) => { if (hidden() && !ours(e.relatedTarget) && !flyout.contains(e.relatedTarget)) expand(false, 100); });
+    cell?.addEventListener("focusin", () => { if (hidden() && cell.querySelector(".bs-pin:focus-visible")) expand(true); });
+    cell?.addEventListener("focusout", (e) => { if (hidden() && !ours(e.relatedTarget)) expand(false); });
+    cell?.addEventListener("keydown", (e) => { if (e.key === "Escape") expand(false); });
     rail.addEventListener("keydown", (e) => { if (e.key === "Escape") expand(false); });
     rail.addEventListener("click", (e) => {
       if (e.target.closest(".rail-item")) expand(false);
@@ -265,8 +282,8 @@ window.BolsterShell = (() => {
     const you = `<button type="button" class="sidebar-item bs-phone" data-not-built="help">${chrome("circle-help", 18)}<span>Help</span></button>`
       + `<button type="button" class="sidebar-item bs-phone" data-not-built="assistant"><img class="bs-bolton" src="${ASSETS}bolton-head.svg" alt=""><span>Ask Bolton</span></button>`
       + `<details class="bs-acc bs-phone" name="bs-nav"><summary class="sidebar-item"><span class="avatar" data-size="sm" data-color="${USER.color}" aria-hidden="true">${USER.initials}</span><span>${esc(USER.name)}</span></summary><div class="bs-acc-body">${[["profile", "Edit profile"], ["users", "Manage users"], ["logout", "Log out"]].map(([id, l]) => `<a class="sidebar-item bs-sub" href="#" data-not-built="${id}"><span>${l}</span></a>`).join("")}</div></details>`;
-    // the foot (Messages, Files, Settings, folding) stays put; everything above scrolls under it
-    return `<div class="bs-nav-main">${search}${NAV.main.map(row).join("")}${you}${extra}</div><div class="bs-nav-bottom">${NAV.bottom.map(row).join("")}<hr class="bs-sep bs-fold"><button type="button" class="sidebar-item bs-fold" data-collapse-sidebar>${foldIcon("in")}<span>Collapse menu</span></button></div>`;
+    // the foot (Messages, Files, Settings) stays put; everything above scrolls under it
+    return `<div class="bs-nav-main">${search}${NAV.main.map(row).join("")}${you}${extra}</div><div class="bs-nav-bottom">${NAV.bottom.map(row).join("")}</div>`;
   }
 
   // Settings, a full-screen window with its own navigation (D88), as the job's workspace is
@@ -485,6 +502,7 @@ window.BolsterShell = (() => {
     shell.insertAdjacentHTML("beforeend", `<button class="bs-menu-fab" type="button" data-toggle-sidebar aria-label="Menu" aria-expanded="false" data-tip="Menu">${chrome("menu", 20)}${chrome("xmark", 20)}</button>`);
     document.body.insertAdjacentHTML("beforeend", settingsHtml());
     try { if (localStorage.getItem(FOLD_KEY)) shell.setAttribute("data-sidebar-hidden", ""); } catch {}
+    syncPin();
     hydrateIcons();
     setCurrent(opts.current);
     // a section you open eases its pages in (shell.css); one open on arrival or redrawn doesn't: a details
@@ -579,11 +597,13 @@ window.BolsterShell = (() => {
         if (el) { el.open = true; el.querySelector("summary")?.focus(); }
         return;
       }
-      // the menu's foot folds it to the icon rail and unfolds it again (desktop), remembered in this browser
+      // the logo's cell folds the menu to the icon rail and keeps it open again (desktop), remembered in this browser
       if (e.target.closest("[data-collapse-sidebar]")) {
         const folded = shell.toggleAttribute("data-sidebar-hidden");
         try { folded ? localStorage.setItem(FOLD_KEY, "1") : localStorage.removeItem(FOLD_KEY); } catch {}
-        shell.querySelector(folded ? ".rail .bs-fold" + ".rail-item" : ".bs-sidebar button.bs-fold")?.focus({ preventScroll: true });
+        syncPin();
+        // folded from the button, the rail stays open under the pointer (or the keyboard) until it leaves
+        shell.querySelector(".rail")?.toggleAttribute("data-expanded", folded);
         return;
       }
       if (e.target.closest(".sidebar a[href^='#']:not([href='#'])")) shell.querySelector(".sidebar").removeAttribute("data-open");
