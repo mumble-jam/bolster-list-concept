@@ -94,6 +94,9 @@
       transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
     }
     .bs-sidebar .sidebar-item > svg { color: var(--color-content-on-chrome-muted); transition: color var(--duration-fast) var(--ease-standard); }
+    /* a section's row is the rail's (44): folding or pinning the menu doesn't change its rows' size; a section's pages
+       stay a step smaller, quieter under it */
+    .bs-sidebar .sidebar-item:not(.bs-sub) { min-block-size: var(--shell-rail-item-size); }
     /* the section you're in: its name and icon lit, a touch heavier */
     .bs-sidebar .sidebar-item[data-current] { color: var(--_ink); font-weight: var(--font-weight-medium); }
     .bs-sidebar .sidebar-item[data-current] > svg { color: var(--_ink); }
@@ -142,6 +145,12 @@
   .bs-settings .bs-settings-nav { transition: margin-inline-start 280ms cubic-bezier(0.2, 0.8, 0, 1), visibility 0s; }
   .bs-settings[data-nav-hidden] .bs-settings-nav { margin-inline-start: -16rem; visibility: hidden; transition: margin-inline-start 280ms cubic-bezier(0.2, 0.8, 0, 1), visibility 0s linear 280ms; }
   @media (prefers-reduced-motion: reduce) { .bs-settings .bs-settings-nav { transition: none; } }
+  /* the loading screen (D90): its cover is here, so it's up before its drawings arrive (loaders.css, lazily); over
+     everything, the floating menu button included */
+  .bs-loader { position: fixed; inset: 0; z-index: calc(var(--z-modal) + 2); display: grid; place-items: center; background: var(--color-surface-canvas); transition: opacity var(--duration-medium) var(--ease-out); }
+  .bs-loader[hidden] { display: none; }
+  .bs-loader[data-leaving] { opacity: 0; }
+  .bs-loader-line { display: inline-block; }
   /* a page in the slot draws no shell of its own (shell.js, ?embed=settings) */
   :root[data-embed] .app-shell { display: block; min-block-size: 100dvh; }
   :root[data-embed] .concept-controls { display: none; }
@@ -178,34 +187,50 @@
     .app-shell:not([data-sidebar-hidden]) .bs-logo { box-shadow: 0 1px 0 var(--color-surface-chrome); position: relative; z-index: 1; }
     .app-shell[data-sidebar-hidden] { grid-template-columns: var(--_rail-column) 0 minmax(0, 1fr); }
     .app-shell[data-sidebar-hidden] .sidebar { display: none; }
-    /* folded, a section's pages in a navigation popup beside the rail (shell.js, placed by hand): it hangs off
-       the section's row by a notch, the row lit; the section's name, then its pages as the open sidebar lists
-       them, text in groups along a guide line, the page you're on marked on the line */
+    /* folded, a section's pages in a navigation popup beside the rail (shell.js, placed by hand): the menu's dark,
+       a step lifted off the rail; it hangs off the section's row by a notch, the row lit; the section's name,
+       then its pages with their icons, groups set apart by space, the page you're on in the menu's pill */
     .bs-navpop {
       --_in: calc(var(--inset-menu) - var(--border-width-default));
+      --_ink: var(--color-content-on-chrome);
+      --_ink-2: color-mix(in oklab, var(--color-content-on-chrome) 82%, var(--color-surface-chrome));
+      --_ink-3: color-mix(in oklab, var(--color-content-on-chrome-muted) 78%, var(--color-surface-chrome));
+      --_pill: color-mix(in oklab, var(--color-content-on-chrome) 13%, transparent);
+      --_pill-edge: color-mix(in oklab, var(--color-content-on-chrome) 7%, transparent);
+      --_hover: color-mix(in oklab, var(--color-content-on-chrome) 7%, transparent);
+      --_bg: color-mix(in oklab, var(--color-content-on-chrome) 6%, var(--color-surface-chrome));
+      --_edge: color-mix(in oklab, var(--color-content-on-chrome) 12%, var(--color-surface-chrome));
       position: fixed; inset: auto; margin: 0; overflow: visible;
       min-inline-size: 12rem; padding: var(--_in);
-      border: var(--border-width-default) solid var(--color-line-default); border-radius: var(--radius-md);
-      background: var(--color-surface-raised); color: var(--color-content-primary); box-shadow: var(--shadow-overlay);
+      border: var(--border-width-default) solid var(--_edge); border-radius: var(--radius-md);
+      background: var(--_bg); color: var(--_ink); box-shadow: var(--shadow-overlay);
     }
     .bs-navpop::before {
       content: ""; position: absolute; inset-inline-start: -0.375rem; inset-block-start: calc(var(--_notch, 1.25rem) - 0.3125rem);
       inline-size: 0.625rem; block-size: 0.625rem; rotate: 45deg; border-radius: 0 0 0 2px;
-      background: var(--color-surface-raised); border: var(--border-width-default) solid var(--color-line-default); border-block-start: 0; border-inline-end: 0;
+      background: var(--_bg); border: var(--border-width-default) solid var(--_edge); border-block-start: 0; border-inline-end: 0;
     }
-    .bs-navpop-title { padding: var(--space-1) var(--space-2) var(--space-2); font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); }
-    .bs-navpop-group { position: relative; display: grid; gap: 1px; margin-inline-start: var(--space-2); padding-inline-start: var(--space-1); }
-    .bs-navpop-group::before { content: ""; position: absolute; inset-block: var(--space-1); inset-inline-start: 0; border-inline-start: var(--border-width-default) solid var(--color-line-default); }
+    .bs-navpop-title { padding: var(--space-1) var(--space-2) var(--space-2); font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); color: var(--_ink); }
+    .bs-navpop-group { display: grid; gap: 1px; }
     .bs-navpop-group + .bs-navpop-group { margin-block-start: var(--space-2); }
     .bs-navpop-link {
-      position: relative; display: flex; align-items: center; min-block-size: 2rem; padding-inline: var(--space-2) var(--space-4);
-      border-radius: var(--radius-sm); font-size: var(--text-sm); color: var(--color-content-secondary); text-decoration: none; white-space: nowrap;
-      transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+      display: flex; align-items: center; gap: var(--space-2); min-block-size: 2rem; padding-inline: var(--space-2) var(--space-4);
+      border-radius: var(--radius-sm); font-size: var(--text-sm); color: var(--_ink-2); text-decoration: none; white-space: nowrap;
+      transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
     }
-    @media (hover: hover) { .bs-navpop-link:hover { background: var(--color-surface-hover-raised); color: var(--color-content-primary); } }
+    .bs-navpop-link > svg { flex: none; inline-size: 1.25rem; block-size: 1rem; color: var(--_ink-3); transition: color var(--duration-fast) var(--ease-out); }
+    @media (hover: hover) { .bs-navpop-link:not([aria-current="page"]):hover { background: var(--_hover); color: var(--_ink); } .bs-navpop-link:hover > svg { color: var(--_ink); } }
+    .bs-navpop-link:active:not([aria-current="page"]) { background: var(--_pill); transition-duration: 30ms; }
     .bs-navpop-link:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
-    .bs-navpop-link[aria-current="page"] { color: var(--color-content-primary); font-weight: var(--font-weight-medium); }
-    .bs-navpop-link[aria-current="page"]::before { content: ""; position: absolute; inset-inline-start: calc(-1 * var(--space-1) - 0.5px); inset-block: var(--space-2); inline-size: 2px; border-radius: 1px; background: var(--color-content-primary); }
+    .bs-navpop-link[aria-current="page"] { background: var(--_pill); box-shadow: inset 0 1px 0 var(--_pill-edge), inset 0 0 0 1px var(--_pill-edge); color: var(--_ink); font-weight: var(--font-weight-medium); }
+    .bs-navpop-link[aria-current="page"] > svg { color: var(--_ink); }
+    /* a section with pages says so in the open rail: a chevron at the row's end, pointing where they open; it shows
+       with the labels and steps toward the popup while its pages are out */
+    .bs-rail-more { display: inline-flex; margin-inline: auto var(--space-3); color: var(--color-content-on-chrome-muted); opacity: 0;
+      transition: opacity var(--duration-fast) var(--ease-standard), translate var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-standard); }
+    .bs-rail-more > svg { inline-size: 0.75rem; block-size: 0.75rem; }
+    .rail[data-expanded] .bs-rail-more { opacity: 1; }
+    .rail-item[data-flying] .bs-rail-more { translate: 2px 0; color: var(--color-content-on-chrome); }
     /* the section's row stays lit while its pages are out */
     .rail-item[data-flying] { background: var(--color-surface-chrome-hover); color: var(--color-content-on-chrome); }
   }

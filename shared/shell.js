@@ -131,7 +131,7 @@ window.BolsterShell = (() => {
   function rail() {
     const item = (s) => s.id === "settings"
       ? `<button class="rail-item" type="button" data-open-settings data-section="${s.id}">${chrome(s.icon)}<span class="rail-label">${esc(s.label)}</span></button>`
-      : `<a class="rail-item" ${sectionHref(s)} data-section="${s.id}">${chrome(s.icon)}<span class="rail-label">${esc(s.label)}</span></a>`;
+      : `<a class="rail-item" ${sectionHref(s)} data-section="${s.id}">${chrome(s.icon)}<span class="rail-label">${esc(s.label)}</span>${s.items ? `<span class="bs-rail-more" aria-hidden="true">${chrome("chevron-right", 12)}</span>` : ""}</a>`; // a chevron where a section has pages (D88)
     return `<nav class="rail" aria-label="Main">${NAV.main.map(item).join("")}<span class="rail-spacer"></span>${NAV.bottom.map(item).join("")}<hr class="rail-separator bs-fold"><button class="rail-item bs-fold" type="button" data-collapse-sidebar>${foldIcon("out")}<span class="rail-label">Expand menu</span></button></nav>`;
   }
 
@@ -146,10 +146,10 @@ window.BolsterShell = (() => {
       timer = setTimeout(() => rail.toggleAttribute("data-expanded", on), delay);
     };
 
-    // folded (D88), a section's pages open beside it as you point at it: a navigation popup, not an action menu.
-    // It hangs off the section's row by a notch (the row stays lit), names the section, and lists its pages as
-    // the open sidebar does, text only, in their groups along a guide line, the page you're on marked on the
-    // line; pointing away from both, Escape or a choice closes it
+    // folded (D88), a section's pages open beside it as you point at it: a navigation popup, not an action menu,
+    // the menu's own dark a step lifted. It hangs off the section's row by a notch (the row stays lit), names the
+    // section, and lists its pages with their icons in their groups, the page you're on in the menu's pill;
+    // pointing away from both, Escape or a choice closes it
     const flyout = document.createElement("nav");
     flyout.className = "bs-navpop"; flyout.setAttribute("popover", "manual"); flyout.dataset.surface = "raised";
     shell.append(flyout);
@@ -166,7 +166,7 @@ window.BolsterShell = (() => {
         if (flyFor !== s.id) {
           flyout.setAttribute("aria-label", s.label);
           flyout.innerHTML = `<p class="bs-navpop-title">${esc(s.label)}</p>${groups(s.items).map((g) => `<div class="bs-navpop-group">${g.map((x) =>
-            `<a class="bs-navpop-link" ${linkAttrs(x.id)}${x.id === opts.current ? ' aria-current="page"' : ""}>${esc(x.label)}</a>`).join("")}</div>`).join("")}`;
+            `<a class="bs-navpop-link" ${linkAttrs(x.id)}${x.id === opts.current ? ' aria-current="page"' : ""}>${chrome(x.icon, 16)}<span>${esc(x.label)}</span></a>`).join("")}</div>`).join("")}`;
           flyFor = s.id;
         }
         light(item);
@@ -394,6 +394,30 @@ window.BolsterShell = (() => {
   function settingsNav(op) { const d = document.getElementById("bs-settings"); if (!d) return false; if (op === "toggle") d.toggleAttribute("data-nav-hidden"); return d.hasAttribute("data-nav-hidden"); }
   function closeSettings() { document.getElementById("bs-settings")?.close(); }
 
+  // The loading screen (D90): Anna's drawings, one at random, with a line from its trade (loader.js). It plays on
+  // the first page of a session, and from the concept controls; its files (her drawings, their animations, the
+  // lines) load only then, so a page without it stays light. The cover goes up at once, so the page never flashes.
+  const SHARED = new URL("./", document.currentScript.src).href;
+  const LOADED_KEY = "bolster-concepts:loaded";
+  let loaderFiles;
+  const fetchLoader = () => loaderFiles ||= new Promise((res, rej) => {
+    document.head.append(Object.assign(document.createElement("link"), { rel: "stylesheet", href: `${SHARED}loaders.css` }));
+    const add = (f) => new Promise((ok, no) => document.head.append(Object.assign(document.createElement("script"), { src: `${SHARED}${f}`, onload: ok, onerror: no })));
+    Promise.all([add("tape.js"), add("loader.js")]).then(res, rej);
+  });
+  function loading({ slow = false } = {}) {
+    const main = document.querySelector(".app-main");
+    let L = document.getElementById("bs-loader");
+    if (!L) {
+      document.body.insertAdjacentHTML("beforeend", `<div class="dash-loader bs-loader" id="bs-loader"><div class="canvas-layers dash-loader-net" aria-hidden="true"><div class="canvas-glow"></div><div class="canvas-net"></div></div><div class="dash-loader-inner" aria-hidden="true"></div><p class="visually-hidden" role="status"></p></div>`);
+      L = document.getElementById("bs-loader");
+    }
+    L.hidden = false; L.removeAttribute("data-leaving"); main?.setAttribute("aria-busy", "true");
+    const done = () => main?.removeAttribute("aria-busy");
+    fetchLoader().then(() => window.BolsterLoader.play({ page: label(opts.current) || document.title.split(" · ")[0], slow, then: done, retry: () => loading() }))
+      .catch(() => { L.hidden = true; done(); });
+  }
+
   function mount(o) {
     opts = { ...opts, ...o };
     shell = document.querySelector(".app-shell");
@@ -417,6 +441,14 @@ window.BolsterShell = (() => {
     }, true);
     railBehaviour();
     canvas.start();
+    let seen = false; try { seen = sessionStorage.getItem(LOADED_KEY) === "1"; sessionStorage.setItem(LOADED_KEY, "1"); } catch {}
+    if (!seen) loading();
+    // the concept controls, on every page that has them: a new loading screen each press, or a slow one
+    const cc = document.querySelector("#concept-controls .concept-body");
+    if (cc) {
+      cc.insertAdjacentHTML("afterbegin", `<div class="cluster"><button class="button" data-variant="secondary" data-size="sm" data-loading>Show a loading screen</button><button class="button" data-variant="secondary" data-size="sm" data-loading="slow">Show a slow load</button></div>`);
+      cc.addEventListener("click", (e) => { const b = e.target.closest("[data-loading]"); if (!b) return; cc.closest("details").open = false; loading({ slow: b.dataset.loading === "slow" }); });
+    }
 
     const narrow = matchMedia("(max-width: 1023px)");
     const phone = matchMedia("(max-width: 767px)");
@@ -519,5 +551,5 @@ window.BolsterShell = (() => {
     return { show: () => set(false), stick };
   }
 
-  return { mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling, week, canvas, settingsNav, closeSettings };
+  return { mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling, week, canvas, settingsNav, closeSettings, loading };
 })();
