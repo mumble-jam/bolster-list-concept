@@ -67,7 +67,6 @@
   /* a section's pages: no icon, in line with the section's label (its padding, the 28px icon column, the gap) */
   .bs-sub { padding-inline-start: calc(var(--space-2) * 2 + 1.75rem); color: var(--color-content-secondary); }
   .bs-sub[aria-current="page"] { color: var(--color-content-primary); }
-  .bs-gap { block-size: var(--space-2); }
   /* an accordion eases open where the browser can animate to its height; elsewhere it just opens */
   .bs-acc { interpolate-size: allow-keywords; }
   .bs-acc::details-content { block-size: 0; overflow: clip; transition: block-size var(--duration-medium) var(--ease-out), content-visibility var(--duration-medium) allow-discrete; }
@@ -77,14 +76,48 @@
      width (the one that opens over the page on phones too): the chrome's ink, a section's pages muted, the
      pill the rail's selected fill; an edge only where the page is dark too (D85) */
   @media all {
-    .bs-sidebar { background: var(--color-surface-chrome); border-inline-end-color: var(--color-line-rail); color: var(--color-content-on-chrome); }
-    .bs-sidebar .sidebar-item { color: var(--color-content-on-chrome); }
-    .bs-sidebar :is(.bs-sub, .sidebar-group) { color: var(--color-content-on-chrome-muted); }
-    .bs-sidebar .sidebar-item > svg { color: var(--color-content-on-chrome-muted); }
-    .bs-sidebar .sidebar-item[aria-current="page"] { background: var(--color-surface-chrome-selected); box-shadow: none; color: var(--color-content-on-chrome); }
-    .bs-sidebar .sidebar-item[aria-current="page"] > svg { color: var(--color-content-on-chrome); }
-    @media (hover: hover) { .bs-sidebar .sidebar-item:hover { background: var(--color-surface-chrome-hover); color: var(--color-content-on-chrome); } }
+    .bs-sidebar {
+      /* three steps of ink, as Shopify's: the section you're in (and the page) brightest, the other sections a
+         step down, a section's pages quieter still; the pill a light lift with a faint lit edge */
+      --_ink: var(--color-content-on-chrome);
+      --_ink-2: color-mix(in oklab, var(--color-content-on-chrome) 82%, var(--color-surface-chrome));
+      --_ink-3: color-mix(in oklab, var(--color-content-on-chrome-muted) 78%, var(--color-surface-chrome));
+      --_pill: color-mix(in oklab, var(--color-content-on-chrome) 13%, transparent);
+      --_pill-edge: color-mix(in oklab, var(--color-content-on-chrome) 7%, transparent);
+      --_hover: color-mix(in oklab, var(--color-content-on-chrome) 7%, transparent);
+      background: var(--color-surface-chrome); border-inline-end-color: var(--color-line-rail); color: var(--_ink);
+    }
+    .bs-sidebar .sidebar-item {
+      min-block-size: 2rem; margin-block-end: 1px; color: var(--_ink-2); font-weight: var(--font-weight-regular);
+      transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+    }
+    .bs-sidebar .sidebar-item > svg { color: var(--color-content-on-chrome-muted); transition: color var(--duration-fast) var(--ease-standard); }
+    /* the section you're in: its name and icon lit, a touch heavier */
+    .bs-sidebar .sidebar-item[data-current] { color: var(--_ink); font-weight: var(--font-weight-medium); }
+    .bs-sidebar .sidebar-item[data-current] > svg { color: var(--_ink); }
+    .bs-sidebar :is(.bs-sub, .sidebar-group) { color: var(--_ink-3); }
+    .bs-sidebar .sidebar-item[aria-current="page"] { background: var(--_pill); box-shadow: inset 0 1px 0 var(--_pill-edge), inset 0 0 0 1px var(--_pill-edge); color: var(--_ink); font-weight: var(--font-weight-medium); }
+    .bs-sidebar .sidebar-item[aria-current="page"] > svg { color: var(--_ink); }
+    @media (hover: hover) { .bs-sidebar .sidebar-item:not([aria-current="page"]):hover { background: var(--_hover); color: var(--_ink); } .bs-sidebar .sidebar-item:hover > svg { color: var(--_ink); } }
+    .bs-sidebar .sidebar-item:active:not([aria-current="page"]) { background: var(--_pill); transition-duration: 30ms; }
     .bs-sidebar :is(.bs-sep, .sidebar-title) { border-color: var(--color-line-chrome); }
+    /* folding is a quiet row at the very foot, under the foot's one rule */
+    .bs-sidebar .bs-nav-bottom > .bs-sep.bs-fold { display: none; }
+    .bs-sidebar button.bs-fold { margin-block-start: var(--space-2); color: var(--_ink-3); }
+  }
+  .bs-gap { block-size: var(--space-1); }
+
+  /* motion (D88): what you open eases in; nothing moves for what was open on arrival, nor with reduced motion */
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes bs-in { from { opacity: 0; translate: 0 -3px; } }
+    /* a section's pages fade and settle in one after another as it opens, as Shopify's do */
+    .bs-acc[data-anim][open] .bs-sub { animation: bs-in 280ms cubic-bezier(0.2, 0.8, 0, 1) calc(var(--i, 0) * 18ms + 30ms) both; }
+    /* the folded rail's dropdown comes out of the rail, not down from above */
+    @starting-style { .bs-flymenu:popover-open { opacity: 0; transform: translateX(-6px); } }
+    /* the floating button turns from ☰ to ✕ and back */
+    .bs-menu-fab > svg { transition: opacity 160ms var(--ease-out), rotate 220ms cubic-bezier(0.2, 0.8, 0, 1), scale 220ms cubic-bezier(0.2, 0.8, 0, 1); }
+    .bs-menu-fab:active { scale: 0.96; }
+    .bs-menu-fab { transition: scale 120ms var(--ease-out); }
   }
   .bs-menu-fab { display: none; }
   /* what the top bar holds joins the menu on phones (search, help, Bolton, your account) */
@@ -127,6 +160,7 @@
     .app-shell:not([data-sidebar-hidden]) .bs-logo { inline-size: var(--shell-sidebar-width); justify-items: start; padding-inline-start: calc(var(--shell-rail-width) / 2 - 0.875rem); }
     /* the logo stays put as the top bar slides away only over the rail; over the sidebar it goes with the bar */
     :root[data-chrome-hidden] .app-shell:not([data-sidebar-hidden]) .bs-logo { translate: none; box-shadow: none; }
+    .app-shell:not([data-sidebar-hidden]) .bs-logo { box-shadow: 0 1px 0 var(--color-surface-chrome); position: relative; z-index: 1; }
     .app-shell[data-sidebar-hidden] { grid-template-columns: var(--_rail-column) 0 minmax(0, 1fr); }
     .app-shell[data-sidebar-hidden] .sidebar { display: none; }
     /* folded, a section's pages as a dropdown beside the rail (shell.js): the menu component, placed by hand */
@@ -148,7 +182,7 @@
        are ticked it steps aside for the bulk bar */
     .app-shell { grid-template-rows: 1fr; grid-template-areas: "main"; }
     .bs-top { display: none; }
-    .bs-sidebar { inset-block: 0; inline-size: min(20rem, calc(100vw - var(--space-12))); }
+    .bs-sidebar { inset-block: 0; }
     /* the foot leaves room for the floating button under it */
     .bs-nav-bottom { padding-block-end: calc(var(--space-20, 5rem) + env(safe-area-inset-bottom)); }
     .bs-menu-fab {
@@ -159,7 +193,18 @@
       filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.18));
     }
     .bs-menu-fab > svg { grid-area: 1 / 1; inline-size: 1.25rem; block-size: 1.25rem; }
-    .bs-menu-fab[aria-expanded="true"] > svg:first-child, .bs-menu-fab:not([aria-expanded="true"]) > svg:last-child { display: none; }
+    .bs-menu-fab[aria-expanded="true"] > svg:first-child { opacity: 0; rotate: 90deg; scale: 0.6; }
+    .bs-menu-fab:not([aria-expanded="true"]) > svg:last-child { opacity: 0; rotate: -90deg; scale: 0.6; }
+    /* the menu pushes the page aside rather than covering it, leaving a column on the right as wide as the
+       button and the air around it; the button rides with the page into that column as the ✕, and a tap
+       anywhere in the column closes the menu (the page takes no taps while it's aside) */
+    .app-shell { --_aside: calc(3.5rem + var(--space-4) * 2); overflow-x: clip; }
+    .bs-sidebar { inline-size: calc(100vw - var(--_aside)); box-shadow: none; transition: translate 320ms cubic-bezier(0.2, 0.8, 0, 1); }
+    .app-main { transition: translate 320ms cubic-bezier(0.2, 0.8, 0, 1), opacity 320ms var(--ease-out); }
+    .bs-menu-fab { transition: translate 320ms cubic-bezier(0.2, 0.8, 0, 1), scale 120ms var(--ease-out); }
+    .app-shell:has(> .bs-sidebar[data-open]) > .app-main { translate: calc(100vw - var(--_aside)) 0; opacity: 0.55; pointer-events: none; }
+    .app-shell:has(> .bs-sidebar[data-open]) > .bs-menu-fab { translate: calc(100vw - var(--_aside)) 0; }
+    @media (prefers-reduced-motion: reduce) { .bs-sidebar, .app-main, .bs-menu-fab { transition: none; } }
     .bs-menu-fab:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
     body[data-selecting] .bs-menu-fab { display: none; }
     /* Create sits at the foot now, with nothing under it */

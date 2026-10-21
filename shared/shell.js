@@ -196,12 +196,13 @@ window.BolsterShell = (() => {
   // A page can add entries for phones at the end (data-more-entry="Label" on the element they open).
   function navHtml() {
     const cur = sectionOf(opts.current)?.id;
-    const page = (x) => `<a class="sidebar-item bs-sub" ${linkAttrs(x.id)} data-item="${x.id}"${x.id === opts.current ? ' aria-current="page"' : ""}><span>${esc(x.label)}</span></a>`;
+    let n = 0; // each page's place in its section, for the stagger as it opens
+    const page = (x) => `<a class="sidebar-item bs-sub" style="--i:${n++}" ${linkAttrs(x.id)} data-item="${x.id}"${x.id === opts.current ? ' aria-current="page"' : ""}><span>${esc(x.label)}</span></a>`;
     const row = (s) => {
       const head = `${chrome(s.icon, 18)}<span>${esc(s.label)}</span>`;
       if (s.id === "settings") return `<button type="button" class="sidebar-item" data-open-settings>${head}</button>`;
-      if (s.items) return `<details class="bs-acc" name="bs-nav"${s.id === cur ? " open" : ""}><summary class="sidebar-item">${head}</summary><div class="bs-acc-body">${s.items.map((x) => (x === "-" ? `<span class="bs-gap" aria-hidden="true"></span>` : page(x))).join("")}</div></details>`;
-      return `<a class="sidebar-item" ${sectionHref(s)} data-section="${s.id}"${s.id === cur ? ' aria-current="page"' : ""}>${head}</a>`;
+      if (s.items) { n = 0; return `<details class="bs-acc" name="bs-nav"${s.id === cur ? " open" : ""}><summary class="sidebar-item"${s.id === cur ? " data-current" : ""}>${head}</summary><div class="bs-acc-body">${s.items.map((x) => (x === "-" ? `<span class="bs-gap" aria-hidden="true"></span>` : page(x))).join("")}</div></details>`; }
+      return `<a class="sidebar-item" ${sectionHref(s)} data-section="${s.id}"${s.id === cur ? ' aria-current="page" data-current' : ""}>${head}</a>`;
     };
     const extra = [...document.querySelectorAll("[data-more-entry]")].map((el) => `<button type="button" class="sidebar-item bs-extra" data-more-open="${el.id}">${chrome(el.dataset.moreIcon || "sliders", 18)}<span>${esc(el.dataset.moreEntry)}</span></button>`).join("");
     // phones have no top bar (D88): its search, help, Bolton and your account are in the menu
@@ -362,13 +363,19 @@ window.BolsterShell = (() => {
     try { if (localStorage.getItem(FOLD_KEY)) shell.setAttribute("data-sidebar-hidden", ""); } catch {}
     hydrateIcons();
     setCurrent(opts.current);
+    // a section you open eases its pages in (shell.css); one that's open on arrival, or redrawn, doesn't
+    shell.querySelector(".sidebar").addEventListener("toggle", (e) => { if (e.target.matches?.(".bs-acc")) e.target.toggleAttribute("data-anim", e.newState === "open"); }, true);
     railBehaviour();
     canvas.start();
 
     const narrow = matchMedia("(max-width: 1023px)");
     const phone = matchMedia("(max-width: 767px)");
     // however the menu closes (a link, a tap outside, Escape), its buttons say so: the floating one shows ☰ again
-    new MutationObserver(() => { const open = shell.querySelector(".sidebar").hasAttribute("data-open"); shell.querySelectorAll("[data-toggle-sidebar]").forEach((b) => b.setAttribute("aria-expanded", open)); })
+    new MutationObserver(() => {
+      const open = shell.querySelector(".sidebar").hasAttribute("data-open");
+      shell.querySelectorAll("[data-toggle-sidebar]").forEach((b) => b.setAttribute("aria-expanded", open));
+      const fab = shell.querySelector(".bs-menu-fab"); fab.setAttribute("aria-label", open ? "Close menu" : "Menu"); fab.dataset.tip = open ? "Close menu" : "Menu";
+    })
       .observe(shell.querySelector(".sidebar"), { attributes: true, attributeFilter: ["data-open"] });
     document.addEventListener("click", (e) => {
       const nb = e.target.closest("[data-not-built]");
