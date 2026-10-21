@@ -120,6 +120,8 @@
       transition: background-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
     }
     .bs-sidebar .sidebar-item > svg { color: var(--color-content-on-chrome-muted); transition: color var(--duration-fast) var(--ease-standard); }
+    /* the rail's icons, pinned or folded (D93): 16 tall, in the same 28 column so they stand where the rail's do */
+    .bs-sidebar .sidebar-item > svg { block-size: 1rem; }
     /* a section's row is the rail's (44): folding or pinning the menu doesn't change its rows' size; a section's pages
        stay a step smaller, quieter under it */
     .bs-sidebar .sidebar-item:not(.bs-sub) { min-block-size: var(--shell-rail-item-size); }

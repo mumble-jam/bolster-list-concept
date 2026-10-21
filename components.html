@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=6fd084af">
-<link rel="stylesheet" href="data-list.css?v=6fd084af">
+<link rel="stylesheet" href="system/bolster.css?v=da48203b">
+<link rel="stylesheet" href="data-list.css?v=da48203b">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -108,19 +108,19 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=6fd084af"></script>
+<script src="shared/icons.js?v=da48203b"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
   ["Foundations", "Warm and cool colour", "yours", "A warmer page (8 Oct); Paper and cement edges from your Figma sketch; warm on every neutral. Then the status quo (13 Oct, D33): warm in light, cool in dark, as the system's own tokens; the Colour switch is gone.", "Which cement step goes where, and the new tokens (card edge, open row, menu hover)."],
   ["Foundations", "Type", "steered", "Cera Pro and Space Grotesk come from your prototype's tokens; you chose Inter for the published copy, then Cera Pro itself there too, Bolster's licence covering the web (20 Oct).", "Sizes and weights here: the page title, the big card numbers, table text and sub-lines."],
-  ["Foundations", "Icons", "yours", "Font Awesome 6 Pro, with your key: Light at first (Regular for search and help), then Regular in the page and Light only in the app shell (20 Oct, D84); table-cells-columns for display settings; smaller, bolder icons in menus. Icons side by side match in ink and line, not box size, after expand and close looked unbalanced (14 Oct, D41). All the job list's picks approved as the system's icon vocabulary, one meaning one icon, every new page drawing from it (15 Oct, D58).", "Every other pick: filter, calendar, one icon per attribute in menus, the action icons; measuring ink and line, the weight step for smaller icons, the checker."],
+  ["Foundations", "Icons", "yours", "Font Awesome 6 Pro, with your key: Light at first (Regular for search and help), then Regular in the page and Light only in the app shell (20 Oct, D84); then Regular in the dark menu too (21 Oct, D93); table-cells-columns for display settings; smaller, bolder icons in menus. Icons side by side match in ink and line, not box size, after expand and close looked unbalanced (14 Oct, D41). All the job list's picks approved as the system's icon vocabulary, one meaning one icon, every new page drawing from it (15 Oct, D58).", "Every other pick: filter, calendar, one icon per attribute in menus, the action icons; measuring ink and line, the weight step for smaller icons, the checker."],
   ["Foundations", "Corners", "yours", "Every button 8px (9 Oct). Nested corners share a centre: the inner radius is the outer minus the offset (13 Oct, D35); you chose 16 on cards with controls 8 in, over smaller buttons or a tighter header.", "Menus stay 12 with 4px rows 8 in; dialogs 12; round chips, badges and avatars; the check that finds every break (check-radii.js)."],
   ["Foundations", "Spacing and layout", "steered", "Follow the layout rules from the list research boards (8 Oct).", "The actual gaps and paddings."],
   ["Foundations", "Words", "steered", "Explanations use the screen's own words (D27); the search field just says Search.", "All the other copy: labels, menu items, empty and error text, the About dialog."],
 
   ["Shell", "Top bar", "yours", "As in Bolster; your Bolster and Bolton assets; Bolton's head sized to the help icon, then 10% bigger, then Bolster's own size, 28 tall (21 Oct); all three corner circles the same size; the ⌘K keycap softened to a 4 px corner (14 Oct).", "The keycap itself, placed by the field's padding rather than nested in its corner (D35 doesn't reach it)."],
-  ["Shell", "Rail", "yours", "Then folded into one sidebar with every section, accordions for the ones with pages, the rail only when it's hidden (21 Oct, trying out, D88). Folded, a section's pages open beside it, first as the menu component, then as a navigation popup of their own, “more explicit about being a navigation menu”, first light with guide lines, then on the menu's dark with the icons back and no lines; a chevron on a section's row; pinned, a section's rows as tall as the rail's; folding moved from the menu's foot to the logo's cell (21 Oct, D92). Bolster's item sizes, its bottom part, hover to expand (8 Oct); the logo stays when collapsed (9 Oct, trying out).", "Pinning the rail open; the popup's notch on the row and its lift off the rail; Keep menu open, and the rail opening as wide as the pinned menu."],
+  ["Shell", "Rail", "yours", "Then folded into one sidebar with every section, accordions for the ones with pages, the rail only when it's hidden (21 Oct, trying out, D88). Folded, a section's pages open beside it, first as the menu component, then as a navigation popup of their own, “more explicit about being a navigation menu”, first light with guide lines, then on the menu's dark with the icons back and no lines; a chevron on a section's row; pinned, a section's rows as tall as the rail's; folding moved from the menu's foot to the logo's cell (21 Oct, D92); Regular icons in the menu, at the rail's size pinned or folded (21 Oct, D93). Bolster's item sizes, its bottom part, hover to expand (8 Oct); the logo stays when collapsed (9 Oct, trying out).", "Pinning the rail open; the popup's notch on the row and its lift off the rail; Keep menu open, and the rail opening as wide as the pinned menu."],
   ["Shell", "Section sidebar", "yours", "Then folded into one sidebar with every section, accordions for the ones with pages, the rail only when it's hidden (21 Oct, trying out, D88). Bolster's sizes, but with the border colour you preferred over Bolster's; as wide as its longest item plus 48; follows Cool; warm hover on its collapse button.", "Its hover and current-item tones."],
   ["Shell", "Logo", "yours", "Bolster's mark and wordmark; the mark growing into the wordmark as the menu opens, your picks in a playground: the menu's ease-out, 420ms, letters rising one after another, the cut-out turning into the B (21 Oct, D91).", "Reading the two as one plate with a notch; the playground and its options."],
   ["Shell", "Loading screen", "steered", "Anna's drawings, her shortlist of 16 (20 Oct, her branch); you asked for them shuffled at random with playful lines about the trade, some jargon but not too much, like a game's loading screen; then ways for the line to come in, with controls (21 Oct, D90).", "The lines, a line every 2 s from the drawing's trade or the site and office, when it plays, loading it only then; the six ways a line comes in."],
@@ -265,6 +265,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=6fd084af"></script>
+<script src="system/specimens/specimen.js?v=da48203b"></script>
 </body>
 </html>

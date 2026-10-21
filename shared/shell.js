@@ -13,6 +13,9 @@ window.BolsterShell = (() => {
   // the app shell's own chrome (top bar, rail, section sidebar, bottom bar) draws Light; the page draws Regular
   // (D84): its own icons are the l- copies, where an icon has one (search and help are Regular in both)
   const chrome = (k, ...a) => icon(`l-${k}`, ...a) || icon(k, ...a);
+  // the dark menu (the sidebar, the rail, the folded menu's popup) draws Regular, a weight up from the rest of the
+  // shell's Light (D93: tried, 21 Oct)
+  const menuIcon = (k, ...a) => icon(k, ...a);
   const ASSETS = new URL("./assets/", document.currentScript.src).href;
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 
@@ -187,8 +190,8 @@ window.BolsterShell = (() => {
 
   function rail() {
     const item = (s) => s.id === "settings"
-      ? `<button class="rail-item" type="button" data-open-settings data-section="${s.id}">${chrome(s.icon)}<span class="rail-label">${esc(s.label)}</span></button>`
-      : `<a class="rail-item" ${sectionHref(s)} data-section="${s.id}">${chrome(s.icon)}<span class="rail-label">${esc(s.label)}</span>${s.items ? `<span class="bs-rail-more" aria-hidden="true">${chrome("chevron-right", 12)}</span>` : ""}</a>`; // a chevron where a section has pages (D88)
+      ? `<button class="rail-item" type="button" data-open-settings data-section="${s.id}">${menuIcon(s.icon)}<span class="rail-label">${esc(s.label)}</span></button>`
+      : `<a class="rail-item" ${sectionHref(s)} data-section="${s.id}">${menuIcon(s.icon)}<span class="rail-label">${esc(s.label)}</span>${s.items ? `<span class="bs-rail-more" aria-hidden="true">${menuIcon("chevron-right", 12)}</span>` : ""}</a>`; // a chevron where a section has pages (D88)
     return `<nav class="rail" aria-label="Main">${NAV.main.map(item).join("")}<span class="rail-spacer"></span>${NAV.bottom.map(item).join("")}</nav>`;
   }
 
@@ -223,7 +226,7 @@ window.BolsterShell = (() => {
         if (flyFor !== s.id) {
           flyout.setAttribute("aria-label", s.label);
           flyout.innerHTML = `<p class="bs-navpop-title">${esc(s.label)}</p>${groups(s.items).map((g) => `<div class="bs-navpop-group">${g.map((x) =>
-            `<a class="bs-navpop-link" ${linkAttrs(x.id)}${x.id === opts.current ? ' aria-current="page"' : ""}>${chrome(x.icon, 16)}<span>${esc(x.label)}</span></a>`).join("")}</div>`).join("")}`;
+            `<a class="bs-navpop-link" ${linkAttrs(x.id)}${x.id === opts.current ? ' aria-current="page"' : ""}>${menuIcon(x.icon, 16)}<span>${esc(x.label)}</span></a>`).join("")}</div>`).join("")}`;
           flyFor = s.id;
         }
         light(item);
@@ -271,15 +274,15 @@ window.BolsterShell = (() => {
     let n = 0; // each page's place in its section, for the stagger as it opens
     const page = (x) => `<a class="sidebar-item bs-sub" style="--i:${n++}" ${linkAttrs(x.id)} data-item="${x.id}"${x.id === opts.current ? ' aria-current="page"' : ""}><span>${esc(x.label)}</span></a>`;
     const row = (s) => {
-      const head = `${chrome(s.icon, 18)}<span>${esc(s.label)}</span>`;
+      const head = `${menuIcon(s.icon, 16)}<span>${esc(s.label)}</span>`; // the rail's size, pinned or folded (D93)
       if (s.id === "settings") return `<button type="button" class="sidebar-item" data-open-settings>${head}</button>`;
       if (s.items) { n = 0; return `<details class="bs-acc" name="bs-nav"${s.id === cur ? " open" : ""}><summary class="sidebar-item"${s.id === cur ? " data-current" : ""}>${head}</summary><div class="bs-acc-body">${s.items.map((x) => (x === "-" ? `<span class="bs-gap" aria-hidden="true"></span>` : page(x))).join("")}</div></details>`; }
       return `<a class="sidebar-item" ${sectionHref(s)} data-section="${s.id}"${s.id === cur ? ' aria-current="page" data-current' : ""}>${head}</a>`;
     };
-    const extra = [...document.querySelectorAll("[data-more-entry]")].map((el) => `<button type="button" class="sidebar-item bs-extra" data-more-open="${el.id}">${chrome(el.dataset.moreIcon || "sliders", 18)}<span>${esc(el.dataset.moreEntry)}</span></button>`).join("");
+    const extra = [...document.querySelectorAll("[data-more-entry]")].map((el) => `<button type="button" class="sidebar-item bs-extra" data-more-open="${el.id}">${menuIcon(el.dataset.moreIcon || "sliders", 18)}<span>${esc(el.dataset.moreEntry)}</span></button>`).join("");
     // phones have no top bar (D88): its search, help, Bolton and your account are in the menu
-    const search = `<button type="button" class="sidebar-item bs-phone" data-not-built="search">${chrome("search", 16)}<span>Search</span></button>`;
-    const you = `<button type="button" class="sidebar-item bs-phone" data-not-built="help">${chrome("circle-help", 18)}<span>Help</span></button>`
+    const search = `<button type="button" class="sidebar-item bs-phone" data-not-built="search">${menuIcon("search", 16)}<span>Search</span></button>`;
+    const you = `<button type="button" class="sidebar-item bs-phone" data-not-built="help">${menuIcon("circle-help", 18)}<span>Help</span></button>`
       + `<button type="button" class="sidebar-item bs-phone" data-not-built="assistant"><img class="bs-bolton" src="${ASSETS}bolton-head.svg" alt=""><span>Ask Bolton</span></button>`
       + `<details class="bs-acc bs-phone" name="bs-nav"><summary class="sidebar-item"><span class="avatar" data-size="sm" data-color="${USER.color}" aria-hidden="true">${USER.initials}</span><span>${esc(USER.name)}</span></summary><div class="bs-acc-body">${[["profile", "Edit profile"], ["users", "Manage users"], ["logout", "Log out"]].map(([id, l]) => `<a class="sidebar-item bs-sub" href="#" data-not-built="${id}"><span>${l}</span></a>`).join("")}</div></details>`;
     // the foot (Messages, Files, Settings) stays put; everything above scrolls under it
@@ -330,10 +333,10 @@ window.BolsterShell = (() => {
   }
 
   function sidebarHtml(section) {
-    const link = (x) => `<a class="sidebar-item" ${linkAttrs(x.id)} data-item="${x.id}"${x.id === opts.current ? ' aria-current="page"' : ""}>${chrome(x.icon, 18)}<span>${esc(x.label)}</span></a>`;
+    const link = (x) => `<a class="sidebar-item" ${linkAttrs(x.id)} data-item="${x.id}"${x.id === opts.current ? ' aria-current="page"' : ""}>${menuIcon(x.icon, 18)}<span>${esc(x.label)}</span></a>`;
     let body = "";
     if (section.items) body = section.items.map((x) => (x === "-" ? `<hr class="bs-sep">` : link(x))).join("");
-    if (section.groups) body = section.groups.map((g) => `<details class="bs-group"${g.closed && !g.items.some((x) => x.id === opts.current) ? "" : " open"}><summary class="sidebar-group">${esc(g.label)}${chrome("chevron-down", 14)}</summary>${g.items.map(link).join("")}</details>`).join("");
+    if (section.groups) body = section.groups.map((g) => `<details class="bs-group"${g.closed && !g.items.some((x) => x.id === opts.current) ? "" : " open"}><summary class="sidebar-group">${esc(g.label)}${menuIcon("chevron-down", 14)}</summary>${g.items.map(link).join("")}</details>`).join("");
     return `<h2 class="sidebar-title">${esc(section.label)}</h2>${body}`;
   }
 
