@@ -9,22 +9,23 @@
   .pl-page { --pl-col: 18.5rem; --pl-seam: var(--space-6); }
 
   /* ---------- the toolbar, on the page: search on the left, whose and what's lost on the right ---------- */
-  /* on the page, not in a card: the to-do's way (no sticking, no edge, no surface of its own); the search is a field
-     with an edge there, the bare one's hover reading as nothing on the canvas */
-  .pl-toolbar { position: static; border-block-end: 0; background: none; }
-  :root[data-chrome-hidden] .pl-toolbar { translate: none; }
-  .pl-toolbar .list-bar { padding: 0; }
+  /* on the page, not in a card, and as the list's: it sticks under the top bar, goes as you scroll down and comes
+     back as you scroll up (the shell's scrolling, D73), while the page header scrolls away; on the canvas's colour,
+     so cards pass under it, no edge. The search is a field with an edge on the page, the bare one's hover reading as
+     nothing on the canvas */
+  .pl-toolbar { border-block-end: 0; background: var(--color-surface-canvas); margin-block: calc(-1 * var(--space-2)); }
+  .pl-toolbar .list-bar { padding: var(--space-2) 0; }
   .pl-toolbar .result-count { margin: 0; }
   .pl-search { flex: 0 1 18rem; margin-inline-start: auto; padding-inline: var(--space-3); border: var(--border-width-default) solid var(--color-line-card); background: var(--color-surface-default); }
   @media (hover: hover) { .pl-search:hover { border-color: var(--color-line-strong); background: var(--color-surface-default); } }
 
   /* ---------- the board: People | seam | Jobs, the kinds named over their columns (P-kinds) ---------- */
-  /* one scroll for the whole board, never one per column: the columns grow with their cards (at the least to the
-     board's foot) and move together, their heads staying at the top */
+  /* the page scrolls down, never a column (as the list's table): the columns grow with their cards and the board
+     scrolls sideways only; each column's head comes down its own column under the toolbar, as the table's header does */
   .pl-board {
     display: grid; grid-template-columns: repeat(2, var(--pl-col)) var(--pl-seam) repeat(3, var(--pl-col)) var(--pl-seam) var(--pl-col); grid-template-rows: auto 1fr;
     column-gap: var(--space-3); row-gap: var(--space-2); justify-content: start;
-    block-size: var(--pl-h, auto); overflow: auto; overscroll-behavior: contain;
+    overflow-x: auto; overscroll-behavior-x: contain;
     /* room for a focus ring and the hovered column's ring at the edges */
     --pl-ring: 2px; padding: var(--pl-ring); margin: calc(-1 * var(--pl-ring));
   }
@@ -37,7 +38,8 @@
 
   /* ---------- a column: a tint, no frame; its name, count and money on one line, then its groups ---------- */
   .pl-col {
-    grid-row: 2; display: flex; flex-direction: column;
+    /* each column as tall as its cards, never stretched to the tallest */
+    grid-row: 2; align-self: start; display: flex; flex-direction: column;
     border: var(--border-width-default) solid transparent; border-radius: var(--radius-xl);
     background: var(--pl-col-bg);
   }
@@ -59,7 +61,30 @@
      canvas's colour, so no card shows in its corners */
   .pl-col-head::before { content: ""; position: absolute; inset: calc(-1 * var(--border-width-default)) calc(-1 * var(--border-width-default)) 0; z-index: -1;
     border-radius: var(--radius-xl) var(--radius-xl) 0 0; background: var(--pl-col-bg); }
-  .pl-col-head { position: sticky; inset-block-start: calc(-1 * var(--pl-ring, 0px)); z-index: 2; background: var(--color-surface-canvas); display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); padding: var(--space-3) var(--_in) var(--space-2); }
+  /* the board scrolls sideways, so a head can't stick to the page by itself: it's moved down by how far its column's
+     top has gone under the bars, up to the column's end (--_room, from the script), the table's way (data-table.css):
+     on the scroll itself where the browser can, by script where it can't */
+  @media (min-width: 768px) {
+    /* the timeline is the board's place on the page (the board itself scrolls sideways, so a column's would follow it);
+       each head's range starts where its column does in the board (--_off) and runs the column's room */
+    .pl-board { view-timeline: --pl-board block; view-timeline-inset: 0px; }
+    .pl-col-head {
+      --_stick: var(--list-head-top, 0px);
+      translate: 0 clamp(0px, calc(var(--_stick) - var(--_col-top, 0px)), var(--_room, 0px));
+      transition: --_stick 300ms var(--ease-out);
+    }
+    :root[data-chrome-hidden] .pl-col-head { --_stick: 0px; }
+    @supports (animation-timeline: view()) {
+      .pl-col-head {
+        translate: none;
+        animation: list-head-follow linear both; animation-timeline: --pl-board;
+        animation-range: exit-crossing calc(var(--_off, 0px) - var(--list-head-top, 0px)) exit-crossing calc(var(--_off, 0px) + var(--_room, 0px) - var(--list-head-top, 0px));
+        transform: translateY(calc(var(--_stick) - var(--list-head-top, 0px)));
+        will-change: translate, transform;
+      }
+    }
+  }
+  .pl-col-head { position: relative; z-index: 2; background: var(--color-surface-canvas); display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); padding: var(--space-3) var(--_in) var(--space-2); }
   .pl-col-head h3 { display: flex; align-items: center; gap: var(--space-1-5, 6px); min-inline-size: 0; margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); }
   .pl-col-head h3 > span:not(.mark):not(.pl-n) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .pl-col-head h3 svg { flex: none; inline-size: 14px; color: var(--color-content-secondary); }
@@ -181,7 +206,10 @@
   .pl-tabs { display: none; }
   @media (max-width: 767px) {
     /* phones: the search first, its own line; whose and Lost under it */
-    .pl-toolbar .list-bar { flex-wrap: wrap; }
+    /* phones: the toolbar stays where it is; the stage tabs are what sticks */
+    .pl-toolbar { position: static; margin: 0; background: none; }
+    :root[data-chrome-hidden] .pl-toolbar { translate: none; }
+    .pl-toolbar .list-bar { flex-wrap: wrap; padding: 0; }
     .pl-search { order: -1; flex: 1 1 100%; margin: 0; }
     .pl-toolbar #pick-people { flex: 1 1 0; min-inline-size: 0; }
     .pl-bar-wide { display: none; }

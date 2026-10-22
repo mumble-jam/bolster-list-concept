@@ -185,10 +185,10 @@
 
   // ---------- drawing ----------
   const markOf = (s, size = "") => (s.kind === "job" ? `<span class="mark${size}" data-mark="${s.mark}" style="--_dot:${s.dot}" aria-hidden="true"></span>` : ic(s.icon, 14, { optical: true }));
-  // three ways to draw a card, to compare (Concept controls): Quiet (the default), Compact and Footer
-  let LAYOUT = "quiet";
-  try { LAYOUT = localStorage.getItem("pl-cards") || "quiet"; } catch {}
-  if (!["quiet", "compact", "footer"].includes(LAYOUT)) LAYOUT = "quiet";
+  // three ways to draw a card, to compare (Concept controls): Footer (the default, your pick for now), Quiet and Compact
+  let LAYOUT = "footer";
+  try { LAYOUT = localStorage.getItem("pl-cards") || "footer"; } catch {}
+  if (!["quiet", "compact", "footer"].includes(LAYOUT)) LAYOUT = "footer";
   function card(r) {
     const w = when(r), [next] = steps(r), job = r.kind === "job", inv = r.kind === "invoice", priced = job || inv;
     const label = `${job ? `${r.name}, ${r.client}` : inv ? `Invoice ${r.number}, ${r.client}, ${r.job}` : r.name}, ${stageOf(r.stage).label}, ${groupLabel(r)}${priced ? `, ${r.value ? money(r.value) : "no price yet"}` : ""}. ${w.text}`;
@@ -233,7 +233,7 @@
   }
   const board = $("#board");
   function render() {
-    const left = board.scrollLeft, top = board.scrollTop;
+    const left = board.scrollLeft;
     // People, Jobs and Invoices over their columns, a seam where one kind becomes the next (P-kinds, P-cross)
     const KINDS = [["person", "user", "People, no job yet"], ["job", "briefcase", "Jobs"], ["invoice", "file-invoice", "Invoices"]];
     let col = 1, cols = "", heads = "";
@@ -244,7 +244,7 @@
       cols += list.map((x) => column(x).replace('<section class="pl-col"', `<section class="pl-col" style="grid-column:${col++}"`)).join("");
     });
     board.innerHTML = heads + cols;
-    board.scrollLeft = left; board.scrollTop = top;
+    board.scrollLeft = left;
     const n = records.filter(shown).length;
     // the count, as the list's: all of them, or how many of them a search or People lets through
     const all = records.length;
@@ -256,11 +256,21 @@
     $("#pick-lost").setAttribute("aria-label", lostName); $("#pick-lost").dataset.tip = lostName;
     fit();
   }
-  // on wider screens the board fills the screen down to its bottom edge and scrolls as one, both ways
   const phone = matchMedia("(max-width: 767px)");
+  // each column's head comes down its column under the toolbar (pipeline.css): how far it may go (the column's height
+  // less the head's), and, where the browser can't tie it to the scroll, where the column's top is now
+  const followByScript = !CSS.supports("animation-timeline: view()");
+  function follow() {
+    if (phone.matches || !followByScript) return;
+    $$(".pl-col", board).forEach((c) => c.style.setProperty("--_col-top", `${c.getBoundingClientRect().top}px`));
+  }
   function fit() {
-    if (phone.matches) return board.style.removeProperty("--pl-h");
-    board.style.setProperty("--pl-h", `${Math.max(360, innerHeight - board.getBoundingClientRect().top - scrollY - 24)}px`);
+    $$(".pl-col", board).forEach((c) => {
+      const h = c.querySelector(".pl-col-head").offsetHeight;
+      c.style.setProperty("--_room", `${Math.max(0, c.offsetHeight - h)}px`);
+      c.style.setProperty("--_off", `${c.getBoundingClientRect().top - board.getBoundingClientRect().top}px`);
+    });
+    follow();
   }
 
   // ---------- changes, every one with Undo ----------
@@ -446,7 +456,7 @@
     // near the board's edges, it scrolls to the stages beyond and the cards below
     const b = board.getBoundingClientRect(), edge = 64;
     board.scrollLeft += e.clientX < b.left + edge ? -14 : e.clientX > b.right - edge ? 14 : 0;
-    board.scrollTop += e.clientY < b.top + edge ? -14 : e.clientY > b.bottom - edge ? 14 : 0;
+    scrollBy(0, e.clientY < edge + (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--list-head-top")) || 0) ? -14 : e.clientY > innerHeight - edge ? 14 : 0);
   });
   function endDrag() {
     $$("[data-over], [data-drop]").forEach((x) => { x.removeAttribute("data-over"); x.removeAttribute("data-drop"); });
@@ -480,7 +490,7 @@
     if ((el = q("[data-fold]"))) {
       const k = el.dataset.fold, folded = !st.folded.has(k);
       folded ? st.folded.add(k) : st.folded.delete(k); keepFolded();
-      el.setAttribute("aria-expanded", String(!folded)); $(`#${el.getAttribute("aria-controls")}`).hidden = folded;
+      el.setAttribute("aria-expanded", String(!folded)); $(`#${el.getAttribute("aria-controls")}`).hidden = folded; fit();
       return;
     }
     if ((el = q("[data-tab]"))) { st.tab = el.dataset.tab; $(`#col-${st.tab}`)?.scrollIntoView({ inline: "start", block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); return tabs(); }
@@ -525,7 +535,7 @@
   phone.addEventListener("change", render);
   addEventListener("resize", () => { fit(); if (popFor) BolsterShell.placePopover(pop, popFor.from); });
   // what hides and sticks as you scroll is the shell's: this page says where the board starts, and that a drag is in use
-  BolsterShell.scrolling({ into: (top) => board.getBoundingClientRect().top < top, busy: () => !!drag?.started });
+  BolsterShell.scrolling({ into: (top) => board.getBoundingClientRect().top < top, toolbar: phone.matches ? null : $(".pl-toolbar"), busy: () => !!drag?.started, onScroll: follow });
   render();
   BolsterShell.hydrateIcons();
 })();
