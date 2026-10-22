@@ -31,15 +31,17 @@
 
     <div class="app-content list-page pl-page" data-width="full">
       <!-- the system's toolbar (toolbar.css), on the page as Tasks has it (your call, 22 Oct): Add filter, an icon, then a
-           rule and the count; the search as a button on the right. People and Show are filters under Add filter, each a
-           chip on the row below once it's set (Show brings in the Lost column, P-closed); the row only while there are chips -->
+           rule and the count; the search as a button on the right, a rule, then Display settings. People is the filter
+           under Add filter, a chip on the row below once it's set; the row only while there's one -->
       <div class="list-toolbar pl-toolbar" role="search" aria-label="Search and filter">
         <div class="list-bar" data-search="button">
-          <button type="button" class="button add-filter" data-variant="secondary" data-size="sm" id="add-filter" aria-haspopup="menu" aria-expanded="false" data-tip="Add filter"><i data-icon="filter" data-size="16"></i><span>Add filter</span></button>
+          <button type="button" class="button add-filter" data-variant="secondary" data-size="sm" id="add-filter" aria-haspopup="dialog" aria-expanded="false" data-tip="Add filter"><i data-icon="filter" data-size="16"></i><span>Add filter</span></button>
           <span class="list-bar-sep" aria-hidden="true"></span>
           <p class="result-count" id="count" aria-live="polite"></p>
           <label class="list-search"><i data-icon="search" data-size="16"></i><input type="search" id="search" aria-label="Search the pipeline" placeholder="Search" enterkeyhint="search" autocomplete="off"></label>
           <button type="button" class="button list-search-open" data-variant="ghost" data-size="sm" data-icon-only aria-label="Search" aria-controls="search" aria-expanded="false" data-tip="Search"><i data-icon="search" data-size="16"></i></button>
+          <span class="list-bar-sep" aria-hidden="true"></span>
+          <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only id="view-options" aria-haspopup="menu" aria-expanded="false" aria-label="Display settings" data-tip="Display settings"><i data-icon="m-display-settings" data-size="16"></i></button>
         </div>
         <div class="list-chips"><div class="filters" id="filters"></div></div>
       </div>
@@ -67,7 +69,7 @@
     <section>
       <h3>What it is</h3>
       <p class="text-secondary">Bolster's Pipeline (Jobs → Pipeline) as direction A of the “Pipeline boards · research” board in Figma, “One lifecycle, made honest” (picked 21 Oct), with the answers to its questions. One board from the first enquiry to the paid invoice. Made-up sample data.</p>
-      <p class="text-secondary">Its toolbar is Tasks' on the page (your call, 22 Oct): Add filter for People and Show, each a chip on the row below once it's set, with Clear all; the count; the search as a button that opens into a field, Escape emptying it.</p>
+      <p class="text-secondary">Its toolbar is Tasks' on the page (your call, 22 Oct): Add filter for People, a chip on the row below once it's set, with Clear all; the count (the cards in the columns shown); the search as a button that opens into a field, Escape emptying it; then Display settings, as the lists': the columns shown (Lost off at first; the last one stays), column totals, the cards' size (Comfortable or Compact) and what they show (price, owner, time, next step), grouping (by status, by owner, or none), and folding every group at once. All of it is remembered in the browser.</p>
     </section>
     <section>
       <h3>Principles</h3>
@@ -76,11 +78,11 @@
         <li><b>One kind becomes the next in one step (P-cross).</b> Create job, on the card or by dragging it onto Pending, asks only for the job's name and makes a draft estimate; the person leaves the leads, a customer with a job now. Create invoice, from In progress, makes the final invoice from work that's done (the job leaves the board, into the job list) or a progress invoice while it's underway (the job stays).</li>
         <li><b>Stages say what they are with a shape, and faintly with a colour (P-colour).</b> The jobs' stages carry the job list's marks, filling a quarter at a time (D49): a quarter for Pending, half for Booked, three quarters for In progress, the people's and the invoices' stages, an icon. Their columns take the same status colours as a faint tint; the people's stay neutral, so a lead is never red. Red means something stuck, and nothing else.</li>
         <li><b>Red means stuck, and says why (P-stuck).</b> Every card says how long it's been where it is; past its stage's limit, that line turns red and says what's waiting: “No reply for 9 days”. Limits, until settings have them: a new lead 2 days, a visit with no job 2 days, an estimate never sent 3 days, a sent one 7, a booked job with no dates 7, finished work not invoiced 3, an invoice past its due date.</li>
-        <li><b>The next step is on the card (P-next).</b> Each card shows its one next step, always, not on hover (a link, an icon or a strip: three card layouts to compare in Concept controls): Create job, Send estimate, Mark as booked, Schedule, Mark as started, Invoice, Record payment. A job opens the job (its own window); Quick look, in its top corner (always there without hover), shows the rest beside the board. A lead or an invoice opens that summary itself.</li>
-        <li><b>Sub-statuses are groups inside their stage (P-groups).</b> Drafts, Never sent, Changes not sent yet, Sent; Not scheduled, Scheduled; Underway, Work done; Not sent, Sent, Overdue, Paid. Each folds, with its count, and what needs doing comes first; space between them, no rules. Within a group, the order is the date's, never your own.</li>
+        <li><b>The next step is on the card (P-next).</b> Each card shows its one next step, always, not on hover (a strip at the card's foot, or an icon on a Compact card; Card details can hide it, and it's still in the card's summary): Create job, Send estimate, Mark as booked, Schedule, Mark as started, Invoice, Record payment. A job opens the job (its own window); Quick look, in its top corner (always there without hover), shows the rest beside the board. A lead or an invoice opens that summary itself.</li>
+        <li><b>Sub-statuses are groups inside their stage (P-groups).</b> Drafts, Never sent, Changes not sent yet, Sent; Not scheduled, Scheduled; Underway, Work done; Not sent, Sent, Overdue, Paid. Each folds, with its count, and what needs doing comes first; space between them, no rules. Within a group, the order is the date's, never your own. Group by can make them people instead (you first, then by name) or none (one run in date order); each grouping keeps its own folds, and a moved card lands in its group at its date's place.</li>
         <li><b>A column's money says what it adds up (P-money).</b> Quoted (sent estimates) on Pending jobs; contracted on Booked and In progress; owed on Invoices. In full, never “3M”. Weighted odds aren't Bolster's yet; people stages show none.</li>
         <li><b>Moving is dragging; a drop that needs something asks for it (P-move).</b> A card goes to the next stage or back one. Where the next stage needs something (a visit's time, the job's name, the contract and start, the invoice's amount) the drop opens a short dialog; otherwise it moves, with Undo. Stages a card can't go to say why as you drag over them. The card you hold leaves an outline in its place and goes with the pointer, lifted; where it lands lights up for a moment. A lead or an estimate dropped on Lost asks for the reason; with Lost hidden, Mark as lost waits at the foot instead. The card's summary does the same from the keyboard and on phones.</li>
-        <li><b>What leaves the board (P-closed).</b> Booked is won. Lost leads and jobs leave their stage with a reason (price, timing, went with someone else, no reply, not a fit) for Lost, a column of its own after the last stage, out of the flow: untinted, its cards quieter, Leads and Jobs apart, the latest first, each saying when and why, and the money lost on top. It's hidden until Show, under Add filter, brings it in: a chip while it's in, its × taking it away again (remembered; your call, 22 Oct), and it isn't in the board's count. Reopen, on the card or by dragging it back onto the stage it left, puts it where it was, with Undo. Paid invoices stay a week, then the job lives in the job list.</li>
+        <li><b>What leaves the board (P-closed).</b> Booked is won. Lost leads and jobs leave their stage with a reason (price, timing, went with someone else, no reply, not a fit) for Lost, a column of its own after the last stage, out of the flow: untinted, its cards quieter, Leads and Jobs apart, the latest first, each saying when and why, and the money lost on top. It's hidden until Display settings → Columns shows it (remembered; your call, 22 Oct), and it isn't in the board's count. Any stage can be hidden the same way; a step that lands a card in a hidden column (Mark as lost, Create invoice) still does it, and its toast says so. Reopen, on the card or by dragging it back onto the stage it left, puts it where it was, with Undo. Paid invoices stay a week, then the job lives in the job list.</li>
         <li><b>On phones, a stage at a time (P-phone).</b> Stages as tabs with their counts, swiped or picked, Lost among them while Show has it; cards full width, their next step on them; no dragging, Move to in the summary (a lost card's reopens it).</li>
       </ol>
     </section>
@@ -107,12 +109,6 @@
 <details class="concept-controls" id="concept-controls" data-more-entry="Concept controls" data-more-icon="sliders">
   <summary><span class="concept-tag">Concept</span> Controls</summary>
   <div class="concept-body">
-    <div class="field" data-size="sm"><label class="field-label" for="cc-cards">Cards</label>
-      <div class="select"><select class="input" id="cc-cards">
-        <option value="footer">Footer: next step as a strip</option>
-        <option value="quiet">Quiet: next step as a link</option>
-        <option value="compact">Compact: two lines, next step as an icon</option>
-      </select></div></div>
     <button class="button" data-variant="secondary" data-size="sm" data-open-dialog="notes">About this concept</button>
     <div class="cluster" style="justify-content:space-between">
       <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>

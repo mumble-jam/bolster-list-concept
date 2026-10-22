@@ -182,16 +182,22 @@
   }
 
   // ---------- filters: search, and whose ----------
-  const st = { q: "", people: null, folded: new Set(), tab: "leads", lost: false };
+  const st = { q: "", people: null, folded: new Set(), tab: "leads", hidden: new Set(["lost"]) };
   try { st.folded = new Set(JSON.parse(localStorage.getItem("pl-folded") || "[]")); } catch {}
-  // Show: the Lost column, off until it's asked for, remembered as the folds are
-  try { st.lost = localStorage.getItem("pl-lost") === "on"; } catch {}
   const keepFolded = () => { try { localStorage.setItem("pl-folded", JSON.stringify([...st.folded])); } catch {} };
-  // People and Show are filters under Add filter, each a chip once it's set (as Tasks', your call, 22 Oct): People when
-  // it's not everyone, Show when Lost is in
-  const FILTERS = [{ key: "people", label: "People", icon: "user" }, { key: "show", label: "Show", icon: "list" }];
-  const isSet = (k) => (k === "people" ? !!st.people : st.lost);
-  const keepLost = () => { try { localStorage.setItem("pl-lost", st.lost ? "on" : "off"); } catch {} };
+  // the columns Display settings hides (your call, 22 Oct), remembered as the folds are: Lost alone at first. The Show
+  // filter before it kept only Lost (pl-lost): on means none hidden
+  const COLS = [...STAGES, LOST].map((x) => x.key);
+  const keepHidden = () => { try { localStorage.setItem("pl-hidden", JSON.stringify([...st.hidden])); } catch {} };
+  try {
+    const kept = localStorage.getItem("pl-hidden"), old = localStorage.getItem("pl-lost");
+    if (kept) st.hidden = new Set(JSON.parse(kept).filter((k) => COLS.includes(k)));
+    else if (old) { st.hidden = new Set(old === "on" ? [] : ["lost"]); keepHidden(); }
+    localStorage.removeItem("pl-lost");
+  } catch {}
+  if (st.hidden.size >= COLS.length) st.hidden = new Set(["lost"]);
+  const showing = (key) => !st.hidden.has(key);
+  // People is the one filter under Add filter, a chip once it's set (as Tasks', your call, 22 Oct)
   const shown = (r) => (!st.people || st.people.has(r.owner)) && (!st.q || `${r.name} ${r.client || ""} ${r.job || ""} ${r.number || ""} ${r.place} ${r.ask || ""}`.toLowerCase().includes(st.q));
   const filtered = () => st.q || st.people;
 
@@ -209,41 +215,50 @@
 
   // ---------- drawing ----------
   const markOf = (s, size = "") => (s.kind === "job" ? `<span class="mark${size}" data-mark="${s.mark}" style="--_dot:${s.dot}" aria-hidden="true"></span>` : ic(s.icon, 14, { optical: true }));
-  // three ways to draw a card, to compare (Concept controls): Footer (the default, your pick for now), Quiet and Compact
-  let LAYOUT = "footer";
-  try { LAYOUT = localStorage.getItem("pl-cards") || "footer"; } catch {}
-  if (!["quiet", "compact", "footer"].includes(LAYOUT)) LAYOUT = "footer";
+  // Display settings (your call, 22 Oct), each remembered: the card's size, Comfortable (its next step a strip at its
+  // foot) or Compact (two lines, the step an icon); what the card shows; how a column groups; the columns' money. The
+  // card layouts were three to compare (Concept controls); Quiet retired, so a kept quiet is Comfortable now
+  const kept = (k, d) => { try { return localStorage.getItem(k) ?? d; } catch { return d; } };
+  const keep = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+  if (kept("pl-size", null) == null && kept("pl-cards", null) != null) keep("pl-size", kept("pl-cards") === "compact" ? "compact" : "comfortable");
+  try { localStorage.removeItem("pl-cards"); } catch {}
+  st.size = kept("pl-size", "comfortable") === "compact" ? "compact" : "comfortable";
+  st.group = ["status", "owner", "none"].includes(kept("pl-group", "")) ? kept("pl-group") : "status";
+  const DETAILS = [["price", "Price", "dollar"], ["owner", "Owner", "user"], ["time", "Time", "clock"], ["next", "Next step", "chevron-right"]];
+  try { st.details = new Set(JSON.parse(kept("pl-details", '["price","time","next"]')).filter((k) => DETAILS.some(([d]) => d === k))); } catch { st.details = new Set(["price", "time", "next"]); }
+  st.totals = kept("pl-totals", "on") !== "off";
   // the line under a card's name: who or what it's for
   const subOf = (r) => (r.kind === "job" ? `${r.client} · ${r.place}` : r.kind === "invoice" ? `${r.number} · ${r.job}` : r.ask);
+  // the card says what Card details asks for; its name always, and its label everything, whatever's hidden
   function card(r) {
     const gone = lostOf(r), w = gone ? lostWhen(gone) : when(r), [next] = gone ? ["reopen"] : steps(r), job = r.kind === "job", inv = r.kind === "invoice", priced = job || inv;
-    const label = `${job ? `${r.name}, ${r.client}` : inv ? `Invoice ${r.number}, ${r.client}, ${r.job}` : r.name}, ${gone ? "lost from " : ""}${stageOf(r.stage).label}, ${groupLabel(r)}${priced ? `, ${r.value ? money(r.value) : "no price yet"}` : ""}. ${w.text}`;
+    const o = who(r.owner), d = st.details, oName = o.me ? `${o.name} (you)` : o.name;
+    const label = `${job ? `${r.name}, ${r.client}` : inv ? `Invoice ${r.number}, ${r.client}, ${r.job}` : r.name}, ${gone ? "lost from " : ""}${stageOf(r.stage).label}, ${groupLabel(r)}${priced ? `, ${r.value ? money(r.value) : "no price yet"}` : ""}. ${w.text}. Owner: ${oName}`;
     const attrs = `class="pl-card" data-id="${r.id}" data-kind="${r.kind}"${w.late ? " data-late" : ""}${r.group === "paid" && !gone ? " data-past" : ""}${gone ? " data-lost" : ""}`;
     // a job opens the job (its own window); its summary is Quick look, in the card's corner (your call, 22 Oct). A lead
     // or an invoice opens its summary
     const open = (inner) => job ? `<button type="button" class="pl-open" data-open-job="${r.id}" aria-label="${esc(label)}">${inner}</button>`
       : `<button type="button" class="pl-open" data-open="${r.id}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(label)}">${inner}</button>`;
     const quick = job ? `<button type="button" class="button pl-quick" data-variant="ghost" data-size="sm" data-icon-only data-open="${r.id}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(`Quick look: ${r.name}`)}" data-tip="Quick look">${ic("sidebar-right", 16, { optical: true })}</button>` : "";
-    const value = (priced ? `<span class="pl-value">${r.value ? money(r.value) : '<span class="pl-none">No price</span>'}</span>` : "") + quick;
-    const stepAria = next ? `aria-label="${esc(`${stepName(next, r)}: ${r.name}`)}" data-step="${next}" data-for="${r.id}"` : "";
-    const who2 = avatar(who(r.owner), "xs");
-    if (LAYOUT === "compact") {
+    const value = (priced && d.has("price") ? `<span class="pl-value">${r.value ? money(r.value) : '<span class="pl-none">No price</span>'}</span>` : "") + quick;
+    // the owner, when it's asked for: their avatar, named by its tooltip (the card's label names them too)
+    // (not while the cards are grouped by owner: the group's head says whose)
+    const owner = d.has("owner") && st.group !== "owner" ? `<span class="pl-owner" data-tip="${esc(oName)}">${avatar(o, "xs")}</span>` : "";
+    // with Next step off, the step is still in the summary (Quick look for a job)
+    const step = d.has("next") ? next : null, stepAria = step ? `aria-label="${esc(`${stepName(step, r)}: ${r.name}`)}" data-step="${step}" data-for="${r.id}"` : "";
+    const head = `<div class="pl-row">${open(`<span>${esc(r.name)}</span>`)}${value}</div>`;
+    if (st.size === "compact") {
       // two lines: the name and its money; who it's for and how long it's been, the owner and the next step as an icon
-      const line = priced ? `${esc(inv ? r.number : r.client)} · <span class="pl-when-text">${esc(w.text)}</span>` : `<span class="pl-when-text">${esc(w.text)}</span>`;
-      return `<article ${attrs}><div class="pl-row">${open(`<span>${esc(r.name)}</span>`)}${value}</div>
-        <div class="pl-row pl-meta"><p class="pl-line">${line}</p>${who2}${next ? `<button type="button" class="button pl-next" data-variant="ghost" data-size="sm" data-icon-only ${stepAria} data-tip="${stepName(next, r)}">${ic("chevron-right", 14, { optical: true })}</button>` : '<span class="pl-next-slot" aria-hidden="true"></span>'}</div></article>`;
+      const bits = [priced ? esc(inv ? r.number : r.client) : "", d.has("time") ? `<span class="pl-when-text">${esc(w.text)}</span>` : ""].filter(Boolean);
+      const tail = d.has("next") ? (step ? `<button type="button" class="button pl-next" data-variant="ghost" data-size="sm" data-icon-only ${stepAria} data-tip="${stepName(step, r)}">${ic("chevron-right", 14, { optical: true })}</button>` : '<span class="pl-next-slot" aria-hidden="true"></span>') : "";
+      return `<article ${attrs}>${head}<div class="pl-row pl-meta"><p class="pl-line">${bits.length ? bits.join(" · ") : esc(subOf(r))}</p>${owner}${tail}</div></article>`;
     }
-    if (LAYOUT === "footer") {
-      // the card's facts on top, quiet; its next step as a strip across its foot, the one thing on it that acts
-      return `<article ${attrs}><div class="pl-row">${open(`<span>${esc(r.name)}</span>`)}${value}</div>
-        <p class="pl-line pl-sub">${esc(subOf(r))}</p><p class="pl-line pl-when-text pl-meta">${esc(w.text)}</p>
-        ${next ? `<button type="button" class="pl-next pl-strip" ${stepAria}><span>${stepName(next, r)}</span>${ic("chevron-right", 12, { optical: true })}</button>` : ""}</article>`;
-    }
-    // Quiet: the name and its money, who or what it's for, then how long it's been beside the next step as a link;
-    // the owner is in the summary (and People picks whose)
-    return `<article ${attrs}><div class="pl-row">${open(`<span>${esc(r.name)}</span>`)}${value}</div>
-      <p class="pl-line pl-sub">${esc(subOf(r))}</p>
-      <div class="pl-row pl-meta"><p class="pl-line pl-when-text">${esc(w.text)}</p>${next ? `<button type="button" class="pl-next pl-link" ${stepAria}>${stepName(next, r)}${ic("chevron-right", 12, { optical: true })}</button>` : ""}</div></article>`;
+    // Comfortable: the card's facts on top, quiet, the owner at the end of the last of them (the time's line, below
+    // where Quick look reaches); its next step as a strip across its foot, the one thing on it that acts
+    const time = d.has("time") ? `<p class="pl-line pl-when-text pl-meta">${esc(w.text)}</p>` : "", sub = `<p class="pl-line pl-sub">${esc(subOf(r))}</p>`;
+    return `<article ${attrs}>${head}
+      ${!owner ? sub + time : time ? `${sub}<div class="pl-row pl-sub-row">${time}${owner}</div>` : `<div class="pl-row pl-sub-row">${sub}${owner}</div>`}
+      ${step ? `<button type="button" class="pl-next pl-strip" ${stepAria}><span>${stepName(step, r)}</span>${ic("chevron-right", 12, { optical: true })}</button>` : ""}</article>`;
   }
   // within a group, the date's order (P-groups): scheduled jobs by their start, visits to come by their day and time,
   // the rest by when they got there
@@ -251,58 +266,75 @@
   const order = (key) => (key === "booked/scheduled" ? (a, b) => a.start - b.start
     : key === "visits/today" || key === "visits/coming" ? (a, b) => a.visit.day - b.visit.day || mins(a.visit.time) - mins(b.visit.time)
     : (a, b) => a.at - b.at);
+  // the same across a whole column, for Owner and None: a visit by its day and time, a scheduled job by its start, the
+  // rest by when they got there
+  const dateKey = (r) => (r.visit ? r.visit.day + mins(r.visit.time) / 1440 : r.stage === "booked" && r.group === "scheduled" ? r.start : r.at);
+  const dated = (a, b) => dateKey(a) - dateKey(b);
   // a lost card says when it was lost and why; most recently lost first
   const lostWhen = (x) => ({ text: `Lost ${ago(-x.at)}: ${x.reason.toLowerCase()}`, late: false });
   const newest = (a, b) => lostOf(b).at - lostOf(a).at;
   const rowsOf = (key) => (key === "lost" ? lost.map((x) => x.rec) : records.filter((r) => r.stage === key)).filter(shown);
+  // Group by (Display settings): Status, the stage's own sub-statuses (Lost's, what it was); Owner, a group per person,
+  // you first, then by name, each in date order; None, the column's cards in one run, in date order. Lost's are the
+  // latest first whatever the grouping. Each grouping folds on its own (an owner's group is keyed o-<id>)
+  const PEOPLE = [OWNERS.find((p) => p.me), ...OWNERS.filter((p) => !p.me).sort((a, b) => a.name.localeCompare(b.name))];
+  function groupsOf(s, rows) {
+    const gone = s === LOST, by = gone ? newest : dated;
+    if (st.group === "none") return [{ g: "all", list: [...rows].sort(by) }];
+    if (st.group === "owner") return PEOPLE.map((p) => ({ g: `o-${p.id}`, p, label: p.me ? "You" : p.name, list: rows.filter((r) => r.owner === p.id).sort(by) }));
+    return s.groups.map(([g, label]) => ({ g, label, list: rows.filter((r) => (gone ? r.kind : r.group) === g).sort(gone ? newest : order(`${s.key}/${g}`)) }));
+  }
+  // the keys of a column's groups, in their order, drawn or not (for where a card would land)
+  const groupKeys = (s) => (st.group === "none" ? ["all"] : st.group === "owner" ? PEOPLE.map((p) => `o-${p.id}`) : s.groups.map(([g]) => g));
   function column(s) {
-    const rows = rowsOf(s.key), gone = s === LOST;
-    const groups = s.groups.map(([g, label]) => {
-      const list = rows.filter((r) => (gone ? r.kind : r.group) === g).sort(gone ? newest : order(`${s.key}/${g}`));
+    const rows = rowsOf(s.key);
+    const groups = groupsOf(s, rows).map(({ g, p, label, list }) => {
       if (!list.length) return "";
-      const key = `${s.key}/${g}`, folded = st.folded.has(key);
-      return `<section class="pl-group" data-group="${key}"><h4 class="pl-group-head"><button type="button" class="pl-group-toggle" data-fold="${key}" aria-expanded="${!folded}" aria-controls="g-${s.key}-${g}">${ic("chevron-down", 12, { optical: true })}<span>${esc(label)}</span><span class="pl-n">${list.length}</span></button></h4>
-        <div class="pl-cards" id="g-${s.key}-${g}"${folded ? " hidden" : ""}>${list.map(card).join("")}</div></section>`;
+      const key = `${s.key}/${g}`, folded = st.group !== "none" && st.folded.has(key), cards = `<div class="pl-cards" id="g-${s.key}-${g}"${folded ? " hidden" : ""}>${list.map(card).join("")}</div>`;
+      if (st.group === "none") return `<section class="pl-group" data-group="${key}">${cards}</section>`;
+      return `<section class="pl-group" data-group="${key}"><h4 class="pl-group-head"><button type="button" class="pl-group-toggle" data-fold="${key}" aria-expanded="${!folded}" aria-controls="g-${s.key}-${g}">${ic("chevron-down", 12, { optical: true })}${p ? avatar(p, "xs") : ""}<span>${esc(label)}</span><span class="pl-n">${list.length}</span></button></h4>
+        ${cards}</section>`;
     }).join("");
     const empty = `<p class="pl-empty">${filtered() ? "No matches" : "Nothing here"}</p>`;
     return `<section class="pl-col" id="col-${s.key}" data-stage="${s.key}" data-kind="${s.kind}" aria-labelledby="h-${s.key}">
-      <header class="pl-col-head"><h3 id="h-${s.key}">${markOf(s)}<span>${esc(s.label)}</span><span class="pl-n">${rows.length}</span></h3>${s.kind !== "person" ? `<p class="pl-figure">${figure(s, rows)}</p>` : ""}</header>
+      <header class="pl-col-head"><h3 id="h-${s.key}">${markOf(s)}<span>${esc(s.label)}</span><span class="pl-n">${rows.length}</span></h3>${s.kind !== "person" && st.totals ? `<p class="pl-figure">${figure(s, rows)}</p>` : ""}</header>
       <div class="pl-col-body" tabindex="-1">${groups || empty}</div></section>`;
   }
   const board = $("#board");
   function render() {
     const left = board.scrollLeft;
-    // People, Jobs and Invoices over their columns, a seam where one kind becomes the next (P-kinds, P-cross)
-    const KINDS = [["person", "user", "People, no job yet"], ["job", "briefcase", "Jobs"], ["invoice", "file-invoice", "Invoices"]];
+    // People, Jobs and Invoices over their columns, a seam where one kind becomes the next (P-kinds, P-cross); only
+    // the columns shown, a kind with none of them gone with its seam; Lost after a seam, out of the flow. The grid's
+    // tracks are what's drawn
+    const KINDS = [["person", "user", "People, no job yet"], ["job", "briefcase", "Jobs"], ["invoice", "file-invoice", "Invoices"], ["lost"]];
     let col = 1, cols = "", heads = "";
-    KINDS.forEach(([k, icon, name], i) => {
-      if (i) cols += `<div class="pl-seam" style="grid-column:${col++}" aria-hidden="true"></div>`;
-      const list = STAGES.filter((x) => x.kind === k);
-      heads += `<p class="pl-kind" data-kind="${k}" style="grid-column:${col} / span ${list.length}">${ic(icon, 12, { optical: true })}${name}</p>`;
-      cols += list.map((x) => column(x).replace('<section class="pl-col"', `<section class="pl-col" style="grid-column:${col++}"`)).join("");
+    const tracks = [], put = (x) => { tracks.push("var(--pl-col)"); return column(x).replace('<section class="pl-col"', `<section class="pl-col" style="grid-column:${col++}"`); };
+    KINDS.forEach(([k, icon, name]) => {
+      const list = (k === "lost" ? [LOST] : STAGES.filter((x) => x.kind === k)).filter((x) => showing(x.key));
+      if (!list.length) return;
+      if (tracks.length) { tracks.push("var(--pl-seam)"); cols += `<div class="pl-seam" style="grid-column:${col++}" aria-hidden="true"></div>`; }
+      if (name) heads += `<p class="pl-kind" data-kind="${k}" style="grid-column:${col} / span ${list.length}">${ic(icon, 12, { optical: true })}${name}</p>`;
+      cols += list.map(put).join("");
     });
-    // Lost after a seam, out of the flow, while Show has it
-    if (st.lost) cols += `<div class="pl-seam" style="grid-column:${col++}" aria-hidden="true"></div>${column(LOST).replace('<section class="pl-col"', `<section class="pl-col" style="grid-column:${col++}"`)}`;
-    board.toggleAttribute("data-lost", st.lost);
+    board.style.gridTemplateColumns = tracks.join(" ");
     board.innerHTML = heads + cols;
     board.scrollLeft = left;
-    const n = records.filter(shown).length;
-    // the count, as the list's: all of them, or how many of them a search or People lets through; the board's own
-    // cards, never what's lost (its column counts those)
-    const all = records.length;
+    // the count, as the list's: all of them, or how many of them a search or People lets through; the cards in the
+    // columns shown, never what's lost (its column counts those). A hidden column isn't a filter: no “of” for it
+    const live = records.filter((r) => showing(r.stage)), n = live.filter(shown).length, all = live.length;
     $("#count").innerHTML = filtered() ? `<strong>${fmt.count(n)}</strong> of ${fmt.plural(all, "card", "cards")}` : `<strong>${fmt.count(all)}</strong> ${all === 1 ? "card" : "cards"}`;
-    if (!st.lost && st.tab === "lost") st.tab = "invoices";
-    $("#tabs").innerHTML = [...STAGES, ...(st.lost ? [LOST] : [])].map((s) => `<button type="button" data-tab="${s.key}"${s.key === st.tab ? ' aria-current="true"' : ""}>${markOf(s)}<span>${esc(s.label)}</span><span class="pl-n">${rowsOf(s.key).length}</span></button>`).join("");
+    // a hidden stage's tab goes; if it was the one picked, the nearest shown takes it (the next, else the one before)
+    const on = COLS.filter(showing);
+    if (!showing(st.tab)) st.tab = on.find((k) => COLS.indexOf(k) > COLS.indexOf(st.tab)) || on.at(-1);
+    $("#tabs").innerHTML = on.map(stageOf).map((s) => `<button type="button" data-tab="${s.key}"${s.key === st.tab ? ' aria-current="true"' : ""}>${markOf(s)}<span>${esc(s.label)}</span><span class="pl-n">${rowsOf(s.key).length}</span></button>`).join("");
     chips();
     fit();
   }
-  // the set filters as chips on the row under the bar, then Clear all; Add filter offers what isn't set
+  // People, once set, as a chip on the row under the bar, then Clear all; Add filter has nothing left to add then
   function chips() {
-    const text = (k) => (k === "people" ? OWNERS.filter((o) => st.people.has(o.id)).map((o) => (o.me ? "You" : o.name.split(" ")[0])).join(", ") : "Lost leads and jobs");
-    const list = FILTERS.filter((f) => isSet(f.key)).map((f) => `<span class="chip" data-active><button type="button" class="chip-main" data-chip="${f.key}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(f.label)}: ${esc(text(f.key))}. Change filter"><span class="chip-field">${esc(f.label)}:</span><span class="chip-value">${esc(text(f.key))}</span></button><button type="button" class="chip-remove" data-remove="${f.key}" aria-label="Remove ${f.label.toLowerCase()} filter" data-tip="Remove filter">${ic("xmark", 14)}</button></span>`);
-    if (list.length) list.push(`<button type="button" class="button clear-all" data-variant="ghost" data-size="sm" data-clear-all>Clear all</button>`);
-    $("#filters").innerHTML = list.join("");
-    $("#add-filter").disabled = FILTERS.every((f) => isSet(f.key));
+    const text = st.people && OWNERS.filter((o) => st.people.has(o.id)).map((o) => (o.me ? "You" : o.name.split(" ")[0])).join(", ");
+    $("#filters").innerHTML = text ? `<span class="chip" data-active><button type="button" class="chip-main" data-chip="people" aria-haspopup="dialog" aria-expanded="false" aria-label="People: ${esc(text)}. Change filter"><span class="chip-field">People:</span><span class="chip-value">${esc(text)}</span></button><button type="button" class="chip-remove" data-remove="people" aria-label="Remove people filter" data-tip="Remove filter">${ic("xmark", 14)}</button></span><button type="button" class="button clear-all" data-variant="ghost" data-size="sm" data-clear-all>Clear all</button>` : "";
+    $("#add-filter").disabled = !!st.people;
   }
   const phone = matchMedia("(max-width: 767px)");
   // each column's head comes down its column under the toolbar (pipeline.css): how far it may go (the column's height
@@ -350,6 +382,9 @@
   function change(mutate, message, r, made = r) {
     const was = structuredClone({ records, lost }), home = r.stage;
     mutate();
+    // what lands in a hidden column still goes there, and the toast says so
+    const went = lostOf(made) ? "lost" : records.includes(made) ? made.stage : null;
+    if (went && !showing(went)) message += `; ${stageOf(went).label} is a hidden column`;
     render();
     land(made.id, home);
     say(message);
@@ -359,7 +394,7 @@
     const card = $(`.pl-card[data-id="${id}"]`, board);
     // in a folded group, its group's toggle
     const to = card && (card.closest(".pl-cards[hidden]") ? $(`[aria-controls="${card.parentElement.id}"]`, board) : $(".pl-open", card));
-    (to || $(`#col-${stage} .pl-col-body`, board))?.focus({ preventScroll: true });
+    (to || $(`#col-${stage} .pl-col-body`, board) || $(".pl-col-body", board))?.focus({ preventScroll: true });
     if (!to) return;
     const seen = to === card.querySelector(".pl-open") ? card : to;
     seen.scrollIntoView({ block: "nearest", inline: "nearest" });
@@ -463,7 +498,7 @@
       case "lose": return ask({
         title: `Mark ${esc(r.name)} as lost`, submit: "Mark as lost",
         body: `<fieldset class="pl-reasons"><legend class="field-label">Why</legend>${["Price", "Timing", "Went with someone else", "No reply", "Not a fit"].map((x, i) => `<label class="choice"><input type="radio" class="radio" name="reason" value="${x}"${i ? "" : " checked"}> ${x}</label>`).join("")}</fieldset>
-          <p class="pl-step-note">${ic("ban", 14, { optical: true })}<span>${st.lost ? "It goes to Lost, at the board's end, to reopen." : "It leaves the board and waits in Lost (Show brings it in), to reopen."}</span></p>`,
+          <p class="pl-step-note">${ic("ban", 14, { optical: true })}<span>${showing("lost") ? "It goes to Lost, at the board's end, to reopen." : "It leaves the board and waits in Lost (Display settings shows it), to reopen."}</span></p>`,
         onSubmit: (v) => change(() => { records = records.filter((x) => x !== r); lost.unshift({ rec: r, reason: v.reason, at: 0 }); }, `${r.name} marked as lost: ${v.reason.toLowerCase()}`, r),
       });
       // back in the stage and group it left, as it was
@@ -483,6 +518,7 @@
     pop.setAttribute("role", "dialog");
     pop.setAttribute("aria-label", label || kind);
     pop.innerHTML = fill();
+    delete pop.dataset.drill;
     pop.showPopover();
     from?.setAttribute("aria-expanded", "true");
     BolsterShell.placePopover(pop, from, { start });
@@ -510,6 +546,7 @@
       if (r.bottom < head.bottom || r.top > innerHeight || r.right < b.left || r.left > b.right) return pop.hidePopover();
     }
     BolsterShell.placePopover(pop, a, { start: popFor.start });
+    placeSub();
   }
   const closeBtn = () => `<button type="button" class="button cal-pop-close" data-variant="ghost" data-size="sm" data-icon-only data-close-pop aria-label="Close" data-tip="Close">${ic("xmark", 16, { optical: true })}</button>`;
   const dd = (term, html) => `<dt>${term}</dt><dd>${html}</dd>`;
@@ -530,10 +567,118 @@
     const rows = [OWNERS.find((p) => p.me), ...OWNERS.filter((p) => !p.me)];
     return `<div class="pop-head"><h3>People</h3>${closeBtn()}</div><div class="pop-body">${rows.map((p) => `<label class="option"><input type="checkbox" class="checkbox" data-person-pick="${p.id}"${!st.people || st.people.has(p.id) ? " checked" : ""}><span class="option-label"><span class="menu-icon">${avatar(p, "sm")}</span>${esc(p.me ? `${p.name} (you)` : p.name)}</span></label>`).join("")}</div>`;
   }
-  const filterMenu = () => `<div class="pop-body">${FILTERS.filter((f) => !isSet(f.key)).map((f) => `<button type="button" class="menu-item" role="menuitem" data-add-filter="${f.key}"><span class="menu-icon">${ic(`m-${f.icon}`, 14)}</span><span>${f.label}</span></button>`).join("")}</div>`;
-  const pickFilter = (k, from) => openPop(k, from, k === "people" ? peopleHtml : showHtml, { label: k === "people" ? "People" : "Show", start: true });
-  // Show: what the board holds besides its stages, as the calendar's and the timeline's Show; one thing for now
-  const showHtml = () => `<div class="pop-head"><h3>Show</h3>${closeBtn()}</div><div class="pop-body"><label class="option"><input type="checkbox" class="checkbox" data-show="lost"${st.lost ? " checked" : ""}><span class="option-label"><span class="menu-icon">${ic("ban", 14)}</span>Lost leads and jobs</span></label></div>`;
+  // with People the only filter, Add filter opens its picker straight away: a menu of one is a step for nothing
+  const pickPeople = (from) => openPop("people", from, peopleHtml, { label: "People", start: true });
+
+  // ---------- Display settings (the lists', your call, 22 Oct): rows that read their value and open a nested menu ----------
+  // Columns, then Column totals beside it (both the columns' own), the card's size and details, Group by last, so the
+  // folding under the rule sits by the grouping it folds
+  const sub = (name, label, icon, value, items) => `<div class="submenu-row"><button type="button" class="menu-item submenu-trigger" role="menuitem" data-sub="${name}" data-key="sub-${name}" aria-haspopup="menu" aria-expanded="false" aria-controls="pop-sub-${name}"><span class="menu-icon">${ic(`m-${icon}`, 14)}</span><span class="submenu-label">${label}</span><span class="submenu-value">${esc(value)}</span>${ic("chevron-right", 12)}</button><div class="pop submenu" id="pop-sub-${name}" popover role="menu" aria-label="${label}"><button type="button" class="menu-item submenu-back" data-sub-back="${name}" aria-label="Back"><span class="submenu-back-to">${ic("chevron-left", 14)}Back</span><span class="submenu-label">${label}</span><span></span></button>${items}</div></div>`;
+  // an item, as the lists': its icon, its name, a check by what's chosen (in the menu itself, menu.css draws the check)
+  const opt = (role, on, attrs, label, icon = "", tick = true) => `<button type="button" class="menu-item" role="${role}" aria-checked="${on}" ${attrs}>${icon ? `<span class="menu-icon">${icon}</span>` : ""}<span class="submenu-label">${esc(label)}</span>${on && tick ? ic("check", 14) : ""}</button>`;
+  const count = (n, of) => (n === of ? "All" : `${n} of ${of}`);
+  const SIZES = [["comfortable", "Comfortable"], ["compact", "Compact"]], GROUPS = [["status", "Status", "status"], ["owner", "Owner", "user"], ["none", "None", "list"]];
+  // Columns: every stage in the board's order, by kind, then Lost; each with its mark. The last one shown stays
+  function colItems() {
+    const last = COLS.filter(showing).length === 1;
+    const item = (x) => opt("menuitemcheckbox", showing(x.key), `data-col-toggle="${x.key}" data-key="col-${x.key}"${showing(x.key) && last ? ' aria-disabled="true" data-tip="The board keeps one column"' : ""}`, x.label, markOf(x));
+    const kind = (k, name) => `<div class="pop-section">${name}</div>${STAGES.filter((x) => x.kind === k).map(item).join("")}`;
+    return `${kind("person", "People")}${kind("job", "Jobs")}${kind("invoice", "Invoices")}<hr>${item(LOST)}`;
+  }
+  // Fold all and Unfold all: the groups drawn now, under the grouping in use
+  const toggles = () => $$("[data-fold]", board);
+  function displayHtml() {
+    const ts = toggles(), canFold = ts.some((t) => t.getAttribute("aria-expanded") === "true"), canOpen = ts.some((t) => t.getAttribute("aria-expanded") === "false");
+    const act = (k, label, icon, on) => `<button type="button" class="menu-item" role="menuitem" data-fold-all="${k}" data-key="${k}"${on ? "" : " disabled"}><span class="menu-icon">${ic(`m-${icon}`, 14)}</span><span class="submenu-label">${label}</span></button>`;
+    return `<div class="pop-body">
+      ${sub("cols", "Columns", "columns-3", count(COLS.filter(showing).length, COLS.length), colItems())}
+      ${opt("menuitemcheckbox", st.totals, 'data-totals data-key="totals"', "Column totals", ic("m-calculator", 14), false)}
+      ${sub("size", "Card size", "line-height", SIZES.find(([v]) => v === st.size)[1], SIZES.map(([v, l]) => opt("menuitemradio", st.size === v, `data-size-pick="${v}" data-key="size-${v}"`, l)).join(""))}
+      ${sub("details", "Card details", "eye", count(st.details.size, DETAILS.length), DETAILS.map(([k, l, i]) => opt("menuitemcheckbox", st.details.has(k), `data-detail="${k}" data-key="det-${k}"`, l, ic(`m-${i}`, 14))).join(""))}
+      ${sub("group", "Group by", "layers", GROUPS.find(([v]) => v === st.group)[1], GROUPS.map(([v, l, i]) => opt("menuitemradio", st.group === v, `data-group-pick="${v}" data-key="grp-${v}"`, l, ic(`m-${i}`, 14))).join(""))}
+      <hr>${act("fold", "Fold all groups", "chevron-right", canFold)}${act("unfold", "Unfold all groups", "chevron-down", canOpen)}
+    </div>`;
+  }
+  // a setting changed: the board's drawn again and the menu with it, in place: a nested menu stays open, focus stays on
+  // what was picked (or, if that's now disabled, on the other fold action)
+  function setDisplay(change, key) {
+    change();
+    board.dataset.cards = st.size;
+    keep("pl-size", st.size); keep("pl-group", st.group); keep("pl-details", JSON.stringify([...st.details])); keep("pl-totals", st.totals ? "on" : "off"); keepHidden(); keepFolded();
+    render();
+    const t = document.createElement("div");
+    t.innerHTML = displayHtml();
+    $$(".submenu", pop).forEach((m) => { $$(":scope > :not(.submenu-back)", m).forEach((x) => x.remove()); m.append(...$$(":scope > :not(.submenu-back)", $(`#${m.id}`, t))); });
+    $$(".submenu-value", pop).forEach((v, i) => (v.textContent = $$(".submenu-value", t)[i].textContent));
+    const fresh = $$(":scope > .pop-body > .menu-item", t);
+    $$(":scope > .pop-body > .menu-item", pop).forEach((x, i) => x.replaceWith(fresh[i]));
+    const to = $(`[data-key="${key}"]`, pop);
+    (to && !to.disabled ? to : $("[data-fold-all]:not(:disabled)", pop) || triggerOf("group"))?.focus({ preventScroll: true });
+    placeSub();
+  }
+  // a column shown or hidden; one brought back comes into view, and on phones the tab follows what's left
+  function toggleCol(key) {
+    setDisplay(() => (showing(key) ? st.hidden.add(key) : st.hidden.delete(key)), `col-${key}`);
+    const c = $(`#col-${key}`, board);
+    if (c && !phone.matches) sideways(board, c);
+    if (phone.matches) { show(st.tab); tabs(); }
+  }
+  // the nested menu: a popover in the menu, beside it on the side with room, its first item level with its row; on
+  // phones the sheet drills into it, a back row on top (popover.css). As the lists' (data-list.js)
+  const menuOf = (name) => $(`#pop-sub-${name}`, pop), triggerOf = (name) => $(`[data-sub="${name}"]`, pop);
+  const openSubName = () => $(".submenu:popover-open", pop)?.id.replace("pop-sub-", "") || null;
+  function placeSub() {
+    const name = openSubName();
+    if (!name) return;
+    const el = menuOf(name), m = pop.getBoundingClientRect(), r = triggerOf(name).getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight, gap = 4;
+    let left = m.right + gap + w <= innerWidth - 12 ? m.right + gap : m.left - gap - w >= 12 ? m.left - gap - w : null;
+    let top = r.top - (parseFloat(getComputedStyle(el).paddingBlockStart) || 0);
+    if (left == null) { left = Math.max(12, r.right - w); top = r.bottom + gap + h <= innerHeight - 12 ? r.bottom + gap : r.top - gap - h; }
+    Object.assign(el.style, { left: `${left}px`, top: `${Math.max(12, Math.min(top, innerHeight - h - 12))}px` });
+  }
+  const firstItem = (el) => $("[aria-checked=true]", el) || $("[role^=menuitem]", el);
+  function openSub(name, { focus = false } = {}) {
+    const el = menuOf(name);
+    if (!el) return;
+    if (phone.matches) { pop.dataset.drill = name; el.setAttribute("data-drilled", ""); pop.scrollTop = 0; if (focus) firstItem(el)?.focus({ preventScroll: true }); return; }
+    if (!el.matches(":popover-open")) el.showPopover();
+    placeSub();
+    if (focus) firstItem(el)?.focus({ preventScroll: true });
+  }
+  function closeSub(name) {
+    delete pop.dataset.drill; menuOf(name)?.removeAttribute("data-drilled");
+    if (menuOf(name)?.matches(":popover-open")) menuOf(name).hidePopover();
+    triggerOf(name)?.focus({ preventScroll: true });
+  }
+  // its row says it's open; closed (Escape, ArrowLeft), focus goes back to its row
+  pop.addEventListener("toggle", (e) => {
+    if (!e.target.matches?.(".submenu") || !e.target.isConnected) return;
+    const tr = triggerOf(e.target.id.replace("pop-sub-", ""));
+    tr?.setAttribute("aria-expanded", e.newState === "open");
+    if (e.newState === "closed" && e.target.contains(document.activeElement)) tr?.focus({ preventScroll: true });
+  }, true);
+  pop.addEventListener("scroll", placeSub, { passive: true });
+  // a mouse over a row opens its menu, over a row without one closes it
+  let subTimer;
+  pop.addEventListener("pointerover", (e) => {
+    if (e.pointerType !== "mouse" || phone.matches || e.target.closest(".submenu")) return clearTimeout(subTimer);
+    const name = e.target.closest("[data-sub]")?.dataset.sub || null;
+    if (name === openSubName()) return clearTimeout(subTimer);
+    clearTimeout(subTimer);
+    subTimer = setTimeout(() => (name ? openSub(name) : openSubName() && menuOf(openSubName()).hidePopover()), name ? 120 : 200);
+  });
+  // keys: arrows between a menu's items, Right, Enter or Space into a nested one, Left back out (Escape closes it)
+  pop.addEventListener("keydown", (e) => {
+    const trigger = e.target.closest?.("[data-sub]");
+    if (trigger && ["ArrowRight", "Enter", " "].includes(e.key)) { e.preventDefault(); return openSub(trigger.dataset.sub, { focus: true }); }
+    const box = e.target.closest?.("[popover]") || pop;
+    if (box.matches(".submenu") && e.key === "ArrowLeft") { e.preventDefault(); return phone.matches ? closeSub(box.id.replace("pop-sub-", "")) : box.hidePopover(); }
+    const items = $$("[role^=menuitem]", box).filter((el) => el.closest("[popover]") === box && !el.disabled && el.checkVisibility());
+    const i = items.indexOf(document.activeElement), next = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: items.length - 1 }[e.key];
+    if (!items.length || next === undefined) return;
+    e.preventDefault();
+    items[(next + items.length) % items.length].focus();
+  });
 
   // ---------- dragging: onto a stage, or onto Lost (its column if it's shown, else Mark as lost at the foot) (P-move) ----------
   // Mouse and pen only: on touch a press scrolls, and phones move cards from the summary (P-phone).
@@ -547,8 +692,9 @@
     const col = el?.closest?.(".pl-col");
     return col ? { stage: col.dataset.stage } : null;
   }
-  // where it would land (the system's drop line, drop-line.css): the group the step puts it in, at its place in that
-  // group's order, in the gap between two cards; under the head of a folded group (said in the hint), where a group
+  // where it would land (the system's drop line, drop-line.css): the group the step puts it in under the grouping in
+  // use (its sub-status, its owner's, or the column's one run), at its place in that group's order, in the gap between
+  // two cards; under the head of a folded group (said in the hint), where a group
   // not drawn would be; at the top of Lost's group, the latest first. None where a drop is refused
   const dropLine = Object.assign(document.createElement("div"), { className: "drop-line" });
   dropLine.setAttribute("aria-hidden", "true");
@@ -569,20 +715,22 @@
   }
   // draws the line; says the group's name if it's folded
   function showDropLine(r, step) {
-    const to = landingOf(r, step), key = `${to.stage}/${to.group}`, body = $(`#col-${to.stage} .pl-col-body`, board);
+    const to = landingOf(r, step), s = stageOf(to.stage), body = $(`#col-${to.stage} .pl-col-body`, board);
+    const g = st.group === "none" ? "all" : st.group === "owner" ? `o-${to.owner}` : to.group, key = `${to.stage}/${g}`;
     if (!body) return hideDropLine();
     const box = body.getBoundingClientRect(), pad = parseFloat(getComputedStyle(body).paddingInlineStart) || 0;
     const rect = (el) => el.getBoundingClientRect(), sec = $(`[data-group="${key}"]`, body);
     const half = (parseFloat(getComputedStyle($(".pl-cards", body) || body).rowGap) || 6) / 2, apart = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--space-2")) || 8) / 2;
     let y, folded = "";
-    if (sec && $(".pl-cards", sec).hidden) { y = rect($(".pl-group-head", sec)).bottom + half; folded = stageOf(to.stage).groups.find(([g]) => g === to.group)[1]; }
+    if (sec && $(".pl-cards", sec).hidden) { y = rect($(".pl-group-head", sec)).bottom + half; folded = st.group === "owner" ? (who(to.owner).me ? "You" : who(to.owner).name) : s.groups.find(([x]) => x === g)[1]; }
     else if (sec) {
       const cards = $$(".pl-card", sec), n = cards.length;
-      const i = to.stage === "lost" ? 0 : cards.filter((c) => order(key)(byId(c.dataset.id), to) <= 0).length;
+      const by = st.group === "status" ? order(key) : dated;
+      const i = to.stage === "lost" ? 0 : cards.filter((c) => by(byId(c.dataset.id), to) <= 0).length;
       y = i === 0 ? rect(cards[0]).top - half : i === n ? rect(cards[n - 1]).bottom + half : (rect(cards[i - 1]).bottom + rect(cards[i]).top) / 2;
     } else {
       // not drawn: before the next group that is, after the last before it, or where the column says it's empty
-      const keys = stageOf(to.stage).groups.map(([g]) => `${to.stage}/${g}`), at = keys.indexOf(key), drawn = (k) => $(`[data-group="${k}"]`, body);
+      const keys = groupKeys(s).map((x) => `${to.stage}/${x}`), at = keys.indexOf(key), drawn = (k) => $(`[data-group="${k}"]`, body);
       const next = keys.slice(at + 1).map(drawn).find(Boolean), prev = keys.slice(0, at).map(drawn).filter(Boolean).pop();
       y = next ? rect(next).top - apart : prev ? rect(prev).bottom + apart : rect($(".pl-empty", body) || body).top;
     }
@@ -610,7 +758,7 @@
       document.documentElement.setAttribute("data-pl-dragging", "");
       $(`.pl-card[data-id="${drag.id}"]`)?.setAttribute("data-dragging-item", "");
       $$(".pl-col", board).forEach((c) => { const g = canDrop(r, c.dataset.stage); c.dataset.drop = g.same ? "home" : g.ok ? "yes" : "no"; });
-      dropbar.hidden = st.lost || !!lostOf(r) || !canLose(r);
+      dropbar.hidden = showing("lost") || !!lostOf(r) || !canLose(r);
       const priced = r.kind !== "person";
       ghost.innerHTML = `<div class="pl-row"><b>${esc(r.name)}</b>${priced ? `<span class="pl-value">${r.value ? money(r.value) : '<span class="pl-none">No price</span>'}</span>` : ""}</div>
         <p class="pl-line">${esc(subOf(r))}</p><p class="pl-ghost-hint"></p>`;
@@ -678,15 +826,17 @@
       return;
     }
     if ((el = q("[data-tab]"))) { st.tab = el.dataset.tab; show(st.tab); return tabs(); }
-    if ((el = q("#add-filter"))) { openPop("add-filter", el, filterMenu, { label: "Add filter", start: true }); pop.setAttribute("role", "menu"); return; }
-    if ((el = q("[data-add-filter]"))) { pop.hidePopover(); return pickFilter(el.dataset.addFilter, $("#add-filter")); }
-    if ((el = q("[data-chip]"))) return pickFilter(el.dataset.chip, el);
-    if ((el = q("[data-remove], [data-clear-all]"))) {
-      const k = el.dataset.remove;
-      if (!k || k === "people") st.people = null;
-      if (!k || k === "show") { st.lost = false; keepLost(); }
-      render(); return $("#add-filter").focus({ preventScroll: true });
-    }
+    if ((el = q("#add-filter, [data-chip]"))) return pickPeople(el);
+    if (q("[data-remove], [data-clear-all]")) { st.people = null; render(); return $("#add-filter").focus({ preventScroll: true }); }
+    if ((el = q("#view-options"))) { openPop("display", el, displayHtml, { label: "Display settings" }); pop.setAttribute("role", "menu"); return; }
+    if ((el = q("[data-sub-back]"))) return closeSub(el.dataset.subBack);
+    if ((el = q("[data-sub]"))) return openSub(el.dataset.sub, { focus: e.detail === 0 });
+    if ((el = q("[data-col-toggle]"))) return el.getAttribute("aria-disabled") === "true" ? undefined : toggleCol(el.dataset.colToggle);
+    if ((el = q("[data-totals]"))) return setDisplay(() => (st.totals = !st.totals), "totals");
+    if ((el = q("[data-size-pick]"))) return setDisplay(() => (st.size = el.dataset.sizePick), `size-${el.dataset.sizePick}`);
+    if ((el = q("[data-detail]"))) { const k = el.dataset.detail; return setDisplay(() => (st.details.has(k) ? st.details.delete(k) : st.details.add(k)), `det-${k}`); }
+    if ((el = q("[data-group-pick]"))) return setDisplay(() => (st.group = el.dataset.groupPick), `grp-${el.dataset.groupPick}`);
+    if ((el = q("[data-fold-all]"))) { const k = el.dataset.foldAll, keys = toggles().map((t) => t.dataset.fold); return setDisplay(() => keys.forEach((x) => (k === "fold" ? st.folded.add(x) : st.folded.delete(x))), k); }
     // Add: a lead (a person, no job yet) or a job (Bolster's Create job window, an empty estimate)
     if ((el = q("#create"))) { openPop("add", el, () => `<div class="pop-body">${[["lead", "user", "Lead"], ["job", "briefcase", "Job"]].map(([k, icon, l]) => `<button type="button" class="menu-item" role="menuitem" data-add="${k}"><span class="menu-icon">${ic(icon, 14)}</span>${l}</button>`).join("")}</div>`, { label: "Add" }); pop.setAttribute("role", "menu"); return; }
     if ((el = q("[data-add]"))) { pop.hidePopover(); return BolsterShell.toast(el.dataset.add === "lead" ? "Concept only: adding a lead isn't wired up." : "Concept only: in Bolster, this opens Create job (an empty estimate)."); }
@@ -709,23 +859,13 @@
     BolsterShell.placePopover(pop, chip, { start: true });
   }
   document.addEventListener("change", (e) => {
-    const sh = e.target.closest("[data-show]");
-    if (sh) {
-      st.lost = sh.checked; keepLost();
-      picked("show");
-      // brought in, the board goes to it at its end
-      if (st.lost) show("lost");
-      return;
-    }
     const p = e.target.closest("[data-person-pick]");
     if (!p) return;
     const ids = $$("[data-person-pick]", pop).filter((x) => x.checked).map((x) => x.dataset.personPick);
     st.people = ids.length && ids.length < OWNERS.length ? new Set(ids) : null;
     picked("people");
   });
-  $("#cc-cards").value = LAYOUT;
-  $("#cc-cards").addEventListener("change", (e) => { LAYOUT = e.target.value; try { localStorage.setItem("pl-cards", LAYOUT); } catch {} board.dataset.cards = LAYOUT; render(); });
-  board.dataset.cards = LAYOUT;
+  board.dataset.cards = st.size;
   $("#search").addEventListener("input", (e) => { st.q = e.target.value.trim().toLowerCase(); render(); });
   // the search as the system's button (toolbar.css): Escape empties it, and the board's drawn again
   BolsterShell.searchButton($(".pl-toolbar .list-bar"), { onClear: () => { st.q = ""; render(); } });
@@ -760,7 +900,7 @@
   board.addEventListener("scrollend", () => { if (steering) steered(); });
 
   phone.addEventListener("change", render);
-  addEventListener("resize", () => { fit(); if (popFor) BolsterShell.placePopover(pop, popFor.from, { start: popFor.start }); });
+  addEventListener("resize", () => { fit(); if (popFor) { BolsterShell.placePopover(pop, popFor.from, { start: popFor.start }); placeSub(); } });
   // what hides and sticks as you scroll is the shell's: this page says where the board starts, and that a drag is in use
   BolsterShell.scrolling({ into: (top) => board.getBoundingClientRect().top < top, toolbar: phone.matches ? null : $(".pl-toolbar"), busy: () => !!drag?.started, onScroll: follow });
   render();

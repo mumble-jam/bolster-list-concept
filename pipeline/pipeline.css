@@ -26,6 +26,11 @@
   .pl-toolbar .add-filter span { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
   @media (hover: hover) { .pl-toolbar .add-filter:hover:not(:disabled) { border-color: transparent; background: var(--color-action-ghost-hover); } }
   .pl-toolbar .add-filter[aria-expanded="true"] { background: var(--color-action-ghost-hover); }
+  /* Display settings, pressed while its menu's open */
+  .pl-toolbar #view-options[aria-expanded="true"] { background: var(--color-action-ghost-hover); color: var(--color-content-primary); }
+  /* the last column shown can't go: its item reads as disabled, its tooltip says why */
+  .pop .menu-item[aria-disabled="true"] { color: var(--color-content-disabled); cursor: not-allowed; }
+  .pop .menu-item[aria-disabled="true"] :is(.menu-icon, svg) { opacity: 0.5; }
   /* the chips' row only while there are chips */
   .pl-toolbar .list-chips { padding: var(--space-2) 0 0; }
   .pl-toolbar .list-chips:not(:has(.chip)) { display: none; }
@@ -34,7 +39,8 @@
   /* the page scrolls down, never a column (as the list's table): the columns grow with their cards and the board
      scrolls sideways only; each column's head comes down its own column under the toolbar, as the table's header does */
   .pl-board {
-    display: grid; grid-template-columns: repeat(2, var(--pl-col)) var(--pl-seam) repeat(3, var(--pl-col)) var(--pl-seam) var(--pl-col); grid-template-rows: auto 1fr;
+    /* its tracks are the script's (render): a column for each shown, a seam where one kind becomes the next */
+    display: grid; grid-template-rows: auto 1fr;
     column-gap: var(--space-3); row-gap: var(--space-2); justify-content: start;
     overflow-x: auto; overscroll-behavior-x: contain;
     /* room for a focus ring and the hovered column's ring at the edges */
@@ -66,9 +72,8 @@
   /* each kind's name over its columns, quietly: a word and its mark, in line with the columns' names */
   .pl-kind { display: flex; align-items: center; gap: var(--space-1-5, 6px); margin: 0; padding-inline-start: calc(var(--inset-card) + var(--border-width-default) + var(--space-3)); font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-tertiary); white-space: nowrap; }
   .pl-kind svg { flex: none; inline-size: 14px; }
-  /* each kind's place on the grid is the script's (render): People, a seam, Jobs, a seam, Invoices; a seam and Lost
-     after them while Show has it */
-  .pl-board[data-lost] { grid-template-columns: repeat(2, var(--pl-col)) var(--pl-seam) repeat(3, var(--pl-col)) var(--pl-seam) var(--pl-col) var(--pl-seam) var(--pl-col); }
+  /* each kind's place on the grid is the script's (render): People, a seam, Jobs, a seam, Invoices, a seam, Lost, of
+     the columns Display settings shows; a kind with none shown goes, with its seam */
   /* a seam: where one kind becomes the next (P-cross), a person a job, a job an invoice: a hairline down the gap */
   .pl-seam { grid-row: 1 / -1; justify-self: center; inline-size: 0; border-inline-start: var(--border-width-default) solid var(--color-line-default); }
 
@@ -137,6 +142,8 @@
     padding: 0 var(--space-2) 0 calc(var(--_in) - var(--_pad) - 3px); border: 0; border-radius: var(--radius-md);
     background: none; color: var(--color-content-secondary); font: inherit; font-size: var(--text-xs); line-height: var(--leading-xs); text-align: start; cursor: pointer;
   }
+  /* grouped by owner: their avatar after the chevron, as on the cards */
+  .pl-group-toggle .avatar { --_size: var(--space-5); flex: none; margin-inline: var(--space-0-5); font-size: 0.5625rem; }
   .pl-group-toggle svg { flex: none; inline-size: 12px; color: var(--color-content-tertiary); transition: rotate var(--duration-fast, 120ms) var(--ease-out); }
   .pl-group-toggle[aria-expanded="false"] svg { rotate: -90deg; }
   @media (hover: hover) { .pl-group-toggle:hover { color: var(--color-content-primary); } }
@@ -188,25 +195,20 @@
   @media (hover: none) { .pl-quick { align-self: center; margin-block: calc((var(--leading-sm) - var(--control-height-sm)) / 2); margin-inline: calc(-1 * var(--space-2)); } }
   /* the next step, always on the card (P-next): above the card's own click */
   .pl-next { position: relative; z-index: 1; flex: none; }
-  /* Quiet: the next step as a link at the line's end, its chevron after it */
-  .pl-link {
-    display: inline-flex; align-items: center; gap: 2px; margin: -2px -4px; padding: 2px 4px; border: 0; border-radius: var(--radius-sm);
-    background: none; color: var(--color-content-primary); font: inherit; font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); white-space: nowrap; cursor: pointer;
-  }
-  .pl-link svg { color: var(--color-content-tertiary); }
-  @media (hover: hover) { .pl-link:hover { background: var(--color-surface-hover); } }
-  .pl-link:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
-  /* a finger gets a target the size of a touch, without the line growing */
-  @media (pointer: coarse) { .pl-link::before { content: ""; position: absolute; inset: -12px -8px; } }
-  /* Compact: the owner and an icon for the next step at the second line's end */
-  .pl-board[data-cards="compact"] .pl-meta { gap: var(--space-2); margin-block: 2px -2px; margin-inline-end: -7px; }
+  /* the owner, when Card details shows it: their avatar at the end of who it's for (Comfortable) or of the second line
+     (Compact), the line keeping its height */
+  .pl-owner { display: inline-flex; flex: none; margin-block: calc((var(--leading-xs) - var(--space-5)) / 2); }
+  .pl-sub-row { align-items: center; }
+  /* Compact: the owner and an icon for the next step at the second line's end (the icon reaching into the padding) */
+  .pl-board[data-cards="compact"] .pl-meta { gap: var(--space-2); margin-block: 2px -2px; }
+  .pl-board[data-cards="compact"] .pl-meta:has(.pl-next, .pl-next-slot) { margin-inline-end: -7px; }
   .pl-board[data-cards="compact"] .pl-meta .pl-line { flex: 1; }
   /* round, so it sits in the card's corner whatever the gap (D35) */
   .pl-board[data-cards="compact"] .pl-meta .pl-next { inline-size: 1.75rem; block-size: 1.75rem; min-inline-size: 0; min-block-size: 0; border-radius: var(--radius-full); margin-block: -3px; }
   .pl-board[data-cards="compact"] .pl-next-slot { inline-size: 1.75rem; }
 
   .pl-next-slot { flex: none; }
-  /* Footer: the next step as a strip across the card's foot, a hairline above it, the card's one control */
+  /* Comfortable: the next step as a strip across the card's foot, a hairline above it, the card's one control */
   .pl-strip {
     display: flex; align-items: center; justify-content: space-between; gap: var(--space-2);
     margin: var(--space-2) calc(-1 * var(--space-3)) calc(-1 * (var(--space-2) + var(--space-0-5))); padding: var(--space-2) var(--space-3);
