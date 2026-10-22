@@ -40,7 +40,7 @@
     money0: (n) => (Math.abs(n) >= 1e6 ? `$${(n / 1e6).toFixed(n >= 1e7 ? 0 : 1)}M` : usd0.format(n)),
     count: (n) => n.toLocaleString("en-US"),
     pct: (n) => `${Math.round(n * 100)}%`,
-    date: (d) => d.toLocaleDateString("en-GB", { day: "numeric", month: "short", ...(d.getFullYear() !== TODAY.getFullYear() ? { year: "numeric" } : {}) }),
+    date: (d) => d.toLocaleDateString("en-US", { day: "numeric", month: "short", ...(d.getFullYear() !== TODAY.getFullYear() ? { year: "numeric" } : {}) }),
     ago: (d) => {
       const n = ageDays(d);
       if (n <= 0) return "Today";

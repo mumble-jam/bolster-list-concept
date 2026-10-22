@@ -85,7 +85,7 @@
     if (n === 1) return "Tomorrow";
     if (n === -1) return "Yesterday";
     if (n < -1 && n > -7) return `${-n} days ago`;
-    if (n > 1 && n < 7) return d.toLocaleDateString("en-GB", { weekday: "long" });
+    if (n > 1 && n < 7) return d.toLocaleDateString("en-US", { weekday: "long" });
     return fmt.date(d);
   };
   // in a sentence: today, tomorrow, yesterday; a day's name or a date keeps its capital
@@ -257,7 +257,7 @@
     if (popFor.kind === "due") {
       const cur = one?.due ? dayDiff(one.due) : one ? null : undefined;
       const presets = [[0, "Today"], [1, "Tomorrow"], [nextMonday(), "Next week"]];
-      let html = presets.map(([n, l]) => item(`data-set-due="${n}"`, l, { hint: daysFrom(TODAY, n).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }), on: cur === n })).join("")
+      let html = presets.map(([n, l]) => item(`data-set-due="${n}"`, l, { hint: daysFrom(TODAY, n).toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" }), on: cur === n })).join("")
         + item(`data-set-due="none"`, "No due date", { on: one && cur === null });
       const m = calMonth || new Date(one?.due || TODAY);
       const first = new Date(m.getFullYear(), m.getMonth(), 1), days = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
@@ -373,7 +373,7 @@
   }
   function moved(t, back) {
     render({ keepFresh: true });
-    if (back) toast(t.due ? `Due ${dueInline(t.due)}, ${t.due.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}` : "No due date", () => { back(); render({ keepFresh: true }); });
+    if (back) toast(t.due ? `Due ${dueInline(t.due)}, ${t.due.toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" })}` : "No due date", () => { back(); render({ keepFresh: true }); });
   }
   document.addEventListener("pointerdown", (e) => { const g = e.target.closest("[data-grip]"); if (g) g.closest(".todo-row").draggable = true; });
   document.addEventListener("dragstart", (e) => {

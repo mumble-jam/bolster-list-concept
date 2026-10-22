@@ -22,9 +22,14 @@
   const isOff = (n) => dow(n) >= 5;
   const weekStart = (n) => n - dow(n);
   const workDays = (a, b) => { let k = 0; for (let n = a; n <= b; n++) if (!isOff(n)) k++; return k; };
-  const short = (n) => dateOf(n).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-  const long = (n) => dateOf(n).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
+  const short = (n) => dateOf(n).toLocaleDateString("en-US", { day: "numeric", month: "short" });
+  const long = (n) => dateOf(n).toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" });
   const span = (a, b) => (a === b ? long(a) : `${long(a)} – ${long(b)}`);
+  // the period, as North America writes it (your call, 22 Oct): “Oct 3 – 28, 2026”, “Sep 28 – Oct 4, 2026”
+  const periodOf = (a, b) => {
+    const s = dateOf(a), e = dateOf(b);
+    return `${short(a)} – ${s.getMonth() === e.getMonth() ? e.getDate() : short(b)}, ${e.getFullYear()}`;
+  };
   const who = (id) => OWNERS.find((o) => o.id === id) || SUBS.find((o) => o.id === id);
   const together = (names) => (names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`);
 
@@ -160,13 +165,13 @@
       const d = dateOf(n), q = tier() === "months";
       const next = q ? new Date(d.getFullYear(), Math.floor(d.getMonth() / 3) * 3 + 3, 1) : new Date(d.getFullYear(), d.getMonth() + 1, 1);
       const m = Math.min(R0 + N, Math.round((next - TODAY) / DAY));
-      const label = q ? `Q${Math.floor(d.getMonth() / 3) + 1} ${d.getFullYear()}` : d.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+      const label = q ? `Q${Math.floor(d.getMonth() / 3) + 1} ${d.getFullYear()}` : d.toLocaleDateString("en-US", { month: "long", year: "numeric" });
       top.push(`<span style="left:${X(n)}px;width:${(m - n) * dw}px"><b>${esc(label)}</b></span>`);
       n = m;
     }
-    if (tier() === "days") for (let k = R0; k < R0 + N; k++) bottom.push(`<span style="left:${X(k)}px;width:${dw}px"${k === 0 ? " data-today" : isOff(k) ? " data-off" : ""}><small>${dateOf(k).toLocaleDateString("en-GB", { weekday: "narrow" })}</small>${dateOf(k).getDate()}</span>`);
+    if (tier() === "days") for (let k = R0; k < R0 + N; k++) bottom.push(`<span style="left:${X(k)}px;width:${dw}px"${k === 0 ? " data-today" : isOff(k) ? " data-off" : ""}><small>${dateOf(k).toLocaleDateString("en-US", { weekday: "narrow" })}</small>${dateOf(k).getDate()}</span>`);
     else if (tier() === "weeks") for (let k = R0; k < R0 + N; k += 7) bottom.push(`<span style="left:${X(k)}px;width:${7 * dw}px"${k <= 0 && 0 < k + 7 ? " data-today" : ""}>${dateOf(k).getDate()}</span>`);
-    else { let k = R0; while (k < R0 + N) { const d = dateOf(k), nx = Math.min(R0 + N, Math.round((new Date(d.getFullYear(), d.getMonth() + 1, 1) - TODAY) / DAY)); bottom.push(`<span style="left:${X(k)}px;width:${(nx - k) * dw}px">${d.toLocaleDateString("en-GB", { month: "short" })}</span>`); k = nx; } }
+    else { let k = R0; while (k < R0 + N) { const d = dateOf(k), nx = Math.min(R0 + N, Math.round((new Date(d.getFullYear(), d.getMonth() + 1, 1) - TODAY) / DAY)); bottom.push(`<span style="left:${X(k)}px;width:${(nx - k) * dw}px">${d.toLocaleDateString("en-US", { month: "short" })}</span>`); k = nx; } }
     return `<div class="tl-scale" style="width:${N * dw}px"><div class="tl-scale-top">${top.join("")}</div><div class="tl-scale-bottom" data-tier="${tier()}">${bottom.join("")}</div></div>`;
   }
 
@@ -318,9 +323,9 @@
   const moved = { scale: true };
   function period() {
     const sc = $(".tl-scroll");
-    if (!sc) { const js = shownJobs(); $("#period").textContent = js.length ? `${short(Math.min(...js.map((j) => j.start)))} – ${dateOf(Math.max(...js.map((j) => j.end))).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : ""; return; }
+    if (!sc) { const js = shownJobs(); $("#period").textContent = js.length ? periodOf(Math.min(...js.map((j) => j.start)), Math.max(...js.map((j) => j.end))) : ""; return; }
     const a = R0 + Math.floor(sc.scrollLeft / dw), b = Math.min(R0 + N - 1, R0 + Math.floor((sc.scrollLeft + sc.clientWidth - GRID) / dw));
-    $("#period").textContent = `${short(a)} – ${dateOf(b).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`;
+    $("#period").textContent = periodOf(a, b);
   }
   // today a quarter of the way in
   function goToday(smooth = true) {

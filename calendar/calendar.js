@@ -24,8 +24,8 @@
   // days off come from the company's settings; here, weekends
   const isOff = (s) => [0, 6].includes(day(s).getDay());
   const f = {
-    short: (s) => day(s).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }),
-    long: (s) => day(s).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }),
+    short: (s) => day(s).toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" }),
+    long: (s) => day(s).toLocaleDateString("en-US", { weekday: "long", day: "numeric", month: "long" }),
     dayWord: (s) => (s === T ? "Today" : s === D(1) ? "Tomorrow" : s === D(-1) ? "Yesterday" : null),
     // 12-hour, as North America reads it (your call, 22 Oct): “9 am”, “1:30 pm”, “12 pm”
     time: (m) => { const h = Math.floor(m / 60) % 24, mm = m % 60; return `${h % 12 || 12}${mm ? `:${String(mm).padStart(2, "0")}` : ""} ${h < 12 ? "am" : "pm"}`; },
@@ -123,7 +123,7 @@
   const dayCells = (start, n, dates, month) => Array.from({ length: n }, (_, i) => {
     const d = add(start, i), other = month != null && day(d).getMonth() !== month;
     return `<button type="button" class="cal-day" tabindex="-1" data-add-day="${d}" style="grid-column:${i + 1}"${isOff(d) ? " data-off" : ""} aria-label="Add on ${esc(f.short(d))}"></button>${dates
-      ? `<span class="cal-date" style="grid-column:${i + 1}"${d === T ? " data-today" : d < T ? " data-past" : ""}${other ? " data-other" : ""}>${day(d).getDate() === 1 ? day(d).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : day(d).getDate()}</span>` : ""}`;
+      ? `<span class="cal-date" style="grid-column:${i + 1}"${d === T ? " data-today" : d < T ? " data-past" : ""}${other ? " data-other" : ""}>${day(d).getDate() === 1 ? day(d).toLocaleDateString("en-US", { day: "numeric", month: "short" }) : day(d).getDate()}</span>` : ""}`;
   }).join("");
   // a bar from day s to day e, squared where it carries on; named where it starts, the rest of it hidden from the keyboard
   const spanBar = (sp, s, e, row, contL, contR, person) => `<button type="button" class="cal-span" data-item="${sp.id}"${person ? ` data-person="${person}"` : ""} style="grid-column:${s + 1} / ${e + 2};grid-row:${row}"${contL ? " data-cont-l" : ""}${contR ? " data-cont-r" : ""}${isPast(sp) ? " data-past" : ""}
@@ -188,7 +188,7 @@
     const label = it.kind === "busy" ? `${f.short(it.date)}, ${spanOf(it)}, ${together(it.who.map((p) => who(p).name))} busy, from ${it.source}` : `${f.short(it.date)}, ${spanOf(it)}, ${it.draft ? "new event" : `${it.type}: ${it.title}`}`;
     return `<button type="button" class="cal-item" data-item="${it.id}" data-kind="${it.kind}" data-cat="${cat(it)}"${person ? ` data-person="${person}"` : ""}${isPast(it) && !it.draft ? " data-past" : ""}${it.allDay ? " data-all-day" : ""}${it.draft ? " data-draft" : ""} aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(label)}">${it.allDay ? "" : `<span class="cal-time">${f.time(it.from)}</span>`}<span>${esc(nameIt(it))}</span></button>`;
   }
-  const weekdayHead = (start, n, lead = "") => `<div class="cal-head" aria-hidden="true">${lead}${Array.from({ length: n }, (_, i) => { const d = add(start, i); return `<div${d === T ? " data-today" : ""}>${day(d).toLocaleDateString("en-GB", { weekday: "short" })}${n < 7 || lead ? `<span class="cal-head-num">${day(d).getDate()}</span>` : ""}</div>`; }).join("")}</div>`;
+  const weekdayHead = (start, n, lead = "") => `<div class="cal-head" aria-hidden="true">${lead}${Array.from({ length: n }, (_, i) => { const d = add(start, i); return `<div${d === T ? " data-today" : ""}>${day(d).toLocaleDateString("en-US", { weekday: "short" })}${n < 7 || lead ? `<span class="cal-head-num">${day(d).getDate()}</span>` : ""}</div>`; }).join("")}</div>`;
 
   // ---------- Month ----------
   // how many lines a month's day fits: the weeks share the screen's height, so taller rows fit more before
@@ -261,7 +261,7 @@
     let strip = "", days = "";
     for (let i = 0; i < 7; i++) {
       const d = add(start, i), any = spansIn(d, d).some((sp) => !isOff(d)) || dayThings(d).length > 0;
-      strip += `<button type="button" data-pick-day="${d}"${d === st.at ? ' aria-current="date"' : ""}${d === T ? " data-today" : d < T ? " data-past" : ""} aria-label="${esc(f.long(d))}${any ? "" : ", nothing on"}"><small>${day(d).toLocaleDateString("en-GB", { weekday: "narrow" })}</small><b>${day(d).getDate()}</b><i${any ? "" : " data-none"}></i></button>`;
+      strip += `<button type="button" data-pick-day="${d}"${d === st.at ? ' aria-current="date"' : ""}${d === T ? " data-today" : d < T ? " data-past" : ""} aria-label="${esc(f.long(d))}${any ? "" : ", nothing on"}"><small>${day(d).toLocaleDateString("en-US", { weekday: "narrow" })}</small><b>${day(d).getDate()}</b><i${any ? "" : " data-none"}></i></button>`;
       const spans = isOff(d) ? [] : spansIn(d, d), things = dayThings(d);
       const starts = spans.filter((sp) => sp.start === d || d === start), runs = spans.filter((sp) => !starts.includes(sp));
       const cards = [
@@ -278,15 +278,21 @@
   }
 
   // ---------- drawing ----------
+  // a span of days as North America writes it (your call, 22 Oct): “Oct 12 – 18, 2026”, “Sep 28 – Oct 4, 2026”,
+  // “Dec 28 – Jan 3, 2027” (the year once, at the end)
+  const span = (s, e) => {
+    const md = (d) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    return `${md(s)} – ${s.getMonth() === e.getMonth() ? e.getDate() : md(e)}, ${e.getFullYear()}`;
+  };
   const periodText = () => {
     const a = day(st.at);
     if (phone.matches || st.view === "week" || st.view === "crew") {
-      const s = day(weekStart(st.at)), e = day(add(weekStart(st.at), 6)), same = s.getMonth() === e.getMonth();
-      return `${s.getDate()}${same ? "" : ` ${s.toLocaleDateString("en-GB", { month: "short" })}`} – ${e.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`;
+      const s = day(weekStart(st.at)), e = day(add(weekStart(st.at), 6));
+      return span(s, e);
     }
-    // Day's short, so the bar fits one row from 1280 (your call, 22 Oct): “Wed 14 Oct 2026”
-    if (st.view === "day") return `${a.toLocaleDateString("en-GB", { weekday: "short" })} ${a.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`;
-    return a.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+    // Day's short, so the bar fits one row from 1250 (your call, 22 Oct): “Wed, Oct 14, 2026”
+    if (st.view === "day") return a.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+    return a.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   };
   function render() {
     const cal = $("#cal"), hoursTop = $(".cal-hours", cal)?.scrollTop || 0, again = cal.contains(popFor?.from) && finder(popFor.from);
@@ -635,7 +641,7 @@
       let free = 0; for (let m = WORK[0]; m + len <= WORK[1]; m += 30) if (!busyAt(nv.with, d, m, m + len)) free++;
       // past days and days off can't be picked, unless it's the day already picked (a past slot clicked, an edit)
       const off = (d < T || isOff(d)) && d !== nv.date;
-      return `<button type="button" class="cal-slot-day" data-slot-day="${d}"${d === nv.date ? ' aria-pressed="true"' : ""}${off ? " disabled" : ""} aria-label="${esc(`${f.long(d)}${off ? "" : `, ${free} free`}`)}"><small>${day(d).toLocaleDateString("en-GB", { weekday: "short" })}</small><b>${day(d).getDate()}</b></button>`;
+      return `<button type="button" class="cal-slot-day" data-slot-day="${d}"${d === nv.date ? ' aria-pressed="true"' : ""}${off ? " disabled" : ""} aria-label="${esc(`${f.long(d)}${off ? "" : `, ${free} free`}`)}"><small>${day(d).toLocaleDateString("en-US", { weekday: "short" })}</small><b>${day(d).getDate()}</b></button>`;
     }).join("");
     const slots = [];
     for (let m = WORK[0]; m + len <= WORK[1]; m += 30) {

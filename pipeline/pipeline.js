@@ -17,7 +17,7 @@
   const dateOf = (n) => new Date(+TODAY + n * DAY);
   const iso = (n) => { const d = dateOf(n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
   const offset = (s) => Math.round((new Date(`${s}T12:00:00`) - TODAY) / DAY);
-  const short = (n) => (n === 0 ? "today" : n === 1 ? "tomorrow" : dateOf(n).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }));
+  const short = (n) => (n === 0 ? "today" : n === 1 ? "tomorrow" : dateOf(n).toLocaleDateString("en-US", { weekday: "short", day: "numeric", month: "short" }));
   // times are 12-hour, for North America (your call, 22 Oct): lowercase, a space before am or pm, no “:00” on the hour
   // (“9 am”, “1:30 pm”, “12 pm”); kept as “13:30” underneath, for sorting and the pickers' values
   const clock = (t) => { const [h, m] = t.split(":").map(Number); return `${h % 12 || 12}${m ? `:${String(m).padStart(2, "0")}` : ""} ${h < 12 ? "am" : "pm"}`; };
