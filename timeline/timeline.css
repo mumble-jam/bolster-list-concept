@@ -16,25 +16,7 @@
   .tl-scroll[data-narrow] .tl-cells { grid-template-columns: 1.25rem minmax(0, 1fr) 3rem; }
 
   /* ---------- the head: the grid's column names, then the scale ---------- */
-  /* ---------- the cards: the scale's on top, then one per job (your call, 22 Oct), on one scroll ----------
-     A card's frame (the system's card, its border, sheen and shadow) is as wide as the chart's view and sticks to its
-     left, so its rounded edges stay at the view's edges; its inside is shown through a window, clipped to the frame,
-     that moves with the scroll (a scroll timeline: no lag), so the days scroll inside the card */
-  .tl-card[data-view="chart"] { background: none; background-image: none; border: 0; box-shadow: none; overflow: visible; }
-  .tl-scroll { --_cr: var(--card-radius, var(--radius-xl)); padding-block-end: var(--space-3); }
-  .tl-head, .tl-job { display: grid; inline-size: calc(var(--_grid) + var(--_w)); }
-  .tl-head > *, .tl-job > * { grid-area: 1 / 1; }
-  .tl-frame { position: sticky; inset-inline-start: 0; z-index: 0; align-self: stretch; inline-size: var(--_vw, 100%); pointer-events: none; }
-  .tl-window { position: relative; z-index: 1; clip-path: inset(1px round calc(var(--_cr) - 1px)); animation: tl-window linear both; animation-timeline: scroll(nearest inline); }
-  @keyframes tl-window {
-    from { clip-path: inset(1px calc(var(--_range) + 1px) 1px 1px round calc(var(--_cr) - 1px)); }
-    to { clip-path: inset(1px 1px 1px calc(var(--_range) + 1px) round calc(var(--_cr) - 1px)); }
-  }
-  .tl-head { position: sticky; inset-block-start: 0; z-index: 6; margin-block-end: var(--space-3); }
-  .tl-head > .tl-window { display: flex; }
-  .tl-body { display: grid; gap: var(--space-3); inline-size: calc(var(--_grid) + var(--_w)); }
-  /* a card's last row: no line under it, the card's edge is there */
-  .tl-window > .tl-row:not(:has(~ .tl-row)) :is(.tl-cells, .tl-track) { border-block-end: 0; }
+  .tl-head { position: sticky; inset-block-start: 0; z-index: 7; display: flex; inline-size: calc(var(--_grid) + var(--_w)); background: var(--color-surface-default); border-block-end: var(--border-width-default) solid var(--color-line-default); }
   .tl-corner { position: sticky; inset-inline-start: 0; z-index: 7; flex: none; inline-size: var(--_grid); display: grid; grid-template-columns: minmax(0, 1fr) 3.5rem 3rem; align-items: end; gap: var(--space-2); padding: 0 var(--space-3) var(--space-2) var(--space-4); background: var(--color-surface-default); border-inline-end: var(--border-width-default) solid var(--color-line-default); font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
   .tl-scale { position: relative; flex: none; block-size: 3.25rem; }
   .tl-scale-top > span, .tl-scale-bottom > span { position: absolute; display: flex; align-items: center; overflow: hidden; white-space: nowrap; font-size: var(--text-xs); line-height: var(--leading-xs); }
@@ -50,6 +32,7 @@
   .tl-scale-bottom > span[data-today] small { color: inherit; }
 
   /* ---------- the body: rows across both parts, weekends shaded behind the bars ---------- */
+  .tl-body { position: relative; inline-size: calc(var(--_grid) + var(--_w)); }
   .tl-grid-bg { position: absolute; inset-block: 0; inset-inline-start: var(--_grid); inline-size: var(--_w);
     background-image: repeating-linear-gradient(to right, transparent 0 calc(var(--_day) * 5), var(--cal-off) calc(var(--_day) * 5) var(--_wk)); }
   .tl-scroll[data-tier="months"] .tl-grid-bg { background-image: repeating-linear-gradient(to right, var(--color-line-subtle) 0 1px, transparent 1px calc(var(--_day) * 30.4)); }
@@ -63,6 +46,18 @@
   }
   .tl-track { position: relative; flex: none; inline-size: var(--_w); block-size: 100%; border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
   @media (hover: hover) { .tl-row:hover .tl-cells, .tl-row:hover .tl-track { background-color: color-mix(in srgb, var(--color-surface-hover) 60%, transparent); } .tl-row:hover .tl-cells { background-color: color-mix(in srgb, var(--color-surface-hover) 60%, var(--color-surface-default)); } }
+  /* a job is a group (your call, 22 Oct): its row is the list's group row (data-table.css, .group-row), the group ground across
+     the names and the days, a firmer line under it, its chevron in the name's ink; its phases and stages on the card under it */
+  .tl-row[data-type="job"] :is(.tl-cells, .tl-track) { background-color: var(--color-surface-group); border-block-end-color: var(--color-line-default); }
+  @media (hover: hover) { .tl-row[data-type="job"]:hover :is(.tl-cells, .tl-track) { background-color: color-mix(in srgb, var(--color-surface-hover) 60%, var(--color-surface-group)); } }
+  .tl-row[data-type="job"] .tl-fold { color: var(--color-content-primary); }
+  /* the job's row sticks under the scale while you're in its rows; the next job's pushes it away (your ask, 22 Oct): each
+     job's rows a group as tall as they are, the job's row in its flow. Over its stages' rows (their names at 5), under the
+     head (7); today's line drawn on it too, as the band covers the one behind. A focused row clears the two */
+  .tl-group { position: absolute; inset-inline-start: 0; inline-size: 100%; }
+  .tl-row[data-type="job"] { position: sticky; inset-block-start: var(--_head, 3.3rem); z-index: 6; }
+  .tl-row[data-type="job"] .tl-today { position: absolute; inset-block: 0; z-index: 2; }
+  .tl-scroll { scroll-padding-block-start: calc(var(--_head, 3.3rem) + var(--tl-row)); }
   .tl-fold { display: grid; place-items: center; inline-size: 1.25rem; block-size: 1.25rem; padding: 0; border: 0; border-radius: var(--radius-sm); background: none; color: var(--color-content-tertiary); cursor: pointer; }
   .tl-fold svg { transition: rotate var(--duration-fast, 120ms) var(--ease-out); }
   .tl-fold[aria-expanded="false"] svg { rotate: -90deg; }
@@ -99,6 +94,11 @@
   .tl-bar-label { position: absolute; inset-block-start: 0; z-index: 3; line-height: var(--tl-row); font-size: var(--text-xs); color: var(--color-content-secondary); white-space: nowrap; pointer-events: none; }
   /* a job and a phase: a bracket over their stages, never read as work of their own */
   .tl-bracket { position: absolute; inset-block-start: 13px; z-index: 3; block-size: 9px; border: var(--border-width-strong) solid var(--color-content-secondary); border-block-end: 0; border-radius: 2px 2px 0 0; cursor: grab; }
+  /* a bracket hovered outlines its job's or phase's rows (your ask, 22 Oct): dashed, its legs carried down to its last row,
+     under the names (5) and a stuck job row (6) */
+  .tl-outline { position: absolute; z-index: 3; border: var(--border-width-default) dashed var(--color-content-secondary); border-block-start: 0; border-radius: 0 0 var(--radius-xs) var(--radius-xs); pointer-events: none; opacity: 0; transition: opacity var(--duration-fast) var(--ease-standard); }
+  .tl-outline[data-phase] { border-color: var(--color-content-tertiary); }
+  .tl-outline[data-on] { opacity: 1; }
   .tl-bracket[data-phase] { inset-block-start: 15px; block-size: 7px; border-width: var(--border-width-default); border-color: var(--color-content-tertiary); }
   /* a milestone: a diamond on its day, a date with no length */
   .tl-milestone { position: absolute; inset-block-start: 11px; z-index: 3; inline-size: 14px; block-size: 14px; translate: -7px 0; rotate: 45deg; padding: 0; border: 0; border-radius: 2px; background: var(--color-content-primary); cursor: grab; }

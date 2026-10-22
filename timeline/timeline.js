@@ -177,18 +177,19 @@
     }
     return out;
   }
-  const chev = (key, open, label) => `<button type="button" class="tl-fold" data-fold="${esc(key)}" aria-expanded="${open}" aria-label="${esc(`${open ? "Fold" : "Unfold"} ${label}`)}" data-tip="${open ? "Fold" : "Unfold"}">${ic("chevron-down", 12, { optical: true })}</button>`;
-  function rowHtml(r, i) {
-    const y = i * ROW, past = r.j.status === "Completed";
+  // a job's is the list's group chevron (14); a phase's and a stage's smaller, under it
+  const chev = (key, open, label, size = 12) => `<button type="button" class="tl-fold" data-fold="${esc(key)}" aria-expanded="${open}" aria-label="${esc(`${open ? "Fold" : "Unfold"} ${label}`)}" data-tip="${open ? "Fold" : "Unfold"}">${ic("chevron-down", size, { optical: true })}</button>`;
+  function rowHtml(r, i, i0 = 0) {
+    const y = (i - i0) * ROW, past = r.j.status === "Completed";
     let cells = "", bar = "";
     if (r.type === "job") {
       const j = r.j, open = isOpen(r.key);
-      cells = `${chev(r.key, open, j.name)}<button type="button" class="tl-name" data-open-job="${esc(j.name)}" aria-haspopup="dialog" aria-expanded="false"><b>${esc(j.name)}</b><span>${esc(j.client)}</span></button><span class="tl-start">${short(j.start)}</span><span class="tl-days">${j.work} d</span>`;
-      bar = `<div class="tl-bracket" data-drag="job" data-key="${esc(j.name)}" style="left:${X(j.start)}px;width:${(j.end - j.start + 1) * dw}px" title="${esc(`${j.name}: ${span(j.start, j.end)}`)}"></div><span class="tl-bar-label" style="left:${X(j.end + 1) + 8}px">${esc(j.status)} · ${j.pct}%</span>`;
+      cells = `${chev(r.key, open, j.name, 14)}<button type="button" class="tl-name" data-open-job="${esc(j.name)}" aria-haspopup="dialog" aria-expanded="false"><b>${esc(j.name)}</b><span>${esc(j.client)}</span></button><span class="tl-start">${short(j.start)}</span><span class="tl-days">${j.work} d</span>`;
+      bar = `<div class="tl-bracket" data-drag="job" data-key="${esc(j.name)}" data-outline="${esc(r.key)}" style="left:${X(j.start)}px;width:${(j.end - j.start + 1) * dw}px" title="${esc(`${j.name}: ${span(j.start, j.end)}`)}"></div><span class="tl-bar-label" style="left:${X(j.end + 1) + 8}px">${esc(j.status)} · ${j.pct}%</span><i class="tl-today" style="left:${X(0) + dw / 2}px"></i>`;
     } else if (r.type === "phase") {
       const open = isOpen(r.key);
       cells = `${chev(r.key, open, r.p.name)}<span class="tl-name tl-name-phase">${esc(r.p.name)}</span><span class="tl-start">${short(r.start)}</span><span class="tl-days">${r.work} d</span>`;
-      bar = `<div class="tl-bracket" data-drag="phase" data-key="${esc(`${r.j.name}|${r.p.name}`)}" data-phase style="left:${X(r.start)}px;width:${(r.end - r.start + 1) * dw}px"></div>`;
+      bar = `<div class="tl-bracket" data-drag="phase" data-key="${esc(`${r.j.name}|${r.p.name}`)}" data-outline="${esc(r.key)}" data-phase style="left:${X(r.start)}px;width:${(r.end - r.start + 1) * dw}px"></div>`;
     } else if (r.type === "stage") {
       const s = r.s, ms = isMilestone(s), end = endOf(s), wd = ms ? 0 : workDays(s.start, end);
       const pct = ms ? 0 : end < 0 ? 100 : s.start <= 0 ? Math.round((workDays(s.start, 0) / wd) * 100) : 0;
@@ -204,7 +205,27 @@
       cells = `<span class="tl-fold-space"></span><span class="tl-name tl-name-item">${ic(it.kind === "labor" ? "hard-hat" : "box", 14, { optical: true })}<span>${esc(it.name)}</span></span><span class="tl-start">${short(s.start)}</span><span class="tl-days">${workDays(s.start, endOf(s))} d</span>`;
       bar = `<div class="tl-item-bar" data-kind="${it.kind}" style="left:${X(s.start)}px;width:${s.days * dw}px"></div>`;
     }
-    return `<div class="tl-row" data-type="${r.type}" data-level="${r.level}"${past ? " data-past" : ""} style="top:${y}px"><div class="tl-cells" style="--_lvl:${r.level}">${cells}</div><div class="tl-track">${bar}</div></div>`;
+    return `<div class="tl-row" data-type="${r.type}" data-level="${r.level}"${past ? " data-past" : ""}${r.type === "job" ? "" : ` style="top:${y}px"`}><div class="tl-cells" style="--_lvl:${r.level}">${cells}</div><div class="tl-track">${bar}</div></div>`;
+  }
+  // a job and its rows as a group, its own row sticking under the scale while you're in its rows, the next job's pushing
+  // it away (your ask, 22 Oct): the group is as tall as its rows, so the job's row can't stick past them
+  function groupsHtml(list) {
+    let html = "", i = 0;
+    while (i < list.length) {
+      let n = i + 1; while (n < list.length && list[n].type !== "job") n++;
+      // a job's or phase's bracket, hovered, outlines its rows (your ask, 22 Oct): a dashed line from its legs down to its
+      // last row, kept here, in the group, so it stays the group's height under a stuck job row
+      const outlines = [];
+      for (let k = i; k < n; k++) {
+        const r = list[k]; if (r.type !== "job" && r.type !== "phase") continue;
+        let e = k + 1; if (r.type === "phase") while (e < n && list[e].type !== "phase") e++; else e = n;
+        const [a, z] = r.type === "job" ? [r.j.start, r.j.end] : [r.start, r.end];
+        outlines.push(`<i class="tl-outline" data-for="${esc(r.key)}"${r.type === "phase" ? " data-phase" : ""} style="left:${GRID + X(a)}px;width:${(z - a + 1) * dw}px;top:${(k - i) * ROW + (r.type === "job" ? 13 : 15)}px;height:${(e - k) * ROW - (r.type === "job" ? 13 : 15) - 5}px"></i>`);
+      }
+      html += `<div class="tl-group" style="top:${i * ROW}px;height:${(n - i) * ROW}px">${list.slice(i, n).map((r, k) => rowHtml(r, i + k, i)).join("")}${outlines.join("")}</div>`;
+      i = n;
+    }
+    return html;
   }
   // the links: finish to start, an elbow from one's end to the other's start (TL-links)
   function linksSvg(list) {
@@ -245,20 +266,14 @@
     else {
       const list = rows();
       tl.dataset.view = "chart";
-      // each job its own card (your call, 22 Oct), under the scale's own card, all on one scroll: a card's frame stays at
-      // the chart's edges while its days scroll inside it (timeline.css); a job's header row folds the card to itself
-      const jobs = []; for (const r2 of list) { if (r2.type === "job") jobs.push([]); jobs.at(-1).push(r2); }
-      const frame = '<i class="card tl-frame" aria-hidden="true"></i>';
       tl.innerHTML = `<div class="tl-scroll" data-tier="${tier()}"${narrow ? " data-narrow" : ""} style="--_day:${dw}px;--_grid:${GRID}px;--_w:${N * dw}px;--_wk:${7 * dw}px;--_off0:${(5 - dow(R0) + 7) % 7}">
-        <div class="tl-head">${frame}<div class="tl-window"><div class="tl-corner"><span>Name</span><span class="tl-start">Start</span><span class="tl-days">Days</span></div>${scaleHtml()}</div></div>
-        <div class="tl-body">${jobs.map((rs) => `<div class="tl-job" role="group" aria-label="${esc(rs[0].j.name)}">${frame}<div class="tl-window" style="block-size:${rs.length * ROW}px"><div class="tl-grid-bg" aria-hidden="true"></div>${rs.map(rowHtml).join("")}<div class="tl-overlay" aria-hidden="true">${linksSvg(rs)}<i class="tl-today" style="left:${X(0) + dw / 2}px"></i></div></div></div>`).join("")}</div></div>`;
+        <div class="tl-head"><div class="tl-corner"><span>Name</span><span class="tl-start">Start</span><span class="tl-days">Days</span></div>${scaleHtml()}</div>
+        <div class="tl-body" style="height:${list.length * ROW}px"><div class="tl-grid-bg" aria-hidden="true"></div>${groupsHtml(list)}<div class="tl-overlay" aria-hidden="true">${linksSvg(list)}<i class="tl-today" style="left:${X(0) + dw / 2}px"></i></div></div></div>`;
       const s2 = $(".tl-scroll");
-      cardWindow(s2);
+      s2.style.setProperty("--_head", `${s2.querySelector(".tl-head").offsetHeight}px`);
       s2.scrollTop = keepTop;
       if (keepDay != null && !moved.scale) s2.scrollLeft = (keepDay - R0) * dw; else { goToday(false); moved.scale = false; }
     }
-    // a card around it only when it's one piece (nothing matches); the chart's cards and the phone's are their own
-    tl.classList.toggle("card", tl.dataset.view === "empty");
     BolsterShell.hydrateIcons(tl);
     // the toolbar reads back its values
     const showText = [st.completed ? null : "Active jobs", st.links ? null : "no links"].filter(Boolean).join(", ") || "Everything";
@@ -298,17 +313,10 @@
     const left = Math.max(0, X(0) - (sc.clientWidth - GRID) * 0.25);
     sc.scrollTo({ left, behavior: smooth && !matchMedia("(prefers-reduced-motion: reduce)").matches ? "smooth" : "auto" });
   }
-  // the cards' frames are as wide as the chart's view, and their insides are shown through a window that moves with
-  // the scroll (timeline.css); both need the view's width and how far it scrolls
-  function cardWindow(sc) {
-    sc.style.setProperty("--_vw", `${sc.clientWidth}px`);
-    sc.style.setProperty("--_range", `${Math.max(0, sc.scrollWidth - sc.clientWidth)}px`);
-  }
   // the chart fills the screen to its foot and scrolls both ways inside, the grid and the scale staying put
   function fit() {
     const sc = $(".tl-scroll"); if (!sc) return;
     sc.style.maxBlockSize = `${Math.max(320, innerHeight - sc.getBoundingClientRect().top - scrollY - 24)}px`;
-    cardWindow(sc);
   }
 
   // ---------- changes, every one with Undo ----------
@@ -579,6 +587,10 @@
     const s = byId(mv.dataset.move);
     if (n !== s.start) applyMove([s], n - s.start, s.name);
   });
+  // a bracket hovered shows its group's outline
+  const outline = (e, on) => { const b = e.target.closest?.(".tl-bracket[data-outline]"); if (!b) return; b.closest(".tl-group")?.querySelector(`.tl-outline[data-for="${CSS.escape(b.dataset.outline)}"]`)?.toggleAttribute("data-on", on); };
+  tl.addEventListener("pointerover", (e) => outline(e, true));
+  tl.addEventListener("pointerout", (e) => outline(e, false));
   document.addEventListener("scroll", (e) => { if (e.target.classList?.contains("tl-scroll")) period(); }, { capture: true, passive: true });
   phone.addEventListener("change", () => { moved.scale = true; render(); });
   addEventListener("resize", () => { fit(); if (st.scale === "fit") { moved.scale = true; render(); } if (popFor) BolsterShell.placePopover(pop, popFor.from); });

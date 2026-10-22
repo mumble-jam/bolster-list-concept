@@ -2,6 +2,9 @@
    system/components/shell.css doesn't cover. Sizes measured on next.bolsterbuilt.com
    (Oct 2026). Semantic tokens only. Pairs with shell.js. */
 
+/* the menu's edge over the page (D98), moving: one length for its clip and for the fade just inside it */
+@property --bs-edge { syntax: "<length-percentage>"; inherits: true; initial-value: 0px; }
+
 @layer concept {
   /* the folded rail opens as wide as the menu is pinned (D92), so opening it on hover and pinning it are the same
      menu: the logo's cell, its fold button and the rows stay where they are when you pin or fold it */
@@ -82,6 +85,10 @@
   .bs-nav-main { padding-block-end: var(--space-3); }
   :is(.bs-sidebar, .bs-settings-nav) :is(button, summary).sidebar-item { inline-size: 100%; border: 0; background: none; font-family: inherit; text-align: start; cursor: pointer; list-style: none; }
   .bs-acc > summary::-webkit-details-marker { display: none; }
+  /* a section with pages: a chevron at the row's end (your ask, 22 Oct), quiet as the rail's, turning down as it opens */
+  .bs-acc-more { display: inline-flex; margin-inline: auto var(--space-1); color: var(--color-content-on-chrome-muted); rotate: -90deg; transition: rotate var(--duration-fast) var(--ease-standard); }
+  .bs-acc-more > svg { inline-size: 0.75rem; block-size: 0.75rem; }
+  .bs-acc[open] > summary .bs-acc-more { rotate: 0deg; }
   @media (hover: hover) { :is(.bs-sidebar, .bs-settings-nav) .sidebar-item:hover { background: var(--color-surface-sidebar-hover); } }
   :is(.bs-sidebar, .bs-settings-nav) .sidebar-item[aria-current="page"] { background: var(--color-surface-default); box-shadow: var(--shadow-raised); }
   :is(.bs-sidebar, .bs-settings-nav) .sidebar-item:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
@@ -275,11 +282,21 @@
        same way as the pointer leaves. Shut, it's out of reach (hidden), so nothing in it takes focus */
     .app-shell[data-sidebar-hidden] .sidebar {
       display: flex; position: fixed; inset-block: var(--shell-top-bar-height) 0; inset-inline-start: 0; z-index: calc(var(--z-popover) + 1);
-      block-size: auto; visibility: hidden; clip-path: inset(0 calc(100% - var(--shell-rail-width)) 0 0);
+      block-size: auto; visibility: hidden; --bs-edge: var(--shell-rail-width); clip-path: inset(0 calc(100% - var(--bs-edge)) 0 0);
       --_d: var(--menu-close-dur, 80ms); --_e: var(--menu-close-ease, var(--menu-ease, cubic-bezier(0.2, 0.8, 0, 1)));
-      transition: clip-path var(--_d) var(--_e), translate var(--_d) var(--_e), box-shadow var(--_d) var(--_e), visibility 0s linear var(--_d);
+      transition: --bs-edge var(--_d) var(--_e), translate var(--_d) var(--_e), box-shadow var(--_d) var(--_e), visibility 0s linear var(--_d);
     }
-    .app-shell[data-sidebar-hidden][data-menu-over] .sidebar { --_d: var(--menu-open-dur, 420ms); --_e: var(--menu-ease, cubic-bezier(0.2, 0.8, 0, 1)); visibility: visible; clip-path: inset(0 -2rem 0 0); box-shadow: var(--menu-over-shadow, var(--shadow-raised)); transition-delay: 0s; }
+    /* open, the edge is past the menu's own by the fade and room for the shadow */
+    .app-shell[data-sidebar-hidden][data-menu-over] .sidebar { --_d: var(--menu-open-dur, 420ms); --_e: var(--menu-ease, cubic-bezier(0.2, 0.8, 0, 1)); visibility: visible; --bs-edge: calc(100% + var(--_fade) + 0.5rem); box-shadow: var(--menu-over-shadow, var(--shadow-raised)); transition-delay: 0s; }
+    /* the labels fade in as the edge passes them, from nothing at it to whole a fade behind it (your note, 22 Oct: the
+       first frame showed their first letters, inside the rail's width); the icons stay whole. On the menu's rows, not
+       on it, so its ground stays whole to the edge */
+    .app-shell[data-sidebar-hidden] .sidebar { --_fade: var(--menu-edge-fade, 3rem); }
+    .app-shell[data-sidebar-hidden] .sidebar > :is(.bs-nav-main, .bs-nav-bottom) {
+      --_x: var(--space-2); /* where the part starts in the menu: the mask is drawn in the part's own box */
+      mask-image: linear-gradient(to right, #000 calc(max(2.75rem, var(--bs-edge) - var(--_fade) - 0.5rem) - var(--_x)), transparent calc(max(2.75rem, var(--bs-edge) - 0.5rem) - var(--_x)));
+    }
+    .app-shell[data-sidebar-hidden] .sidebar > .bs-nav-bottom { --_x: 0px; }
     :root[data-chrome-hidden] .app-shell[data-sidebar-hidden] .sidebar { inset-block-start: 0; }
     @media (prefers-reduced-motion: reduce) { .app-shell[data-sidebar-hidden] .sidebar { transition: none; } }
     /* a section with pages says so in the open rail (the keyboard's way in): a chevron at the row's end */
