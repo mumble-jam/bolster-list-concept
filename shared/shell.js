@@ -167,12 +167,13 @@ window.BolsterShell = (() => {
     const open = () => !shell.hasAttribute("data-sidebar-hidden") || rail.hasAttribute("data-expanded");
     let e = open() ? 1 : 0, to = e, raf;
     draw(e);
+    let held = false;
     const go = () => {
-      if (open() === !!to) return;
+      if (held || open() === !!to) return;
       to = open() ? 1 : 0; cancelAnimationFrame(raf);
       if (matchMedia("(prefers-reduced-motion: reduce)").matches) { e = to; return draw(e); }
       const curve = bezier(to ? tuned("--menu-ease", "") : tuned("--menu-close-ease", "") || tuned("--menu-ease", ""));
-      const e0 = e, t0 = performance.now(), D = (to ? tuned("--menu-open-dur", 420) : tuned("--menu-close-dur", 420)) * Math.max(0.35, Math.abs(to - e0));
+      const e0 = e, t0 = performance.now(), D = (to ? tuned("--menu-open-dur", 420) : tuned("--menu-close-dur", 80)) * Math.max(0.35, Math.abs(to - e0));
       const tick = (now) => { const k = D ? clamp((now - t0) / D) : 1; e = e0 + (to - e0) * ease(curve, k); draw(e); if (k < 1) raf = requestAnimationFrame(tick); };
       raf = requestAnimationFrame(tick);
     };
@@ -181,7 +182,12 @@ window.BolsterShell = (() => {
     watch.observe(rail, { attributes: true, attributeFilter: ["data-expanded"] });
     // measured late: draw again once it can be (the top bar shows from 1024 wide)
     addEventListener("resize", () => { if (!box) draw(e); });
+    // the menu playground's player holds the logo and draws it at a moment of its own: k from 0 to 1 of the opening
+    // or the closing, on that one's curve; let go, it settles where the menu is
+    logo.hold = (on) => { held = on; cancelAnimationFrame(raf); if (!on) { e = to = open() ? 1 : 0; draw(e); } };
+    logo.at = (k, opening) => { const curve = bezier(opening ? tuned("--menu-ease", "") : tuned("--menu-close-ease", "") || tuned("--menu-ease", "")); e = opening ? ease(curve, clamp(k)) : 1 - ease(curve, clamp(k)); draw(e); };
   }
+  const logo = { hold() {}, at() {} };
 
   // the menu folds and unfolds from its own foot (D88), with the old pin's icon: Bolster's own, a panel with a
   // chevron that points the way the menu will move
@@ -224,16 +230,16 @@ window.BolsterShell = (() => {
     // without it closing, and the keyboard opens the rail on the way to the cell's button
     const cell = shell.querySelector(".bs-logo");
     const ours = (el) => rail.contains(el) || cell?.contains(el) || (shell.hasAttribute("data-menu-over") && side?.contains(el));
-    // a short pause before it opens, so a pointer passing across doesn't flash it, and before it closes (the playground's
-    // --menu-open-delay and --menu-close-delay)
+    // a short pause before it opens, so a pointer passing across doesn't flash it; it closes at once (your values, 22 Oct;
+    // the playground's --menu-open-delay and --menu-close-delay)
     rail.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") expand(true, tuned("--menu-open-delay", 150), true); });
-    rail.addEventListener("pointerleave", (e) => { if (!ours(e.relatedTarget)) expand(false, tuned("--menu-close-delay", 100)); });
+    rail.addEventListener("pointerleave", (e) => { if (!ours(e.relatedTarget)) expand(false, tuned("--menu-close-delay", 0)); });
     side?.addEventListener("pointerenter", () => { if (shell.hasAttribute("data-menu-over")) clearTimeout(timer); });
-    side?.addEventListener("pointerleave", (e) => { if (shell.hasAttribute("data-menu-over") && !ours(e.relatedTarget)) expand(false, tuned("--menu-close-delay", 150)); });
+    side?.addEventListener("pointerleave", (e) => { if (shell.hasAttribute("data-menu-over") && !ours(e.relatedTarget)) expand(false, tuned("--menu-close-delay", 0)); });
     rail.addEventListener("focusin", () => { if (rail.querySelector(":focus-visible")) expand(true); });
     rail.addEventListener("focusout", (e) => { if (!ours(e.relatedTarget)) expand(false); });
     cell?.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" && hidden()) expand(true, tuned("--menu-open-delay", 150), true); });
-    cell?.addEventListener("pointerleave", (e) => { if (hidden() && !ours(e.relatedTarget)) expand(false, tuned("--menu-close-delay", 100)); });
+    cell?.addEventListener("pointerleave", (e) => { if (hidden() && !ours(e.relatedTarget)) expand(false, tuned("--menu-close-delay", 0)); });
     cell?.addEventListener("focusin", () => { if (hidden() && cell.querySelector(".bs-pin:focus-visible")) expand(true); });
     cell?.addEventListener("focusout", (e) => { if (hidden() && !ours(e.relatedTarget)) expand(false); });
     cell?.addEventListener("keydown", (e) => { if (e.key === "Escape") expand(false); });
@@ -242,6 +248,62 @@ window.BolsterShell = (() => {
     rail.addEventListener("click", (e) => { if (e.target.closest(".rail-item")) expand(false); });
     // a page picked in the menu over the page closes it; a section's accordion keeps it open
     side?.addEventListener("click", (e) => { if (shell.hasAttribute("data-menu-over") && e.target.closest("a[href]")) expand(false); });
+    // Over the page, the open section's pages unfold with the menu and fold away as it closes (your note, 22 Oct: its
+    // icons jumped), so what's left at the rail's width as it shuts is the sections alone, where the rail has its icons.
+    // Its own motion (--acc-*), after --menu-acc-lag; the section you leave open is the one that opens next time
+    let kept = null, later;
+    const sections = (on) => {
+      if (!side || document.documentElement.dataset.menuSections === "still") return;
+      clearTimeout(later);
+      if (on) {
+        const d = kept || side.querySelector(".bs-acc[open]"); if (!d) return;
+        d.removeAttribute("data-touched"); d.removeAttribute("data-anim"); d.open = false; // shut at once, then unfold
+        later = setTimeout(() => requestAnimationFrame(() => { d.setAttribute("data-touched", ""); d.setAttribute("data-anim", ""); d.open = true; morph(true); }), tuned("--menu-acc-lag", 0));
+      } else {
+        const d = side.querySelector(".bs-acc[open]"); if (d) kept = d; if (!d) return;
+        d.setAttribute("data-touched", ""); d.removeAttribute("data-anim"); d.open = false;
+      }
+    };
+    // The rail's square for the section you're in becomes the page's pill as the menu opens over the page, and the pill
+    // the square as it closes (your ask, 22 Oct): one shape, in the one pill's look, moving and reshaping between the two, the real ones hidden
+    // while it does, handed over a frame after it goes. The playground's --menu-pill-dur, or data-menu-pill="still"
+    const blobIn = () => side.querySelector(":scope > .bs-morph") || side.insertAdjacentElement("afterbegin", Object.assign(document.createElement("i"), { className: "bs-morph", hidden: true }));
+    const morph = (opening) => {
+      if (!side || document.documentElement.dataset.menuPill === "still") return;
+      const page = side.querySelector('.sidebar-item[aria-current="page"]'), acc = page?.closest(".bs-acc");
+      if (!page || (acc && !acc.open)) return; // its section isn't the open one: nothing to move between
+      const sec = acc ? acc.querySelector(":scope > summary") : page, blob = blobIn();
+      const box = side.getBoundingClientRect(), at = (rc, w) => ({ x: rc.left - box.left + side.scrollLeft, y: rc.top - box.top + side.scrollTop, w: w ?? rc.width, h: rc.height });
+      // where a row sits once settled, not where its own easing-in has it now (your note: it landed 3px off): its layout box
+      const laid = (el, w) => { let x = 0, y = 0; for (let n = el; n && n !== side; n = n.offsetParent) { x += n.offsetLeft; y += n.offsetTop; if (n.offsetParent && !side.contains(n.offsetParent)) break; } return { x, y, w: w ?? el.offsetWidth, h: el.offsetHeight }; };
+      // the square is the rail's own, as wide as a rail row is tall (measured: its size token is in rem, and the rail's rows
+      // are wide while it's open)
+      const square = laid(sec, shell.querySelector(".rail .rail-item")?.offsetHeight || 44), pill = laid(page);
+      // from where it is, if it's on its way already
+      const now = !blob.hidden && blob.getAnimations().length ? at(blob.getBoundingClientRect()) : null;
+      const kf = (b, sq) => ({ transform: `translate(${b.x}px, ${b.y}px)`, width: `${b.w}px`, height: `${b.h}px`, backgroundColor: "var(--bs-pill)", boxShadow: "inset 0 1px 0 var(--bs-pill-edge), inset 0 0 0 1px var(--bs-pill-edge)" }); // one pill, two shapes
+      blob.getAnimations().forEach((x) => x.cancel());
+      side.setAttribute("data-morph", ""); blob.hidden = false;
+      const dur = opening ? tuned("--menu-pill-dur", 420) : tuned("--menu-close-dur", 80);
+      const ease = opening ? tuned("--menu-pill-ease", "") || tuned("--menu-ease", "cubic-bezier(0.2, 0.8, 0, 1)") : tuned("--menu-close-ease", "") || tuned("--menu-ease", "cubic-bezier(0.2, 0.8, 0, 1)");
+      const from = now ? { ...kf(now, !opening) } : kf(opening ? square : pill, opening), to = kf(opening ? pill : square, !opening);
+      const anim = blob.animate([from, to], { duration: matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : dur, easing: ease, fill: "forwards" });
+      // handed over in one frame, the real one without its fade (your note: a frame of neither, then its fade, blinked)
+      anim.onfinish = () => { side.setAttribute("data-morph-end", ""); side.removeAttribute("data-morph"); blob.hidden = true; requestAnimationFrame(() => requestAnimationFrame(() => side.removeAttribute("data-morph-end"))); };
+    };
+    new MutationObserver(() => {
+      const over = shell.hasAttribute("data-menu-over");
+      if (over !== sections.was) {
+        sections.was = over;
+        // closing: the pill goes back to the square while the page's row is still there; opening: once its section is open
+        if (!over) morph(false);
+        sections(over);
+        if (over && document.documentElement.dataset.menuSections === "still") requestAnimationFrame(() => morph(true));
+      }
+      // pinned again, the section left open is open, at once
+      if (!shell.hasAttribute("data-sidebar-hidden") && kept && !side.querySelector(".bs-acc[open]")) { kept.removeAttribute("data-touched"); kept.open = true; }
+    }).observe(shell, { attributes: true, attributeFilter: ["data-menu-over", "data-sidebar-hidden"] });
+    sections.was = false;
   }
 
 
@@ -638,5 +700,5 @@ window.BolsterShell = (() => {
     return { show: () => set(false), stick };
   }
 
-  return { mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling, week, canvas, settingsNav, closeSettings, loading };
+  return { mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling, week, canvas, settingsNav, closeSettings, loading, logo };
 })();
