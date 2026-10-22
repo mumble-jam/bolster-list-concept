@@ -42,7 +42,7 @@ window.BolsterShell = (() => {
       { id: "financial", label: "Financial", icon: "banknote", items: [
         { id: "overview", label: "Overview", icon: "chart-line" },
         { id: "business-account", label: "Business account", icon: "landmark" },
-        { id: "customer-payments", label: "Customer payments", icon: "banknote" },
+        { id: "customer-payments", label: "Customer payments", icon: "hand-dollar" },
         { id: "invoices", label: "Invoices", icon: "file-text" },
         { id: "reports", label: "Reports", icon: "table" },
       ] },
@@ -272,7 +272,8 @@ window.BolsterShell = (() => {
   function navHtml() {
     const cur = sectionOf(opts.current)?.id;
     let n = 0; // each page's place in its section, for the stagger as it opens
-    const page = (x) => `<a class="sidebar-item bs-sub" style="--i:${n++}" ${linkAttrs(x.id)} data-item="${x.id}"${x.id === opts.current ? ' aria-current="page"' : ""}><span>${esc(x.label)}</span></a>`;
+    // a section's pages with their icons (the folded menu's popup has the same), a step smaller than the section's
+    const page = (x) => `<a class="sidebar-item bs-sub" style="--i:${n++}" ${linkAttrs(x.id)} data-item="${x.id}"${x.id === opts.current ? ' aria-current="page"' : ""}>${menuIcon(x.icon, 14, { optical: true })}<span>${esc(x.label)}</span></a>`;
     const row = (s) => {
       const head = `${menuIcon(s.icon, 16)}<span>${esc(s.label)}</span>`; // the rail's size, pinned or folded (D93)
       if (s.id === "settings") return `<button type="button" class="sidebar-item" data-open-settings>${head}</button>`;
@@ -284,7 +285,7 @@ window.BolsterShell = (() => {
     const search = `<button type="button" class="sidebar-item bs-phone" data-not-built="search">${menuIcon("search", 16)}<span>Search</span></button>`;
     const you = `<button type="button" class="sidebar-item bs-phone" data-not-built="help">${menuIcon("circle-help", 18)}<span>Help</span></button>`
       + `<button type="button" class="sidebar-item bs-phone" data-not-built="assistant"><img class="bs-bolton" src="${ASSETS}bolton-head.svg" alt=""><span>Ask Bolton</span></button>`
-      + `<details class="bs-acc bs-phone" name="bs-nav"><summary class="sidebar-item"><span class="avatar" data-size="sm" data-color="${USER.color}" aria-hidden="true">${USER.initials}</span><span>${esc(USER.name)}</span></summary><div class="bs-acc-body">${[["profile", "Edit profile"], ["users", "Manage users"], ["logout", "Log out"]].map(([id, l]) => `<a class="sidebar-item bs-sub" href="#" data-not-built="${id}"><span>${l}</span></a>`).join("")}</div></details>`;
+      + `<details class="bs-acc bs-phone" name="bs-nav"><summary class="sidebar-item"><span class="avatar" data-size="sm" data-color="${USER.color}" aria-hidden="true">${USER.initials}</span><span>${esc(USER.name)}</span></summary><div class="bs-acc-body">${[["profile", "Edit profile", "user-cog"], ["users", "Manage users", "users"], ["logout", "Log out", "log-out"]].map(([id, l, ico]) => `<a class="sidebar-item bs-sub" href="#" data-not-built="${id}">${menuIcon(ico, 14, { optical: true })}<span>${l}</span></a>`).join("")}</div></details>`;
     // the foot (Messages, Files, Settings) stays put; everything above scrolls under it
     return `<div class="bs-nav-main">${search}${NAV.main.map(row).join("")}${you}${extra}</div><div class="bs-nav-bottom">${NAV.bottom.map(row).join("")}</div>`;
   }

@@ -260,7 +260,11 @@
   // each column's head comes down its column under the toolbar (pipeline.css): how far it may go (the column's height
   // less the head's), and, where the browser can't tie it to the scroll, where the column's top is now
   const followByScript = !CSS.supports("animation-timeline: view()");
+  // the toolbar takes the canvas's colour only while it's stuck under the top bar (pipeline.css)
+  const toolbar = $(".pl-toolbar");
+  const stuck = () => toolbar.toggleAttribute("data-stuck", !phone.matches && scrollY > 0 && toolbar.getBoundingClientRect().top <= (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--list-toolbar-top")) || 0) + 1);
   function follow() {
+    stuck();
     if (phone.matches || !followByScript) return;
     $$(".pl-col", board).forEach((c) => c.style.setProperty("--_col-top", `${c.getBoundingClientRect().top}px`));
   }

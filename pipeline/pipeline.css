@@ -10,10 +10,12 @@
 
   /* ---------- the toolbar, on the page: search on the left, whose and what's lost on the right ---------- */
   /* on the page, not in a card, and as the list's: it sticks under the top bar, goes as you scroll down and comes
-     back as you scroll up (the shell's scrolling, D73), while the page header scrolls away; on the canvas's colour,
-     so cards pass under it, no edge. The search is a field with an edge on the page, the bare one's hover reading as
+     back as you scroll up (the shell's scrolling, D73), while the page header scrolls away. No surface of its own, as
+     the to-do's and the calendar's: the canvas shows through it; only once it's stuck does it take the canvas's colour,
+     so cards pass under it. No edge. The search is a field with an edge on the page, the bare one's hover reading as
      nothing on the canvas */
-  .pl-toolbar { border-block-end: 0; background: var(--color-surface-canvas); margin-block: calc(-1 * var(--space-2)); }
+  .pl-toolbar { border-block-end: 0; background: none; margin-block: calc(-1 * var(--space-2)); }
+  .pl-toolbar[data-stuck] { background: var(--color-surface-canvas); }
   .pl-toolbar .list-bar { padding: var(--space-2) 0; }
   .pl-toolbar .result-count { margin: 0; }
   .pl-search { flex: 0 1 18rem; margin-inline-start: auto; padding-inline: var(--space-3); border: var(--border-width-default) solid var(--color-line-card); background: var(--color-surface-default); }

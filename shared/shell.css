@@ -90,7 +90,8 @@
   .bs-settings-nav .sidebar-item[aria-current="page"] > svg { color: var(--color-content-primary); }
   @media (hover: hover) { .bs-settings-nav .sidebar-item:hover > svg { color: var(--color-content-primary); } }
   .bs-acc-body { display: grid; padding-block-end: var(--space-1); }
-  /* a section's pages: no icon, in line with the section's label (its padding, the 28px icon column, the gap) */
+  /* a section's pages: their icons start where the section's label does (its padding, the 28px icon column, the gap),
+     a step smaller than the section's and in a 20px slot of their own, so every page's name starts in one line */
   .bs-sub { padding-inline-start: calc(var(--space-2) * 2 + 1.75rem); color: var(--color-content-secondary); }
   .bs-sub[aria-current="page"] { color: var(--color-content-primary); }
   /* an accordion eases open where the browser can animate to its height; elsewhere it just opens */
@@ -122,6 +123,8 @@
     .bs-sidebar .sidebar-item > svg { color: var(--color-content-on-chrome-muted); transition: color var(--duration-fast) var(--ease-standard); }
     /* the rail's icons, pinned or folded (D93): 16 tall, in the same 28 column so they stand where the rail's do */
     .bs-sidebar .sidebar-item > svg { block-size: 1rem; }
+    /* a page's icon: 14 tall (its section's is 16), as quiet as its name; lit with it when it's the page you're on */
+    .bs-sidebar .bs-sub > svg { inline-size: 1.25rem; block-size: 0.875rem; color: var(--_ink-3); }
     /* a section's row is the rail's (44): folding or pinning the menu doesn't change its rows' size; a section's pages
        stay a step smaller, quieter under it */
     .bs-sidebar .sidebar-item:not(.bs-sub) { min-block-size: var(--shell-rail-item-size); }
@@ -135,7 +138,7 @@
     .bs-sidebar .sidebar-item:active:not([aria-current="page"]) { background: var(--_pill); transition-duration: 30ms; }
     .bs-sidebar :is(.bs-sep, .sidebar-title) { border-color: var(--color-line-chrome); }
   }
-  /* between a section's groups of pages, a hairline as faint as the menu can carry, from where their names start
+  /* between a section's groups of pages, a hairline as faint as the menu can carry, from where their icons start
      to the row's end, with a little air either side */
   .bs-gap { block-size: var(--border-width-default); margin-block: calc(var(--space-1) + 2px); margin-inline: calc(var(--space-2) * 2 + 1.75rem) var(--space-2);
     background: color-mix(in oklab, var(--color-content-on-chrome) 9%, transparent); }
@@ -303,6 +306,7 @@
        icons a step up in the same 28px column, so a section's pages stay in line with the labels */
     .bs-sidebar .sidebar-item { min-block-size: var(--touch-target-min); font-size: var(--text-base); line-height: var(--leading-base, 1.5rem); }
     .bs-sidebar .sidebar-item > svg { block-size: 1.25rem; }
+    .bs-sidebar .bs-sub > svg { inline-size: 1.5rem; block-size: 1rem; }
     .bs-sidebar .bs-bolton { block-size: 1.375rem; }
     /* the foot ends at the screen's edge: the button moved aside with the page, nothing to leave room for */
     .bs-nav-bottom { padding-block-end: calc(var(--space-3) + env(safe-area-inset-bottom)); }
