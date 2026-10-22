@@ -16,7 +16,25 @@
   .tl-scroll[data-narrow] .tl-cells { grid-template-columns: 1.25rem minmax(0, 1fr) 3rem; }
 
   /* ---------- the head: the grid's column names, then the scale ---------- */
-  .tl-head { position: sticky; inset-block-start: 0; z-index: 6; display: flex; inline-size: calc(var(--_grid) + var(--_w)); background: var(--color-surface-default); border-block-end: var(--border-width-default) solid var(--color-line-default); }
+  /* ---------- the cards: the scale's on top, then one per job (your call, 22 Oct), on one scroll ----------
+     A card's frame (the system's card, its border, sheen and shadow) is as wide as the chart's view and sticks to its
+     left, so its rounded edges stay at the view's edges; its inside is shown through a window, clipped to the frame,
+     that moves with the scroll (a scroll timeline: no lag), so the days scroll inside the card */
+  .tl-card[data-view="chart"] { background: none; background-image: none; border: 0; box-shadow: none; overflow: visible; }
+  .tl-scroll { --_cr: var(--card-radius, var(--radius-xl)); padding-block-end: var(--space-3); }
+  .tl-head, .tl-job { display: grid; inline-size: calc(var(--_grid) + var(--_w)); }
+  .tl-head > *, .tl-job > * { grid-area: 1 / 1; }
+  .tl-frame { position: sticky; inset-inline-start: 0; z-index: 0; align-self: stretch; inline-size: var(--_vw, 100%); pointer-events: none; }
+  .tl-window { position: relative; z-index: 1; clip-path: inset(1px round calc(var(--_cr) - 1px)); animation: tl-window linear both; animation-timeline: scroll(nearest inline); }
+  @keyframes tl-window {
+    from { clip-path: inset(1px calc(var(--_range) + 1px) 1px 1px round calc(var(--_cr) - 1px)); }
+    to { clip-path: inset(1px 1px 1px calc(var(--_range) + 1px) round calc(var(--_cr) - 1px)); }
+  }
+  .tl-head { position: sticky; inset-block-start: 0; z-index: 6; margin-block-end: var(--space-3); }
+  .tl-head > .tl-window { display: flex; }
+  .tl-body { display: grid; gap: var(--space-3); inline-size: calc(var(--_grid) + var(--_w)); }
+  /* a card's last row: no line under it, the card's edge is there */
+  .tl-window > .tl-row:not(:has(~ .tl-row)) :is(.tl-cells, .tl-track) { border-block-end: 0; }
   .tl-corner { position: sticky; inset-inline-start: 0; z-index: 7; flex: none; inline-size: var(--_grid); display: grid; grid-template-columns: minmax(0, 1fr) 3.5rem 3rem; align-items: end; gap: var(--space-2); padding: 0 var(--space-3) var(--space-2) var(--space-4); background: var(--color-surface-default); border-inline-end: var(--border-width-default) solid var(--color-line-default); font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
   .tl-scale { position: relative; flex: none; block-size: 3.25rem; }
   .tl-scale-top > span, .tl-scale-bottom > span { position: absolute; display: flex; align-items: center; overflow: hidden; white-space: nowrap; font-size: var(--text-xs); line-height: var(--leading-xs); }
@@ -32,7 +50,6 @@
   .tl-scale-bottom > span[data-today] small { color: inherit; }
 
   /* ---------- the body: rows across both parts, weekends shaded behind the bars ---------- */
-  .tl-body { position: relative; inline-size: calc(var(--_grid) + var(--_w)); }
   .tl-grid-bg { position: absolute; inset-block: 0; inset-inline-start: var(--_grid); inline-size: var(--_w);
     background-image: repeating-linear-gradient(to right, transparent 0 calc(var(--_day) * 5), var(--cal-off) calc(var(--_day) * 5) var(--_wk)); }
   .tl-scroll[data-tier="months"] .tl-grid-bg { background-image: repeating-linear-gradient(to right, var(--color-line-subtle) 0 1px, transparent 1px calc(var(--_day) * 30.4)); }

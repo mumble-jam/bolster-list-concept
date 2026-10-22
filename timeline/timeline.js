@@ -245,13 +245,20 @@
     else {
       const list = rows();
       tl.dataset.view = "chart";
+      // each job its own card (your call, 22 Oct), under the scale's own card, all on one scroll: a card's frame stays at
+      // the chart's edges while its days scroll inside it (timeline.css); a job's header row folds the card to itself
+      const jobs = []; for (const r2 of list) { if (r2.type === "job") jobs.push([]); jobs.at(-1).push(r2); }
+      const frame = '<i class="card tl-frame" aria-hidden="true"></i>';
       tl.innerHTML = `<div class="tl-scroll" data-tier="${tier()}"${narrow ? " data-narrow" : ""} style="--_day:${dw}px;--_grid:${GRID}px;--_w:${N * dw}px;--_wk:${7 * dw}px;--_off0:${(5 - dow(R0) + 7) % 7}">
-        <div class="tl-head"><div class="tl-corner"><span>Name</span><span class="tl-start">Start</span><span class="tl-days">Days</span></div>${scaleHtml()}</div>
-        <div class="tl-body" style="height:${list.length * ROW}px"><div class="tl-grid-bg" aria-hidden="true"></div>${list.map(rowHtml).join("")}<div class="tl-overlay" aria-hidden="true">${linksSvg(list)}<i class="tl-today" style="left:${X(0) + dw / 2}px"></i></div></div></div>`;
+        <div class="tl-head">${frame}<div class="tl-window"><div class="tl-corner"><span>Name</span><span class="tl-start">Start</span><span class="tl-days">Days</span></div>${scaleHtml()}</div></div>
+        <div class="tl-body">${jobs.map((rs) => `<div class="tl-job" role="group" aria-label="${esc(rs[0].j.name)}">${frame}<div class="tl-window" style="block-size:${rs.length * ROW}px"><div class="tl-grid-bg" aria-hidden="true"></div>${rs.map(rowHtml).join("")}<div class="tl-overlay" aria-hidden="true">${linksSvg(rs)}<i class="tl-today" style="left:${X(0) + dw / 2}px"></i></div></div></div>`).join("")}</div></div>`;
       const s2 = $(".tl-scroll");
+      cardWindow(s2);
       s2.scrollTop = keepTop;
       if (keepDay != null && !moved.scale) s2.scrollLeft = (keepDay - R0) * dw; else { goToday(false); moved.scale = false; }
     }
+    // a card around it only when it's one piece (nothing matches); the chart's cards and the phone's are their own
+    tl.classList.toggle("card", tl.dataset.view === "empty");
     BolsterShell.hydrateIcons(tl);
     // the toolbar reads back its values
     const showText = [st.completed ? null : "Active jobs", st.links ? null : "no links"].filter(Boolean).join(", ") || "Everything";
@@ -291,10 +298,17 @@
     const left = Math.max(0, X(0) - (sc.clientWidth - GRID) * 0.25);
     sc.scrollTo({ left, behavior: smooth && !matchMedia("(prefers-reduced-motion: reduce)").matches ? "smooth" : "auto" });
   }
+  // the cards' frames are as wide as the chart's view, and their insides are shown through a window that moves with
+  // the scroll (timeline.css); both need the view's width and how far it scrolls
+  function cardWindow(sc) {
+    sc.style.setProperty("--_vw", `${sc.clientWidth}px`);
+    sc.style.setProperty("--_range", `${Math.max(0, sc.scrollWidth - sc.clientWidth)}px`);
+  }
   // the chart fills the screen to its foot and scrolls both ways inside, the grid and the scale staying put
   function fit() {
     const sc = $(".tl-scroll"); if (!sc) return;
     sc.style.maxBlockSize = `${Math.max(320, innerHeight - sc.getBoundingClientRect().top - scrollY - 24)}px`;
+    cardWindow(sc);
   }
 
   // ---------- changes, every one with Undo ----------

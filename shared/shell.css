@@ -136,23 +136,31 @@
     /* the section you're in: its name and icon lit, a touch heavier */
     .bs-sidebar .sidebar-item[data-current] { color: var(--_ink); font-weight: var(--font-weight-medium); }
     .bs-sidebar .sidebar-item[data-current] > svg { color: var(--_ink); }
-    /* over the page (D98), the section you're in, folded, sits in the rail's square behind its icon, so the menu folding
-       back ends where the rail starts; the rail's rows 44 apart and 1 between, as the menu's are, every icon where the
-       menu's was */
-    .app-shell[data-sidebar-hidden] .bs-sidebar .bs-acc > summary[data-current] { position: relative; isolation: isolate; }
-    .app-shell[data-sidebar-hidden] .bs-sidebar .bs-acc > summary[data-current]::before {
-      content: ""; position: absolute; inset-block: 0; inset-inline-start: 0; z-index: -1; inline-size: var(--shell-rail-item-size);
+    /* the section you're in, folded: its row holds the pill, as its page's is folded away in it (your note, 22 Oct) */
+    .bs-sidebar .bs-acc > summary[data-current] { position: relative; isolation: isolate; }
+    .bs-sidebar .bs-acc > summary[data-current]::before {
+      content: ""; position: absolute; inset-block: 0; inset-inline: 0; z-index: -1;
       border-radius: var(--radius-md); background: var(--bs-pill); box-shadow: inset 0 1px 0 var(--bs-pill-edge), inset 0 0 0 1px var(--bs-pill-edge); opacity: 0; transition: opacity var(--duration-medium) var(--ease-standard);
     }
-    .app-shell[data-sidebar-hidden] .bs-sidebar .bs-acc:not([open]) > summary[data-current]::before { opacity: 1; }
+    .bs-sidebar:not([data-morph]) .bs-acc:not([open]) > summary[data-current]::before { opacity: 1; }
+    @media (min-width: 1024px) {
+      /* over the page (D98), it's the rail's square behind its icon, so the menu folding back ends where the rail starts;
+         the rail's rows 44 apart and 1 between, as the menu's are, every icon where the menu's was. Only where there's a
+         rail: below 1024 the menu is the phone's (your note, 22 Oct) */
+      .app-shell[data-sidebar-hidden] .bs-sidebar .bs-acc > summary[data-current]::before { inline-size: var(--shell-rail-item-size); }
+      /* while the menu's over the page, the pill once another section's open (your note, 22 Oct: the square showed
+         there); not as it opens, while its own section folds for a frame before it unfolds */
+      .app-shell[data-menu-over] .bs-sidebar .bs-acc > summary[data-current]::before { opacity: 0; }
+      .app-shell[data-menu-over] .bs-sidebar:not([data-morph]):has(.bs-acc[open]) .bs-acc:not([open]) > summary[data-current]::before { inline-size: auto; opacity: 1; }
+    }
     .app-shell .rail .rail-item { margin-block-end: 1px; }
     /* the shape moving between the rail's square and the page's pill (D98): behind the rows, the real ones hidden while it moves */
     .bs-morph { position: absolute; inset: 0 auto auto 0; z-index: 0; border-radius: var(--radius-md); pointer-events: none; }
     .bs-morph[hidden] { display: none; }
     .bs-sidebar[data-morph] .sidebar-item { position: relative; z-index: 1; }
     .bs-sidebar[data-morph] .sidebar-item[aria-current="page"] { background: transparent; box-shadow: none; transition: none; }
-    /* as specific as the folded square's own rule (above), so it stays hidden while the shape is on its way to it (your
-       note, 22 Oct: the two overlapped) */
+    /* the section's own stays hidden while the shape is on its way to it (your note, 22 Oct: the two overlapped); the
+       rules that show it above skip a moving shape too */
     .app-shell[data-sidebar-hidden] .bs-sidebar[data-morph] .bs-acc > summary[data-current]::before { opacity: 0; transition: none; }
     .bs-sidebar[data-morph-end] .sidebar-item[aria-current="page"], .app-shell[data-sidebar-hidden] .bs-sidebar[data-morph-end] .bs-acc > summary[data-current]::before { transition: none; }
     .bs-sidebar :is(.bs-sub, .sidebar-group) { color: var(--_ink-3); }
@@ -180,7 +188,7 @@
   .bs-menu-fab { display: none; }
   /* what the top bar holds joins the menu on phones (search, help, Bolton, your account) */
   .bs-phone { display: none; }
-  @media (max-width: 767px) { .bs-sidebar .bs-phone { display: flex; } .bs-sidebar details.bs-phone { display: block; } }
+  @media (max-width: 1023px) { .bs-sidebar .bs-phone { display: flex; } .bs-sidebar details.bs-phone { display: block; } }
   .bs-sidebar .bs-bolton { inline-size: 1.75rem; block-size: 1.25rem; object-fit: contain; flex: none; }
   .bs-sidebar summary .avatar { margin-inline: calc((1.75rem - var(--avatar-size-sm, 1.5rem)) / 2); flex: none; }
   /* a page's own entries (Concept controls) join the menu on phones only */
@@ -286,7 +294,14 @@
     .bs-hamburger { display: inline-grid; }
     .bs-top .bs-logo { display: none; }
   }
-  @media (max-width: 767px) {
+  /* the phone's navigation up to 1023 (your call, 22 Oct; D88's phones, now tablets too): no rail, no top bar, the
+     floating menu button. The pages' own layouts keep their phone breakpoint (767) */
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .app-shell { grid-template-columns: minmax(0, 1fr); }
+    .app-shell > .rail { display: none; }
+    .bs-sidebar { inset-inline-start: 0; }
+  }
+  @media (max-width: 1023px) {
     .bs-company { display: none; }
     .bs-top .top-bar-search { margin-inline-start: auto; }
     /* phones (D88): no tab bar and no top bar; one floating menu button, bottom left across from Create, opens
@@ -317,12 +332,14 @@
     /* the menu pushes the page aside rather than covering it, leaving a column on the right as wide as the
        button and the air around it; the button rides with the page into that column as the ✕, and a tap
        anywhere in the column closes the menu (the page takes no taps while it's aside) */
-    .app-shell { --_aside: calc(3.5rem + var(--space-4) * 2); overflow-x: clip; }
-    .bs-sidebar { inline-size: calc(100vw - var(--_aside)); box-shadow: none; transition: translate 320ms cubic-bezier(0.2, 0.8, 0, 1); }
+    /* on a tablet the menu stays the pinned menu's width, the page pushed aside by as much */
+    .app-shell { --_aside: calc(3.5rem + var(--space-4) * 2); --_menu-w: min(calc(100vw - var(--_aside)), var(--shell-sidebar-width, 16rem)); overflow-x: clip; }
+    @media (max-width: 767px) { .app-shell { --_menu-w: calc(100vw - var(--_aside)); } }
+    .bs-sidebar { inline-size: var(--_menu-w); box-shadow: none; transition: translate 320ms cubic-bezier(0.2, 0.8, 0, 1); }
     .app-main { transition: translate 320ms cubic-bezier(0.2, 0.8, 0, 1), opacity 320ms var(--ease-out); }
     .bs-menu-fab { transition: translate 320ms cubic-bezier(0.2, 0.8, 0, 1), scale 120ms var(--ease-out); }
-    .app-shell:has(> .bs-sidebar[data-open]) > .app-main { translate: calc(100vw - var(--_aside)) 0; opacity: 0.55; pointer-events: none; }
-    .app-shell:has(> .bs-sidebar[data-open]) > .bs-menu-fab { translate: calc(100vw - var(--_aside)) 0; }
+    .app-shell:has(> .bs-sidebar[data-open]) > .app-main { translate: var(--_menu-w) 0; opacity: 0.55; pointer-events: none; }
+    .app-shell:has(> .bs-sidebar[data-open]) > .bs-menu-fab { translate: var(--_menu-w) 0; }
     @media (prefers-reduced-motion: reduce) { .bs-sidebar, .app-main, .bs-menu-fab { transition: none; } }
     .bs-menu-fab:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
     body[data-selecting] .bs-menu-fab { display: none; }
