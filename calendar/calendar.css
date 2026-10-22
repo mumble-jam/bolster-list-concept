@@ -299,7 +299,6 @@
   .pop[data-kind="create"] { inline-size: 25rem; }
   .cal-new { display: grid; gap: var(--space-2); padding: var(--space-3) var(--space-4) var(--space-4); }
   .cal-new { position: relative; }
-  .cal-new-top { display: flex; align-items: center; gap: var(--space-2); padding-inline-end: var(--space-8); }
   /* Close in the card's corner, 8 from both edges, its corner sharing the card's (D35) */
   .cal-new .cal-pop-close { position: absolute; inset-block-start: calc(var(--space-2) - var(--border-width-default)); inset-inline-end: calc(var(--space-2) - var(--border-width-default)); border-radius: calc(var(--radius-lg) - var(--space-2)); }
   /* what to make: two quiet tabs, the picked one a soft pill */
@@ -311,7 +310,7 @@
   .cal-tab input:checked + span { background: var(--color-surface-selected); color: var(--color-content-primary); }
   .cal-tab input:focus-visible + span { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
   /* the title: a large plain line, its underline only while typing */
-  .cal-new-title { inline-size: 100%; margin-block: var(--space-1); padding: var(--space-1) 0 var(--space-1) calc(1.25rem + var(--space-3)); border: 0; border-block-end: var(--border-width-strong) solid transparent; background: none; color: var(--color-content-primary); font: inherit; font-size: var(--text-xl); line-height: var(--leading-xl); font-weight: var(--font-weight-medium); outline: none; }
+  .cal-new-title { inline-size: 100%; margin-block: var(--space-1); padding: var(--space-1) 0; border: 0; border-block-end: var(--border-width-strong) solid transparent; background: none; color: var(--color-content-primary); font: inherit; font-size: var(--text-xl); line-height: var(--leading-xl); font-weight: var(--font-weight-medium); outline: none; }
   .cal-new-title::placeholder { color: var(--color-content-tertiary); }
   .cal-new-title:focus { border-block-end-color: var(--color-action-accent); }
   /* a row: its icon in a 20 column, then its control(s), in line with the title's text */
@@ -327,7 +326,11 @@
   @media (hover: hover) { .cal-txt:hover { background: var(--color-surface-hover); } }
   .cal-txt:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -1px; }
   /* the first control of a row starts where the title's text does */
-  .cal-row-body > :first-child { margin-inline-start: calc(-1 * var(--space-2)); }
+  .cal-row-body > :is(:first-child:not(.visually-hidden), .visually-hidden:first-child + *) { margin-inline-start: calc(-1 * var(--space-2)); }
+  /* the title's text, and the tabs' words, start where the rows' values do */
+  .cal-row-title .cal-row-body > .cal-new-title { margin-inline-start: 0; }
+  .cal-row-tabs .cal-row-body > .cal-tabs { margin-inline-start: calc(-1 * var(--space-3)); }
+  .cal-row-tabs { padding-inline-end: var(--space-8); }
   .cal-txt-input { flex: 1; inline-size: 100%; cursor: text; }
   .cal-txt-input::placeholder { color: var(--color-content-tertiary); }
   .cal-txt-input:focus { background: var(--color-surface-sunken); outline: none; box-shadow: inset 0 calc(-1 * var(--border-width-strong)) 0 var(--color-action-accent); }
@@ -360,7 +363,7 @@
   /* the whole dialog: the same rows, more of them */
   .cal-new-dlg { --_w: 34rem; }
   .cal-new-full .dialog-body { display: grid; gap: var(--space-2); }
-  .cal-new-full .cal-tabs { margin-block-end: var(--space-1); }
+  .cal-new-full .cal-row-tabs { margin-block-end: var(--space-1); padding-inline-end: 0; }
   .cal-new-owner { display: grid; margin: 0; padding-block: var(--space-1); font-size: var(--text-sm); line-height: var(--leading-sm); }
   .cal-new-owner b { font-weight: var(--font-weight-medium); }
   .cal-new-owner span { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }

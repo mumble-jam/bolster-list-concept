@@ -565,8 +565,9 @@
   const withRow = (pre) => row(avatar(who(nv.with), "xs"), withPick(`${pre}-with`));
   function quickHtml() {
     const ev = nv.kind === "event", clash = conflict();
-    return `<form class="cal-new" data-new="quick" novalidate><div class="cal-new-top">${kindTabs()}${closeBtn()}</div>
-      ${ev ? titleInput() : row(iconOf("user"), customerPick("q-client"), "cal-row-lead")}
+    // the tabs and the title in the rows' text column, the icons alone in the gutter (as Google's card)
+    return `<form class="cal-new" data-new="quick" novalidate>${row("", kindTabs(), "cal-row-tabs")}${closeBtn()}
+      ${ev ? row("", titleInput(), "cal-row-title") : row(iconOf("user"), customerPick("q-client"), "cal-row-lead")}
       ${whenRow("q")}
       ${ev ? row(iconOf("location"), ghostInput("location", "q-loc", "Location", "Add location", nv.location))
         : `${row(iconOf("tag"), typePick("q-type"))}${withRow("q")}${clash ? `<p class="cal-new-note" data-tone="warning">${esc(clash)}. You can still book it.</p>` : ""}`}
@@ -604,8 +605,8 @@
     const guests = `<div class="cal-guests">${nv.guests.map((g, i) => `<span class="cal-guest">${esc(g)}<button type="button" data-guest-remove="${i}" aria-label="${esc(`Remove ${g}`)}" data-tip="Remove">${ic("xmark", 12, { optical: true })}</button></span>`).join("")}<label class="visually-hidden" for="f-guest">Guests</label><input class="cal-guest-input" id="f-guest" list="f-guest-list" placeholder="${nv.guests.length ? "Add another" : "Add customers or email addresses"}" autocomplete="off" enterkeyhint="done"></div>
       <datalist id="f-guest-list">${[...OWNERS.filter((p) => !p.me).map((p) => p.name), ...CUSTOMERS.map((x) => x.name)].map((n) => `<option value="${esc(n)}">`).join("")}</datalist>`;
     return `<form class="cal-new-full" data-new="full" novalidate><header class="dialog-header"><h2 id="new-event-title">${editing ? "Edit" : "New"} ${ev ? "event" : "sales appointment"}</h2><button type="button" class="button" data-variant="ghost" data-icon-only data-close-new aria-label="Close" data-tip="Close">${ic("xmark", 16, { optical: true })}</button></header>
-      <div class="dialog-body">${editing ? "" : kindTabs()}
-      ${ev ? `${titleInput()}
+      <div class="dialog-body">${editing ? "" : row("", kindTabs(), "cal-row-tabs")}
+      ${ev ? `${row("", titleInput(), "cal-row-title")}
         ${whenRow("f")}
         ${row(iconOf("users"), guests)}
         ${row(iconOf("location"), ghostInput("location", "f-loc", "Location", "Add location", nv.location))}
