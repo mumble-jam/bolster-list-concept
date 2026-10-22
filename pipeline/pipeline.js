@@ -505,7 +505,9 @@
       pop.hidePopover();
       return change(() => { lost = lost.filter((y) => y !== x); records.push(x.rec); }, `${x.rec.name} reopened, in ${stageOf(x.rec.stage).label}`);
     }
-    if (q("#create")) return BolsterShell.toast("Concept only: Add lead isn't wired up.");
+    // Add: a lead (a person, no job yet) or a job (Bolster's Create job window, an empty estimate)
+    if ((el = q("#create"))) { openPop("add", el, () => `<div class="pop-body">${[["lead", "user", "Lead"], ["job", "briefcase", "Job"]].map(([k, icon, l]) => `<button type="button" class="menu-item" role="menuitem" data-add="${k}"><span class="menu-icon">${ic(icon, 14)}</span>${l}</button>`).join("")}</div>`, { label: "Add" }); pop.setAttribute("role", "menu"); return; }
+    if ((el = q("[data-add]"))) { pop.hidePopover(); return BolsterShell.toast(el.dataset.add === "lead" ? "Concept only: adding a lead isn't wired up." : "Concept only: in Bolster, this opens Create job (an empty estimate)."); }
   });
   document.addEventListener("submit", (e) => {
     const mv = e.target.closest("[data-move]");

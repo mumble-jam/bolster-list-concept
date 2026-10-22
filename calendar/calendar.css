@@ -10,9 +10,24 @@
   /* days off: a breath of the sunken surface over the day's, almost a weekday, so the week still reads as one */
   .cal-page { --cal-off: color-mix(in srgb, var(--color-surface-sunken) 30%, var(--color-surface-default)); }
 
-  /* ---------- job work: one neutral tint and edge, the same for every job (D100). The name says which job; colour
-     stays for status, as everywhere else on the platform ---------- */
-  .cal-page, .tl-page { --cal-job-fill: var(--color-surface-tint); --cal-job-fill-hover: color-mix(in srgb, var(--color-content-primary) 6%, var(--color-surface-tint)); --cal-job-edge: var(--color-content-secondary); }
+  /* ---------- what kind it is, in colour (D101): job work, sales appointments and events each a tint to fill and its
+     hue at the edge (a stronger tint and a lighter edge in dark, so both still read); other calendars grey and hatched.
+     Never which job (D100). The timeline's bars are all job work, so they stay neutral (--cal-job-*) ---------- */
+  :root { --cal-tint: 14%; --cal-tint-hover: 22%; --cal-edge-mix: 0%; --cal-c-job: var(--color-avatar-3); --cal-c-sales: var(--color-avatar-2); --cal-c-event: var(--color-avatar-4); }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --cal-tint: 30%; --cal-tint-hover: 40%; --cal-edge-mix: 40%; } }
+  :root[data-theme="dark"] { --cal-tint: 30%; --cal-tint-hover: 40%; --cal-edge-mix: 40%; }
+  .cal-span, .cal-line, .cal-card-item, [data-cat] { --_k: var(--cal-c-job); }
+  [data-cat="sales"] { --_k: var(--cal-c-sales); }
+  [data-cat="event"] { --_k: var(--cal-c-event); }
+  .cal-span, .cal-line, .cal-card-item, [data-cat] {
+    --_fill: color-mix(in srgb, var(--_k) var(--cal-tint), var(--color-surface-default)); --_fill-hover: color-mix(in srgb, var(--_k) var(--cal-tint-hover), var(--color-surface-default));
+    --_edge: color-mix(in srgb, var(--_k), var(--color-content-primary) var(--cal-edge-mix));
+    --_past-fill: color-mix(in srgb, var(--_fill) 45%, var(--color-surface-default)); --_past-edge: color-mix(in srgb, var(--_edge) 40%, var(--color-surface-default));
+  }
+  .tl-page { --cal-job-fill: var(--color-surface-tint); --cal-job-fill-hover: color-mix(in srgb, var(--color-content-primary) 6%, var(--color-surface-tint)); --cal-job-edge: var(--color-content-secondary); }
+  /* the key, in Show: a swatch of each */
+  .cal-swatch { display: block; inline-size: 0.75rem; block-size: 0.75rem; border-radius: var(--radius-xs); background: var(--_fill); box-shadow: inset var(--border-width-strong) 0 0 var(--_edge); }
+  .cal-swatch[data-cat="busy"] { background: repeating-linear-gradient(135deg, var(--color-content-tertiary) 0 1.5px, transparent 1.5px 3px); box-shadow: inset 0 0 0 var(--border-width-default) var(--color-line-strong); }
 
   /* ---------- the toolbar, on the page ---------- */
   .cal-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
@@ -80,20 +95,21 @@
   .cal-span {
     position: relative; z-index: 1; display: flex; align-items: center; gap: var(--space-1); min-inline-size: 0;
     margin-inline: var(--space-1); padding: 0 var(--space-2); border: 0; border-radius: var(--radius-sm);
-    background: var(--cal-job-fill); color: var(--color-content-primary);
+    background: var(--_fill); color: var(--color-content-primary);
     font: inherit; font-size: var(--text-xs); line-height: var(--_lane); font-weight: var(--font-weight-medium); text-align: start; white-space: nowrap; cursor: pointer;
-    box-shadow: inset var(--border-width-strong) 0 0 var(--cal-job-edge);
+    box-shadow: inset var(--border-width-strong) 0 0 var(--_edge);
   }
   .cal-span > span { overflow: hidden; text-overflow: ellipsis; }
   .cal-span .cal-sub { font-weight: var(--font-weight-regular); color: var(--color-content-secondary); }
-  .cal-span svg { flex: none; color: var(--color-content-secondary); }
+  .cal-span svg { flex: none; color: var(--_edge); }
   .cal-span[data-cont-l] { margin-inline-start: 0; border-start-start-radius: 0; border-end-start-radius: 0; box-shadow: none; }
   .cal-span[data-cont-r] { margin-inline-end: 0; border-start-end-radius: 0; border-end-end-radius: 0; }
   .cal-span[data-cont-l] { box-shadow: none; }
   /* done: faded, its edge and words quieter */
-  .cal-span[data-past] { color: var(--color-content-secondary); background: color-mix(in srgb, var(--cal-job-fill) 55%, var(--color-surface-default)); box-shadow: inset var(--border-width-strong) 0 0 var(--color-line-strong); }
+  .cal-span[data-past] { color: var(--color-content-secondary); background: var(--_past-fill); box-shadow: inset var(--border-width-strong) 0 0 var(--_past-edge); }
+  .cal-span[data-past] svg { color: var(--_past-edge); }
   .cal-span[data-past][data-cont-l] { box-shadow: none; }
-  @media (hover: hover) { .cal-span:hover { background: var(--cal-job-fill-hover); } }
+  @media (hover: hover) { .cal-span:hover { background: var(--_fill-hover); } }
   .cal-span:focus-visible, .cal-item:focus-visible, .cal-more:focus-visible, .cal-block:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
   .cal-span[aria-expanded="true"], .cal-item[aria-expanded="true"], .cal-block[aria-expanded="true"] { outline: var(--border-width-strong) solid var(--color-action-accent); outline-offset: 0; }
   /* its end: drag to stretch (C-move) */
@@ -108,10 +124,10 @@
   .cal-item { display: flex; align-items: center; gap: var(--space-1); min-inline-size: 0; block-size: var(--_lane); padding: 0 var(--space-1); border: 0; border-radius: var(--radius-sm); background: none; color: var(--color-content-primary); font: inherit; font-size: var(--text-xs); line-height: var(--leading-xs); text-align: start; white-space: nowrap; cursor: pointer; }
   .cal-item > span:last-child { overflow: hidden; text-overflow: ellipsis; }
   .cal-item .cal-time { flex: none; color: var(--color-content-secondary); font-variant-numeric: tabular-nums; }
-  .cal-item::before { content: ""; flex: none; inline-size: 6px; block-size: 6px; border-radius: var(--radius-full); background: var(--color-content-primary); }
+  .cal-item::before { content: ""; flex: none; inline-size: 6px; block-size: 6px; border-radius: var(--radius-full); background: var(--_edge, var(--color-content-primary)); }
   @media (hover: hover) { .cal-item:hover { background: var(--color-surface-hover); } }
   .cal-item[data-past] { color: var(--color-content-secondary); }
-  .cal-item[data-past]::before { background: var(--color-line-strong); }
+  .cal-item[data-past]::before { background: var(--_past-edge, var(--color-line-strong)); }
   /* busy time from other calendars: quieter, hatched, and it says Busy */
   .cal-item[data-kind="busy"] { color: var(--color-content-secondary); }
   .cal-item[data-kind="busy"]::before { border-radius: 1px; background: repeating-linear-gradient(135deg, var(--color-content-tertiary) 0 1.5px, transparent 1.5px 3px); }
@@ -141,10 +157,18 @@
   }
   .cal-block b { font-weight: var(--font-weight-medium); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .cal-block span { color: var(--color-content-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .cal-block[data-past] { color: var(--color-content-secondary); border-inline-start-color: var(--color-line-strong); }
+  /* its kind's tint and edge */
+  .cal-block[data-cat] { border-color: color-mix(in srgb, var(--_edge) 22%, var(--color-surface-default)); border-inline-start-color: var(--_edge); background: var(--_fill); }
+  .cal-block[data-past] { color: var(--color-content-secondary); border-color: var(--color-line-subtle); border-inline-start-color: var(--_past-edge, var(--color-line-strong)); background: var(--_past-fill, var(--color-surface-default)); }
+  /* under an hour, two lines would be cut (your note, 22 Oct): one line, the title, then when it starts (the
+     rest is in its name and summary); 15 minutes, smaller still */
+  .cal-block[data-size] { flex-direction: row; align-items: center; gap: var(--space-1); padding-block: 0; }
+  .cal-block[data-size] b { flex: 0 1 auto; min-inline-size: 0; }
+  .cal-block[data-size] span { flex: none; font-variant-numeric: tabular-nums; }
+  .cal-block[data-size="xs"] { font-size: 0.625rem; line-height: 1; }
   .cal-block[data-kind="busy"] { border-color: var(--color-line-subtle); border-inline-start-color: var(--color-line-strong); color: var(--color-content-secondary);
     background: repeating-linear-gradient(135deg, var(--color-surface-sunken) 0 4px, var(--color-surface-default) 4px 8px); }
-  @media (hover: hover) { .cal-block:hover { background-color: var(--color-surface-hover); } }
+  @media (hover: hover) { .cal-block:hover { background-color: var(--_fill-hover, var(--color-surface-hover)); } .cal-block[data-kind="busy"]:hover { background: var(--color-surface-hover); } }
   /* now: a line across today's column (C-today) */
   .cal-now { position: absolute; inset-inline: 0; inset-block-start: var(--_top); z-index: 2; block-size: var(--border-width-strong); background: var(--color-feedback-danger-accent); pointer-events: none; }
   .cal-now::before { content: ""; position: absolute; inset-inline-start: -4px; inset-block-start: -3px; inline-size: 8px; block-size: 8px; border-radius: var(--radius-full); background: var(--color-feedback-danger-accent); }
@@ -189,6 +213,7 @@
   /* the kind line and Close share the top row; Close sits 13 in from the corner, where the pop-head puts it */
   .cal-sum-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin: calc(-1 * var(--space-1)) calc(-1 * var(--space-1)) calc(-1 * var(--space-2)) 0; }
   .cal-sum-kind { display: flex; align-items: center; gap: var(--space-1); margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  .cal-sum[data-cat] .cal-sum-kind svg { color: var(--_edge); }
   .cal-sum h3 { margin: 0; font-size: var(--text-base); line-height: var(--leading-base); font-weight: var(--font-weight-medium); }
   .cal-sum-when { margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); }
   .cal-sum-when small { display: block; color: var(--color-content-secondary); font-size: var(--text-sm); }
@@ -258,14 +283,15 @@
   .cal-card-item b svg { flex: none; color: var(--color-content-secondary); }
   .cal-card-item span { font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
   /* a job's phase: the spans' tint and edge, so job work reads the same on phones */
-  .cal-card-item:not([data-kind]) { border-inline-start: var(--border-width-strong) solid var(--cal-job-edge); background: var(--cal-job-fill); }
+  .cal-card-item:is(:not([data-kind]), [data-cat="sales"], [data-cat="event"]) { border-inline-start: var(--border-width-strong) solid var(--_edge); background: var(--_fill); }
+  .cal-card-item:not([data-kind]) b svg, .cal-line svg { color: var(--_edge); }
   .cal-card-item[data-kind="busy"] { background: repeating-linear-gradient(135deg, var(--color-surface-sunken) 0 4px, var(--color-surface-default) 4px 8px); }
   .cal-card-item:focus-visible, .cal-line:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
   /* a phase that only runs through the day, and an empty day: one line each, in line with the cards' text
      (a card's padding and its edge), as the day's content; the day's heading stays outside it */
   .cal-agenda { --_in: calc(var(--space-4) + var(--border-width-default)); }
   .cal-line { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) var(--_in); border: 0; background: none; color: var(--color-content-secondary); font: inherit; font-size: var(--text-sm); line-height: var(--leading-sm); text-align: start; cursor: pointer; }
-  .cal-line svg { color: var(--color-content-tertiary); }
+  .cal-line svg { color: var(--_edge); }
   .cal-none { margin: 0; padding-inline: var(--_in); font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-tertiary); }
 
   /* ---------- creating (D96): the draft on the grid, the card beside it, the whole dialog ---------- */

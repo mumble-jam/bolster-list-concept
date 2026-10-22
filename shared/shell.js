@@ -136,6 +136,10 @@ window.BolsterShell = (() => {
   const LOGO = `<svg class="bs-logo-svg" viewBox="0 0 104 32" aria-hidden="true"><defs><clipPath id="bs-logo-clip"><path class="bs-logo-clip"/></clipPath></defs><path class="bs-logo-plate"/>`
     + `<g clip-path="url(#bs-logo-clip)">${LETTERS.map((d) => `<path class="bs-logo-letter" d="${d}"/>`).join("")}</g>`
     + `<g class="bs-logo-cut"><path d="M150 92h214v78H233v271h-83z" transform="scale(${LS}) translate(-62 -10)"/></g></svg>`;
+  // the menu's motion, tunable in the menu playground through --menu-* on the root (ms, or a cubic-bezier); unset, the
+  // fallbacks are the settled values
+  const tuned = (name, fallback) => { const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim(); return v ? (/^\d/.test(v) ? parseFloat(v) * (v.endsWith("ms") ? 1 : 1000) : v) : fallback; };
+  const bezier = (css) => { const m = String(css).match(/cubic-bezier\(([^)]+)\)/); return m ? m[1].split(",").map(Number) : [0.2, 0.8, 0, 1]; };
   function logoMotion() {
     const svg = shell.querySelector(".bs-logo-svg"), rail = shell.querySelector(".rail");
     if (!svg || !rail) return;
@@ -155,8 +159,11 @@ window.BolsterShell = (() => {
       // the rest rise one after another as the plate's edge reaches each
       ls.slice(1).forEach((l, i) => { const b = box[i + 1], a = clamp((w - nw * 0.5 - b.x) / b.width * 0.9 - 0.1); l.style.opacity = a; l.setAttribute("transform", a < 1 ? `translate(0 ${(1 - a) * 4})` : ""); });
     };
-    // the menu's ease-out, cubic-bezier(0.2, 0.8, 0, 1)
-    const ease = (t) => { let u = t; for (let i = 0; i < 8; i++) { const x = 3 * (1 - u) ** 2 * u * 0.2 + u ** 3 - t, dx = 3 * (1 - u) ** 2 * 0.2 + 6 * (1 - u) * u * -0.2 + 3 * u ** 2; if (Math.abs(x) < 1e-5 || !dx) break; u = clamp(u - x / dx); } return 3 * (1 - u) ** 2 * u * 0.8 + 3 * (1 - u) * u ** 2 + u ** 3; };
+    // the menu's ease-out, cubic-bezier(0.2, 0.8, 0, 1), or the playground's
+    const ease = ([x1, y1, x2, y2], t) => {
+      const bx = (u) => 3 * (1 - u) ** 2 * u * x1 + 3 * (1 - u) * u ** 2 * x2 + u ** 3, by = (u) => 3 * (1 - u) ** 2 * u * y1 + 3 * (1 - u) * u ** 2 * y2 + u ** 3;
+      let lo = 0, hi = 1, u = t; for (let i = 0; i < 24; i++) { u = (lo + hi) / 2; if (bx(u) < t) lo = u; else hi = u; } return by(u);
+    };
     const open = () => !shell.hasAttribute("data-sidebar-hidden") || rail.hasAttribute("data-expanded");
     let e = open() ? 1 : 0, to = e, raf;
     draw(e);
@@ -164,8 +171,9 @@ window.BolsterShell = (() => {
       if (open() === !!to) return;
       to = open() ? 1 : 0; cancelAnimationFrame(raf);
       if (matchMedia("(prefers-reduced-motion: reduce)").matches) { e = to; return draw(e); }
-      const e0 = e, t0 = performance.now(), D = 420 * Math.max(0.35, Math.abs(to - e0));
-      const tick = (now) => { const k = clamp((now - t0) / D); e = e0 + (to - e0) * ease(k); draw(e); if (k < 1) raf = requestAnimationFrame(tick); };
+      const curve = bezier(to ? tuned("--menu-ease", "") : tuned("--menu-close-ease", "") || tuned("--menu-ease", ""));
+      const e0 = e, t0 = performance.now(), D = (to ? tuned("--menu-open-dur", 420) : tuned("--menu-close-dur", 420)) * Math.max(0.35, Math.abs(to - e0));
+      const tick = (now) => { const k = D ? clamp((now - t0) / D) : 1; e = e0 + (to - e0) * ease(curve, k); draw(e); if (k < 1) raf = requestAnimationFrame(tick); };
       raf = requestAnimationFrame(tick);
     };
     const watch = new MutationObserver(go);
@@ -216,14 +224,16 @@ window.BolsterShell = (() => {
     // without it closing, and the keyboard opens the rail on the way to the cell's button
     const cell = shell.querySelector(".bs-logo");
     const ours = (el) => rail.contains(el) || cell?.contains(el) || (shell.hasAttribute("data-menu-over") && side?.contains(el));
-    rail.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") expand(true, 150, true); });
-    rail.addEventListener("pointerleave", (e) => { if (!ours(e.relatedTarget)) expand(false, 100); });
+    // a short pause before it opens, so a pointer passing across doesn't flash it, and before it closes (the playground's
+    // --menu-open-delay and --menu-close-delay)
+    rail.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") expand(true, tuned("--menu-open-delay", 150), true); });
+    rail.addEventListener("pointerleave", (e) => { if (!ours(e.relatedTarget)) expand(false, tuned("--menu-close-delay", 100)); });
     side?.addEventListener("pointerenter", () => { if (shell.hasAttribute("data-menu-over")) clearTimeout(timer); });
-    side?.addEventListener("pointerleave", (e) => { if (shell.hasAttribute("data-menu-over") && !ours(e.relatedTarget)) expand(false, 150); });
+    side?.addEventListener("pointerleave", (e) => { if (shell.hasAttribute("data-menu-over") && !ours(e.relatedTarget)) expand(false, tuned("--menu-close-delay", 150)); });
     rail.addEventListener("focusin", () => { if (rail.querySelector(":focus-visible")) expand(true); });
     rail.addEventListener("focusout", (e) => { if (!ours(e.relatedTarget)) expand(false); });
-    cell?.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" && hidden()) expand(true, 150, true); });
-    cell?.addEventListener("pointerleave", (e) => { if (hidden() && !ours(e.relatedTarget)) expand(false, 100); });
+    cell?.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" && hidden()) expand(true, tuned("--menu-open-delay", 150), true); });
+    cell?.addEventListener("pointerleave", (e) => { if (hidden() && !ours(e.relatedTarget)) expand(false, tuned("--menu-close-delay", 100)); });
     cell?.addEventListener("focusin", () => { if (hidden() && cell.querySelector(".bs-pin:focus-visible")) expand(true); });
     cell?.addEventListener("focusout", (e) => { if (hidden() && !ours(e.relatedTarget)) expand(false); });
     cell?.addEventListener("keydown", (e) => { if (e.key === "Escape") expand(false); });

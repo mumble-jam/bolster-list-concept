@@ -77,20 +77,24 @@
   const titleOf = (it) => (it.kind === "job" ? spanLabel(it) : it.kind === "busy" ? "Busy" : it.title);
 
   // ---------- what's shown (C-show) ----------
+  // each kind in its own colour (D101): job work, sales appointments, events; other calendars grey and hatched. Bolster
+  // books two kinds, a sales appointment (a site visit, the default) and an event (anything else: a meeting, a call)
   const KINDS = [
-    { key: "job", label: "Jobs", note: "Their phases, from each job's schedule", icon: "briefcase" },
-    { key: "appt", label: "Appointments", note: "Site visits and meetings", icon: "calendar-check" },
+    { key: "job", label: "Job work", note: "Their phases, from each job's schedule", icon: "briefcase" },
+    { key: "sales", label: "Sales appointments", note: "Site visits", icon: "calendar-check" },
+    { key: "event", label: "Events", note: "Meetings and calls", icon: "calendar" },
     { key: "busy", label: "Other calendars", note: "When someone's busy elsewhere", icon: "clock" },
   ];
+  const cat = (it) => (it.kind === "appt" ? (it.type === "Site visit" ? "sales" : "event") : it.kind);
   let VIEW = "month";
   try { VIEW = localStorage.getItem("cal-view") || "month"; } catch {}
   // Unscheduled opens beside the calendar the first time (from 1024 wide; a sheet below it never opens on
   // its own), then stays as it was last left, in this browser
   let TRAY = true;
   try { TRAY = localStorage.getItem("cal-tray") !== "closed"; } catch {}
-  const st = { view: VIEW, at: T, show: { job: true, appt: true, busy: true }, people: null, trayOpen: TRAY };
+  const st = { view: VIEW, at: T, show: { job: true, sales: true, event: true, busy: true }, people: null, trayOpen: TRAY };
   const keepTray = () => { try { localStorage.setItem("cal-tray", st.trayOpen ? "open" : "closed"); } catch {} };
-  const shown = (it) => it.draft || (st.show[it.kind] && (!st.people || it.who.some((p) => st.people.has(p))));
+  const shown = (it) => it.draft || (st.show[cat(it)] && (!st.people || it.who.some((p) => st.people.has(p))));
   const spansIn = (a, b, filter = () => true) => items.filter((it) => it.kind === "job" && shown(it) && it.start <= b && endOf(it) >= a && filter(it));
   const dayThings = (s, filter = () => true) => items.filter((it) => it.kind !== "job" && shown(it) && it.date === s && filter(it)).sort((a, b) => (b.allDay ? 1 : 0) - (a.allDay ? 1 : 0) || a.from - b.from);
   const nameIt = (it) => (it.kind === "busy" ? "Busy" : it.title || "(No title)");
@@ -134,7 +138,7 @@
   // an appointment, or busy time: its time, then what (C-show)
   function itemBtn(it, person) {
     const label = it.kind === "busy" ? `${f.short(it.date)}, ${spanOf(it)}, ${together(it.who.map((p) => who(p).name))} busy, from ${it.source}` : `${f.short(it.date)}, ${spanOf(it)}, ${it.draft ? "new event" : `${it.type}: ${it.title}`}`;
-    return `<button type="button" class="cal-item" data-item="${it.id}" data-kind="${it.kind}"${person ? ` data-person="${person}"` : ""}${isPast(it) && !it.draft ? " data-past" : ""}${it.allDay ? " data-all-day" : ""}${it.draft ? " data-draft" : ""} aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(label)}">${it.allDay ? "" : `<span class="cal-time">${f.time(it.from)}</span>`}<span>${esc(nameIt(it))}</span></button>`;
+    return `<button type="button" class="cal-item" data-item="${it.id}" data-kind="${it.kind}" data-cat="${cat(it)}"${person ? ` data-person="${person}"` : ""}${isPast(it) && !it.draft ? " data-past" : ""}${it.allDay ? " data-all-day" : ""}${it.draft ? " data-draft" : ""} aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(label)}">${it.allDay ? "" : `<span class="cal-time">${f.time(it.from)}</span>`}<span>${esc(nameIt(it))}</span></button>`;
   }
   const weekdayHead = (start, n, lead = "") => `<div class="cal-head" aria-hidden="true">${lead}${Array.from({ length: n }, (_, i) => { const d = add(start, i); return `<div${d === T ? " data-today" : ""}>${day(d).toLocaleDateString("en-GB", { weekday: "short" })}${n < 7 || lead ? `<span class="cal-head-num">${day(d).getDate()}</span>` : ""}</div>`; }).join("")}</div>`;
 
@@ -174,7 +178,9 @@
       flush();
       const blocks = placed.map(({ it, c, of }) => {
         const a = Math.max(it.from, H0 * 60), b = Math.min(Math.max(it.to, a + 15), H1 * 60);
-        return `<button type="button" class="cal-block" data-item="${it.id}" data-kind="${it.kind}"${isPast(it) && !it.draft ? " data-past" : ""}${it.draft ? " data-draft" : ""} style="--_top:calc(var(--_hour) * ${(a - H0 * 60) / 60});--_h:calc(var(--_hour) * ${(b - a) / 60});--_x:${c / of};--_w:${1 / of}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(`${f.short(d)}, ${f.span(it.from, it.to)}, ${it.kind === "busy" ? "busy, from another calendar" : it.draft ? "new event" : `${it.type}: ${it.title}`}`)}"><b>${esc(nameIt(it))}</b><span>${f.span(it.from, it.to)}${it.place ? ` · ${esc(it.place)}` : it.kind === "busy" ? ` · ${esc(together(it.who.map((p) => nameOf(who(p)))))}` : ""}</span></button>`;
+        // under an hour, where two lines would be cut: one line, the title, then when it starts (15 minutes: smaller still)
+        const len = b - a, size = len <= 15 ? ' data-size="xs"' : len <= 45 ? ' data-size="sm"' : "";
+        return `<button type="button" class="cal-block"${size} data-item="${it.id}" data-kind="${it.kind}" data-cat="${cat(it)}"${isPast(it) && !it.draft ? " data-past" : ""}${it.draft ? " data-draft" : ""} style="--_top:calc(var(--_hour) * ${(a - H0 * 60) / 60});--_h:calc(var(--_hour) * ${(b - a) / 60});--_x:${c / of};--_w:${1 / of}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(`${f.short(d)}, ${f.span(it.from, it.to)}, ${it.kind === "busy" ? "busy, from another calendar" : it.draft ? "new event" : `${it.type}: ${it.title}`}`)}"><b>${esc(nameIt(it))}</b><span>${size ? f.time(it.from) : `${f.span(it.from, it.to)}${it.place ? ` · ${esc(it.place)}` : it.kind === "busy" ? ` · ${esc(together(it.who.map((p) => nameOf(who(p)))))}` : ""}`}</span></button>`;
       }).join("");
       const nowMin = 9 * 60 + 40; // the sample's “now”: twenty to ten
       const now = d === T ? `<span class="cal-now" style="--_top:calc(var(--_hour) * ${(nowMin - H0 * 60) / 60})" aria-hidden="true"></span>` : "";
@@ -213,7 +219,7 @@
       const cards = [
         ...starts.map((sp) => `<button type="button" class="cal-card-item" data-item="${sp.id}" aria-haspopup="dialog"><b>${ic("briefcase", 16, { optical: true })}${esc(spanLabel(sp))}</b><span>${sp.start === d ? `${workDays(sp)} working ${workDays(sp) === 1 ? "day" : "days"}, to ${esc(f.short(endOf(sp)))}` : `Day ${workDayOn(sp, d)} of ${workDays(sp)}`}${sp.who.length ? ` · ${esc(together(sp.who.map((p) => nameOf(who(p)))))}` : " · No one yet"}</span></button>`),
         ...runs.map((sp) => `<button type="button" class="cal-line" data-item="${sp.id}" aria-haspopup="dialog">${ic("briefcase", 14)}${esc(spanLabel(sp))}, day ${workDayOn(sp, d)} of ${workDays(sp)}</button>`),
-        ...things.filter((it) => !it.draft).map((it) => `<button type="button" class="cal-card-item" data-item="${it.id}" data-kind="${it.kind}" aria-haspopup="dialog"><b>${esc(nameIt(it))}</b><span>${spanOf(it)}${it.kind === "busy" ? ` · ${esc(together(it.who.map((p) => nameOf(who(p)))))}, ${esc(it.source)}` : it.place ? ` · ${esc(it.place)}` : ""}</span></button>`),
+        ...things.filter((it) => !it.draft).map((it) => `<button type="button" class="cal-card-item" data-item="${it.id}" data-kind="${it.kind}" data-cat="${cat(it)}" aria-haspopup="dialog"><b>${esc(nameIt(it))}</b><span>${spanOf(it)}${it.kind === "busy" ? ` · ${esc(together(it.who.map((p) => nameOf(who(p)))))}, ${esc(it.source)}` : it.place ? ` · ${esc(it.place)}` : ""}</span></button>`),
       ];
       const word = f.dayWord(d);
       days += `<section class="cal-agenda-day" id="ag-${d}" aria-labelledby="agh-${d}"><h3 id="agh-${d}"${d === T ? " data-today" : ""}>${word ? `${word} · ` : ""}${esc(f.short(d))}</h3>${cards.join("") || `<p class="cal-none">Nothing on${isOff(d) ? " · day off" : ""}</p>`}</section>`;
@@ -329,7 +335,7 @@
   function summaryHtml(it) {
     if (it.kind === "job") {
       const wd = workDays(it), on = it.start <= T && endOf(it) >= T, k = workDayOn(it, T);
-      return `<div class="cal-sum"><div class="cal-sum-top"><p class="cal-sum-kind">${ic("briefcase", 14)}Job phase</p>${closeBtn()}</div>
+      return `<div class="cal-sum" data-cat="job"><div class="cal-sum-top"><p class="cal-sum-kind">${ic("briefcase", 14)}Job phase</p>${closeBtn()}</div>
         <h3 tabindex="-1">${esc(it.job)} · ${esc(it.phase)}</h3>
         <p class="cal-sum-when">${esc(f.short(it.start))} – ${esc(f.short(endOf(it)))}<small>${wd} working ${wd === 1 ? "day" : "days"}${on && k ? ` · day ${k} of ${wd} today` : isPast(it) ? " · done" : ""}</small></p>
         <dl>${dd("Client", esc(it.client))}${dd("Where", esc(it.place))}${dd("Crew", peopleHtml(it.who))}</dl>
@@ -339,7 +345,7 @@
     }
     if (it.kind === "appt") {
       const tool = (attr, icon, name) => `<button type="button" class="button cal-pop-close" data-variant="ghost" data-size="sm" data-icon-only ${attr}="${it.id}" aria-label="${name}" data-tip="${name}">${ic(icon, 16, { optical: true })}</button>`;
-      return `<div class="cal-sum"><div class="cal-sum-top"><p class="cal-sum-kind">${ic("calendar-check", 14)}${esc(it.type)}</p><span class="cal-sum-tools">${tool("data-edit", "pen", "Edit")}${tool("data-delete", "trash", "Delete")}${closeBtn()}</span></div>
+      return `<div class="cal-sum" data-cat="${cat(it)}"><div class="cal-sum-top"><p class="cal-sum-kind">${ic(cat(it) === "sales" ? "calendar-check" : "calendar", 14)}${esc(it.type)}</p><span class="cal-sum-tools">${tool("data-edit", "pen", "Edit")}${tool("data-delete", "trash", "Delete")}${closeBtn()}</span></div>
         <h3 tabindex="-1">${esc(it.title)}</h3>
         <p class="cal-sum-when">${esc(f.long(it.date))}<small>${spanOf(it)}</small></p>
         <dl>${it.place ? dd("Where", esc(it.place)) : ""}${it.client ? dd("Customer", esc(it.client)) : ""}${dd("With", peopleHtml(it.who))}${it.guests?.length ? dd("Guests", esc(together(it.guests))) : ""}${it.notes ? dd("Notes", esc(it.notes)) : ""}</dl>
@@ -361,7 +367,8 @@
   function checksHtml(title, rows) {
     return `<div class="pop-head"><h3>${title}</h3>${closeBtn()}</div><div class="pop-body">${rows.map((r) => `<label class="option"><input type="checkbox" class="checkbox" ${r.attr}${r.on ? " checked" : ""}><span class="option-label"><span class="menu-icon">${r.icon}</span>${esc(r.label)}</span></label>`).join("")}</div>`;
   }
-  const showHtml = () => checksHtml("Show", KINDS.map((k) => ({ attr: `data-show="${k.key}"`, on: st.show[k.key], icon: ic(k.icon, 14), label: k.label })));
+  // Show is the colours' key: each kind with its swatch
+  const showHtml = () => checksHtml("Show", KINDS.map((k) => ({ attr: `data-show="${k.key}"`, on: st.show[k.key], icon: `<i class="cal-swatch" data-cat="${k.key}"></i>`, label: k.label })));
   const peopleChecks = () => checksHtml("People", [OWNERS.find((p) => p.me), ...OWNERS.filter((p) => !p.me)].map((p) => ({ attr: `data-person-pick="${p.id}"`, on: !st.people || st.people.has(p.id), icon: avatar(p, "sm"), label: p.me ? `${p.name} (you)` : p.name })));
   function scheduleHtml(u) {
     return `<div class="cal-sum"><div class="cal-sum-top"><p class="cal-sum-kind">${ic("briefcase", 14)}Unscheduled</p>${closeBtn()}</div><h3 tabindex="-1">${esc(u.job)}</h3>
