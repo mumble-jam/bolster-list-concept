@@ -148,8 +148,6 @@
     @keyframes bs-in { from { opacity: 0; translate: 0 -3px; } }
     /* a section's pages fade and settle in one after another as it opens, as Shopify's do */
     .bs-acc[data-anim][open] .bs-sub { animation: bs-in 280ms cubic-bezier(0.2, 0.8, 0, 1) calc(var(--i, 0) * 18ms + 30ms) both; }
-    /* the folded rail's dropdown comes out of the rail, not down from above */
-    @starting-style { .bs-navpop:popover-open { opacity: 0; transform: translateX(-6px); } }
     /* the floating button turns from ☰ to ✕ and back */
     .bs-menu-fab > svg { transition: opacity 160ms var(--ease-out), rotate 220ms cubic-bezier(0.2, 0.8, 0, 1), scale 220ms cubic-bezier(0.2, 0.8, 0, 1); }
     .bs-menu-fab:active { scale: 0.96; }
@@ -238,54 +236,22 @@
     /* the top bar's rule runs on under the logo, over the menu (your call, 21 Oct, back from the design pass) */
     .app-shell[data-sidebar-hidden] { grid-template-columns: var(--_rail-column) 0 minmax(0, 1fr); }
     .app-shell[data-sidebar-hidden] .sidebar { display: none; }
-    /* folded, a section's pages in a navigation popup beside the rail (shell.js, placed by hand): the menu's dark,
-       a step lifted off the rail; it hangs off the section's row by a notch, the row lit; the section's name,
-       then its pages with their icons, groups set apart by space, the page you're on in the menu's pill */
-    .bs-navpop {
-      --_in: calc(var(--inset-menu) - var(--border-width-default));
-      --_ink: var(--color-content-on-chrome);
-      --_ink-2: color-mix(in oklab, var(--color-content-on-chrome) 82%, var(--color-surface-chrome));
-      --_ink-3: color-mix(in oklab, var(--color-content-on-chrome-muted) 78%, var(--color-surface-chrome));
-      --_pill: color-mix(in oklab, var(--color-content-on-chrome) 13%, transparent);
-      --_pill-edge: color-mix(in oklab, var(--color-content-on-chrome) 7%, transparent);
-      --_hover: color-mix(in oklab, var(--color-content-on-chrome) 7%, transparent);
-      --_bg: color-mix(in oklab, var(--color-content-on-chrome) 6%, var(--color-surface-chrome));
-      --_edge: color-mix(in oklab, var(--color-content-on-chrome) 12%, var(--color-surface-chrome));
-      position: fixed; inset: auto; margin: 0; overflow: visible;
-      min-inline-size: 12rem; padding: var(--_in);
-      border: var(--border-width-default) solid var(--_edge); border-radius: var(--radius-md);
-      background: var(--_bg); color: var(--_ink); box-shadow: var(--shadow-overlay);
+    /* folded, pointing at the rail opens the menu itself over the page (D98): the pinned menu's sections and
+       accordions, unfolding from the rail's width to its own at the menu's pace as the logo grows; it folds back the
+       same way as the pointer leaves. Shut, it's out of reach (hidden), so nothing in it takes focus */
+    .app-shell[data-sidebar-hidden] .sidebar {
+      display: flex; position: fixed; inset-block: var(--shell-top-bar-height) 0; inset-inline-start: 0; z-index: calc(var(--z-popover) + 1);
+      block-size: auto; visibility: hidden; clip-path: inset(0 calc(100% - var(--shell-rail-width)) 0 0);
+      transition: clip-path 420ms cubic-bezier(0.2, 0.8, 0, 1), box-shadow 420ms cubic-bezier(0.2, 0.8, 0, 1), visibility 0s linear 420ms;
     }
-    .bs-navpop::before {
-      content: ""; position: absolute; inset-inline-start: -0.375rem; inset-block-start: calc(var(--_notch, 1.25rem) - 0.3125rem);
-      inline-size: 0.625rem; block-size: 0.625rem; rotate: 45deg; border-radius: 0 0 0 2px;
-      background: var(--_bg); border: var(--border-width-default) solid var(--_edge); border-block-start: 0; border-inline-end: 0;
-    }
-    .bs-navpop-title { padding: var(--space-1) var(--space-2) var(--space-2); font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); color: var(--_ink); }
-    .bs-navpop-group { display: grid; gap: 1px; }
-    .bs-navpop-group + .bs-navpop-group { margin-block-start: var(--space-2); padding-block-start: calc(var(--space-2) - 1px); position: relative; }
-    .bs-navpop-group + .bs-navpop-group::before { content: ""; position: absolute; inset-block-start: 0; inset-inline: calc(var(--space-2) * 2 + 1.25rem) var(--space-2);
-      border-block-start: var(--border-width-default) solid color-mix(in oklab, var(--color-content-on-chrome) 9%, transparent); }
-    .bs-navpop-link {
-      display: flex; align-items: center; gap: var(--space-2); min-block-size: 2rem; padding-inline: var(--space-2) var(--space-4);
-      border-radius: var(--radius-sm); font-size: var(--text-sm); color: var(--_ink-2); text-decoration: none; white-space: nowrap;
-      transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
-    }
-    .bs-navpop-link > svg { flex: none; inline-size: 1.25rem; block-size: 1rem; color: var(--_ink-3); transition: color var(--duration-fast) var(--ease-out); }
-    @media (hover: hover) { .bs-navpop-link:not([aria-current="page"]):hover { background: var(--_hover); color: var(--_ink); } .bs-navpop-link:hover > svg { color: var(--_ink); } }
-    .bs-navpop-link:active:not([aria-current="page"]) { background: var(--_pill); transition-duration: 30ms; }
-    .bs-navpop-link:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
-    .bs-navpop-link[aria-current="page"] { background: var(--_pill); box-shadow: inset 0 1px 0 var(--_pill-edge), inset 0 0 0 1px var(--_pill-edge); color: var(--_ink); font-weight: var(--font-weight-medium); }
-    .bs-navpop-link[aria-current="page"] > svg { color: var(--_ink); }
-    /* a section with pages says so in the open rail: a chevron at the row's end, pointing where they open; it shows
-       with the labels and steps toward the popup while its pages are out */
+    .app-shell[data-sidebar-hidden][data-menu-over] .sidebar { visibility: visible; clip-path: inset(0 -2rem 0 0); box-shadow: var(--shadow-overlay); transition-delay: 0s; }
+    :root[data-chrome-hidden] .app-shell[data-sidebar-hidden] .sidebar { inset-block-start: 0; }
+    @media (prefers-reduced-motion: reduce) { .app-shell[data-sidebar-hidden] .sidebar { transition: none; } }
+    /* a section with pages says so in the open rail (the keyboard's way in): a chevron at the row's end */
     .bs-rail-more { display: inline-flex; margin-inline: auto var(--space-3); color: var(--color-content-on-chrome-muted); opacity: 0;
       transition: opacity var(--duration-fast) var(--ease-standard), translate var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-standard); }
     .bs-rail-more > svg { inline-size: 0.75rem; block-size: 0.75rem; }
     .rail[data-expanded] .bs-rail-more { opacity: 1; }
-    .rail-item[data-flying] .bs-rail-more { translate: 2px 0; color: var(--color-content-on-chrome); }
-    /* the section's row stays lit while its pages are out */
-    .rail-item[data-flying] { background: var(--color-surface-chrome-hover); color: var(--color-content-on-chrome); }
   }
 
   /* ---------- narrower screens ---------- */

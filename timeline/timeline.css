@@ -108,12 +108,23 @@
   .tl-link-name { min-inline-size: 0; }
   .pop[data-kind="summary"] dd .button { margin-block: -6px; margin-inline-start: auto; }
 
+  /* ---------- what's narrowed (TL-filter): Add filter's chips on the page under the toolbar, the jobs picker's swatches ---------- */
+  .tl-chips { padding: 0; }
+  .tl-swatch { display: block; inline-size: 0.625rem; block-size: 0.625rem; border-radius: var(--radius-xs); background: var(--_hue); box-shadow: inset 0 0 0 var(--border-width-default) var(--_edge); }
+  .tl-jobs-pick .option { align-items: flex-start; }
+  .tl-jobs-pick .menu-icon { block-size: var(--leading-sm); }
+  .tl-opt { display: grid; min-inline-size: 0; }
+  .tl-opt small { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  .tl-find-none { padding: var(--space-2) var(--space-3); font-size: var(--text-sm); color: var(--color-content-secondary); }
+  .tl-card[data-view="empty"] { display: grid; }
+
   /* ---------- phones: a list, no chart (TL-phone) ---------- */
   @media (max-width: 767px) {
     .tl-scales { display: none; }
     /* no chart to move along: the period stays, Today and the arrows go */
     .tl-toolbar .cal-where > :not(.cal-period) { display: none; }
-    .tl-bar { gap: var(--space-2); }
+    .tl-toolbar { gap: var(--space-2); }
+    #add-filter { flex: none; }
   }
   .tl-card[data-view="list"] { background: none; border: 0; box-shadow: none; overflow: visible; }
   .tl-phone { display: grid; gap: var(--space-3); }

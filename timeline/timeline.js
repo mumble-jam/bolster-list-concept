@@ -3,7 +3,7 @@
 // when something moves, finished jobs muted left of today. The calendar's jobs and dates (kit.SCHEDULE). Made-up data.
 (() => {
   const { TODAY, esc, kit } = window.BDS_CONCEPT;
-  const { OWNERS, avatar, jobHue } = kit;
+  const { OWNERS, SUBS, avatar, jobHue } = kit;
   const ic = (n, s = 16, o) => window.BolsterIcons(n, s, o);
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -25,7 +25,7 @@
   const short = (n) => dateOf(n).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
   const long = (n) => dateOf(n).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" });
   const span = (a, b) => (a === b ? long(a) : `${long(a)} – ${long(b)}`);
-  const who = (id) => OWNERS.find((o) => o.id === id);
+  const who = (id) => OWNERS.find((o) => o.id === id) || SUBS.find((o) => o.id === id);
   const together = (names) => (names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`);
 
   // ---------- the plan: the shared schedule's stages, their labor and materials ----------
@@ -40,7 +40,7 @@
   ];
   const itemsFor = (name) => (ITEMS.find(([re]) => re.test(name))?.[1] || [["Labor", "labor"], ["Materials", "materials"]]).map(([n, kind]) => ({ name: n, kind }));
   let seq = 0;
-  let stages = kit.SCHEDULE.map((x) => ({ id: `s${++seq}`, job: x.job, client: x.client, place: x.place, phase: x.phase, name: x.stage, start: x.start, days: x.days, who: [...x.who], waitsName: x.waits, items: itemsFor(x.stage) }));
+  let stages = kit.SCHEDULE.map((x) => ({ id: `s${++seq}`, job: x.job, client: x.client, place: x.place, phase: x.phase, name: x.stage, start: x.start, days: x.days, who: [...x.who], sub: x.sub, owner: x.owner, waitsName: x.waits, items: itemsFor(x.stage) }));
   for (const s of stages) { s.waits = s.waitsName ? stages.find((x) => x.job === s.job && x.name === s.waitsName)?.id || null : null; delete s.waitsName; }
   let unscheduled = kit.UNSCHEDULED.map((u) => ({ id: `u${++seq}`, ...u }));
   const byId = (id) => stages.find((s) => s.id === id);
@@ -55,7 +55,7 @@
   function jobsOf() {
     const m = new Map();
     for (const s of stages) {
-      if (!m.has(s.job)) m.set(s.job, { name: s.job, client: s.client, place: s.place, stages: [] });
+      if (!m.has(s.job)) m.set(s.job, { name: s.job, client: s.client, place: s.place, owner: s.owner, stages: [] });
       m.get(s.job).stages.push(s);
     }
     return [...m.values()].map((j) => {
@@ -85,6 +85,46 @@
   for (const j of jobsOf()) if (j.status === "Completed") st.shut.add(`job:${j.name}`);
   const isOpen = (key) => !st.shut.has(key);
 
+  // ---------- what's narrowed (TL-filter): which jobs (the toolbar's Jobs), then Add filter's (L-filters): the job's
+  // owner, who's assigned, our crew or a subcontractor, a stage's status. A job's own filters drop the job; a stage's
+  // keep its job and phase as the rows around it, their brackets still the whole job's, so you see where the work sits
+  const STATUS = [["coming", "Coming up"], ["under", "Under way"], ["done", "Done"], ["early", "Starts too early"]];
+  const stageStatus = (s) => (endOf(s) < 0 ? "done" : s.start <= 0 ? "under" : "coming");
+  const nameOf = (p) => (p.me ? `${p.name} (you)` : p.name);
+  const personOpt = (p) => ({ value: p.id, label: nameOf(p), html: `<span class="menu-icon">${avatar(p, "sm")}</span>${esc(nameOf(p))}` });
+  const FILTERS = [
+    { key: "owner", label: "Owner", icon: "user", job: true, test: (j, v) => v.includes(j.owner), groups: () => [[null, OWNERS.map(personOpt)]] },
+    { key: "who", label: "Assigned to", icon: "user", test: (s, v) => s.who.some((p) => v.includes(p)) || v.includes(s.sub),
+      groups: () => [["Team", OWNERS.map(personOpt)], ["Subcontractors", SUBS.map(personOpt)]] },
+    // a milestone is no one's work: neither ours nor a subcontractor's
+    { key: "by", label: "Done by", icon: "handshake", test: (s, v) => !isMilestone(s) && v.includes(s.sub ? "sub" : "crew"),
+      groups: () => [[null, [{ value: "crew", label: "Our crew" }, { value: "sub", label: "Subcontractors" }]]] },
+    { key: "status", label: "Status", icon: "status", test: (s, v) => v.includes(stageStatus(s)) || (v.includes("early") && broken(s)),
+      groups: () => [[null, STATUS.map(([value, label]) => ({ value, label }))]] },
+  ];
+  const filterDef = (k) => FILTERS.find((f) => f.key === k);
+  // kept in this browser, as the scale is
+  {
+    let k = null; try { k = JSON.parse(kept("tl-filters")); } catch {}
+    const names = new Set(stages.map((s) => s.job));
+    st.jobs = Array.isArray(k?.jobs) && k.jobs.some((n) => names.has(n)) ? k.jobs.filter((n) => names.has(n)) : null;
+    st.filters = Object.fromEntries(Object.entries(k?.filters || {}).filter(([key, v]) => filterDef(key) && Array.isArray(v) && v.length));
+  }
+  const save = () => keep("tl-filters", JSON.stringify({ jobs: st.jobs, filters: st.filters }));
+  const filtered = () => !!st.jobs || FILTERS.some((f) => st.filters[f.key]);
+  const stageFiltered = () => FILTERS.some((f) => !f.job && st.filters[f.key]);
+  // what passes, all but one filter when an option counts what it would show (except)
+  const jobPass = (j, except) => (st.completed || j.status !== "Completed") && (except === "jobs" || !st.jobs || st.jobs.includes(j.name))
+    && FILTERS.every((f) => !f.job || f.key === except || !st.filters[f.key] || f.test(j, st.filters[f.key]));
+  const stagePass = (s, except) => FILTERS.every((f) => f.job || f.key === except || !st.filters[f.key] || f.test(s, st.filters[f.key]));
+  // the jobs shown, each phase with only the stages that pass (all its stages kept, for its bracket)
+  function shownJobs(except) {
+    return jobsOf().filter((j) => jobPass(j, except)).map((j) => {
+      const phases = j.phases.map((p) => ({ ...p, all: p.stages, stages: p.stages.filter((s) => stagePass(s, except)) })).filter((p) => p.stages.length);
+      return { ...j, phases, shown: phases.flatMap((p) => p.stages) };
+    }).filter((j) => j.shown.length);
+  }
+
   // ---------- the scale ----------
   // the grid's width: 400, or 300 without its Start column where the card is narrow, so the chart keeps room
   const ROW = 36;
@@ -92,7 +132,7 @@
   const DW = { weeks: 40, months: 16, quarters: 5 };
   let R0 = 0, N = 0, dw = 40;
   function range() {
-    const all = jobsOf().filter((j) => st.completed || j.status !== "Completed");
+    const shown = shownJobs(), all = shown.length ? shown : jobsOf();
     const a = Math.min(0, ...all.map((j) => j.start)), b = Math.max(28, ...all.map((j) => j.end));
     R0 = weekStart(a - 14); N = weekStart(b + 35) - R0;
     const scroller = $(".tl-scroll"), cardW = scroller?.clientWidth || $("#tl").clientWidth || 1000;
@@ -123,12 +163,11 @@
   // ---------- rows: a job, its phases, their stages, a stage's items ----------
   function rows() {
     const out = [];
-    for (const j of jobsOf()) {
-      if (!st.completed && j.status === "Completed") continue;
+    for (const j of shownJobs()) {
       out.push({ type: "job", key: `job:${j.name}`, j, level: 0 });
       if (!isOpen(`job:${j.name}`)) continue;
       for (const p of j.phases) {
-        out.push({ type: "phase", key: `phase:${j.name}:${p.name}`, j, p, level: 1, ...extent(p.stages) });
+        out.push({ type: "phase", key: `phase:${j.name}:${p.name}`, j, p, level: 1, ...extent(p.all) });
         if (!isOpen(`phase:${j.name}:${p.name}`)) continue;
         for (const s of p.stages) {
           out.push({ type: "stage", key: s.id, j, s, level: 2 });
@@ -186,7 +225,7 @@
   // ---------- phones: no chart, a list (TL-phone) ----------
   const phone = matchMedia("(max-width: 767px)");
   function phoneHtml() {
-    return `<div class="tl-phone">${jobsOf().filter((j) => st.completed || j.status !== "Completed").map((j) => {
+    return `<div class="tl-phone">${shownJobs().map((j) => {
       const len = j.end - j.start + 1;
       const track = (a, b) => `<span class="tl-ptrack" aria-hidden="true"><i style="left:${((a - j.start) / len) * 100}%;width:${Math.max(2, ((b - a + 1) / len) * 100)}%"></i></span>`;
       return `<section class="tl-pjob"${j.status === "Completed" ? " data-past" : ""} data-hue="${jobHue(j.name)}"><button type="button" class="tl-pjob-head" data-open-job="${esc(j.name)}" aria-haspopup="dialog"><b>${esc(j.name)}</b><span>${esc(j.client)} · ${esc(span(j.start, j.end))}</span><span>${esc(j.status)} · ${j.pct}%</span></button>
@@ -199,7 +238,10 @@
   function render() {
     const sc = $(".tl-scroll"), keepDay = sc ? R0 + Math.round(sc.scrollLeft / dw) : null, keepTop = sc?.scrollTop || 0;
     range();
-    if (phone.matches) { tl.dataset.view = "list"; tl.innerHTML = phoneHtml(); }
+    if (!shownJobs().length) {
+      tl.dataset.view = "empty";
+      tl.innerHTML = `<div class="state"><span class="state-icon">${ic("filter", 20)}</span><h3>No work matches</h3><p>Nothing scheduled fits ${filtered() ? "these filters" : "what's shown"}.</p>${filtered() ? `<div class="state-actions"><button type="button" class="button" data-variant="secondary" data-size="sm" data-clear-all>Clear all filters</button></div>` : ""}</div>`;
+    } else if (phone.matches) { tl.dataset.view = "list"; tl.innerHTML = phoneHtml(); }
     else {
       const list = rows();
       tl.dataset.view = "chart";
@@ -215,9 +257,26 @@
     const showText = [st.completed ? null : "Active jobs", st.links ? null : "no links"].filter(Boolean).join(", ") || "Everything";
     $("#show-text").textContent = showText; $("#pick-show").setAttribute("aria-label", `Show: ${showText}`);
     $$("#scales input").forEach((r) => (r.checked = r.value === st.scale));
+    renderFilters();
     const un = `Unscheduled, ${unscheduled.length ? `${unscheduled.length} ${unscheduled.length === 1 ? "job" : "jobs"}` : "none"}`;
     $("#tray-toggle").setAttribute("aria-label", un); $("#tray-toggle").dataset.tip = un;
     period(); fit();
+  }
+  // the toolbar's Jobs reads back its value; Add filter's are chips, with the count and Clear all (L-filters)
+  function renderFilters() {
+    const jt = !st.jobs ? "All jobs" : st.jobs.length === 1 ? st.jobs[0] : `${st.jobs.length} jobs`;
+    $("#jobs-text").textContent = jt; $("#pick-jobs").setAttribute("aria-label", `Jobs: ${jt}`);
+    const text = (f, v) => v.map((x) => f.groups().flatMap(([, o]) => o).find((o) => o.value === x)?.label.replace(" (you)", "") ?? x).join(", ");
+    const chips = FILTERS.filter((f) => st.filters[f.key]).map((f) => { const t = text(f, st.filters[f.key]);
+      return `<span class="chip" data-active><button type="button" class="chip-main" data-chip="${f.key}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(`${f.label}: ${t}. Change filter`)}"><span class="chip-field">${esc(f.label)}:</span><span class="chip-value">${esc(t)}</span></button><button type="button" class="chip-remove" data-remove="${f.key}" aria-label="${esc(`Remove ${f.label.toLowerCase()} filter`)}" data-tip="Remove filter">${ic("xmark", 14)}</button></span>`; });
+    if (filtered()) chips.push(`<button type="button" class="button clear-all" data-variant="ghost" data-size="sm" data-clear-all>Clear all</button>`);
+    $("#filters").innerHTML = chips.join("");
+    // how much is left: jobs, and stages once a stage's filter is set
+    const all = jobsOf().filter((j) => st.completed || j.status !== "Completed"), shown = shownJobs();
+    const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+    $("#result-count").innerHTML = `<strong>${shown.length}</strong> of ${plural(all.length, "job", "jobs")}${stageFiltered() ? `, <strong>${shown.reduce((n, j) => n + j.shown.length, 0)}</strong> of ${plural(all.reduce((n, j) => n + j.stages.length, 0), "stage", "stages")}` : ""}`;
+    $("#list-chips").hidden = !filtered();
+    $("#add-filter").disabled = FILTERS.every((f) => st.filters[f.key]);
   }
   const moved = { scale: true };
   function period() {
@@ -293,8 +352,8 @@
   function openPop(kind, from, fill, { start = false, label } = {}) {
     if (pop.matches(":popover-open") && popFor?.from === from && popFor.kind === kind) { pop.hidePopover(); return; }
     if (pop.matches(":popover-open")) pop.hidePopover();
-    popFor = { kind, from };
-    pop.dataset.kind = kind; pop.setAttribute("role", "dialog"); pop.setAttribute("aria-label", label || kind);
+    popFor = { kind, from, fill };
+    pop.dataset.kind = kind; pop.setAttribute("role", kind === "add" ? "menu" : "dialog"); pop.setAttribute("aria-label", label || kind);
     pop.innerHTML = fill(); BolsterShell.hydrateIcons(pop);
     pop.showPopover();
     from?.setAttribute("aria-expanded", "true");
@@ -311,14 +370,16 @@
   pop.addEventListener("toggle", (e) => { if (e.newState === "closed" && refocus?.isConnected && !pop.matches(":popover-open")) refocus.focus({ preventScroll: true }); refocus = null; });
   const closeBtn = () => `<button type="button" class="button cal-pop-close" data-variant="ghost" data-size="sm" data-icon-only data-close-pop aria-label="Close" data-tip="Close">${ic("xmark", 16, { optical: true })}</button>`;
   const dd = (term, html) => `<dt>${term}</dt><dd>${html}</dd>`;
-  const crew = (ids) => (ids.length ? `<span class="cal-faces" aria-hidden="true">${ids.map(who).map((p) => avatar(p, "sm")).join("")}</span><span>${esc(together(ids.map((p) => (who(p).me ? "You" : who(p).name))))}</span>` : `<span class="text-secondary">No one yet</span>`);
+  // the team on it, and the subcontractor doing it, named as one
+  const crew = (ids, sub) => { const ps = [...ids, ...(sub ? [sub] : [])].map(who);
+    return ps.length ? `<span class="cal-faces" aria-hidden="true">${ps.map((p) => avatar(p, "sm")).join("")}</span><span>${esc(together(ps.map((p) => (p.me ? "You" : p.sub ? `${p.name} (subcontractor)` : p.name))))}</span>` : `<span class="text-secondary">No one yet</span>`; };
   function stageHtml(s) {
     const ms = isMilestone(s), end = endOf(s), wd = ms ? 0 : workDays(s.start, end), on = !ms && s.start <= 0 && end >= 0;
     const p = s.waits && byId(s.waits), holds = holdsUp(s);
     return `<div class="cal-sum" data-hue="${jobHue(s.job)}"><div class="cal-sum-top"><p class="cal-sum-kind">${ic(ms ? "calendar" : "briefcase", 14)}${ms ? "Milestone" : "Stage"} · ${esc(s.phase)}</p>${closeBtn()}</div>
       <h3 tabindex="-1">${esc(s.name)}</h3>
       <p class="cal-sum-when">${esc(ms ? long(s.start) : span(s.start, end))}<small>${ms ? "A date, no length" : `${wd} working ${wd === 1 ? "day" : "days"}${on ? ` · day ${workDays(s.start, 0)} of ${wd} today` : end < 0 ? " · done" : ""}`}</small></p>
-      <dl>${dd("Job", `${esc(s.job)} · ${esc(s.client)}`)}${ms ? "" : dd("Crew", crew(s.who))}
+      <dl>${dd("Job", `${esc(s.job)} · ${esc(s.client)}`)}${ms ? "" : dd("Crew", crew(s.who, s.sub))}
         ${dd("Waits for", p ? `<span class="tl-link-name${broken(s) ? " tl-late" : ""}">${esc(p.name)}${broken(s) ? " (ends after this starts)" : ""}</span><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-unlink="${s.id}" aria-label="${esc(`Stop ${s.name} waiting for ${p.name}`)}" data-tip="Remove link">${ic("xmark", 14, { optical: true })}</button>` : '<span class="text-secondary">Nothing</span>')}
         ${dd("Holds up", holds.length ? esc(together(holds.map((x) => x.name))) : '<span class="text-secondary">Nothing</span>')}</dl>
       <form class="cal-sum-move" data-move="${s.id}"><div class="field" data-size="sm"><label class="field-label" for="mv-date">Starts</label><input class="input" type="date" id="mv-date" name="date" value="${iso(s.start)}" required></div><button type="submit" class="button" data-variant="secondary" data-size="sm">Move</button></form>
@@ -330,18 +391,56 @@
     return `<div class="cal-sum" data-hue="${jobHue(j.name)}"><div class="cal-sum-top"><p class="cal-sum-kind">${ic("briefcase", 14)}Job</p>${closeBtn()}</div>
       <h3 tabindex="-1">${esc(j.name)}</h3>
       <p class="cal-sum-when">${esc(span(j.start, j.end))}<small>${j.work} working days · ${esc(j.status)} · ${j.pct}%</small></p>
-      <dl>${dd("Client", esc(j.client))}${dd("Where", esc(j.place))}${dd("Plan", `${j.phases.length} ${j.phases.length === 1 ? "phase" : "phases"}, ${j.stages.length} ${j.stages.length === 1 ? "stage" : "stages"}`)}</dl>
+      <dl>${dd("Owner", crew([j.owner]))}${dd("Client", esc(j.client))}${dd("Where", esc(j.place))}${dd("Plan", `${j.phases.length} ${j.phases.length === 1 ? "phase" : "phases"}, ${j.stages.length} ${j.stages.length === 1 ? "stage" : "stages"}`)}</dl>
       <p class="cal-sum-note">Its dates are its stages': move a stage, or drag the job's bracket to move all of it.</p>
       <div class="cal-sum-actions"><a class="button" data-size="sm" href="../index.html#jobs">Open job</a></div></div>`;
   }
   const checks = (title, rows2) => `<div class="pop-head"><h3>${title}</h3>${closeBtn()}</div><div class="pop-body">${rows2.map((r) => `<label class="option"><input type="checkbox" class="checkbox" ${r.attr}${r.on ? " checked" : ""}><span class="option-label"><span class="menu-icon">${ic(r.icon, 14)}</span>${esc(r.label)}</span></label>`).join("")}</div>`;
   const showHtml = () => checks("Show", [{ attr: 'data-show="completed"', on: st.completed, icon: "circle-check", label: "Finished jobs" }, { attr: 'data-show="links"', on: st.links, icon: "link", label: "Links between stages" }]);
+  // Jobs: found by name, grouped by where they stand; none ticked is all of them
+  function jobsHtml() {
+    const all = jobsOf().filter((j) => st.completed || j.status !== "Completed"), on = new Set(st.jobs || []);
+    const opt = (j) => `<label class="option"><input type="checkbox" class="checkbox" data-job-pick="${esc(j.name)}"${on.has(j.name) ? " checked" : ""}><span class="option-label"><span class="menu-icon"><i class="tl-swatch" data-hue="${jobHue(j.name)}"></i></span><span class="tl-opt">${esc(j.name)}<small>${esc(j.client)} · ${esc(`${short(j.start)} – ${short(j.end)}`)}</small></span></span></label>`;
+    return `<div class="pop-head"><h3>Jobs</h3>${st.jobs ? `<button type="button" class="button" data-variant="ghost" data-size="sm" data-clear-jobs>Clear</button>` : ""}${closeBtn()}</div>
+      <div class="pop-find"><input class="input" data-size="sm" type="search" data-opt-find placeholder="Find a job or client" aria-label="Find a job or client" autocomplete="off"></div>
+      <div class="pop-body tl-jobs-pick" role="group" aria-label="Jobs">${[["In progress", "Under way"], ["Booked", "Coming up"], ["Completed", "Finished"]].map(([status, title]) => {
+        const list = all.filter((j) => j.status === status);
+        return list.length ? `<div class="pop-section">${title}</div>${list.map(opt).join("")}` : ""; }).join("")}<p class="tl-find-none" hidden>No job or client by that name.</p></div>`;
+  }
+  const addHtml = () => `<div class="pop-body"><div class="pop-section">Filter by</div>${FILTERS.filter((f) => !st.filters[f.key]).map((f) => `<button type="button" class="menu-item" role="menuitem" data-add-filter="${f.key}"><span class="menu-icon">${ic(f.icon, 14)}</span>${esc(f.label)}</button>`).join("")}</div>`;
+  // a filter's options, each with how many it would show among what the other filters let through (jobs for the
+  // owner, stages for the rest)
+  function filterHtml(key) {
+    const f = filterDef(key), v = st.filters[key] || [], base = shownJobs(key);
+    const n = (value) => (f.job ? base.filter((j) => f.test(j, [value])).length : base.flatMap((j) => j.shown).filter((x) => f.test(x, [value])).length);
+    return `<div class="pop-head"><h3>${esc(f.label)}</h3>${v.length ? `<button type="button" class="button" data-variant="ghost" data-size="sm" data-remove="${key}">Clear</button>` : ""}${closeBtn()}</div>
+      <div class="pop-body" role="group" aria-label="${esc(f.label)}">${f.groups().map(([title, opts]) => `${title ? `<div class="pop-section">${title}</div>` : ""}${opts.map((o) => `<label class="option"><input type="checkbox" class="checkbox" data-opt="${esc(o.value)}"${v.includes(o.value) ? " checked" : ""}><span class="option-label">${o.html || esc(o.label)}</span><span class="option-count">${n(o.value)}</span></label>`).join("")}`).join("")}</div>`;
+  }
+  // a pick redraws the popover where it is, keeping the focus and what's typed in Find
+  function refill() {
+    if (!popFor) return;
+    const a = document.activeElement, key = pop.contains(a) ? a.dataset.opt ?? a.dataset.jobPick : null, find = $("[data-opt-find]", pop)?.value;
+    pop.innerHTML = popFor.fill(); BolsterShell.hydrateIcons(pop);
+    if (find) { $("[data-opt-find]", pop).value = find; findIn(find); }
+    if (key != null) $(`[data-opt="${CSS.escape(key)}"], [data-job-pick="${CSS.escape(key)}"]`, pop)?.focus({ preventScroll: true });
+    // a chip drawn again is a new element: the popover stays at the new one
+    if (!popFor.from?.isConnected) popFor.from = (popFor.key && $(`[data-chip="${popFor.key}"]`)) || $("#add-filter");
+    popFor.from.setAttribute("aria-expanded", "true");
+    BolsterShell.placePopover(pop, popFor.from, { start: popFor.kind === "filter" && !!popFor.from.closest(".chip") });
+  }
+  function findIn(text) {
+    const q = text.trim().toLowerCase();
+    $$(".option", pop).forEach((o) => (o.hidden = !!q && !o.textContent.toLowerCase().includes(q)));
+    $$(".pop-section", pop).forEach((h) => { let el = h.nextElementSibling, any = false; while (el?.classList.contains("option")) { any ||= !el.hidden; el = el.nextElementSibling; } h.hidden = !any; });
+    const none = $(".tl-find-none", pop); if (none) none.hidden = $$(".option", pop).some((o) => !o.hidden);
+  }
+  const openFilter = (key, from) => { openPop("filter", from, () => filterHtml(key), { label: `Filter by ${filterDef(key).label.toLowerCase()}`, start: !!from.closest(".chip") }); if (popFor) popFor.key = key; };
   const trayHtml = () => `<div class="pop-head"><h3>Unscheduled</h3>${closeBtn()}</div><div class="pop-body"><p class="cal-tray-help">Booked jobs with no dates yet. Open one to give it a start.</p><ul class="cal-tray-list">${unscheduled.length ? unscheduled.map((u) => `<li><button type="button" class="cal-tray-item" data-schedule="${u.id}" data-hue="${jobHue(u.job)}"><b>${esc(u.job)}</b><span>${esc(u.stage)} · ${u.days} ${u.days === 1 ? "day" : "days"} · ${esc(u.client)}</span></button></li>`).join("") : '<li><p class="cal-tray-empty">Every job has its dates.</p></li>'}</ul></div>`;
   const scheduleHtml = (u) => `<div class="cal-sum" data-hue="${jobHue(u.job)}"><div class="cal-sum-top"><p class="cal-sum-kind">${ic("briefcase", 14)}Unscheduled</p>${closeBtn()}</div><h3 tabindex="-1">${esc(u.job)}</h3>
     <p class="cal-sum-when">${esc(u.stage)}<small>${u.days} ${u.days === 1 ? "day" : "days"} · ${esc(u.client)}, ${esc(u.place)}</small></p>
     <form class="cal-sum-move" data-schedule-form="${u.id}"><div class="field" data-size="sm"><label class="field-label" for="sc-date">Start on</label><input class="input" type="date" id="sc-date" name="date" value="${iso(weekStart(7))}" required></div><button type="submit" class="button" data-size="sm">Schedule</button></form></div>`;
   function schedule(u, start) {
-    change(() => { unscheduled = unscheduled.filter((x) => x !== u); stages.push({ id: `s${++seq}`, job: u.job, client: u.client, place: u.place, phase: "Construction", name: u.stage, start, days: u.days, who: [], waits: null, items: itemsFor(u.stage) }); }, `${u.job} scheduled from ${long(start)}`);
+    change(() => { unscheduled = unscheduled.filter((x) => x !== u); stages.push({ id: `s${++seq}`, job: u.job, client: u.client, place: u.place, phase: "Construction", name: u.stage, start, days: u.days, who: [], sub: null, owner: u.owner, waits: null, items: itemsFor(u.stage) }); }, `${u.job} scheduled from ${long(start)}`);
   }
 
   // ---------- dragging: a stage, its end, a job's or phase's bracket, or a link from a bar's end (TL-move, TL-links) ----------
@@ -435,6 +534,13 @@
     if ((el = q("[data-open]"))) { const s = byId(el.dataset.open), row = q(".tl-row"), from = row?.querySelector(".tl-bar, .tl-milestone") || el; return openPop("summary", from, () => stageHtml(s), { label: s.name, start: true }); }
     if ((el = q("[data-open-job]"))) { const name = el.dataset.openJob; return openPop("summary", el, () => jobHtml(name), { label: name, start: true }); }
     if ((el = q("#pick-show"))) return openPop("show", el, showHtml, { label: "Show" });
+    if ((el = q("#pick-jobs"))) return openPop("jobs", el, jobsHtml, { label: "Jobs" });
+    if ((el = q("#add-filter"))) return openPop("add", el, addHtml, { label: "Add a filter" });
+    if ((el = q("[data-add-filter]"))) return openFilter(el.dataset.addFilter, $("#add-filter"));
+    if ((el = q("[data-chip]"))) return openFilter(el.dataset.chip, el);
+    if ((el = q("[data-remove]"))) { const k = el.dataset.remove; delete st.filters[k]; save(); if (pop.matches(":popover-open")) pop.hidePopover(); render(); return (filtered() ? $("[data-chip]") || $("[data-clear-all]") : $("#add-filter"))?.focus({ preventScroll: true, focusVisible: byKey }); }
+    if (q("[data-clear-all]")) { st.jobs = null; st.filters = {}; save(); if (pop.matches(":popover-open")) pop.hidePopover(); render(); say("Filters cleared"); return $("#pick-jobs").focus({ preventScroll: true, focusVisible: byKey }); }
+    if (q("[data-clear-jobs]")) { st.jobs = null; save(); render(); refill(); return $("[data-opt-find]", pop)?.focus({ preventScroll: true }); }
     if ((el = q("#tray-toggle")) || (el = q("#create"))) return openPop("tray", el, trayHtml, { label: "Unscheduled" });
     if ((el = q("[data-schedule]"))) { const u = unscheduled.find((x) => x.id === el.dataset.schedule), from = popFor?.from || $("#tray-toggle"); return openPop("schedule", from, () => scheduleHtml(u), { label: `Schedule ${u.job}` }); }
     if (q("#go-today")) return goToday();
@@ -442,8 +548,12 @@
   });
   document.addEventListener("change", (e) => {
     const sh = e.target.closest("[data-show]");
+    const jp = e.target.closest("[data-job-pick]"), op = e.target.closest("[data-opt]");
+    if (jp) { const set = new Set(st.jobs || []); jp.checked ? set.add(jp.dataset.jobPick) : set.delete(jp.dataset.jobPick); st.jobs = set.size ? [...set] : null; save(); render(); return refill(); }
+    if (op && popFor?.key) { const k = popFor.key, set = new Set(st.filters[k] || []); op.checked ? set.add(op.dataset.opt) : set.delete(op.dataset.opt); if (set.size) st.filters[k] = [...set]; else delete st.filters[k]; save(); render(); return refill(); }
     if (sh) { st[sh.dataset.show] = sh.checked; keep(`tl-${sh.dataset.show}`, sh.checked ? "on" : "off"); render(); popFor.from = $("#pick-show"); popFor.from.setAttribute("aria-expanded", "true"); return; }
   });
+  document.addEventListener("input", (e) => { if (e.target.matches("#pop [data-opt-find]")) findIn(e.target.value); });
   $("#scales").addEventListener("change", (e) => { st.scale = e.target.value; keep("tl-scale", st.scale); moved.scale = true; render(); });
   document.addEventListener("submit", (e) => {
     const mv = e.target.closest("[data-move]"), sc = e.target.closest("[data-schedule-form]");

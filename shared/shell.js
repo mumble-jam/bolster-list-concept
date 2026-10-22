@@ -197,72 +197,41 @@ window.BolsterShell = (() => {
 
   // The rail widens over the page on hover, after a short pause so passing the mouse across it
   // doesn't flash it open; keyboard focus opens it straight away. Pinned, it stays wide.
+  // Folded, pointing at it opens the menu itself over the page (your call, 22 Oct; D98): the same sections and
+  // accordions as the pinned menu, unfolding from the rail's width as the logo grows, in place of the section popup
+  // (D88). The keyboard still opens the rail's own labels, so focus never sits under the menu.
   function railBehaviour() {
-    const rail = shell.querySelector(".rail");
+    const rail = shell.querySelector(".rail"), side = shell.querySelector(".sidebar");
     const desktop = matchMedia("(min-width: 1024px)");
-    let timer;
-    const expand = (on, delay = 0) => {
-      clearTimeout(timer);
-      timer = setTimeout(() => rail.toggleAttribute("data-expanded", on), delay);
-    };
-
-    // folded (D88), a section's pages open beside it as you point at it: a navigation popup, not an action menu,
-    // the menu's own dark a step lifted. It hangs off the section's row by a notch (the row stays lit), names the
-    // section, and lists its pages with their icons in their groups, the page you're on in the menu's pill;
-    // pointing away from both, Escape or a choice closes it
-    const flyout = document.createElement("nav");
-    flyout.className = "bs-navpop"; flyout.setAttribute("popover", "manual"); flyout.dataset.surface = "raised";
-    shell.append(flyout);
-    let flyTimer, flyFor = null, lit = null;
-    const light = (item) => { lit?.removeAttribute("data-flying"); lit = item; item?.setAttribute("data-flying", ""); };
     const hidden = () => shell.hasAttribute("data-sidebar-hidden") && desktop.matches;
-    const close = () => { if (flyout.matches(":popover-open")) flyout.hidePopover(); flyFor = null; light(null); };
-    const groups = (items) => items.reduce((g, x) => (x === "-" ? g.push([]) : g.at(-1).push(x), g), [[]]).filter((g) => g.length);
-    const fly = (item, delay = 0) => {
-      clearTimeout(flyTimer);
-      flyTimer = setTimeout(() => {
-        const s = item && sections.find((x) => x.id === item.dataset.section);
-        if (!s || !hidden() || !s.items) return close();
-        if (flyFor !== s.id) {
-          flyout.setAttribute("aria-label", s.label);
-          flyout.innerHTML = `<p class="bs-navpop-title">${esc(s.label)}</p>${groups(s.items).map((g) => `<div class="bs-navpop-group">${g.map((x) =>
-            `<a class="bs-navpop-link" ${linkAttrs(x.id)}${x.id === opts.current ? ' aria-current="page"' : ""}>${menuIcon(x.icon, 16)}<span>${esc(x.label)}</span></a>`).join("")}</div>`).join("")}`;
-          flyFor = s.id;
-        }
-        light(item);
-        if (!flyout.matches(":popover-open")) flyout.showPopover();
-        // beside the rail as it stands open, its top near the section's row, kept on screen; the notch on the row
-        const r = item.getBoundingClientRect(), rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
-        const open = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--shell-rail-expanded-width")) * rem; // the rail's width as it stands open
-        const top = Math.round(Math.max(8, Math.min(r.top - 8, innerHeight - flyout.offsetHeight - 8)));
-        flyout.style.left = `${Math.round(rail.getBoundingClientRect().left + open + 8)}px`; // the notch's tip on the rail's edge
-        flyout.style.top = `${top}px`;
-        flyout.style.setProperty("--_notch", `${Math.round(r.top + r.height / 2 - top)}px`);
+    let timer;
+    const expand = (on, delay = 0, pointer = false) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        rail.toggleAttribute("data-expanded", on);
+        shell.toggleAttribute("data-menu-over", on && pointer && hidden());
       }, delay);
     };
-    rail.addEventListener("pointerover", (e) => { if (e.pointerType !== "mouse" || !hidden()) return; const item = e.target.closest(".rail-item[data-section]"); if (item) fly(item, rail.hasAttribute("data-expanded") ? 60 : 200); });
-    flyout.addEventListener("pointerenter", () => { clearTimeout(flyTimer); expand(true); });
-    flyout.addEventListener("pointerleave", (e) => { if (!rail.contains(e.relatedTarget)) { fly(null, 150); expand(false, 150); } });
-    flyout.addEventListener("click", (e) => { if (e.target.closest("a")) { close(); expand(false); } });
-    addEventListener("keydown", (e) => { if (e.key === "Escape" && flyout.matches(":popover-open")) { close(); expand(false); } });
-
-    // the logo's cell above it is the rail's too (D92): pointing at it opens the rail, the pointer can go from one to
-    // the other (to Keep menu open) without it closing, and the keyboard opens it on the way to that button
+    // the logo's cell above it is the rail's too (D92), and the menu over the page is: the pointer goes between them
+    // without it closing, and the keyboard opens the rail on the way to the cell's button
     const cell = shell.querySelector(".bs-logo");
-    const ours = (el) => rail.contains(el) || cell?.contains(el);
-    rail.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") expand(true, 150); });
-    rail.addEventListener("pointerleave", (e) => { if (flyout.contains(e.relatedTarget)) return; fly(null, 100); if (!cell?.contains(e.relatedTarget)) expand(false, 100); });
+    const ours = (el) => rail.contains(el) || cell?.contains(el) || (shell.hasAttribute("data-menu-over") && side?.contains(el));
+    rail.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") expand(true, 150, true); });
+    rail.addEventListener("pointerleave", (e) => { if (!ours(e.relatedTarget)) expand(false, 100); });
+    side?.addEventListener("pointerenter", () => { if (shell.hasAttribute("data-menu-over")) clearTimeout(timer); });
+    side?.addEventListener("pointerleave", (e) => { if (shell.hasAttribute("data-menu-over") && !ours(e.relatedTarget)) expand(false, 150); });
     rail.addEventListener("focusin", () => { if (rail.querySelector(":focus-visible")) expand(true); });
     rail.addEventListener("focusout", (e) => { if (!ours(e.relatedTarget)) expand(false); });
-    cell?.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" && hidden()) expand(true, 150); });
-    cell?.addEventListener("pointerleave", (e) => { if (hidden() && !ours(e.relatedTarget) && !flyout.contains(e.relatedTarget)) expand(false, 100); });
+    cell?.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" && hidden()) expand(true, 150, true); });
+    cell?.addEventListener("pointerleave", (e) => { if (hidden() && !ours(e.relatedTarget)) expand(false, 100); });
     cell?.addEventListener("focusin", () => { if (hidden() && cell.querySelector(".bs-pin:focus-visible")) expand(true); });
     cell?.addEventListener("focusout", (e) => { if (hidden() && !ours(e.relatedTarget)) expand(false); });
     cell?.addEventListener("keydown", (e) => { if (e.key === "Escape") expand(false); });
     rail.addEventListener("keydown", (e) => { if (e.key === "Escape") expand(false); });
-    rail.addEventListener("click", (e) => {
-      if (e.target.closest(".rail-item")) expand(false);
-    });
+    addEventListener("keydown", (e) => { if (e.key === "Escape" && shell.hasAttribute("data-menu-over")) expand(false); });
+    rail.addEventListener("click", (e) => { if (e.target.closest(".rail-item")) expand(false); });
+    // a page picked in the menu over the page closes it; a section's accordion keeps it open
+    side?.addEventListener("click", (e) => { if (shell.hasAttribute("data-menu-over") && e.target.closest("a[href]")) expand(false); });
   }
 
 

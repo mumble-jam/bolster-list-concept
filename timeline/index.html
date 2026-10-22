@@ -10,11 +10,11 @@
 <link rel="apple-touch-icon" href="../shared/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../system/bolster.css?v=bb08b14d">
-<link rel="stylesheet" href="../shared/shell.css?v=bb08b14d">
-<link rel="stylesheet" href="../data-list.css?v=bb08b14d">
-<link rel="stylesheet" href="../calendar/calendar.css?v=bb08b14d">
-<link rel="stylesheet" href="timeline.css?v=bb08b14d">
+<link rel="stylesheet" href="../system/bolster.css?v=9701126e">
+<link rel="stylesheet" href="../shared/shell.css?v=9701126e">
+<link rel="stylesheet" href="../data-list.css?v=9701126e">
+<link rel="stylesheet" href="../calendar/calendar.css?v=9701126e">
+<link rel="stylesheet" href="timeline.css?v=9701126e">
 </head>
 <body>
 <div class="app-shell">
@@ -46,10 +46,18 @@
             <label class="segmented-option"><input type="radio" name="scale" value="quarters"> Quarters</label>
             <label class="segmented-option"><input type="radio" name="scale" value="fit"> Fit</label>
           </div>
+          <!-- which jobs, a picker reading back its value as People does on the calendar (D80); the rest under Add filter,
+               as chips on the row below (L-filters, TL-filter) -->
+          <button type="button" class="button" data-variant="secondary" data-size="sm" id="pick-jobs" aria-haspopup="dialog" aria-expanded="false"><span class="button-value" id="jobs-text">All jobs</span><i data-icon="chevron-down" data-size="14"></i></button>
           <button type="button" class="button" data-variant="secondary" data-size="sm" id="pick-show" aria-haspopup="dialog" aria-expanded="false"><span class="button-value" id="show-text">Show</span><i data-icon="chevron-down" data-size="14"></i></button>
+          <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only id="add-filter" aria-haspopup="menu" aria-expanded="false" aria-label="Add filter" data-tip="Add filter"><i data-icon="filter" data-size="16"></i></button>
           <span class="list-bar-sep cal-sep" aria-hidden="true"></span>
           <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only id="tray-toggle" aria-haspopup="dialog" aria-expanded="false" aria-label="Unscheduled" data-tip="Unscheduled"><i data-icon="calendar-circle-minus" data-size="16"></i></button>
         </div>
+      </div>
+      <div class="list-chips tl-chips" id="list-chips" hidden>
+        <p class="result-count" id="result-count" aria-live="polite"></p>
+        <div class="filters" id="filters"></div>
       </div>
       <!-- wider screens: the jobs' plans as a grid beside bars, one scroll (TL-two-parts); phones: a list (TL-phone) -->
       <section class="card tl-card" id="tl" aria-labelledby="page-title"></section>
@@ -76,6 +84,7 @@
         <li><b>Weeks, Months, Quarters, Fit (TL-scale).</b> Today and the arrows to move; weekends shaded; today a line in the alert colour; lengths in working days.</li>
         <li><b>Moving is dragging (TL-move).</b> Drag a stage to move it, its end to stretch it, a job or phase to move all of it; dates and working days show while you do; the drop saves, with Undo. Moved later, what waits on it keeps its gap (your call, 22 Oct).</li>
         <li><b>Links, finish to start (TL-links).</b> A stage waits for another: an elbow line from one's end to the next's start, drawn by dragging from a bar's end onto another; red and dashed when it starts too early. Named in the stage's summary (Waits for, Holds up), where it's removed. Show turns the lines off.</li>
+        <li><b>Narrowed by job, then by anything else (TL-filter).</b> Jobs in the toolbar, found by name and grouped by where they stand; Add filter for the job's owner, who's assigned (the team and subcontractors), who does it (our crew or a subcontractor) and a stage's status, each a chip with the count and Clear all. A job's filters drop the job; a stage's keep its job and phase around it, their brackets still the whole job, so you see where the work sits. Links show where both ends do; moving still moves what waits, shown or not, and the toast names it.</li>
         <li><b>A click opens a summary (TL-open).</b> A stage's dates, crew, links and Move; a job's span, status and Open job.</li>
         <li><b>Nothing hidden by default (TL-undated).</b> Finished jobs stay, muted, left of today (your call, 22 Oct), Show hides them; jobs with no dates wait under Unscheduled, to schedule from.</li>
         <li><b>On phones, a list (TL-phone).</b> No chart: each job with its phases and stages, their dates, and a track showing where each stage falls in its job. A tap opens the summary as a sheet; no dragging.</li>
@@ -101,10 +110,10 @@
     </div>
   </div>
 </details>
-<script src="../shared/icons.js?v=bb08b14d"></script>
-<script src="../shared/shell.js?v=bb08b14d"></script>
-<script src="../system/specimens/specimen.js?v=bb08b14d"></script>
-<script src="../data.js?v=bb08b14d"></script>
-<script src="timeline.js?v=bb08b14d"></script>
+<script src="../shared/icons.js?v=9701126e"></script>
+<script src="../shared/shell.js?v=9701126e"></script>
+<script src="../system/specimens/specimen.js?v=9701126e"></script>
+<script src="../data.js?v=9701126e"></script>
+<script src="timeline.js?v=9701126e"></script>
 </body>
 </html>

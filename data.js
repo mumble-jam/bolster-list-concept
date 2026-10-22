@@ -90,32 +90,44 @@
   ["Lakeside kitchen", "Garage drywall", "Basement finish", "Attic insulation", "Stairwell skim coat", "Office build-out",
     "Fire-rated walls", "Popcorn ceiling removal", "Crawl space insulation", "Water damage repair"].forEach(jobHue);
 
+  // the companies a job's stages are subcontracted to (the timeline's Assigned to and Done by): avatars like people's
+  const SUBS = [
+    { id: "rd", name: "Rapid Demo", trade: "Demolition", color: 6 },
+    { id: "pi", name: "Precision Insulation", trade: "Insulation", color: 4 },
+    { id: "ms", name: "Metro Steel Framing", trade: "Steel framing", color: 2 },
+    { id: "ap", name: "Apex Painting", trade: "Painting", color: 8 },
+  ].map((o) => ({ ...o, initials: initials(o.name), sub: true }));
+  // whose job each site job is: its owner, as on the job list
+  const JOB_OWNER = { "Lakeside kitchen": "hm", "Garage drywall": "pn", "Basement finish": "dc", "Attic insulation": "hm", "Stairwell skim coat": "mr",
+    "Office build-out": "dc", "Fire-rated walls": "hm", "Popcorn ceiling removal": "mr", "Crawl space insulation": "pn", "Water damage repair": "hm" };
+
   // the site jobs' schedules, the calendar's and the timeline's: each stage of a job, in its phase, on its days.
   // [job, client, place, phase, stage, start (days from today), days (0 for a milestone), crew, waits for (a stage
-  // of the same job)]. A job's dates are its stages' (D97): never typed, so a stage can't sit outside its job
+  // of the same job), the subcontractor doing it, if one is]. A job's dates are its stages' (D97): never typed, so a
+  // stage can't sit outside its job
   const SCHEDULE = [
-    ["Lakeside kitchen", "Hale residence", "14 Birch Lane", "Pre-construction", "Demolition", -3, 2, ["mr"], null],
+    ["Lakeside kitchen", "Hale residence", "14 Birch Lane", "Pre-construction", "Demolition", -3, 2, ["mr"], null, "rd"],
     ["Lakeside kitchen", "Hale residence", "14 Birch Lane", "Construction", "Framing", -1, 6, ["mr", "pn"], "Demolition"],
     ["Lakeside kitchen", "Hale residence", "14 Birch Lane", "Construction", "Drywall", 5, 4, ["mr", "dc"], "Framing"],
     ["Lakeside kitchen", "Hale residence", "14 Birch Lane", "Construction", "Inspection", 9, 0, [], "Drywall"],
     ["Lakeside kitchen", "Hale residence", "14 Birch Lane", "Finishing", "Finish", 11, 3, ["dc"], "Inspection"],
     ["Garage drywall", "Ortiz", "88 Quarry Road", "Construction", "Hang and tape", -9, 4, ["pn"], null],
-    ["Garage drywall", "Ortiz", "88 Quarry Road", "Finishing", "Prime and paint", -3, 2, ["pn"], "Hang and tape"],
+    ["Garage drywall", "Ortiz", "88 Quarry Road", "Finishing", "Prime and paint", -3, 2, ["pn"], "Hang and tape", "ap"],
     ["Basement finish", "Brennan", "3 Elm Street", "Construction", "Framing", 4, 4, ["pn"], null],
-    ["Basement finish", "Brennan", "3 Elm Street", "Construction", "Insulation", 8, 1, ["dc"], "Framing"],
+    ["Basement finish", "Brennan", "3 Elm Street", "Construction", "Insulation", 8, 1, ["dc"], "Framing", "pi"],
     ["Basement finish", "Brennan", "3 Elm Street", "Construction", "Drywall", 11, 5, ["mr", "pn"], "Insulation"],
-    ["Attic insulation", "Novak", "41 Hill Road", "Construction", "Blown-in, R-49", 0, 2, ["dc"], null],
+    ["Attic insulation", "Novak", "41 Hill Road", "Construction", "Blown-in, R-49", 0, 2, ["dc"], null, "pi"],
     ["Stairwell skim coat", "Galloway", "9 Mill Lane", "Finishing", "Skim coat", 6, 2, [], null],
-    ["Office build-out", "Northgate Property Group", "200 Harbor Way, suite 4", "Construction", "Steel studs", 12, 4, ["mr"], null],
+    ["Office build-out", "Northgate Property Group", "200 Harbor Way, suite 4", "Construction", "Steel studs", 12, 4, ["mr"], null, "ms"],
     ["Office build-out", "Northgate Property Group", "200 Harbor Way, suite 4", "Construction", "Board and tape", 18, 5, ["mr", "pn", "dc"], "Steel studs"],
     ["Fire-rated walls", "Pinecrest Builders", "Lot 12, Pinecrest", "Construction", "Two layers, type X", 19, 3, ["dc"], null],
-  ].map(([job, client, place, phase, stage, start, days, who, waits]) => ({ job, client, place, phase, stage, start, days, who, waits }));
+  ].map(([job, client, place, phase, stage, start, days, who, waits, sub = null]) => ({ job, client, place, phase, stage, start, days, who, waits, sub, owner: JOB_OWNER[job] }));
   // jobs booked with no dates yet: [job, client, place, first stage, its length]
   const UNSCHEDULED = [
     ["Popcorn ceiling removal", "Lindqvist", "31 Cedar Street", "Scrape and skim", 3],
     ["Crawl space insulation", "Marsh", "12 Fern Road", "Vapour barrier", 2],
     ["Water damage repair", "Calloway", "17 Bay Street", "Demolition and dry-out", 4],
-  ].map(([job, client, place, stage, days]) => ({ job, client, place, stage, days }));
+  ].map(([job, client, place, stage, days]) => ({ job, client, place, stage, days, owner: JOB_OWNER[job] }));
 
   const emailOf = (c) => `${c.name.split(" ")[0].toLowerCase()}@${c.name.split(" ").slice(-1)[0].toLowerCase().replace(/[^a-z]/g, "")}.example`;
   const latest = (a, b) => (+a > +b ? a : b);
@@ -572,7 +584,7 @@
   window.BDS_CONCEPT = {
     TODAY, fmt, esc, ageDays, attrIcons, actionIcons,
     // the parts recipe.js builds a list from a page description with
-    kit: { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, thumb, person, main, PHOTOS, photoAt, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf, MIN_SAMPLE, jobHue, SCHEDULE, UNSCHEDULED },
+    kit: { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, thumb, person, main, PHOTOS, photoAt, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf, MIN_SAMPLE, jobHue, SCHEDULE, UNSCHEDULED, SUBS },
     configs: { jobs: estimatesConfig, invoices: invoicesConfig, customers: clientsConfig, catalog: itemsConfig },
   };
 })();
