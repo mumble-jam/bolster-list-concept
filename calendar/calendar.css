@@ -10,18 +10,9 @@
   /* days off: a breath of the sunken surface over the day's, almost a weekday, so the week still reads as one */
   .cal-page { --cal-off: color-mix(in srgb, var(--color-surface-sunken) 30%, var(--color-surface-default)); }
 
-  /* ---------- a job's colour: the system's avatar hues (D13), one per job, a tint to fill and the hue at
-     the edge; in dark the tint is stronger and the edge lighter, so both still read ---------- */
-  :root { --cal-tint: 16%; --cal-tint-hover: 24%; --cal-edge-mix: 0%; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --cal-tint: 34%; --cal-tint-hover: 44%; --cal-edge-mix: 45%; } }
-  :root[data-theme="dark"] { --cal-tint: 34%; --cal-tint-hover: 44%; --cal-edge-mix: 45%; }
-  [data-hue="2"] { --_hue: var(--color-avatar-2); }
-  [data-hue="3"] { --_hue: var(--color-avatar-3); }
-  [data-hue="4"] { --_hue: var(--color-avatar-4); }
-  [data-hue="5"] { --_hue: var(--color-avatar-5); }
-  [data-hue="6"] { --_hue: var(--color-avatar-6); }
-  [data-hue="7"] { --_hue: var(--color-avatar-7); }
-  [data-hue] { --_edge: color-mix(in srgb, var(--_hue), var(--color-content-primary) var(--cal-edge-mix)); --_fill: color-mix(in srgb, var(--_hue) var(--cal-tint), var(--color-surface-default)); }
+  /* ---------- job work: one neutral tint and edge, the same for every job (D100). The name says which job; colour
+     stays for status, as everywhere else on the platform ---------- */
+  .cal-page, .tl-page { --cal-job-fill: var(--color-surface-tint); --cal-job-fill-hover: color-mix(in srgb, var(--color-content-primary) 6%, var(--color-surface-tint)); --cal-job-edge: var(--color-content-secondary); }
 
   /* ---------- the toolbar, on the page ---------- */
   .cal-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-3); }
@@ -89,23 +80,20 @@
   .cal-span {
     position: relative; z-index: 1; display: flex; align-items: center; gap: var(--space-1); min-inline-size: 0;
     margin-inline: var(--space-1); padding: 0 var(--space-2); border: 0; border-radius: var(--radius-sm);
-    background: var(--color-surface-tint); color: var(--color-content-primary);
+    background: var(--cal-job-fill); color: var(--color-content-primary);
     font: inherit; font-size: var(--text-xs); line-height: var(--_lane); font-weight: var(--font-weight-medium); text-align: start; white-space: nowrap; cursor: pointer;
-    box-shadow: inset var(--border-width-strong) 0 0 var(--color-content-secondary);
+    box-shadow: inset var(--border-width-strong) 0 0 var(--cal-job-edge);
   }
   .cal-span > span { overflow: hidden; text-overflow: ellipsis; }
   .cal-span .cal-sub { font-weight: var(--font-weight-regular); color: var(--color-content-secondary); }
   .cal-span svg { flex: none; color: var(--color-content-secondary); }
   .cal-span[data-cont-l] { margin-inline-start: 0; border-start-start-radius: 0; border-end-start-radius: 0; box-shadow: none; }
   .cal-span[data-cont-r] { margin-inline-end: 0; border-start-end-radius: 0; border-end-end-radius: 0; }
-  .cal-span[data-hue] { background: var(--_fill); box-shadow: inset var(--border-width-strong) 0 0 var(--_edge); }
-  .cal-span[data-hue] svg { color: var(--_edge); }
   .cal-span[data-cont-l] { box-shadow: none; }
-  /* done: the job's colour, faded */
-  .cal-span[data-past] { color: var(--color-content-secondary); }
-  .cal-span[data-past][data-hue] { --cal-tint: 7%; box-shadow: inset var(--border-width-strong) 0 0 color-mix(in srgb, var(--_edge) 45%, var(--color-surface-default)); }
+  /* done: faded, its edge and words quieter */
+  .cal-span[data-past] { color: var(--color-content-secondary); background: color-mix(in srgb, var(--cal-job-fill) 55%, var(--color-surface-default)); box-shadow: inset var(--border-width-strong) 0 0 var(--color-line-strong); }
   .cal-span[data-past][data-cont-l] { box-shadow: none; }
-  @media (hover: hover) { .cal-span[data-hue]:hover { --cal-tint: var(--cal-tint-hover); } }
+  @media (hover: hover) { .cal-span:hover { background: var(--cal-job-fill-hover); } }
   .cal-span:focus-visible, .cal-item:focus-visible, .cal-more:focus-visible, .cal-block:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
   .cal-span[aria-expanded="true"], .cal-item[aria-expanded="true"], .cal-block[aria-expanded="true"] { outline: var(--border-width-strong) solid var(--color-action-accent); outline-offset: 0; }
   /* its end: drag to stretch (C-move) */
@@ -182,7 +170,6 @@
   .cal-tray-item { display: grid; gap: var(--space-0-5); inline-size: 100%; padding: var(--space-2) var(--space-3); border: var(--border-width-default) solid var(--color-line-default); border-radius: var(--radius-md); background: var(--color-surface-default); color: var(--color-content-primary); font: inherit; text-align: start; cursor: grab; }
   /* in the sheet, a row of a menu: its corners follow the menu's (D35) */
   .pop .cal-tray-item { border-radius: var(--radius-sm); }
-  .cal-tray-item[data-hue] { border-inline-start: var(--border-width-strong) solid var(--_edge); }
   .cal-tray-item b { font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); }
   .cal-tray-item span { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
   @media (hover: hover) { .cal-tray-item:hover { border-color: var(--color-line-strong); } }
@@ -202,8 +189,6 @@
   /* the kind line and Close share the top row; Close sits 13 in from the corner, where the pop-head puts it */
   .cal-sum-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin: calc(-1 * var(--space-1)) calc(-1 * var(--space-1)) calc(-1 * var(--space-2)) 0; }
   .cal-sum-kind { display: flex; align-items: center; gap: var(--space-1); margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
-  .cal-sum[data-hue] .cal-sum-kind svg { color: var(--_edge); }
-  .cal-sum[data-hue] h3 { padding-inline-start: var(--space-2); box-shadow: inset var(--border-width-strong) 0 0 var(--_edge); }
   .cal-sum h3 { margin: 0; font-size: var(--text-base); line-height: var(--leading-base); font-weight: var(--font-weight-medium); }
   .cal-sum-when { margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); }
   .cal-sum-when small { display: block; color: var(--color-content-secondary); font-size: var(--text-sm); }
@@ -272,8 +257,8 @@
   .cal-card-item b { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-base); line-height: var(--leading-base); font-weight: var(--font-weight-medium); }
   .cal-card-item b svg { flex: none; color: var(--color-content-secondary); }
   .cal-card-item span { font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
-  .cal-card-item[data-hue] { border-inline-start: var(--border-width-strong) solid var(--_edge); background: var(--_fill); }
-  .cal-card-item[data-hue] b svg, .cal-line[data-hue] svg { color: var(--_edge); }
+  /* a job's phase: the spans' tint and edge, so job work reads the same on phones */
+  .cal-card-item:not([data-kind]) { border-inline-start: var(--border-width-strong) solid var(--cal-job-edge); background: var(--cal-job-fill); }
   .cal-card-item[data-kind="busy"] { background: repeating-linear-gradient(135deg, var(--color-surface-sunken) 0 4px, var(--color-surface-default) 4px 8px); }
   .cal-card-item:focus-visible, .cal-line:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
   /* a phase that only runs through the day, and an empty day: one line each, in line with the cards' text

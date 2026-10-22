@@ -3,7 +3,7 @@
 // when something moves, finished jobs muted left of today. The calendar's jobs and dates (kit.SCHEDULE). Made-up data.
 (() => {
   const { TODAY, esc, kit } = window.BDS_CONCEPT;
-  const { OWNERS, SUBS, avatar, jobHue } = kit;
+  const { OWNERS, SUBS, avatar } = kit;
   const ic = (n, s = 16, o) => window.BolsterIcons(n, s, o);
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -184,7 +184,7 @@
     if (r.type === "job") {
       const j = r.j, open = isOpen(r.key);
       cells = `${chev(r.key, open, j.name)}<button type="button" class="tl-name" data-open-job="${esc(j.name)}" aria-haspopup="dialog" aria-expanded="false"><b>${esc(j.name)}</b><span>${esc(j.client)}</span></button><span class="tl-start">${short(j.start)}</span><span class="tl-days">${j.work} d</span>`;
-      bar = `<div class="tl-bracket" data-drag="job" data-key="${esc(j.name)}" data-hue="${jobHue(j.name)}" style="left:${X(j.start)}px;width:${(j.end - j.start + 1) * dw}px" title="${esc(`${j.name}: ${span(j.start, j.end)}`)}"></div><span class="tl-bar-label" style="left:${X(j.end + 1) + 8}px">${esc(j.status)} · ${j.pct}%</span>`;
+      bar = `<div class="tl-bracket" data-drag="job" data-key="${esc(j.name)}" style="left:${X(j.start)}px;width:${(j.end - j.start + 1) * dw}px" title="${esc(`${j.name}: ${span(j.start, j.end)}`)}"></div><span class="tl-bar-label" style="left:${X(j.end + 1) + 8}px">${esc(j.status)} · ${j.pct}%</span>`;
     } else if (r.type === "phase") {
       const open = isOpen(r.key);
       cells = `${chev(r.key, open, r.p.name)}<span class="tl-name tl-name-phase">${esc(r.p.name)}</span><span class="tl-start">${short(r.start)}</span><span class="tl-days">${r.work} d</span>`;
@@ -197,7 +197,7 @@
       if (ms) bar = `<button type="button" class="tl-milestone" data-open="${s.id}" data-drag="stage" data-key="${s.id}" tabindex="-1" aria-hidden="true" style="left:${X(s.start) + dw / 2}px" data-tip="${esc(`${s.name} · ${long(s.start)}`)}"></button><span class="tl-bar-label" style="left:${X(s.start) + dw / 2 + 12}px">${esc(s.name)}</span>`;
       else {
         const w = (s.days) * dw, out = w < 84;
-        bar = `<button type="button" class="tl-bar" data-open="${s.id}" data-drag="stage" data-key="${s.id}" data-hue="${jobHue(s.job)}" tabindex="-1" aria-hidden="true" style="left:${X(s.start)}px;width:${w}px;--_pct:${pct}%"${broken(s) ? " data-broken" : ""}>${out ? "" : `<span>${esc(s.name)}</span>`}<i class="tl-end" data-stretch="${s.id}"></i><i class="tl-link-handle" data-link-from="${s.id}" data-tip="Drag onto a stage to link it"></i></button>${out ? `<span class="tl-bar-label" style="left:${X(s.start) + w + 8}px">${esc(s.name)}</span>` : ""}`;
+        bar = `<button type="button" class="tl-bar" data-open="${s.id}" data-drag="stage" data-key="${s.id}" tabindex="-1" aria-hidden="true" style="left:${X(s.start)}px;width:${w}px;--_pct:${pct}%"${broken(s) ? " data-broken" : ""}>${out ? "" : `<span>${esc(s.name)}</span>`}<i class="tl-end" data-stretch="${s.id}"></i><i class="tl-link-handle" data-link-from="${s.id}" data-tip="Drag onto a stage to link it"></i></button>${out ? `<span class="tl-bar-label" style="left:${X(s.start) + w + 8}px">${esc(s.name)}</span>` : ""}`;
       }
     } else {
       const s = r.s, it = r.it;
@@ -228,7 +228,7 @@
     return `<div class="tl-phone">${shownJobs().map((j) => {
       const len = j.end - j.start + 1;
       const track = (a, b) => `<span class="tl-ptrack" aria-hidden="true"><i style="left:${((a - j.start) / len) * 100}%;width:${Math.max(2, ((b - a + 1) / len) * 100)}%"></i></span>`;
-      return `<section class="tl-pjob"${j.status === "Completed" ? " data-past" : ""} data-hue="${jobHue(j.name)}"><button type="button" class="tl-pjob-head" data-open-job="${esc(j.name)}" aria-haspopup="dialog"><b>${esc(j.name)}</b><span>${esc(j.client)} · ${esc(span(j.start, j.end))}</span><span>${esc(j.status)} · ${j.pct}%</span></button>
+      return `<section class="tl-pjob"${j.status === "Completed" ? " data-past" : ""}><button type="button" class="tl-pjob-head" data-open-job="${esc(j.name)}" aria-haspopup="dialog"><b>${esc(j.name)}</b><span>${esc(j.client)} · ${esc(span(j.start, j.end))}</span><span>${esc(j.status)} · ${j.pct}%</span></button>
         ${j.phases.map((p) => `<h3>${esc(p.name)}</h3>${p.stages.map((s) => `<button type="button" class="tl-pstage" data-open="${s.id}" aria-haspopup="dialog"${broken(s) ? " data-broken" : ""}><b>${isMilestone(s) ? '<i class="tl-pdiamond" aria-hidden="true"></i>' : ""}${esc(s.name)}</b><span>${esc(isMilestone(s) ? long(s.start) : `${span(s.start, endOf(s))} · ${workDays(s.start, endOf(s))} working days`)}</span>${s.waits ? `<span class="tl-pwaits">Waits for ${esc(byId(s.waits).name)}${broken(s) ? ", which ends after it starts" : ""}</span>` : ""}${track(s.start, endOf(s))}</button>`).join("")}`).join("")}</section>`;
     }).join("")}</div>`;
   }
@@ -376,7 +376,7 @@
   function stageHtml(s) {
     const ms = isMilestone(s), end = endOf(s), wd = ms ? 0 : workDays(s.start, end), on = !ms && s.start <= 0 && end >= 0;
     const p = s.waits && byId(s.waits), holds = holdsUp(s);
-    return `<div class="cal-sum" data-hue="${jobHue(s.job)}"><div class="cal-sum-top"><p class="cal-sum-kind">${ic(ms ? "calendar" : "briefcase", 14)}${ms ? "Milestone" : "Stage"} · ${esc(s.phase)}</p>${closeBtn()}</div>
+    return `<div class="cal-sum"><div class="cal-sum-top"><p class="cal-sum-kind">${ic(ms ? "calendar" : "briefcase", 14)}${ms ? "Milestone" : "Stage"} · ${esc(s.phase)}</p>${closeBtn()}</div>
       <h3 tabindex="-1">${esc(s.name)}</h3>
       <p class="cal-sum-when">${esc(ms ? long(s.start) : span(s.start, end))}<small>${ms ? "A date, no length" : `${wd} working ${wd === 1 ? "day" : "days"}${on ? ` · day ${workDays(s.start, 0)} of ${wd} today` : end < 0 ? " · done" : ""}`}</small></p>
       <dl>${dd("Job", `${esc(s.job)} · ${esc(s.client)}`)}${ms ? "" : dd("Crew", crew(s.who, s.sub))}
@@ -388,7 +388,7 @@
   }
   function jobHtml(name) {
     const j = jobsOf().find((x) => x.name === name);
-    return `<div class="cal-sum" data-hue="${jobHue(j.name)}"><div class="cal-sum-top"><p class="cal-sum-kind">${ic("briefcase", 14)}Job</p>${closeBtn()}</div>
+    return `<div class="cal-sum"><div class="cal-sum-top"><p class="cal-sum-kind">${ic("briefcase", 14)}Job</p>${closeBtn()}</div>
       <h3 tabindex="-1">${esc(j.name)}</h3>
       <p class="cal-sum-when">${esc(span(j.start, j.end))}<small>${j.work} working days · ${esc(j.status)} · ${j.pct}%</small></p>
       <dl>${dd("Owner", crew([j.owner]))}${dd("Client", esc(j.client))}${dd("Where", esc(j.place))}${dd("Plan", `${j.phases.length} ${j.phases.length === 1 ? "phase" : "phases"}, ${j.stages.length} ${j.stages.length === 1 ? "stage" : "stages"}`)}</dl>
@@ -400,7 +400,7 @@
   // Jobs: found by name, grouped by where they stand; none ticked is all of them
   function jobsHtml() {
     const all = jobsOf().filter((j) => st.completed || j.status !== "Completed"), on = new Set(st.jobs || []);
-    const opt = (j) => `<label class="option"><input type="checkbox" class="checkbox" data-job-pick="${esc(j.name)}"${on.has(j.name) ? " checked" : ""}><span class="option-label"><span class="menu-icon"><i class="tl-swatch" data-hue="${jobHue(j.name)}"></i></span><span class="tl-opt">${esc(j.name)}<small>${esc(j.client)} · ${esc(`${short(j.start)} – ${short(j.end)}`)}</small></span></span></label>`;
+    const opt = (j) => `<label class="option"><input type="checkbox" class="checkbox" data-job-pick="${esc(j.name)}"${on.has(j.name) ? " checked" : ""}><span class="option-label"><span class="tl-opt">${esc(j.name)}<small>${esc(j.client)} · ${esc(`${short(j.start)} – ${short(j.end)}`)}</small></span></span></label>`;
     return `<div class="pop-head"><h3>Jobs</h3>${st.jobs ? `<button type="button" class="button" data-variant="ghost" data-size="sm" data-clear-jobs>Clear</button>` : ""}${closeBtn()}</div>
       <div class="pop-find"><input class="input" data-size="sm" type="search" data-opt-find placeholder="Find a job or client" aria-label="Find a job or client" autocomplete="off"></div>
       <div class="pop-body tl-jobs-pick" role="group" aria-label="Jobs">${[["In progress", "Under way"], ["Booked", "Coming up"], ["Completed", "Finished"]].map(([status, title]) => {
@@ -435,8 +435,8 @@
     const none = $(".tl-find-none", pop); if (none) none.hidden = $$(".option", pop).some((o) => !o.hidden);
   }
   const openFilter = (key, from) => { openPop("filter", from, () => filterHtml(key), { label: `Filter by ${filterDef(key).label.toLowerCase()}`, start: !!from.closest(".chip") }); if (popFor) popFor.key = key; };
-  const trayHtml = () => `<div class="pop-head"><h3>Unscheduled</h3>${closeBtn()}</div><div class="pop-body"><p class="cal-tray-help">Booked jobs with no dates yet. Open one to give it a start.</p><ul class="cal-tray-list">${unscheduled.length ? unscheduled.map((u) => `<li><button type="button" class="cal-tray-item" data-schedule="${u.id}" data-hue="${jobHue(u.job)}"><b>${esc(u.job)}</b><span>${esc(u.stage)} · ${u.days} ${u.days === 1 ? "day" : "days"} · ${esc(u.client)}</span></button></li>`).join("") : '<li><p class="cal-tray-empty">Every job has its dates.</p></li>'}</ul></div>`;
-  const scheduleHtml = (u) => `<div class="cal-sum" data-hue="${jobHue(u.job)}"><div class="cal-sum-top"><p class="cal-sum-kind">${ic("briefcase", 14)}Unscheduled</p>${closeBtn()}</div><h3 tabindex="-1">${esc(u.job)}</h3>
+  const trayHtml = () => `<div class="pop-head"><h3>Unscheduled</h3>${closeBtn()}</div><div class="pop-body"><p class="cal-tray-help">Booked jobs with no dates yet. Open one to give it a start.</p><ul class="cal-tray-list">${unscheduled.length ? unscheduled.map((u) => `<li><button type="button" class="cal-tray-item" data-schedule="${u.id}"><b>${esc(u.job)}</b><span>${esc(u.stage)} · ${u.days} ${u.days === 1 ? "day" : "days"} · ${esc(u.client)}</span></button></li>`).join("") : '<li><p class="cal-tray-empty">Every job has its dates.</p></li>'}</ul></div>`;
+  const scheduleHtml = (u) => `<div class="cal-sum"><div class="cal-sum-top"><p class="cal-sum-kind">${ic("briefcase", 14)}Unscheduled</p>${closeBtn()}</div><h3 tabindex="-1">${esc(u.job)}</h3>
     <p class="cal-sum-when">${esc(u.stage)}<small>${u.days} ${u.days === 1 ? "day" : "days"} · ${esc(u.client)}, ${esc(u.place)}</small></p>
     <form class="cal-sum-move" data-schedule-form="${u.id}"><div class="field" data-size="sm"><label class="field-label" for="sc-date">Start on</label><input class="input" type="date" id="sc-date" name="date" value="${iso(weekStart(7))}" required></div><button type="submit" class="button" data-size="sm">Schedule</button></form></div>`;
   function schedule(u, start) {
