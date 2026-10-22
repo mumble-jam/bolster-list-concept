@@ -3,11 +3,12 @@
      <div class="toast" data-tone="success|danger|warning|info" role="status">
        <span class="toast-message">Proposal sent</span>
        <button class="toast-action">Undo</button>
-       <button class="toast-close" aria-label="Dismiss">×</button>
+       <button class="toast-close" aria-label="Dismiss" data-tip="Dismiss"><svg…xmark/></button>
      </div>
    </div>
    Timing (I-entries): success and info leave after 5s (paused on hover/focus);
-   danger stays until dismissed and uses role="alert". */
+   danger stays until dismissed and uses role="alert". A toast leaves as it came (fading, sliding 8 px)
+   while its place closes up, so the ones above come down rather than drop (the script animates it). */
 
 @layer tokens, base, components, utilities;
 
@@ -60,7 +61,7 @@
     cursor: pointer;
   }
   :where(.toast-action) { color: var(--color-action-brand); }
-  :where(.toast-close) { inline-size: var(--control-height-sm); padding: 0; opacity: 0.8; }
+  :where(.toast-close) { display: inline-grid; place-items: center; inline-size: var(--control-height-sm); padding: 0; opacity: 0.8; }
   @media (hover: hover) { :where(.toast-action:hover, .toast-close:hover) { background: var(--color-surface-inverse-hover); } }
   @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
 }

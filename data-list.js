@@ -660,7 +660,9 @@
     }
     document.querySelector(".list-page").toggleAttribute("data-selecting", on);
     document.body.toggleAttribute("data-selecting", on);
-    if (!on) { bar.innerHTML = ""; return; }
+    // hidden, it keeps its contents while it fades out, out of reach
+    bar.inert = !on;
+    if (!on) return;
     const what = n === 1 ? `1 ${cfg.noun[0]}` : `${fmt.count(n)} ${cfg.noun[1]}`;
     bar.setAttribute("aria-label", n ? `Bulk actions for ${n} selected` : "Select mode");
     const { acts, more, del } = bulkSet();
@@ -743,7 +745,8 @@
   }
   function place() {
     const a = anchorFor(popFor);
-    $$("[aria-expanded='true']").forEach((el) => { if (el !== a) el.setAttribute("aria-expanded", "false"); });
+    // only popover triggers: a group's toggle keeps its own state
+    $$("[aria-haspopup][aria-expanded='true']").forEach((el) => { if (el !== a) el.setAttribute("aria-expanded", "false"); });
     $$(".chip[data-open]").forEach((el) => el.removeAttribute("data-open"));
     if (!a) return;
     a.setAttribute("aria-expanded", "true");
@@ -794,8 +797,7 @@
     const sub = subOf(name);
     if (!sub) return;
     if (sheet()) { // in the sheet: drill in, with a back row on top
-      pop.dataset.drill = name;
-      markDrill();
+      drillSheet(() => { pop.dataset.drill = name; markDrill(); });
       pop.scrollTop = 0;
       if (focus) ($("[aria-checked=true]", sub) || $("[role^=menuitem]", sub))?.focus({ preventScroll: true });
       return;
@@ -811,9 +813,21 @@
     $$(".submenu[data-drilled]", pop).forEach((s) => s.removeAttribute("data-drilled"));
     if (pop.dataset.drill) subOf(pop.dataset.drill)?.setAttribute("data-drilled", "");
   }
+  // the sheet's height eases to what it holds now, rather than snapping, and the new rows fade in
+  function drillSheet(change) {
+    const from = pop.getBoundingClientRect().height;
+    change();
+    if (!pop.matches(":popover-open") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const to = pop.getBoundingClientRect().height;
+    if (Math.abs(to - from) < 1) return;
+    const ease = getComputedStyle(document.documentElement).getPropertyValue("--ease-out") || "ease-out";
+    pop.style.overflow = "hidden";
+    const done = () => (pop.style.overflow = "");
+    pop.animate([{ blockSize: `${from}px` }, { blockSize: `${to}px` }], { duration: 200, easing: ease }).finished.then(done, done);
+    $(".pop-body", pop)?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: ease });
+  }
   function closeSub(name) {
-    if (pop.dataset.drill === name) delete pop.dataset.drill;
-    markDrill();
+    drillSheet(() => { if (pop.dataset.drill === name) delete pop.dataset.drill; markDrill(); });
     const sub = subOf(name);
     if (sub?.matches(":popover-open")) sub.hidePopover();
     triggerOf(name)?.focus({ preventScroll: true });
@@ -930,7 +944,7 @@
     if (sheet() && !dp.custom) {
       // phones: the presets are the sheet's list; one picked on desktop shows too
       const ids = PHONE_PRESETS.includes(presetOf(cur)?.id ?? "") ? PHONE_PRESETS : [...PHONE_PRESETS, presetOf(cur).id];
-      const row = (p) => `<button type="button" class="menu-item" data-date-preset="${p.id}" aria-pressed="${presetOf(cur)?.id === p.id}">${esc(p.label)}${presetOf(cur)?.id === p.id ? I.check : ""}</button>`;
+      const row = (p) => `<button type="button" class="menu-item" data-date-preset="${p.id}" aria-pressed="${presetOf(cur)?.id === p.id}"><span class="submenu-label">${esc(p.label)}</span>${presetOf(cur)?.id === p.id ? I.check : ""}</button>`;
       const custom = presetOf(cur) ? "" : `<span class="submenu-value">${esc(dateText(cur))}</span>`;
       pop.innerHTML = `<div class="pop-head"><h3>${esc(f.label)}</h3>${set ? `<button type="button" class="button" data-variant="ghost" data-size="sm" data-remove="${f.key}">Clear</button>` : ""}</div>
         <div class="pop-body">${ids.map((id) => row(presetOf(id))).join("")}<button type="button" class="menu-item" data-date-custom aria-pressed="${!presetOf(cur)}"><span class="submenu-label">Custom…</span>${custom}${I.chevR}</button></div>`;
@@ -1349,7 +1363,7 @@
     if (q("[data-select-done]")) { unpick(); $("#select-mode")?.focus({ preventScroll: true }); return; }
     if ((el = q("[data-select-matching]"))) { const head = el.id === "select-all" || !!el.closest(".select-bar"); rowsWhere().forEach((x) => st.selected.add(x.id)); renderBody(); renderBulk(); (head ? el : $("#bulk-bar .floating-bar-count"))?.focus({ preventScroll: true }); return; }
     if (q("[data-clear-selection]")) { unpick(); $("#select-page")?.focus({ preventScroll: true }); return; }
-    if ((el = q("[data-unselect-all]"))) { const head = el.id === "select-all" || !!el.closest(".select-bar"); untick(); (head ? el : $("#bulk-bar .floating-bar-link") || $("#select-page"))?.focus({ preventScroll: true }); return; }
+    if ((el = q("[data-unselect-all]"))) { const head = el.id === "select-all" || !!el.closest(".select-bar"); untick(); (head ? el : $("#bulk-bar:not([hidden]) .floating-bar-link") || $("#select-page"))?.focus({ preventScroll: true }); return; }
     if (q("#select-mode")) { st.picking || st.selected.size ? unpick() : ((st.picking = true), renderBulk()); return; }
     if ((el = q("[data-confirm]"))) { if (pop.contains(el)) pop.hidePopover(); return openConfirm(el.dataset.confirm); }
     if (q("#confirm-go")) {

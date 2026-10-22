@@ -123,6 +123,6 @@
     margin-block: calc((var(--space-1) + var(--card-lift)) * -1) calc(var(--_reach) * -1);
   }
   @media (min-width: 768px) {
-    :root:not([data-cards="flat"]) .slice-row { padding-inline: max(var(--space-1), var(--card-ab)); margin-inline: calc(max(var(--space-1), var(--card-ab)) * -1); }
+    :root:not([data-cards="flat"]) .slice-row { padding-inline: max(var(--space-1), var(--card-ab)); margin-inline: calc(max(var(--space-1), var(--card-ab)) * -1); scroll-padding-inline: max(var(--space-1), var(--card-ab)); }
   }
 }

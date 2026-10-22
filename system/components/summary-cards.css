@@ -24,6 +24,7 @@
     grid-template-columns: repeat(var(--_slices, 5), minmax(max-content, 1fr)) minmax(max-content, 2fr);
     overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity;
     margin: calc(var(--space-1) * -1); padding: var(--space-1); /* room for the focus ring */
+    scroll-padding-inline: var(--space-1); /* the cards snap to the padding's edge, so the row loads at 0 */
   }
   .slice {
     min-inline-size: 7.5rem;

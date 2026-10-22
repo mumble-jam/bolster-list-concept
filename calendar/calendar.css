@@ -23,6 +23,7 @@
     --_fill: color-mix(in srgb, var(--_k) var(--cal-tint), var(--color-surface-default)); --_fill-hover: color-mix(in srgb, var(--_k) var(--cal-tint-hover), var(--color-surface-default));
     --_edge: color-mix(in srgb, var(--_k), var(--color-content-primary) var(--cal-edge-mix));
     --_past-fill: color-mix(in srgb, var(--_fill) 45%, var(--color-surface-default)); --_past-edge: color-mix(in srgb, var(--_edge) 40%, var(--color-surface-default));
+    --_past-fill-hover: color-mix(in srgb, var(--_fill-hover) 45%, var(--color-surface-default));
   }
   .tl-page { --cal-job-fill: var(--color-surface-tint); --cal-job-fill-hover: color-mix(in srgb, var(--color-content-primary) 6%, var(--color-surface-tint)); --cal-job-edge: var(--color-content-secondary); }
   /* the key, in Show: a swatch of each */
@@ -40,6 +41,13 @@
   /* Unscheduled's icon is wider than tall: drawn by its height, as the list draws display settings', so it
      isn't squeezed into a square and drawn smaller than the rest (D41) */
   #tray-toggle > svg { inline-size: auto; block-size: 1rem; }
+  /* the bar's layout never follows its words, so the calendar under it doesn't jump as you page, switch views or
+     pick: the period has room for its longest (a Wednesday in September, in Day), Show and People a width of
+     their own, what they read back cut short (it's whole in their names). The timeline's bar is its own */
+  @media (min-width: 768px) {
+    .cal-page .cal-where { min-inline-size: 29.5rem; }
+    .cal-page :is(#pick-show, #pick-people) { inline-size: 8rem; justify-content: space-between; }
+  }
 
   /* ---------- the calendar and the tray beside it ---------- */
   .cal-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); align-items: start; }
@@ -109,9 +117,13 @@
   .cal-span[data-past] { color: var(--color-content-secondary); background: var(--_past-fill); box-shadow: inset var(--border-width-strong) 0 0 var(--_past-edge); }
   .cal-span[data-past] svg { color: var(--_past-edge); }
   .cal-span[data-past][data-cont-l] { box-shadow: none; }
-  @media (hover: hover) { .cal-span:hover { background: var(--_fill-hover); } }
+  /* done things stay faded under the pointer: their own fill, a step stronger */
+  @media (hover: hover) { .cal-span:hover { background: var(--_fill-hover); } .cal-span[data-past]:hover { background: var(--_past-fill-hover); } }
   .cal-span:focus-visible, .cal-item:focus-visible, .cal-more:focus-visible, .cal-block:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
   .cal-span[aria-expanded="true"], .cal-item[aria-expanded="true"], .cal-block[aria-expanded="true"] { outline: var(--border-width-strong) solid var(--color-action-accent); outline-offset: 0; }
+  /* a span that carries on past the week touches the card's edge, which would cut its ring: drawn inside it */
+  .cal-span:is([data-cont-l], [data-cont-r]):focus-visible { outline-offset: calc(-1 * var(--focus-ring-width)); }
+  .cal-span:is([data-cont-l], [data-cont-r])[aria-expanded="true"] { outline-offset: calc(-1 * var(--border-width-strong)); }
   /* its end: drag to stretch (C-move) */
   .cal-resize { position: absolute; inset-block: 0; inset-inline-end: 0; inline-size: var(--space-2); cursor: ew-resize; }
   .cal-span:not(:hover) .cal-resize { display: none; }
@@ -121,7 +133,7 @@
   /* the list's gaps belong to the day under it: a click there makes something on that day (D96) */
   .cal-items { pointer-events: none; }
   .cal-items > * { pointer-events: auto; }
-  .cal-item { display: flex; align-items: center; gap: var(--space-1); min-inline-size: 0; block-size: var(--_lane); padding: 0 var(--space-1); border: 0; border-radius: var(--radius-sm); background: none; color: var(--color-content-primary); font: inherit; font-size: var(--text-xs); line-height: var(--leading-xs); text-align: start; white-space: nowrap; cursor: pointer; }
+  .cal-item { display: flex; align-items: center; gap: var(--space-1); min-inline-size: 0; overflow: hidden; block-size: var(--_lane); padding: 0 var(--space-1); border: 0; border-radius: var(--radius-sm); background: none; color: var(--color-content-primary); font: inherit; font-size: var(--text-xs); line-height: var(--leading-xs); text-align: start; white-space: nowrap; cursor: pointer; }
   .cal-item > span:last-child { overflow: hidden; text-overflow: ellipsis; }
   .cal-item .cal-time { flex: none; color: var(--color-content-secondary); font-variant-numeric: tabular-nums; }
   .cal-item::before { content: ""; flex: none; inline-size: 6px; block-size: 6px; border-radius: var(--radius-full); background: var(--_edge, var(--color-content-primary)); }
@@ -139,14 +151,19 @@
   .cal-time { --_cols: 3.5rem repeat(var(--_n), minmax(0, 1fr)); }
   .cal-allday { display: grid; grid-template-columns: 3.5rem minmax(0, 1fr); border-block-end: var(--border-width-default) solid var(--color-line-default); }
   .cal-allday > .cal-gutter-label { align-self: center; }
-  .cal-allday .cal-week { min-block-size: 0; --_pt: var(--space-1); }
+  /* empty, it still keeps a lane, so its label and its + clear the rules */
+  .cal-allday .cal-week { min-block-size: calc(var(--_pt) + var(--_lane) + var(--_pb)); --_pt: var(--space-1); }
+  /* its first day keeps the rule the hours have beside the gutter (Month's first day is the card's edge) */
+  .cal-allday .cal-day:first-child { border-inline-start: var(--border-width-default) solid var(--color-line-subtle); }
   .cal-allday .cal-week .cal-date { display: none; }
   .cal-gutter-label { padding-inline: var(--space-2); font-size: var(--text-xxs, 0.6875rem); line-height: 1; color: var(--color-content-tertiary); text-align: end; font-variant-numeric: tabular-nums; }
   .cal-hours { position: relative; display: grid; grid-template-columns: var(--_cols); max-block-size: calc(100dvh - 15rem); min-block-size: 20rem; overflow-y: auto; }
   .cal-gutter { position: relative; block-size: calc(var(--_hour) * var(--_span-h)); }
   .cal-gutter .cal-gutter-label { position: absolute; inset-inline: 0; translate: 0 -50%; }
   .cal-col { position: relative; block-size: calc(var(--_hour) * var(--_span-h)); border-inline-start: var(--border-width-default) solid var(--color-line-subtle);
-    background-image: repeating-linear-gradient(to bottom, var(--color-line-subtle) 0 var(--border-width-default), transparent var(--border-width-default) var(--_hour)); }
+    background-image: repeating-linear-gradient(to bottom, var(--color-line-subtle) 0 var(--border-width-default), transparent var(--border-width-default) var(--_hour));
+    /* the hour lines from the second hour: the first is the all-day row's rule */
+    background-size: 100% calc(100% - var(--_hour)); background-position: 0 var(--_hour); background-repeat: no-repeat; }
   .cal-col[data-off] { background-color: var(--cal-off); }
   .cal-col[data-drop] { background-color: var(--color-action-accent-subtle); }
   .cal-block {
@@ -163,14 +180,20 @@
   /* under an hour, two lines would be cut (your note, 22 Oct): one line, the title, then when it starts (the
      rest is in its name and summary); 15 minutes, smaller still */
   .cal-block[data-size] { flex-direction: row; align-items: center; gap: var(--space-1); padding-block: 0; }
-  .cal-block[data-size] b { flex: 0 1 auto; min-inline-size: 0; }
-  .cal-block[data-size] span { flex: none; font-variant-numeric: tabular-nums; }
+  /* side by side, the title gives way first, down to 3rem (or all there is), then the time */
+  .cal-block[data-size] b { flex: 0 1000 auto; min-inline-size: min(3rem, 100%); }
+  .cal-block[data-size] span { flex: 0 1 auto; min-inline-size: 0; font-variant-numeric: tabular-nums; }
   .cal-block[data-size="xs"] { font-size: 0.625rem; line-height: 1; }
+  /* busy: the hatch over a colour of its own, so a hover changes the colour and keeps the hatch */
   .cal-block[data-kind="busy"] { border-color: var(--color-line-subtle); border-inline-start-color: var(--color-line-strong); color: var(--color-content-secondary);
-    background: repeating-linear-gradient(135deg, var(--color-surface-sunken) 0 4px, var(--color-surface-default) 4px 8px); }
-  @media (hover: hover) { .cal-block:hover { background-color: var(--_fill-hover, var(--color-surface-hover)); } .cal-block[data-kind="busy"]:hover { background: var(--color-surface-hover); } }
+    background: repeating-linear-gradient(135deg, var(--color-surface-sunken) 0 4px, transparent 4px 8px) var(--color-surface-default); }
+  @media (hover: hover) {
+    .cal-block:hover { background-color: var(--_fill-hover, var(--color-surface-hover)); }
+    .cal-block[data-past]:hover { background-color: var(--_past-fill-hover, var(--color-surface-hover)); }
+    .cal-block[data-kind="busy"]:hover { background-color: var(--color-surface-hover); }
+  }
   /* now: a line across today's column (C-today) */
-  .cal-now { position: absolute; inset-inline: 0; inset-block-start: var(--_top); z-index: 2; block-size: var(--border-width-strong); background: var(--color-feedback-danger-accent); pointer-events: none; }
+  .cal-now { position: absolute; inset-inline: 0; inset-block-start: var(--_top); translate: 0 -50%; z-index: 2; block-size: var(--border-width-strong); background: var(--color-feedback-danger-accent); pointer-events: none; }
   .cal-now::before { content: ""; position: absolute; inset-inline-start: -4px; inset-block-start: -3px; inline-size: 8px; block-size: 8px; border-radius: var(--radius-full); background: var(--color-feedback-danger-accent); }
 
   /* ---------- Crew: people down the side, the week across ---------- */
@@ -219,8 +242,10 @@
   .cal-sum-when small { display: block; color: var(--color-content-secondary); font-size: var(--text-sm); }
   .cal-sum dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-1) var(--space-3); margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); }
   .cal-sum dt { color: var(--color-content-secondary); }
+  /* beside faces, the term lines up with the names */
+  .cal-sum dt:has(+ dd > .cal-faces) { align-self: center; }
   .cal-sum dd { margin: 0; display: flex; align-items: center; gap: var(--space-2); min-inline-size: 0; }
-  .cal-sum-move { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); align-items: end; padding-block-start: var(--space-3); border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
+  .cal-sum-move { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--space-2); align-items: end; padding-block-start: var(--space-3); border-block-start: var(--border-width-default) solid var(--color-line-card); } /* the card's line: the subtle one is the raised surface's own colour in dark */
   .cal-sum-move:has(.cal-move-time) { grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr) auto; }
   .cal-sum-move .field { margin: 0; }
   .cal-sum-note { margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }

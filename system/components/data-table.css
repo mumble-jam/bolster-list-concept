@@ -49,7 +49,10 @@
     vertical-align: middle;
   }
   :where(.data-table) :where(td[data-numeric], th[data-numeric]) { text-align: end; font-variant-numeric: tabular-nums; }
-  :where(.data-table-select) { inline-size: var(--space-10); padding-inline-end: 0; }
+  /* 40 wide even when the columns don't all fit and the table squeezes them; the box block-level, so it
+     sits in the cell's middle rather than on a line's baseline */
+  :where(.data-table-select) { inline-size: var(--space-10); min-inline-size: var(--space-10); padding-inline-end: 0; }
+  .data-table .data-table-select .checkbox { display: grid; }
 
   :where(.data-table) :where(tbody tr) { position: relative; transition: background-color var(--duration-fast) var(--ease-standard); }
   @media (hover: hover) { :where(.data-table) :where(tbody tr:hover) { background: var(--color-surface-hover); } }
@@ -191,6 +194,8 @@
   .data-table .cell-muted { color: var(--color-content-secondary); white-space: nowrap; }
   .data-table .cell-danger { color: var(--color-feedback-danger-content); white-space: nowrap; }
   .data-table .row-actions { inline-size: var(--space-10); text-align: end; }
+  /* its ··· in the card's corner column, 8 in like the bar's display settings above it (D35) */
+  .data-table :is(th, td).row-actions { padding-inline-end: calc(var(--inset-card) - var(--border-width-default)); }
   .data-table th[aria-sort] .data-table-sort { color: var(--color-content-primary); }
   /* right-aligned headers take the arrow on the left, so the label doesn't shift when it appears */
   .data-table th[data-numeric] .data-table-sort { flex-direction: row-reverse; }

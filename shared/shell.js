@@ -119,7 +119,7 @@ window.BolsterShell = (() => {
           <button class="menu-item" role="menuitem" data-not-built="profile">${chrome("user", 16)}Edit profile</button>
           <button class="menu-item" role="menuitem" data-not-built="users">${chrome("users", 16)}Manage users</button>
           <hr class="menu-separator">
-          <button class="menu-item" role="menuitem" data-not-built="logout">Log out</button>
+          <button class="menu-item" role="menuitem" data-not-built="logout">${chrome("log-out", 16)}Log out</button>
         </div>
       </div>
     </header>`;
@@ -240,7 +240,7 @@ window.BolsterShell = (() => {
     rail.addEventListener("focusout", (e) => { if (!ours(e.relatedTarget)) expand(false); });
     cell?.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" && hidden()) expand(true, tuned("--menu-open-delay", 150), true); });
     cell?.addEventListener("pointerleave", (e) => { if (hidden() && !ours(e.relatedTarget)) expand(false, tuned("--menu-close-delay", 0)); });
-    cell?.addEventListener("focusin", () => { if (hidden() && cell.querySelector(".bs-pin:focus-visible")) expand(true); });
+    cell?.addEventListener("focusin", () => { if (hidden() && cell.querySelector(":focus-visible")) expand(true); });
     cell?.addEventListener("focusout", (e) => { if (hidden() && !ours(e.relatedTarget)) expand(false); });
     cell?.addEventListener("keydown", (e) => { if (e.key === "Escape") expand(false); });
     rail.addEventListener("keydown", (e) => { if (e.key === "Escape") expand(false); });
@@ -295,6 +295,8 @@ window.BolsterShell = (() => {
       const over = shell.hasAttribute("data-menu-over");
       if (over !== sections.was) {
         sections.was = over;
+        // folded or pinned from the logo's cell, the menu stays as it was: nothing to fold, unfold or move
+        if (shell.hasAttribute("data-menu-instant")) return;
         // closing: the pill goes back to the square while the page's row is still there; opening: once its section is open
         if (!over) morph(false);
         sections(over);
@@ -410,14 +412,29 @@ window.BolsterShell = (() => {
     t.className = "toast";
     t.dataset.tone = "info";
     t.setAttribute("role", "status");
-    t.innerHTML = `<span class="toast-message"></span>${undo ? `<button class="toast-action">Undo</button>` : ""}<button class="toast-close" aria-label="Dismiss" data-tip="Dismiss">×</button>`;
+    t.innerHTML = `<span class="toast-message"></span>${undo ? `<button class="toast-action">Undo</button>` : ""}<button class="toast-close" aria-label="Dismiss" data-tip="Dismiss">${icon("xmark", 16)}</button>`;
     t.querySelector(".toast-message").textContent = message;
-    t.querySelector(".toast-close").onclick = () => t.remove();
-    if (undo) t.querySelector(".toast-action").onclick = () => { undo(); t.remove(); };
+    t.querySelector(".toast-close").onclick = () => dismissToast(t);
+    if (undo) t.querySelector(".toast-action").onclick = () => { undo(); dismissToast(t); };
     const host = [...document.querySelectorAll("dialog:modal")].pop() || document.body;
     if (region.parentElement !== host) host.append(region);
     region.append(t);
-    setTimeout(() => t.remove(), undo ? 5000 : 4000);
+    setTimeout(() => dismissToast(t), undo ? 5000 : 4000);
+  }
+  // A toast leaves as it came, fading and sliding a little, while its place closes up (its height and
+  // the gap after it), so the ones above it come down rather than drop. Reduced motion: it only fades.
+  function dismissToast(t) {
+    if (!t.isConnected || t.dataset.leaving != null) return;
+    t.dataset.leaving = "";
+    t.inert = true;
+    const quiet = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const cs = getComputedStyle(t), root = getComputedStyle(document.documentElement), gap = parseFloat(getComputedStyle(t.parentElement).rowGap) || 0;
+    const keys = quiet ? [{ opacity: 1 }, { opacity: 0 }] : [
+      { opacity: 1, translate: "0 0", blockSize: `${t.offsetHeight}px`, paddingBlock: `${cs.paddingBlockStart} ${cs.paddingBlockEnd}`, marginBlockStart: "0px" },
+      { opacity: 0, translate: `0 ${root.getPropertyValue("--space-2")}`, blockSize: "0px", paddingBlock: "0px", marginBlockStart: `${-gap}px` },
+    ];
+    t.style.overflow = "clip";
+    t.animate(keys, { duration: 200, easing: root.getPropertyValue("--ease-out") || "ease-out", fill: "forwards" }).finished.then(() => t.remove(), () => t.remove());
   }
   document.addEventListener("close", (e) => { const region = document.querySelector(".toast-region"); if (region && e.target.contains?.(region)) document.body.append(region); }, true);
 
@@ -601,6 +618,11 @@ window.BolsterShell = (() => {
 
     const narrow = matchMedia("(max-width: 1023px)");
     const phone = matchMedia("(max-width: 767px)");
+    // Escape closes the phone's and tablet's menu, back to its button
+    addEventListener("keydown", (e) => {
+      const s = shell.querySelector(".sidebar");
+      if (e.key === "Escape" && narrow.matches && s.hasAttribute("data-open")) { s.removeAttribute("data-open"); shell.querySelector(".bs-menu-fab")?.focus(); }
+    });
     // however the menu closes (a link, a tap outside, Escape), its buttons say so: the floating one shows ☰ again
     new MutationObserver(() => {
       const open = shell.querySelector(".sidebar").hasAttribute("data-open");
@@ -646,11 +668,17 @@ window.BolsterShell = (() => {
       }
       // the logo's cell folds the menu to the icon rail and keeps it open again (desktop), remembered in this browser
       if (e.target.closest("[data-collapse-sidebar]")) {
+        // a swap in place, nothing moving for a frame: folded, the pinned menu becomes the menu over the page, open
+        // where it was until the pointer (or the keyboard) leaves, then folds as it always does; pinned, the menu over
+        // the page becomes the pinned one (the audit: folding showed the old menu's column in the rail's strip, then
+        // swept the rail's labels away; pinning left the menu "over the page" and a stray pill flew as you left it)
+        shell.setAttribute("data-menu-instant", "");
         const folded = shell.toggleAttribute("data-sidebar-hidden");
         try { folded ? localStorage.setItem(FOLD_KEY, "1") : localStorage.removeItem(FOLD_KEY); } catch {}
         syncPin();
-        // folded from the button, the rail stays open under the pointer (or the keyboard) until it leaves
         shell.querySelector(".rail")?.toggleAttribute("data-expanded", folded);
+        shell.toggleAttribute("data-menu-over", folded && e.detail > 0); // by the keyboard, the rail's own labels (I9)
+        requestAnimationFrame(() => requestAnimationFrame(() => shell.removeAttribute("data-menu-instant")));
         return;
       }
       if (e.target.closest(".sidebar a[href^='#']:not([href='#'])")) shell.querySelector(".sidebar").removeAttribute("data-open");

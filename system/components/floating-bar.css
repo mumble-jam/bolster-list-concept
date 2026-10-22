@@ -14,7 +14,7 @@
    Desktop: a dark capsule that floats at the bottom of the list. The count is a chip that holds its own ×
    (Escape does the same), so the bar's end is free; actions carry the product's icons beside their labels;
    one rule after Select all and one before the red Delete. 48 tall with 6 padding: the 8 px buttons inside
-   a 14 px capsule keep their corners concentric. It slides up 8 px and fades in.
+   a 14 px capsule keep their corners concentric. It slides up 8 px and fades in, and back down as it goes.
    Phones: it takes the tab bar's place, in the chrome's own dark: icons over labels, More, Delete last.
    The count, Select all and Done move to the page header (list-page.css). I6, D17 */
 
@@ -35,7 +35,8 @@
     transition: opacity var(--duration-medium) var(--ease-out), translate var(--duration-medium) var(--ease-out), display var(--duration-medium) allow-discrete;
   }
   @starting-style { .floating-bar { opacity: 0; translate: 0 var(--space-2); } }
-  .floating-bar[hidden] { display: none; }
+  /* and leaves the way it came, its contents kept until it's gone (the script makes it inert) */
+  .floating-bar[hidden] { display: none; opacity: 0; translate: 0 var(--space-2); }
   .floating-bar :focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
 
   /* the count, a chip that clears the selection */
@@ -83,6 +84,7 @@
   @media (prefers-reduced-motion: reduce) {
     .floating-bar { transition: opacity var(--duration-medium) var(--ease-out), display var(--duration-medium) allow-discrete; }
     @starting-style { .floating-bar { translate: none; } }
+    .floating-bar[hidden] { translate: none; }
   }
 
   /* ---------- phones: the tab bar turns into the action bar ---------- */
@@ -96,6 +98,7 @@
       transition: opacity var(--duration-medium) var(--ease-out), display var(--duration-medium) allow-discrete;
     }
     @starting-style { .floating-bar { translate: none; } }
+    .floating-bar[hidden] { translate: none; }
     .floating-bar-count, .floating-bar-link, .floating-bar-sep, .floating-bar-chev { display: none; }
     .floating-bar-actions { display: contents; }
     .floating-bar .button {

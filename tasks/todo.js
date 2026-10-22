@@ -88,6 +88,8 @@
     if (n > 1 && n < 7) return d.toLocaleDateString("en-GB", { weekday: "long" });
     return fmt.date(d);
   };
+  // in a sentence: today, tomorrow, yesterday; a day's name or a date keeps its capital
+  const dueInline = (d) => { const w = dueWords(d); return /^(Today|Tomorrow|Yesterday)$/.test(w) ? w.toLowerCase() : w; };
   const isLate = (t) => !t.done && t.due && dayDiff(t.due) < 0;
   const status = (t) => (t.done ? "Completed" : isLate(t) ? "Overdue" : "To do");
 
@@ -162,6 +164,7 @@
       : `<button type="button" class="todo-who" data-pick="who" data-id="${t.id}" data-empty aria-haspopup="dialog" aria-expanded="false" aria-label="No one on it. Assign" data-tip="Assign"><span class="ghost" aria-hidden="true">+</span></button>`;
   };
   const meta = (t) => [t.due && `<span${isLate(t) ? " data-late" : ""}>${esc(dueWords(t.due))}</span>`, st.group !== "job" && t.job && esc(t.job), t.hours && `${t.hours}\u00a0h`, t.assignees.length && esc(together(peopleOf(t).map((p) => (p.me ? "You" : p.name))))].filter(Boolean).join(" · ");
+  const sideHtml = (t) => `<span class="todo-hours">${t.hours ? `${t.hours} h` : ""}</span>${dueChip(t)}${whoChip(t)}`;
   function rowHtml(t) {
     const lead = st.selecting
       ? `<input type="checkbox" class="checkbox" data-select="${t.id}" aria-label="Select ${esc(t.name)}"${st.sel.has(t.id) ? " checked" : ""}>`
@@ -174,16 +177,13 @@
         <button type="button" class="todo-title" data-open-task="${t.id}">${esc(t.name)}</button>${st.group !== "job" && t.job ? `<span class="todo-sep" aria-hidden="true">·</span><a class="todo-job" href="../index.html#jobs" data-tip="Open ${esc(t.job)}">${esc(t.job)}</a>` : ""}
         <p class="todo-meta">${meta(t)}</p>
       </div>
-      <div class="todo-side">
-        <span class="todo-hours">${t.hours ? `${t.hours} h` : ""}</span>
-        ${dueChip(t)}${whoChip(t)}
-      </div>
+      <div class="todo-side">${sideHtml(t)}</div>
     </li>`;
   }
-  const addHint = (g) => (g.completed || g.late ? "" : g.job !== undefined ? (g.job ? `for ${g.job}` : "no job") : g.due == null ? "no due date" : `due ${dueWords(daysFrom(TODAY, g.due)).toLowerCase()}`);
+  const addHint = (g) => (g.completed || g.late ? "" : g.job !== undefined ? (g.job ? `for ${g.job}` : "no job") : g.due == null ? "no due date" : `due ${dueInline(daysFrom(TODAY, g.due))}`);
   function addHtml(g) {
     if (g.completed || g.late || st.selecting) return "";
-    if (st.adding !== g.key) return `<button type="button" class="todo-add" data-add="${esc(g.key)}">${ic("circle-plus", 14)}<span>Add task</span><span class="todo-add-hint">${esc(addHint(g))}</span></button>`;
+    if (st.adding !== g.key) return `<button type="button" class="todo-add" data-add="${esc(g.key)}">${ic("circle-plus", 14)}<span>Add task<span class="todo-add-hint">${esc(addHint(g))}</span></span></button>`;
     return `<form class="todo-add-form" data-add-form="${esc(g.key)}"><input type="checkbox" class="todo-check" disabled aria-hidden="true" tabindex="-1">
       <input class="input" data-size="sm" name="name" placeholder="Task name" aria-label="New task, ${esc(addHint(g))}" autocomplete="off"><p class="field-helper">Enter adds it, ${esc(addHint(g))}; Escape stops.</p></form>`;
   }
@@ -205,10 +205,16 @@
     if (st.adding) $(`[data-add-form] input[name=name]`)?.focus({ preventScroll: true });
     renderBulk();
   }
-  // a tick changes the row and the counts, never the layout (I13): the task stays where it is
+  // a tick changes the row and the counts, never the layout (I13): the task stays where it is, changed in
+  // place, so its check turns as it's ticked and keeps the focus
   function patchRow(t) {
     const li = $(`.todo-row[data-id="${t.id}"]`);
-    if (li) li.outerHTML = rowHtml(t);
+    if (li) {
+      li.toggleAttribute("data-done", t.done); li.toggleAttribute("data-selected", st.sel.has(t.id));
+      const c = $("[data-check]", li), s = $("[data-select]", li);
+      if (c) c.checked = t.done; if (s) s.checked = st.sel.has(t.id);
+      $(".todo-meta", li).innerHTML = meta(t); $(".todo-side", li).innerHTML = sideHtml(t);
+    }
     $$("[data-count]").forEach((c) => { const g = c.closest(".todo-group"); const n = $$(".todo-row:not([data-done])", g).length; c.textContent = n || ""; });
     const openCount = tasks.filter((x) => !x.done).length;
     $("#bar-count").textContent = $("#result-count").textContent = fmt.plural(openCount, "open task", "open tasks");
@@ -222,13 +228,21 @@
     const list = ids.map((id) => tasks.find((t) => t.id === id)).filter((t) => t.done !== done);
     if (!list.length) return;
     const was = list.map((t) => ({ t, doneAt: t.doneAt, doneBy: t.doneBy, fresh: st.fresh.has(t.id) }));
+    const inRecord = !!document.activeElement?.closest(".detail");
     for (const t of list) { t.done = done; t.doneAt = done ? new Date(TODAY) : null; t.doneBy = done ? ME.id : null; if (done) st.fresh.add(t.id); }
     // reopening one from Completed brings it back to its group: a redraw that keeps the fresh ones in place
     const fromCompleted = !done && list.some((t) => !!$(`.todo-row[data-id="${t.id}"]`)?.closest('[data-group="completed"]'));
     if (fromCompleted || list.length > 1) render({ keepFresh: true }); else list.forEach(patchRow);
     if (!say) return;
     const what = list.length === 1 ? (done ? "Task completed" : "Task reopened") : `${fmt.count(list.length)} tasks ${done ? "completed" : "reopened"}`;
-    toast(what, () => { for (const w of was) { w.t.done = !done; w.t.doneAt = w.doneAt; w.t.doneBy = w.doneBy; if (!w.fresh) st.fresh.delete(w.t.id); } render({ keepFresh: true }); });
+    toast(what, () => {
+      for (const w of was) { w.t.done = !done; w.t.doneAt = w.doneAt; w.t.doneBy = w.doneBy; if (!w.fresh) st.fresh.delete(w.t.id); }
+      render({ keepFresh: true });
+      if (st.openId) drawTask(st.openId);
+      // the toast goes with its Undo: the focus goes back to what ticked it (the record's Complete, or the
+      // task's check), not the page
+      ((inRecord && st.openId && $("[data-from-task]", recordHost())) || $(`.todo-row[data-id="${list[0].id}"] :is([data-check], [data-select])`))?.focus({ preventScroll: true });
+    });
   }
 
   // ---------- pickers: due date, priority, who (T-in-place) ----------
@@ -252,7 +266,7 @@
         const date = new Date(m.getFullYear(), m.getMonth(), d), n = dayDiff(date), sel = cur === n;
         cells.push(`<td${n === 0 ? " data-today" : ""}${sel ? ' data-range="single" aria-selected="true"' : ""}><button type="button" class="calendar-day" data-set-due="${n}" aria-label="${date.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}">${d}</button></td>`);
       }
-      while (cells.length % 7) cells.push("<td></td>");
+      while (cells.length < 42) cells.push("<td></td>"); // six weeks always, so the arrows stay put as you page
       const weeks = []; for (let i = 0; i < cells.length; i += 7) weeks.push(`<tr>${cells.slice(i, i + 7).join("")}</tr>`);
       html += `<hr class="menu-separator"><div class="todo-cal calendar-month"><div class="todo-cal-nav"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-cal="-1" aria-label="Previous month" data-tip="Previous month">${ic("chevron-left", 14)}</button><h4 class="calendar-title" id="todo-cal-title">${title}</h4><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-cal="1" aria-label="Next month" data-tip="Next month">${ic("chevron-right", 14)}</button></div>
         <table class="calendar-grid" role="grid" aria-labelledby="todo-cal-title"><thead><tr>${week.names.map((d) => `<th scope="col" abbr="${d}">${d[0]}</th>`).join("")}</tr></thead><tbody>${weeks.join("")}</tbody></table></div>`;
@@ -287,11 +301,15 @@
     $$("[aria-expanded='true']").forEach((el) => el !== a && el.closest("#pop, .todo-groups, .list-bar, #bulk-bar, .detail") && el.setAttribute("aria-expanded", "false"));
     a?.setAttribute("aria-expanded", "true");
     // what opens from the bar's left (Add filter, a chip) starts at its trigger's left; the rest ends at its right
-    BolsterShell.placePopover(pop, a, { start: a?.id === "add-filter" || !!a?.closest(".chip") });
+    BolsterShell.placePopover(pop, a?.closest(".chip") || a, { start: a?.id === "add-filter" || !!a?.closest(".chip") });
+    // one that fits neither under nor over its trigger (the date's six weeks, low on a short screen) moves up
+    // until it's all in view
+    const b = pop.getBoundingClientRect();
+    if (pop.style.top && b.bottom > innerHeight - 12) pop.style.top = `${Math.max(12, innerHeight - b.height - 12)}px`;
   }
   function openPick(kind, from, { id, bulk = false } = {}) {
     if (pop.matches(":popover-open") && popFor?.from === from) { pop.hidePopover(); return; }
-    popFor = { kind, from, id, bulk }; calMonth = null;
+    popFor = { kind, from, id, bulk, record: !!from?.closest(".detail") }; calMonth = null;
     pop.dataset.kind = kind;
     pop.setAttribute("role", "menu");
     pop.setAttribute("aria-label", { due: "Due date", prio: "Priority", who: "Assign to", add: "Add a filter", filter: `Filter by ${filterDef(id)?.label.toLowerCase()}`, display: "Display settings" }[kind]);
@@ -305,14 +323,16 @@
   let refocus = null;
   pop.addEventListener("beforetoggle", (e) => { if (e.target === pop && e.newState === "closed") { const f = popFor?.from; f?.setAttribute("aria-expanded", "false"); popFor = null; refocus = f?.isConnected && pop.contains(document.activeElement) ? f : null; } });
   pop.addEventListener("toggle", (e) => { if (e.target === pop && e.newState === "closed" && refocus && !pop.matches(":popover-open")) refocus.focus({ preventScroll: true }); refocus = null; });
+  // where the picker's opener is drawn again: the record's field, or the row's chip
+  const pickScope = (record) => (record ? recordHost() : $("#groups"));
   function apply(change, words) {
     const list = targets();
     list.forEach(change);
-    const from = popFor?.from, key = from?.dataset.pick, id = from?.dataset.id;
+    const from = popFor?.from, key = from?.dataset.pick, id = from?.dataset.id, record = popFor?.record;
     pop.hidePopover();
     render({ keepFresh: true });
     if (st.openId) drawTask(st.openId);
-    if (popFor === null && id) $(`[data-pick="${key}"][data-id="${id}"]`)?.focus({ preventScroll: true });
+    if (popFor === null && id) $(`[data-pick="${key}"][data-id="${id}"]`, pickScope(record))?.focus({ preventScroll: true });
     if (list.length > 1) toast(`${fmt.plural(list.length, "task", "tasks")} ${words}`);
   }
 
@@ -352,7 +372,7 @@
   }
   function moved(t, back) {
     render({ keepFresh: true });
-    if (back) toast(t.due ? `Due ${dueWords(t.due).toLowerCase()}, ${t.due.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}` : "No due date", () => { back(); render({ keepFresh: true }); });
+    if (back) toast(t.due ? `Due ${dueInline(t.due)}, ${t.due.toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" })}` : "No due date", () => { back(); render({ keepFresh: true }); });
   }
   document.addEventListener("pointerdown", (e) => { const g = e.target.closest("[data-grip]"); if (g) g.closest(".todo-row").draggable = true; });
   document.addEventListener("dragstart", (e) => {
@@ -487,6 +507,10 @@
     const bar = $("#bulk-bar"), n = st.sel.size;
     $("#select-mode").textContent = st.selecting ? "Done" : "Select";
     document.querySelector(".todo-page").toggleAttribute("data-selecting", st.selecting);
+    document.body.toggleAttribute("data-selecting", st.selecting);
+    // phones: the header carries the count while selecting (list-page.css)
+    const sc = $("#select-count"); sc.hidden = !st.selecting; sc.textContent = n ? `${fmt.count(n)} selected` : "Select tasks";
+    bar.inert = !st.selecting; // no taps while it fades out
     if (!st.selecting) { bar.hidden = true; return; }
     bar.hidden = false;
     const visible = groups().out.flatMap((g) => g.rows).filter((t) => !t.done);
@@ -503,6 +527,7 @@
 
   // ---------- the task, beside the list or as a sheet (T-open) ----------
   const split = matchMedia("(min-width: 1280px)");
+  const recordHost = () => (split.matches ? $("#detail") : $("#peek"));
   function taskHtml(t) {
     const ps = peopleOf(t), by = who(t.createdBy);
     const story = [[`Created by ${by.name}`, t.created], ps.length && [`Assigned to ${together(ps.map((p) => p.name))}`, daysFrom(t.created, 1)], t.done && [`Completed by ${who(t.doneBy).name}`, t.doneAt]].filter(Boolean);
@@ -527,8 +552,13 @@
   }
   function drawTask(id) {
     const t = tasks.find((x) => x.id === id);
-    const host = split.matches ? $("#detail") : $("#peek");
-    host.innerHTML = taskHtml(t);
+    const host = recordHost(), was = host.contains(document.activeElement) ? document.activeElement : null;
+    // the sheet also holds the picker and the toasts while it's open (on top of it): they stay, open as they are
+    [...host.children].forEach((c) => c.matches("#pop, .toast-region") || c.remove());
+    host.insertAdjacentHTML("afterbegin", taskHtml(t));
+    // drawn again: the control that was used keeps the focus
+    const again = was?.matches("[data-from-task]") ? $("[data-from-task]", host) : was?.dataset.pick ? $(`[data-pick="${was.dataset.pick}"]`, host) : null;
+    again?.focus({ preventScroll: true });
   }
   function openTask(id, byKey) {
     st.openId = id;
@@ -560,13 +590,15 @@
       for (const t of ts) t.assignees = as.checked ? [...new Set([...t.assignees, id])].sort((a, b) => OWNERS.findIndex((o) => o.id === a) - OWNERS.findIndex((o) => o.id === b)) : t.assignees.filter((x) => x !== id);
       render({ keepFresh: true });
       if (st.openId) drawTask(st.openId);
-      if (popFor.from && !popFor.from.isConnected) popFor.from = popFor.bulk ? $('[data-bulk="who"]') : $(`[data-pick="who"][data-id="${popFor.id}"]`);
+      if (popFor.from && !popFor.from.isConnected) popFor.from = popFor.bulk ? $('[data-bulk="who"]') : $(`[data-pick="who"][data-id="${popFor.id}"]`, pickScope(popFor.record));
       popFor.from?.setAttribute("aria-expanded", "true"); place(); return;
     }
     // ticking a value applies it at once; none, or all of them, is no filter
     const fo = e.target.closest("[data-filter-opt]");
     if (fo && popFor) { const k = popFor.id, set = new Set(st.filters[k] || []); fo.checked ? set.add(fo.dataset.filterOpt) : set.delete(fo.dataset.filterOpt);
-      const order = filterDef(k).options().map((o) => o.value), vals = order.filter((x) => set.has(x)); vals.length && vals.length < order.length ? (st.filters[k] = vals) : delete st.filters[k]; render(); if (popFor.from && !popFor.from.isConnected) popFor.from = $(`[data-chip="${k}"]`) || $("#add-filter"); place(); return; }
+      const order = filterDef(k).options().map((o) => o.value), vals = order.filter((x) => set.has(x)); vals.length && vals.length < order.length ? (st.filters[k] = vals) : delete st.filters[k]; render(); if (popFor.from && !popFor.from.isConnected) popFor.from = $(`[data-chip="${k}"]`) || $("#add-filter");
+      // its chip gone (the last value off), it stays where it is rather than jump to Add filter
+      if (popFor.from.closest(".chip")) place(); else popFor.from.setAttribute("aria-expanded", "true"); return; }
     const s = e.target.closest("[data-select]");
     if (s) { s.checked ? st.sel.add(s.dataset.select) : st.sel.delete(s.dataset.select); s.closest(".todo-row").toggleAttribute("data-selected", s.checked); renderBulk(); return; }
   });
@@ -584,21 +616,34 @@
     if ((el = q("#view-options"))) return openPick("display", el);
     if ((el = q("[data-group-by]"))) { st.group = el.dataset.groupBy; st.adding = null; pop.hidePopover(); render(); return; }
     if (q("#search-open")) return openSearch();
-    if ((el = q("[data-bulk]"))) { if (el.dataset.bulk === "complete") { setDone([...st.sel], true); st.sel.clear(); return renderBulk(); } return openPick(el.dataset.bulk, el, { bulk: true }); }
-    if ((el = q("[data-set-due]"))) { const v = el.dataset.setDue; const d = v === "none" ? null : daysFrom(TODAY, +v); return apply((t) => (t.due = d), v === "none" ? "have no due date" : `due ${dueWords(d).toLowerCase()}`); }
+    if ((el = q("[data-bulk]"))) { if (el.dataset.bulk === "complete") { const ids = [...st.sel]; st.sel.clear(); setDone(ids, true); return renderBulk(); } return openPick(el.dataset.bulk, el, { bulk: true }); }
+    if ((el = q("[data-set-due]"))) { const v = el.dataset.setDue; const d = v === "none" ? null : daysFrom(TODAY, +v); return apply((t) => (t.due = d), v === "none" ? "have no due date" : `due ${dueInline(d)}`); }
     if ((el = q("[data-cal]"))) { const m = calMonth || new Date(targets()[0]?.due || TODAY); calMonth = new Date(m.getFullYear(), m.getMonth() + +el.dataset.cal, 1); fillPop(); place(); $(`[data-cal="${el.dataset.cal}"]`, pop)?.focus(); return; }
     if ((el = q("[data-set-prio]"))) return apply((t) => (t.priority = +el.dataset.setPrio), `set to ${PRIO[+el.dataset.setPrio].toLowerCase()}`);
-    if ((el = q("[data-open-task]"))) { if (st.selecting) return; return openTask(el.dataset.openTask, e.detail === 0); }
+    if ((el = q("[data-open-task]"))) { if (st.selecting) return tickRow(el.closest(".todo-row")); return openTask(el.dataset.openTask, e.detail === 0); }
     if (q("[data-close-task]")) return closeTask();
     if ((el = q("[data-add]"))) { st.adding = el.dataset.add; return render({ keepFresh: true }); }
-    if (q("[data-fold]")) { st.completedOpen = !st.completedOpen; render({ keepFresh: true }); return $("[data-fold]")?.focus({ preventScroll: true }); }
+    if (q("[data-fold]")) {
+      const was = st.completedOpen; st.completedOpen = !was; render({ keepFresh: true });
+      const nb = $("[data-fold]"); nb?.focus({ preventScroll: true });
+      // drawn again, it turns from where it was (render replaces it, so its own transition can't run)
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) nb?.querySelector("svg")?.animate([{ transform: `rotate(${was ? 0 : -90}deg)` }, { transform: `rotate(${was ? -90 : 0}deg)` }], { duration: 120, easing: "cubic-bezier(0, 0, 0.2, 1)" });
+      return;
+    }
     if (q("#select-mode")) return setSelecting(!st.selecting);
     if (q("[data-clear-sel]")) { st.sel.clear(); return render({ keepFresh: true }); }
     if (q("[data-select-all]")) { groups().out.flatMap((g) => g.rows).filter((t) => !t.done).forEach((t) => st.sel.add(t.id)); return render({ keepFresh: true }); }
-    if (q("#create")) { if (st.selecting) setSelecting(false); st.adding = st.group === "job" ? groups().out[0]?.key : "today"; render({ keepFresh: true }); return; }
+    if (q("#create")) {
+      if (st.selecting) setSelecting(false); st.adding = st.group === "job" ? groups().out[0]?.key : "today"; render({ keepFresh: true });
+      // the field it focuses may be far down the page (phones): brought to the middle of the screen
+      const f = $("[data-add-form]"), r = f?.getBoundingClientRect();
+      if (r && (r.top < 96 || r.bottom > innerHeight - 96)) f.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      return;
+    }
     // selecting: a tap on the row ticks its box
-    if (st.selecting && (el = q(".todo-row")) && !q("button, a, input")) { const box = $("[data-select]", el); box.checked = !box.checked; box.dispatchEvent(new Event("change", { bubbles: true })); }
+    if (st.selecting && (el = q(".todo-row")) && !q("button, a, input")) tickRow(el);
   });
+  function tickRow(li) { const box = $("[data-select]", li); box.checked = !box.checked; box.dispatchEvent(new Event("change", { bubbles: true })); }
   document.addEventListener("submit", (e) => {
     const pf = e.target.closest("[data-period]");
     if (pf) { e.preventDefault(); const from = pf.from.value, to = pf.to.value; from || to ? (st.filters.period = { from, to }) : delete st.filters.period; pop.hidePopover(); render(); return $('[data-chip="period"]')?.focus({ preventScroll: true }) || $("#add-filter").focus({ preventScroll: true }); }

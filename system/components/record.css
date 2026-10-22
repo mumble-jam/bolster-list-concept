@@ -87,14 +87,25 @@
   /* the activity: a line through the events, solid for what happened, dashed to the next step.
      Job events wear the status shape they moved the job to; others are small dots, green for money
      in, red for a miss; the next step is a hollow dashed ring */
-  .activity { list-style: none; justify-self: stretch; margin: var(--space-5) 0 0; padding: 0; font-size: var(--text-sm); }
-  .activity li { position: relative; display: grid; grid-template-columns: var(--space-4) minmax(0, 1fr); column-gap: var(--space-3); padding-block-end: var(--space-4); }
+  /* The line runs from each dot's centre to the next one's, under them, and every dot masks it with a disc
+     of the surface 3 px wider than itself (::after, --_ring), so it stops the same distance from each,
+     whatever the dot's size or shape. Each row is its own layer, so the next row's disc covers the line */
+  .activity { --_ring: var(--color-surface-default); list-style: none; justify-self: stretch; margin: var(--space-5) 0 0; padding: 0; font-size: var(--text-sm); }
+  .dialog .activity { --_ring: var(--color-surface-raised); }
+  .activity li {
+    --_c: calc(var(--space-1) + 7px); /* every dot's centre, down from its row's top */
+    --_r: calc(var(--space-1) + 3px); /* the disc's radius: the dot's half and the ring */
+    position: relative; isolation: isolate; display: grid; grid-template-columns: var(--space-4) minmax(0, 1fr); column-gap: var(--space-3); padding-block-end: var(--space-4);
+  }
+  .activity li:has(> .activity-dot:is(.mark, [data-next])) { --_r: 10px; }
   .activity li:last-child { padding-block-end: 0; }
-  .activity li::before { content: ""; position: absolute; inset-block: calc(var(--space-1) + 14px) 2px; inset-inline-start: calc(var(--space-2) - 1px); inline-size: 0; border-inline-start: 2px solid var(--color-action-accent); }
+  .activity li::before { content: ""; position: absolute; inset-block: var(--_c) calc(var(--_c) * -1); inset-inline-start: calc(var(--space-2) - 1px); inline-size: 0; border-inline-start: 2px solid var(--color-action-accent); }
+  .activity li::after { content: ""; position: absolute; inset-block-start: calc(var(--_c) - var(--_r)); inset-inline-start: calc(var(--space-2) - var(--_r)); inline-size: calc(var(--_r) * 2); block-size: calc(var(--_r) * 2); border-radius: var(--radius-full); background: var(--_ring); }
+  .activity li.activity-more::after { content: none; }
   .activity li[data-line="dashed"]::before { border-inline-start-style: dashed; border-color: var(--color-line-strong); }
   .activity li[data-line="dotted"]::before { border-inline-start-style: dotted; }
   .activity li[data-line="none"]::before { content: none; }
-  .activity-dot { justify-self: center; margin-block-start: var(--space-1); inline-size: var(--space-2); block-size: var(--space-2); margin-inline: auto; border-radius: var(--radius-full); background: var(--color-action-accent); translate: 0 3px; }
+  .activity-dot { position: relative; z-index: 1; justify-self: center; margin-block-start: var(--space-1); inline-size: var(--space-2); block-size: var(--space-2); margin-inline: auto; border-radius: var(--radius-full); background: var(--color-action-accent); translate: 0 3px; }
   .activity-dot.mark { inline-size: 14px; block-size: 14px; translate: 0 0; background: var(--_dot); }
   .activity-dot[data-tone="good"] { background: var(--color-status-booked-dot); }
   .activity-dot[data-tone="bad"] { background: var(--color-feedback-danger-accent); }

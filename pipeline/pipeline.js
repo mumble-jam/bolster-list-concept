@@ -217,10 +217,16 @@
       <p class="pl-line pl-sub">${esc(sub)}</p>
       <div class="pl-row pl-meta"><p class="pl-line pl-when-text">${esc(w.text)}</p>${next ? `<button type="button" class="pl-next pl-link" ${stepAria}>${STEP[next]}${ic("chevron-right", 12, { optical: true })}</button>` : ""}</div></article>`;
   }
+  // within a group, the date's order (P-groups): scheduled jobs by their start, visits to come by their day and time,
+  // the rest by when they got there
+  const mins = (t) => { const [h, m] = t.split(":"); return +h * 60 + +m; };
+  const order = (key) => (key === "booked/scheduled" ? (a, b) => a.start - b.start
+    : key === "visits/today" || key === "visits/coming" ? (a, b) => a.visit.day - b.visit.day || mins(a.visit.time) - mins(b.visit.time)
+    : (a, b) => a.at - b.at);
   function column(s) {
     const rows = records.filter((r) => r.stage === s.key && shown(r));
     const groups = s.groups.map(([g, label]) => {
-      const list = rows.filter((r) => r.group === g).sort((a, b) => (s.key === "booked" && g === "scheduled" ? a.start - b.start : a.at - b.at));
+      const list = rows.filter((r) => r.group === g).sort(order(`${s.key}/${g}`));
       if (!list.length) return "";
       const key = `${s.key}/${g}`, folded = st.folded.has(key);
       return `<section class="pl-group" data-group="${key}"><h4 class="pl-group-head"><button type="button" class="pl-group-toggle" data-fold="${key}" aria-expanded="${!folded}" aria-controls="g-${s.key}-${g}">${ic("chevron-down", 12, { optical: true })}<span>${esc(label)}</span><span class="pl-n">${list.length}</span></button></h4>
@@ -258,32 +264,48 @@
   }
   const phone = matchMedia("(max-width: 767px)");
   // each column's head comes down its column under the toolbar (pipeline.css): how far it may go (the column's height
-  // less the head's), and, where the browser can't tie it to the scroll, where the column's top is now
-  const followByScript = !CSS.supports("animation-timeline: view()");
+  // inside its edge, less the head's), and where the column's top is now, on every scroll
   // the toolbar takes the canvas's colour only while it's stuck under the top bar (pipeline.css)
   const toolbar = $(".pl-toolbar");
   const stuck = () => toolbar.toggleAttribute("data-stuck", !phone.matches && scrollY > 0 && toolbar.getBoundingClientRect().top <= (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--list-toolbar-top")) || 0) + 1);
   function follow() {
     stuck();
-    if (phone.matches || !followByScript) return;
+    keepPop();
+    if (phone.matches) return;
     $$(".pl-col", board).forEach((c) => c.style.setProperty("--_col-top", `${c.getBoundingClientRect().top}px`));
   }
   function fit() {
     $$(".pl-col", board).forEach((c) => {
       const h = c.querySelector(".pl-col-head").offsetHeight;
-      c.style.setProperty("--_room", `${Math.max(0, c.offsetHeight - h)}px`);
-      c.style.setProperty("--_off", `${c.getBoundingClientRect().top - board.getBoundingClientRect().top}px`);
+      c.style.setProperty("--_room", `${Math.max(0, c.clientHeight - h)}px`);
     });
+    edges();
     follow();
+  }
+  // an edge with more beyond it fades (pipeline.css), as the table's
+  function edges() {
+    const max = board.scrollWidth - board.clientWidth;
+    board.toggleAttribute("data-scrolled", board.scrollLeft > 1);
+    board.toggleAttribute("data-more", board.scrollLeft < max - 1);
   }
 
   // ---------- changes, every one with Undo ----------
-  function change(mutate, message) {
-    const was = structuredClone({ records, lost });
+  // the board is drawn again, so focus goes to the card that moved (made, if the change made a new one), or back to
+  // it on Undo; to its column if it's left the board
+  function change(mutate, message, r, made = r) {
+    const was = structuredClone({ records, lost }), home = r.stage;
     mutate();
     render();
+    land(made.id, home);
     say(message);
-    BolsterShell.toast(message, { undo: () => { ({ records, lost } = was); render(); say("Undone"); } });
+    BolsterShell.toast(message, { undo: () => { ({ records, lost } = was); render(); land(r.id, home); say("Undone"); } });
+  }
+  function land(id, stage) {
+    const card = $(`.pl-card[data-id="${id}"]`, board);
+    // in a folded group, its group's toggle
+    const to = card && (card.closest(".pl-cards[hidden]") ? $(`[aria-controls="${card.parentElement.id}"]`, board) : $(".pl-open", card));
+    (to || $(`#col-${stage} .pl-col-body`, board))?.focus({ preventScroll: true });
+    if (to) (to === card.querySelector(".pl-open") ? card : to).scrollIntoView({ block: "nearest", inline: "nearest" });
   }
   const set = (r, stage, group, extra = {}) => Object.assign(r, { stage, group, at: 0 }, extra);
 
@@ -310,38 +332,38 @@
         title: `Create a job for ${esc(r.name)}`, submit: "Create job",
         body: `${field("j-name", "Name this job", `<input class="input" id="j-name" name="name" value="${esc(r.place)}" placeholder="Use the address or the customer's name if you're not sure" required>`)}
           <p class="pl-step-note">${ic("briefcase", 14, { optical: true })}<span>It starts in ${s("pending")} as a draft estimate. ${esc(r.name)} is a customer from now on, so they leave ${s(r.stage)}.</span></p>`,
-        onSubmit: (v) => change(() => {
-          records = records.filter((x) => x !== r);
-          records.push(job("pending", "drafts", v.name.trim() || r.place, r.name, r.place, 0, 0, r.owner));
-        }, `${v.name.trim() || r.place} created for ${r.name}, in ${s("pending")}`),
+        onSubmit: (v) => {
+          const made = job("pending", "drafts", v.name.trim() || r.place, r.name, r.place, 0, 0, r.owner);
+          change(() => { records = records.filter((x) => x !== r); records.push(made); }, `${made.name} created for ${r.name}, in ${s("pending")}`, r, made);
+        },
       });
       case "visit": return ask({
         title: `Book a visit with ${esc(r.name)}`, submit: "Book visit",
         body: `${field("v-what", "What for", `<div class="select"><select class="input" id="v-what" name="what"><option>Estimate visit</option><option>Measure</option></select></div>`)}
           <div class="pl-step-row">${field("v-day", "Day", `<input class="input" type="date" id="v-day" name="day" value="${iso(1)}" required>`)}${field("v-time", "Time", `<input class="input" type="time" id="v-time" name="time" step="900" value="09:00" required>`)}</div>
           <p class="pl-step-note">${ic("calendar-check", 14, { optical: true })}<span>It goes on the calendar too.</span></p>`,
-        onSubmit: (v) => { const d = offset(v.day); change(() => set(r, "visits", d < 0 ? "visited" : d === 0 ? "today" : "coming", { visit: { day: d, time: v.time.replace(/^0/, ""), what: v.what } }), `Visit with ${r.name} booked for ${short(d)}, ${v.time.replace(/^0/, "")}`); },
+        onSubmit: (v) => { const d = offset(v.day); change(() => set(r, "visits", d < 0 ? "visited" : d === 0 ? "today" : "coming", { visit: { day: d, time: v.time.replace(/^0/, ""), what: v.what } }), `Visit with ${r.name} booked for ${short(d)}, ${v.time.replace(/^0/, "")}`, r); },
       });
-      case "unvisit": return change(() => { set(r, "leads", "talking"); delete r.visit; }, `${r.name} back in ${s("leads")}, visit cancelled`);
+      case "unvisit": return change(() => { set(r, "leads", "talking"); delete r.visit; }, `${r.name} back in ${s("leads")}, visit cancelled`, r);
       case "finish": return BolsterShell.toast(`Concept only: ${r.name}'s estimate opens in the job.`);
-      case "send": case "resend": return change(() => set(r, "pending", "sent"), `${step === "send" ? "Estimate" : "Changes"} sent to ${r.client}`);
+      case "send": case "resend": return change(() => set(r, "pending", "sent"), `${step === "send" ? "Estimate" : "Changes"} sent to ${r.client}`, r);
       case "book": return ask({
         title: `Mark ${esc(r.name)} as booked`, submit: "Mark as booked",
         body: `${field("b-value", "Contract", moneyInput("b-value", r.value), `The estimate's total. Change it if ${esc(r.client)} signed for something else.`)}
           ${field("b-start", "Starts", `<input class="input" type="date" id="b-start" name="start" value="">`, "Leave it empty to schedule it later.")}`,
-        onSubmit: (v) => { const start = v.start ? offset(v.start) : null; change(() => set(r, "booked", start == null ? "unscheduled" : "scheduled", { value: amount(v["b-value"]), ...(start == null ? {} : { start, end: start + 4 }) }), `${r.name} booked${start == null ? ", not scheduled yet" : `, starting ${short(start)}`}`); },
+        onSubmit: (v) => { const start = v.start ? offset(v.start) : null; change(() => set(r, "booked", start == null ? "unscheduled" : "scheduled", { value: amount(v["b-value"]), ...(start == null ? {} : { start, end: start + 4 }) }), `${r.name} booked${start == null ? ", not scheduled yet" : `, starting ${short(start)}`}`, r); },
       });
-      case "unbook": return change(() => { set(r, "pending", "sent"); delete r.start; delete r.end; }, `${r.name} back in ${s("pending")}`);
+      case "unbook": return change(() => { set(r, "pending", "sent"); delete r.start; delete r.end; }, `${r.name} back in ${s("pending")}`, r);
       case "schedule": return ask({
         title: `Schedule ${esc(r.name)}`, submit: "Schedule",
         body: `<div class="pl-step-row">${field("s-start", "Starts", `<input class="input" type="date" id="s-start" name="start" value="${iso(4)}" required>`)}${field("s-days", "Working days", `<input class="input" type="number" id="s-days" name="days" min="1" max="60" value="3" data-numeric required>`)}</div>
           <p class="pl-step-note">${ic("calendar", 14, { optical: true })}<span>It goes on the calendar.</span></p>`,
-        onSubmit: (v) => { const start = offset(v.start); change(() => set(r, "booked", "scheduled", { start, end: start + Math.max(1, +v.days) - 1 }), `${r.name} scheduled from ${short(start)}`); },
+        onSubmit: (v) => { const start = offset(v.start); change(() => set(r, "booked", "scheduled", { start, end: start + Math.max(1, +v.days) - 1 }), `${r.name} scheduled from ${short(start)}`, r); },
       });
       // started today, keeping the length it was scheduled for (four days if it had none)
-      case "start": return change(() => set(r, "progress", "underway", { start: 0, end: r.start != null ? r.end - r.start : 4 }), `${r.name} started today`);
-      case "unstart": return change(() => { set(r, "booked", "unscheduled"); delete r.start; delete r.end; }, `${r.name} back in ${s("booked")}, not scheduled`);
-      case "complete": return change(() => set(r, "progress", "done", { end: 0 }), `${r.name}: work done`);
+      case "start": return change(() => set(r, "progress", "underway", { start: 0, end: r.start != null ? r.end - r.start : 4 }), `${r.name} started today`, r);
+      case "unstart": return change(() => { set(r, "booked", "unscheduled"); delete r.start; delete r.end; }, `${r.name} back in ${s("booked")}, not scheduled`, r);
+      case "complete": return change(() => set(r, "progress", "done", { end: 0 }), `${r.name}: work done`, r);
       case "invoice": {
         const final = r.group === "done";
         return ask({
@@ -350,18 +372,18 @@
             <p class="pl-step-note">${ic("file-invoice", 14, { optical: true })}<span>${final ? `An invoice of its own from here, in ${s("invoices")}. ${esc(r.name)} is done, so it leaves the board; it stays in the job list.` : `An invoice of its own, in ${s("invoices")}; ${esc(r.name)} stays where it is.`}</span></p>`,
           onSubmit: (v) => {
             const made = invoice("unsent", r.client, r.name, r.place, amount(v["i-amount"]), 0, r.owner, { label: final ? "Final invoice" : "Progress invoice" });
-            change(() => { if (final) records = records.filter((x) => x !== r); records.push(made); }, `Invoice ${made.number} for ${r.name} created, not sent yet${final ? `; ${r.name} leaves the board` : ""}`);
+            change(() => { if (final) records = records.filter((x) => x !== r); records.push(made); }, `Invoice ${made.number} for ${r.name} created, not sent yet${final ? `; ${r.name} leaves the board` : ""}`, r, made);
           },
         });
       }
-      case "sendInvoice": return change(() => set(r, "invoices", "sent", { due: 14 }), `Invoice sent to ${r.client}, due ${short(14)}`);
-      case "pay": return change(() => set(r, "invoices", "paid"), `${r.name}: paid in full`);
-      case "remind": return change(() => (r.reminded = true), `Reminder sent to ${r.client}`);
+      case "sendInvoice": return change(() => set(r, "invoices", "sent", { due: 14 }), `Invoice sent to ${r.client}, due ${short(14)}`, r);
+      case "pay": return change(() => set(r, "invoices", "paid"), `${r.name}: paid in full`, r);
+      case "remind": return change(() => (r.reminded = true), `Reminder sent to ${r.client}`, r);
       case "lose": return ask({
         title: `Mark ${esc(r.name)} as lost`, submit: "Mark as lost",
         body: `<fieldset class="pl-reasons"><legend class="field-label">Why</legend>${["Price", "Timing", "Went with someone else", "No reply", "Not a fit"].map((x, i) => `<label class="choice"><input type="radio" class="radio" name="reason" value="${x}"${i ? "" : " checked"}> ${x}</label>`).join("")}</fieldset>
           <p class="pl-step-note">${ic("ban", 14, { optical: true })}<span>It leaves the board and waits under Lost, to reopen.</span></p>`,
-        onSubmit: (v) => change(() => { records = records.filter((x) => x !== r); lost.unshift({ rec: r, reason: v.reason, at: 0 }); }, `${r.name} marked as lost: ${v.reason.toLowerCase()}`),
+        onSubmit: (v) => change(() => { records = records.filter((x) => x !== r); lost.unshift({ rec: r, reason: v.reason, at: 0 }); }, `${r.name} marked as lost: ${v.reason.toLowerCase()}`, r),
       });
     }
   }
@@ -373,7 +395,7 @@
   function openPop(kind, from, fill, { start = false, label } = {}) {
     if (pop.matches(":popover-open") && popFor?.from === from && popFor.kind === kind) { pop.hidePopover(); return; }
     if (pop.matches(":popover-open")) pop.hidePopover();
-    popFor = { kind, from };
+    popFor = { kind, from, start };
     pop.dataset.kind = kind;
     pop.setAttribute("role", "dialog");
     pop.setAttribute("aria-label", label || kind);
@@ -394,6 +416,18 @@
     if (e.newState === "closed" && refocus?.isConnected && !pop.matches(":popover-open") && !dlg.open) refocus.focus({ preventScroll: true });
     refocus = null;
   });
+  // it stays on what opened it as the page or the board scrolls, and closes once that's gone out of view (under the
+  // column's head, past the board's edge, off the screen)
+  function keepPop() {
+    const a = popFor?.from;
+    if (!a?.isConnected || phone.matches || !pop.matches(":popover-open")) return;
+    const card = a.closest(".pl-card");
+    if (card) {
+      const r = a.getBoundingClientRect(), b = board.getBoundingClientRect(), head = card.closest(".pl-col").querySelector(".pl-col-head").getBoundingClientRect();
+      if (r.bottom < head.bottom || r.top > innerHeight || r.right < b.left || r.left > b.right) return pop.hidePopover();
+    }
+    BolsterShell.placePopover(pop, a, { start: popFor.start });
+  }
   const closeBtn = () => `<button type="button" class="button cal-pop-close" data-variant="ghost" data-size="sm" data-icon-only data-close-pop aria-label="Close" data-tip="Close">${ic("xmark", 16, { optical: true })}</button>`;
   const dd = (term, html) => `<dt>${term}</dt><dd>${html}</dd>`;
   function summaryHtml(r) {
@@ -456,7 +490,9 @@
       drag.to = g.ok ? { stage: t.stage } : null;
     } else drag.to = null;
     ghost.innerHTML = `<b>${esc(r.name)}</b><span>${esc(line)}</span>`;
-    ghost.style.translate = `${Math.min(e.clientX + 14, innerWidth - ghost.offsetWidth - 8)}px ${e.clientY + 14}px`;
+    // beside the pointer, above it where it would run off the foot
+    const gy = e.clientY + 14 + ghost.offsetHeight > innerHeight - 8 ? e.clientY - 14 - ghost.offsetHeight : e.clientY + 14;
+    ghost.style.translate = `${Math.min(e.clientX + 14, innerWidth - ghost.offsetWidth - 8)}px ${gy}px`;
     // near the board's edges, it scrolls to the stages beyond and the cards below
     const b = board.getBoundingClientRect(), edge = 64;
     board.scrollLeft += e.clientX < b.left + edge ? -14 : e.clientX > b.right - edge ? 14 : 0;
@@ -497,13 +533,13 @@
       el.setAttribute("aria-expanded", String(!folded)); $(`#${el.getAttribute("aria-controls")}`).hidden = folded; fit();
       return;
     }
-    if ((el = q("[data-tab]"))) { st.tab = el.dataset.tab; $(`#col-${st.tab}`)?.scrollIntoView({ inline: "start", block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); return tabs(); }
-    if ((el = q("#pick-people"))) return openPop("people", el, peopleHtml, { label: "People" });
+    if ((el = q("[data-tab]"))) { st.tab = el.dataset.tab; show(st.tab); return tabs(); }
+    if ((el = q("#pick-people"))) return openPop("people", el, peopleHtml, { label: "People", start: true });
     if ((el = q("#pick-lost"))) return openPop("lost", el, lostHtml, { label: "Lost" });
     if ((el = q("[data-reopen]"))) {
       const x = lost[+el.dataset.reopen];
       pop.hidePopover();
-      return change(() => { lost = lost.filter((y) => y !== x); records.push(x.rec); }, `${x.rec.name} reopened, in ${stageOf(x.rec.stage).label}`);
+      return change(() => { lost = lost.filter((y) => y !== x); records.push(x.rec); }, `${x.rec.name} reopened, in ${stageOf(x.rec.stage).label}`, x.rec);
     }
     // Add: a lead (a person, no job yet) or a job (Bolster's Create job window, an empty estimate)
     if ((el = q("#create"))) { openPop("add", el, () => `<div class="pop-body">${[["lead", "user", "Lead"], ["job", "briefcase", "Job"]].map(([k, icon, l]) => `<button type="button" class="menu-item" role="menuitem" data-add="${k}"><span class="menu-icon">${ic(icon, 14)}</span>${l}</button>`).join("")}</div>`, { label: "Add" }); pop.setAttribute("role", "menu"); return; }
@@ -529,17 +565,37 @@
   board.dataset.cards = LAYOUT;
   $("#search").addEventListener("input", (e) => { st.q = e.target.value.trim().toLowerCase(); render(); });
 
-  // phones: the tab of the stage in view follows the swipe
-  const tabs = () => $$("#tabs [data-tab]").forEach((t) => { t.toggleAttribute("aria-current", t.dataset.tab === st.tab); if (t.dataset.tab === st.tab) t.scrollIntoView({ inline: "nearest", block: "nearest" }); });
-  board.addEventListener("scroll", () => {
-    if (!phone.matches) return;
+  // phones: the tab of the stage in view follows the swipe; the tabs and the board scroll sideways only, never the page
+  const sideways = (box, el, pad = 0) => {
+    const a = el.getBoundingClientRect(), b = box.getBoundingClientRect();
+    box.scrollLeft += a.left < b.left + pad ? a.left - b.left - pad : a.right > b.right - pad ? a.right - b.right + pad : 0;
+  };
+  const tabs = () => $$("#tabs [data-tab]").forEach((t) => { t.toggleAttribute("aria-current", t.dataset.tab === st.tab); if (t.dataset.tab === st.tab) sideways($("#tabs"), t, parseFloat(getComputedStyle($("#tabs")).paddingInlineStart) || 0); });
+  // a picked tab steers the board to its stage; until it's there, the stages it passes don't take the tab
+  let steering = false, steerTimer = 0;
+  function show(key) {
+    const c = $(`#col-${key}`, board);
+    if (!c) return;
+    const to = board.scrollLeft + c.getBoundingClientRect().left - board.getBoundingClientRect().left - (parseFloat(getComputedStyle(board).scrollPaddingInlineStart) || 0);
+    const smooth = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (Math.abs(to - board.scrollLeft) < 1) return;
+    steering = smooth;
+    clearTimeout(steerTimer);
+    if (smooth) steerTimer = setTimeout(steered, 1000);
+    board.scrollTo({ left: to, behavior: smooth ? "smooth" : "auto" });
+  }
+  function inView() {
+    if (!phone.matches || steering) return;
     const left = board.getBoundingClientRect().left;
     const near = $$(".pl-col", board).reduce((a, c) => (Math.abs(c.getBoundingClientRect().left - left) < Math.abs(a.getBoundingClientRect().left - left) ? c : a));
     if (near.dataset.stage !== st.tab) { st.tab = near.dataset.stage; tabs(); }
-  }, { passive: true });
+  }
+  function steered() { clearTimeout(steerTimer); steering = false; inView(); }
+  board.addEventListener("scroll", () => { edges(); keepPop(); inView(); }, { passive: true });
+  board.addEventListener("scrollend", () => { if (steering) steered(); });
 
   phone.addEventListener("change", render);
-  addEventListener("resize", () => { fit(); if (popFor) BolsterShell.placePopover(pop, popFor.from); });
+  addEventListener("resize", () => { fit(); if (popFor) BolsterShell.placePopover(pop, popFor.from, { start: popFor.start }); });
   // what hides and sticks as you scroll is the shell's: this page says where the board starts, and that a drag is in use
   BolsterShell.scrolling({ into: (top) => board.getBoundingClientRect().top < top, toolbar: phone.matches ? null : $(".pl-toolbar"), busy: () => !!drag?.started, onScroll: follow });
   render();

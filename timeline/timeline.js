@@ -137,11 +137,19 @@
     R0 = weekStart(a - 14); N = weekStart(b + 35) - R0;
     const scroller = $(".tl-scroll"), cardW = scroller?.clientWidth || $("#tl").clientWidth || 1000;
     narrow = cardW < 1000; GRID = narrow ? 300 : 400;
-    const room = cardW - GRID - 2;
+    const room = cardW - GRID; // clientWidth is inside the border already
     dw = st.scale === "fit" ? Math.max(3, room / N) : DW[st.scale];
   }
   const X = (n) => (n - R0) * dw;
   const tier = () => (dw >= 28 ? "days" : dw >= 9 ? "weeks" : "months");
+  // months and quarters: a line where each month starts, on the 1st (the audit: a repeat every 30.4 days from a Monday
+  // missed them)
+  function monthLines() {
+    if (tier() !== "months") return "";
+    const out = []; let k = R0;
+    while (k < R0 + N) { const d = dateOf(k); k = Math.round((new Date(d.getFullYear(), d.getMonth() + 1, 1) - TODAY) / DAY); if (k < R0 + N) out.push(`<i class="tl-mline" style="left:${X(k)}px"></i>`); }
+    return out.join("");
+  }
   function scaleHtml() {
     const top = [], bottom = [];
     // months across the top (quarters when far out), then days, weeks or months under them
@@ -185,25 +193,25 @@
     if (r.type === "job") {
       const j = r.j, open = isOpen(r.key);
       cells = `${chev(r.key, open, j.name, 14)}<button type="button" class="tl-name" data-open-job="${esc(j.name)}" aria-haspopup="dialog" aria-expanded="false"><b>${esc(j.name)}</b><span>${esc(j.client)}</span></button><span class="tl-start">${short(j.start)}</span><span class="tl-days">${j.work} d</span>`;
-      bar = `<div class="tl-bracket" data-drag="job" data-key="${esc(j.name)}" data-outline="${esc(r.key)}" style="left:${X(j.start)}px;width:${(j.end - j.start + 1) * dw}px" title="${esc(`${j.name}: ${span(j.start, j.end)}`)}"></div><span class="tl-bar-label" style="left:${X(j.end + 1) + 8}px">${esc(j.status)} · ${j.pct}%</span><i class="tl-today" style="left:${X(0) + dw / 2}px"></i>`;
+      bar = `<div class="tl-bracket" data-drag="job" data-key="${esc(j.name)}" data-outline="${esc(r.key)}" style="left:${X(j.start)}px;width:${(j.end - j.start + 1) * dw}px" data-tip="${esc(`${j.name} · ${span(j.start, j.end)}`)}"></div><span class="tl-bar-label" data-follow-job="${esc(j.name)}" style="left:${X(j.end + 1) + 8}px">${esc(j.status)} · ${j.pct}%</span><i class="tl-today" style="left:${X(0) + dw / 2}px"></i>`;
     } else if (r.type === "phase") {
       const open = isOpen(r.key);
       cells = `${chev(r.key, open, r.p.name)}<span class="tl-name tl-name-phase">${esc(r.p.name)}</span><span class="tl-start">${short(r.start)}</span><span class="tl-days">${r.work} d</span>`;
-      bar = `<div class="tl-bracket" data-drag="phase" data-key="${esc(`${r.j.name}|${r.p.name}`)}" data-outline="${esc(r.key)}" data-phase style="left:${X(r.start)}px;width:${(r.end - r.start + 1) * dw}px"></div>`;
+      bar = `<div class="tl-bracket" data-drag="phase" data-key="${esc(`${r.j.name}|${r.p.name}`)}" data-outline="${esc(r.key)}" data-phase data-tip="${esc(`${r.p.name} · ${span(r.start, r.end)}`)}" style="left:${X(r.start)}px;width:${(r.end - r.start + 1) * dw}px"></div>`;
     } else if (r.type === "stage") {
       const s = r.s, ms = isMilestone(s), end = endOf(s), wd = ms ? 0 : workDays(s.start, end);
       const pct = ms ? 0 : end < 0 ? 100 : s.start <= 0 ? Math.round((workDays(s.start, 0) / wd) * 100) : 0;
       const label = `${s.name}, ${ms ? `milestone, ${long(s.start)}` : `${span(s.start, end)}, ${wd} working ${wd === 1 ? "day" : "days"}`}${broken(s) ? ", starts before what it waits for ends" : ""}`;
       cells = `${!ms ? chev(`items:${s.id}`, st.items.has(s.id), `${s.name}'s labor and materials`) : '<span class="tl-fold-space"></span>'}<button type="button" class="tl-name" data-open="${s.id}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(label)}">${esc(s.name)}</button><span class="tl-start">${short(s.start)}</span><span class="tl-days">${ms ? "—" : `${wd} d`}</span>`;
-      if (ms) bar = `<button type="button" class="tl-milestone" data-open="${s.id}" data-drag="stage" data-key="${s.id}" tabindex="-1" aria-hidden="true" style="left:${X(s.start) + dw / 2}px" data-tip="${esc(`${s.name} · ${long(s.start)}`)}"></button><span class="tl-bar-label" style="left:${X(s.start) + dw / 2 + 12}px">${esc(s.name)}</span>`;
+      if (ms) bar = `<button type="button" class="tl-milestone" data-open="${s.id}" data-drag="stage" data-key="${s.id}" tabindex="-1" aria-hidden="true" style="left:${X(s.start) + dw / 2}px" data-tip="${esc(`${s.name} · ${long(s.start)}`)}"></button><span class="tl-bar-label" data-follow="${s.id}" style="left:${X(s.start) + dw / 2 + 16}px">${esc(s.name)}</span>`;
       else {
         const w = (s.days) * dw, out = w < 84;
-        bar = `<button type="button" class="tl-bar" data-open="${s.id}" data-drag="stage" data-key="${s.id}" tabindex="-1" aria-hidden="true" style="left:${X(s.start)}px;width:${w}px;--_pct:${pct}%"${broken(s) ? " data-broken" : ""}>${out ? "" : `<span>${esc(s.name)}</span>`}<i class="tl-end" data-stretch="${s.id}"></i><i class="tl-link-handle" data-link-from="${s.id}" data-tip="Drag onto a stage to link it"></i></button>${out ? `<span class="tl-bar-label" style="left:${X(s.start) + w + 8}px">${esc(s.name)}</span>` : ""}`;
+        bar = `<button type="button" class="tl-bar" data-open="${s.id}" data-drag="stage" data-key="${s.id}" tabindex="-1" aria-hidden="true" style="left:${X(s.start)}px;width:${w}px;--_pct:${pct}%"${broken(s) ? " data-broken" : ""}>${out ? "" : `<span>${esc(s.name)}</span>`}<i class="tl-end" data-stretch="${s.id}"></i><i class="tl-link-handle" data-link-from="${s.id}" data-tip="Drag onto a stage to link it"></i></button>${out ? `<span class="tl-bar-label" data-follow="${s.id}" style="left:${X(s.start) + w + 16}px">${esc(s.name)}</span>` : ""}`;
       }
     } else {
       const s = r.s, it = r.it;
       cells = `<span class="tl-fold-space"></span><span class="tl-name tl-name-item">${ic(it.kind === "labor" ? "hard-hat" : "box", 14, { optical: true })}<span>${esc(it.name)}</span></span><span class="tl-start">${short(s.start)}</span><span class="tl-days">${workDays(s.start, endOf(s))} d</span>`;
-      bar = `<div class="tl-item-bar" data-kind="${it.kind}" style="left:${X(s.start)}px;width:${s.days * dw}px"></div>`;
+      bar = `<div class="tl-item-bar" data-kind="${it.kind}" data-follow="${s.id}" style="left:${X(s.start)}px;width:${s.days * dw}px"></div>`;
     }
     return `<div class="tl-row" data-type="${r.type}" data-level="${r.level}"${past ? " data-past" : ""}${r.type === "job" ? "" : ` style="top:${y}px"`}><div class="tl-cells" style="--_lvl:${r.level}">${cells}</div><div class="tl-track">${bar}</div></div>`;
   }
@@ -220,7 +228,7 @@
         const r = list[k]; if (r.type !== "job" && r.type !== "phase") continue;
         let e = k + 1; if (r.type === "phase") while (e < n && list[e].type !== "phase") e++; else e = n;
         const [a, z] = r.type === "job" ? [r.j.start, r.j.end] : [r.start, r.end];
-        outlines.push(`<i class="tl-outline" data-for="${esc(r.key)}"${r.type === "phase" ? " data-phase" : ""} style="left:${GRID + X(a)}px;width:${(z - a + 1) * dw}px;top:${(k - i) * ROW + (r.type === "job" ? 13 : 15)}px;height:${(e - k) * ROW - (r.type === "job" ? 13 : 15) - 5}px"></i>`);
+        outlines.push(`<i class="tl-outline" data-for="${esc(r.key)}"${r.type === "phase" ? " data-phase" : ""} style="left:${GRID + X(a) + (r.type === "job" ? 0.5 : 0)}px;width:${(z - a + 1) * dw - (r.type === "job" ? 1 : 0)}px;top:${(k - i) * ROW + (r.type === "job" ? 13 : 15)}px;height:${(e - k) * ROW - (r.type === "job" ? 13 : 15) - 5}px"></i>`);
       }
       html += `<div class="tl-group" style="top:${i * ROW}px;height:${(n - i) * ROW}px">${list.slice(i, n).map((r, k) => rowHtml(r, i + k, i)).join("")}${outlines.join("")}</div>`;
       i = n;
@@ -257,7 +265,7 @@
   // ---------- drawing ----------
   const tl = $("#tl");
   function render() {
-    const sc = $(".tl-scroll"), keepDay = sc ? R0 + Math.round(sc.scrollLeft / dw) : null, keepTop = sc?.scrollTop || 0;
+    const sc = $(".tl-scroll"), keepDay = sc ? R0 + sc.scrollLeft / dw : null, keepTop = sc?.scrollTop || 0;
     range();
     if (!shownJobs().length) {
       tl.dataset.view = "empty";
@@ -268,7 +276,7 @@
       tl.dataset.view = "chart";
       tl.innerHTML = `<div class="tl-scroll" data-tier="${tier()}"${narrow ? " data-narrow" : ""} style="--_day:${dw}px;--_grid:${GRID}px;--_w:${N * dw}px;--_wk:${7 * dw}px;--_off0:${(5 - dow(R0) + 7) % 7}">
         <div class="tl-head"><div class="tl-corner"><span>Name</span><span class="tl-start">Start</span><span class="tl-days">Days</span></div>${scaleHtml()}</div>
-        <div class="tl-body" style="height:${list.length * ROW}px"><div class="tl-grid-bg" aria-hidden="true"></div>${groupsHtml(list)}<div class="tl-overlay" aria-hidden="true">${linksSvg(list)}<i class="tl-today" style="left:${X(0) + dw / 2}px"></i></div></div></div>`;
+        <div class="tl-body" style="height:${list.length * ROW}px"><div class="tl-grid-bg" aria-hidden="true">${monthLines()}</div>${groupsHtml(list)}<div class="tl-overlay" aria-hidden="true">${linksSvg(list)}<i class="tl-today" style="left:${X(0) + dw / 2}px"></i></div></div></div>`;
       const s2 = $(".tl-scroll");
       s2.style.setProperty("--_head", `${s2.querySelector(".tl-head").offsetHeight}px`);
       s2.scrollTop = keepTop;
@@ -303,7 +311,7 @@
   const moved = { scale: true };
   function period() {
     const sc = $(".tl-scroll");
-    if (!sc) { const js = jobsOf(); $("#period").textContent = js.length ? `${short(Math.min(...js.map((j) => j.start)))} – ${dateOf(Math.max(...js.map((j) => j.end))).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : ""; return; }
+    if (!sc) { const js = shownJobs(); $("#period").textContent = js.length ? `${short(Math.min(...js.map((j) => j.start)))} – ${dateOf(Math.max(...js.map((j) => j.end))).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : ""; return; }
     const a = R0 + Math.floor(sc.scrollLeft / dw), b = Math.min(R0 + N - 1, R0 + Math.floor((sc.scrollLeft + sc.clientWidth - GRID) / dw));
     $("#period").textContent = `${short(a)} – ${dateOf(b).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`;
   }
@@ -496,8 +504,12 @@
     let text = "";
     if (drag.mode === "move") {
       const d = dayDelta(e);
-      for (const s of drag.list) { const b = $(`[data-drag][data-key="${s.id}"]`); if (b) b.style.translate = `${d * dw}px 0`; }
-      $$(`.tl-bracket`).forEach((b) => { if (drag.kind !== "stage" && b.dataset.key === drag.key) b.style.translate = `${d * dw}px 0`; });
+      // everything of what's moving goes with it: its bars, their labels and labor and materials, its brackets and label
+      // (the audit: they stayed behind and jumped on the drop)
+      const by = `${d * dw}px 0`, go = (el) => { el.style.translate = by; };
+      for (const s of drag.list) $$(`[data-drag][data-key="${s.id}"], [data-follow="${s.id}"]`).forEach(go);
+      if (drag.kind !== "stage") $$(".tl-bracket").forEach((b) => { if (b.dataset.key === drag.key || (drag.kind === "job" && b.dataset.key.startsWith(`${drag.key}|`))) go(b); });
+      if (drag.kind === "job") $$(`[data-follow-job="${CSS.escape(drag.key)}"]`).forEach(go);
       const a = Math.min(...drag.list.map((s) => s.start)) + d, b2 = Math.max(...drag.list.map(endOf)) + d;
       text = `<b>${esc(drag.name)}</b><span>${esc(span(a, b2))}, ${workDays(a, b2)} working days</span>`;
       drag.delta = d;
@@ -549,11 +561,16 @@
       const k = el.dataset.fold;
       if (k.startsWith("items:")) { const id = k.slice(6); st.items.has(id) ? st.items.delete(id) : st.items.add(id); }
       else st.shut.has(k) ? st.shut.delete(k) : st.shut.add(k);
-      render(); $(`[data-fold="${CSS.escape(k)}"]`)?.focus({ focusVisible: byKey }); return;
+      const was = el.getAttribute("aria-expanded") === "true";
+      render(); const nb = $(`[data-fold="${CSS.escape(k)}"]`); nb?.focus({ focusVisible: byKey });
+      // drawn again, it turns from where it was (render replaces it, so its own transition can't run)
+      nb?.querySelector("svg")?.animate([{ rotate: was ? "0deg" : "-90deg" }, { rotate: was ? "-90deg" : "0deg" }], { duration: 120, easing: "cubic-bezier(0, 0, 0.2, 1)" });
+      return;
     }
     if ((el = q("[data-unlink]"))) { pop.hidePopover(); return unlink(byId(el.dataset.unlink)); }
     // a stage's summary opens at its bar, beside its dates, not over the grid (on phones, a sheet)
-    if ((el = q("[data-open]"))) { const s = byId(el.dataset.open), row = q(".tl-row"), from = row?.querySelector(".tl-bar, .tl-milestone") || el; return openPop("summary", from, () => stageHtml(s), { label: s.name, start: true }); }
+    if ((el = q("[data-open]"))) { const s = byId(el.dataset.open), bar = q(".tl-row")?.querySelector(".tl-bar, .tl-milestone"), sr = $(".tl-scroll").getBoundingClientRect(), br = bar?.getBoundingClientRect();
+      const from = br && br.right > sr.left + GRID && br.left < sr.right ? bar : el; /* its bar scrolled away: at its name */ return openPop("summary", from, () => stageHtml(s), { label: s.name, start: true }); }
     if ((el = q("[data-open-job]"))) { const name = el.dataset.openJob; return openPop("summary", el, () => jobHtml(name), { label: name, start: true }); }
     if ((el = q("#pick-show"))) return openPop("show", el, showHtml, { label: "Show" });
     if ((el = q("#pick-jobs"))) return openPop("jobs", el, jobsHtml, { label: "Jobs" });
@@ -588,7 +605,7 @@
     if (n !== s.start) applyMove([s], n - s.start, s.name);
   });
   // a bracket hovered shows its group's outline
-  const outline = (e, on) => { const b = e.target.closest?.(".tl-bracket[data-outline]"); if (!b) return; b.closest(".tl-group")?.querySelector(`.tl-outline[data-for="${CSS.escape(b.dataset.outline)}"]`)?.toggleAttribute("data-on", on); };
+  const outline = (e, on) => { const b = e.target.closest?.(".tl-bracket[data-outline]"); if (!b) return; b.closest(".tl-group")?.querySelector(`.tl-outline[data-for="${CSS.escape(b.dataset.outline)}"]`)?.toggleAttribute("data-on", on); b.toggleAttribute("data-on", on); };
   tl.addEventListener("pointerover", (e) => outline(e, true));
   tl.addEventListener("pointerout", (e) => outline(e, false));
   document.addEventListener("scroll", (e) => { if (e.target.classList?.contains("tl-scroll")) period(); }, { capture: true, passive: true });

@@ -34,6 +34,14 @@
     /* room for a focus ring and the hovered column's ring at the edges */
     --pl-ring: 2px; padding: var(--pl-ring); margin: calc(-1 * var(--pl-ring));
   }
+  /* an edge with more beyond it fades, as the table's does (data-table.css): the right while there's more, the left
+     once it's scrolled (data-more, data-scrolled from the script) */
+  @media (min-width: 768px) {
+    .pl-board { --_fade-s: 0px; --_fade-e: 0px; }
+    .pl-board[data-scrolled] { --_fade-s: var(--space-8); }
+    .pl-board[data-more] { --_fade-e: var(--space-8); }
+    .pl-board:is([data-more], [data-scrolled]) { mask-image: linear-gradient(to right, transparent, #000 var(--_fade-s), #000 calc(100% - var(--_fade-e)), transparent); }
+  }
   /* each kind's name over its columns, quietly: a word and its mark, in line with the columns' names */
   .pl-kind { display: flex; align-items: center; gap: var(--space-1-5, 6px); margin: 0; padding-inline-start: calc(var(--inset-card) + var(--border-width-default) + var(--space-3)); font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-tertiary); white-space: nowrap; }
   .pl-kind svg { flex: none; inline-size: 14px; }
@@ -47,6 +55,8 @@
     grid-row: 2; align-self: start; display: flex; flex-direction: column;
     border: var(--border-width-default) solid transparent; border-radius: var(--radius-xl);
     background: var(--pl-col-bg);
+    /* the head stops at the column's foot, inside its rounded corners */
+    overflow: clip;
   }
   .pl-page { --pl-col-base: color-mix(in srgb, var(--color-surface-sunken) 55%, var(--color-surface-canvas)); --pl-tint: 8%; }
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pl-page { --pl-tint: 10%; } }
@@ -63,35 +73,28 @@
      with the cards' text (from inside the column's edge: the inset, the card's edge, its padding) */
   .pl-col { --_pad: calc(var(--inset-card) - var(--border-width-default)); --_in: calc(var(--_pad) + var(--border-width-default) + var(--space-3)); }
   /* the head stays at the board's top as the cards pass under it: it draws the column's rounded top itself, over the
-     canvas's colour, so no card shows in its corners */
+     canvas's colour, so no card shows in its corners, nor in the line above it */
   .pl-col-head::before { content: ""; position: absolute; inset: calc(-1 * var(--border-width-default)) calc(-1 * var(--border-width-default)) 0; z-index: -1;
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0; background: var(--pl-col-bg); }
+    border: var(--border-width-default) solid transparent; border-block-end: 0;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0; background: var(--pl-col-bg) padding-box; }
   /* the board scrolls sideways, so a head can't stick to the page by itself: it's moved down by how far its column's
-     top has gone under the bars, up to the column's end (--_room, from the script), the table's way (data-table.css):
-     on the scroll itself where the browser can, by script where it can't */
+     top has gone under the bars (--_col-top, from the script on every scroll), up to the column's end (--_room), the
+     table's way (data-table.css). Always by script here, not on the scroll itself: a scroll-driven range can't know
+     where the bars are, and while they're away the heads came loose from their columns. --_stick slides with the bars */
   @media (min-width: 768px) {
-    /* the timeline is the board's place on the page (the board itself scrolls sideways, so a column's would follow it);
-       each head's range starts where its column does in the board (--_off) and runs the column's room */
-    .pl-board { view-timeline: --pl-board block; view-timeline-inset: 0px; }
     .pl-col-head {
       --_stick: var(--list-head-top, 0px);
       translate: 0 clamp(0px, calc(var(--_stick) - var(--_col-top, 0px)), var(--_room, 0px));
       transition: --_stick 300ms var(--ease-out);
+      will-change: translate;
     }
     :root[data-chrome-hidden] .pl-col-head { --_stick: 0px; }
-    @supports (animation-timeline: view()) {
-      .pl-col-head {
-        translate: none;
-        animation: list-head-follow linear both; animation-timeline: --pl-board;
-        animation-range: exit-crossing calc(var(--_off, 0px) - var(--list-head-top, 0px)) exit-crossing calc(var(--_off, 0px) + var(--_room, 0px) - var(--list-head-top, 0px));
-        transform: translateY(calc(var(--_stick) - var(--list-head-top, 0px)));
-        will-change: translate, transform;
-      }
-    }
   }
-  .pl-col-head { position: relative; z-index: 2; background: var(--color-surface-canvas); display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); padding: var(--space-3) var(--_in) var(--space-2); }
+  .pl-col-head { position: relative; z-index: 2; background: var(--color-surface-canvas); box-shadow: 0 calc(-1 * var(--border-width-default)) var(--color-surface-canvas); display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); padding: var(--space-3) var(--_in) var(--space-2); }
   .pl-col-head h3 { display: flex; align-items: center; gap: var(--space-1-5, 6px); min-inline-size: 0; margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); }
   .pl-col-head h3 > span:not(.mark):not(.pl-n) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* the name and its count give the head its baseline (not the icon), so the figure sits on it */
+  .pl-col-head h3 > span:not(.mark) { align-self: baseline; }
   .pl-col-head h3 svg { flex: none; inline-size: 14px; color: var(--color-content-secondary); }
   .pl-col-head h3 .mark { margin-inline: 1px; }
   .pl-col-head h3 .pl-n { margin-inline-start: var(--space-0-5); }
@@ -120,7 +123,10 @@
     position: relative; display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: calc(var(--space-2) + var(--space-0-5)) var(--space-3);
     border: var(--border-width-default) solid var(--color-line-subtle); border-radius: var(--radius-md);
     background: var(--color-surface-default);
+    /* brought into view clear of its column's head (on phones, of the stage tabs) */
+    scroll-margin: var(--space-10) var(--space-8) var(--space-2);
   }
+  @media (max-width: 767px) { .pl-card { scroll-margin-block-start: calc(var(--touch-target-min, 2.75rem) + var(--space-4)); } }
   @media (hover: hover) { .pl-card:hover { border-color: var(--color-line-strong); } }
   .pl-card:has(.pl-open[aria-expanded="true"]) { outline: var(--border-width-strong) solid var(--color-action-accent); outline-offset: -1px; }
   .pl-card[data-past] { background: transparent; }
@@ -156,7 +162,7 @@
   .pl-board[data-cards="compact"] .pl-meta { gap: var(--space-2); margin-block: 2px -2px; margin-inline-end: -7px; }
   .pl-board[data-cards="compact"] .pl-meta .pl-line { flex: 1; }
   /* round, so it sits in the card's corner whatever the gap (D35) */
-  .pl-board[data-cards="compact"] .pl-meta .pl-next { inline-size: 1.75rem; block-size: 1.75rem; min-block-size: 0; border-radius: var(--radius-full); margin-block: -3px; }
+  .pl-board[data-cards="compact"] .pl-meta .pl-next { inline-size: 1.75rem; block-size: 1.75rem; min-inline-size: 0; min-block-size: 0; border-radius: var(--radius-full); margin-block: -3px; }
   .pl-board[data-cards="compact"] .pl-next-slot { inline-size: 1.75rem; }
 
   .pl-next-slot { flex: none; }
@@ -177,6 +183,9 @@
   .pl-col[data-drop="no"] { opacity: 0.5; }
   .pl-col[data-drop="yes"] { border-style: dashed; border-color: var(--color-line-strong); }
   .pl-col[data-drop="yes"][data-over] { border-style: solid; border-color: var(--color-action-accent); background: var(--color-action-accent-subtle); box-shadow: 0 0 0 1px var(--color-action-accent); }
+  /* the head takes it too, so head and cards read as one target, its edge along the top when it's come down */
+  .pl-col[data-drop="yes"] .pl-col-head::before { border-style: dashed; border-color: var(--color-line-strong); }
+  .pl-col[data-drop="yes"][data-over] .pl-col-head::before { border-style: solid; border-color: var(--color-action-accent); background-color: var(--color-action-accent-subtle); }
   /* Mark as lost waits at the foot while a lead or a pending job is dragged */
   .pl-dropbar { position: fixed; inset-inline: 0; inset-block-end: calc(var(--space-6) + env(safe-area-inset-bottom, 0px)); z-index: 50; display: flex; justify-content: center; pointer-events: none; }
   .pl-drop-lost {
@@ -188,6 +197,8 @@
 
   /* ---------- the summary (the calendar's) and the step dialogs ---------- */
   @media (min-width: 768px) { .pop:is([data-kind="summary"]) { inline-size: 21rem; } }
+  /* Add's menu as wide as its words */
+  @media (min-width: 768px) { .pop[data-kind="add"] { inline-size: max-content; min-inline-size: 10rem; } }
   .pl-sum .cal-sum-kind .mark { inline-size: 0.75rem; block-size: 0.75rem; }
   .pl-sum .cal-sum-when.pl-late { color: var(--color-feedback-danger-content); }
   .pl-sum-actions { flex-wrap: wrap; }
@@ -220,7 +231,7 @@
     .pl-bar-wide { display: none; }
     /* they stay at the top while a long stage scrolls, on the canvas's colour so cards pass under them */
     .pl-tabs {
-      position: sticky; inset-block-start: 0; z-index: 2; display: flex; gap: var(--space-1);
+      position: sticky; inset-block-start: 0; z-index: 3; display: flex; gap: var(--space-1);
       margin: calc(-1 * var(--space-2)) calc(-1 * var(--space-4)); padding: calc(env(safe-area-inset-top, 0px) + var(--space-2)) var(--space-4) var(--space-2);
       background: var(--color-surface-canvas); overflow-x: auto; scrollbar-width: none;
     }

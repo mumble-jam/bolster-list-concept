@@ -240,9 +240,14 @@
     return a.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
   };
   function render() {
-    const cal = $("#cal"), hoursTop = $(".cal-hours", cal)?.scrollTop || 0;
+    const cal = $("#cal"), hoursTop = $(".cal-hours", cal)?.scrollTop || 0, again = cal.contains(popFor?.from) && finder(popFor.from);
     cal.dataset.view = phone.matches ? "agenda" : st.view;
     cal.innerHTML = phone.matches ? phoneHtml() : `<div class="cal-desk">${st.view === "month" ? monthHtml() : st.view === "week" ? timeHtml(7) : st.view === "day" ? timeHtml(1) : crewHtml()}</div>`;
+    // an open popover keeps its opener, drawn again (the new card its draft); gone, the popover closes
+    if (again) {
+      popFor.from = popFor.kind === "create" ? draftEl() : $(again, cal);
+      if (popFor.from) { popFor.from.setAttribute("aria-expanded", "true"); place(); } else pop.hidePopover();
+    }
     if (phone.matches) stripHeader(); // a day picked from the header keeps it down
     $("#period").textContent = periodText();
     // the pickers read back their value; their names say what each picks
@@ -298,10 +303,22 @@
   // ---------- the summary, the day's list, the pickers: one shared popover (C-open) ----------
   const pop = $("#pop");
   let popFor = null, byKey = false;
+  // where it sits: under its opener (the day's list from its start), the new card beside its draft; a sheet on phones
+  function place() {
+    if (!popFor || !pop.matches(":popover-open")) return;
+    if (popFor.kind === "create" && !phone.matches) beside(popFor.from);
+    else BolsterShell.placePopover(pop, popFor.from, { start: popFor.start });
+  }
+  // an opener in the calendar, to find once a redraw has replaced it: what it is, in its week's (and person's) row
+  function finder(el) {
+    const own = ["item", "more", "addDay", "col"].filter((k) => el.dataset[k]).map((k) => `[data-${k.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)}="${el.dataset[k]}"]`).join("");
+    const wk = el.closest(".cal-week");
+    return own && `${wk ? `.cal-week[data-start="${wk.dataset.start}"]${wk.dataset.person ? `[data-person="${wk.dataset.person}"]` : ""} ` : ""}${own}`;
+  }
   function openPop(kind, from, fill, { start = false, label } = {}) {
     if (pop.matches(":popover-open") && popFor?.from === from && popFor.kind === kind) { pop.hidePopover(); return; }
     if (pop.matches(":popover-open")) pop.hidePopover();
-    popFor = { kind, from };
+    popFor = { kind, from, start };
     pop.dataset.kind = kind;
     pop.setAttribute("role", "dialog");
     pop.setAttribute("aria-label", label || kind);
@@ -309,7 +326,7 @@
     BolsterShell.hydrateIcons(pop);
     pop.showPopover();
     from?.setAttribute("aria-expanded", "true");
-    BolsterShell.placePopover(pop, from, { start });
+    place();
     ($("h3[tabindex]", pop) || $("input[type=radio]:checked", pop) || $("input, button:not([data-close-pop])", pop) || $("[data-close-pop]", pop))?.focus({ preventScroll: true, focusVisible: byKey });
   }
   // closing: the opener's state at once (beforetoggle, not toggle, which comes later: by then another picker
@@ -510,7 +527,6 @@
     const el = draftEl();
     if (pop.matches(":popover-open")) { keepDraft = true; pop.hidePopover(); keepDraft = false; }
     openPop("create", el, quickHtml, { label: "New event", start: true });
-    beside(el);
     $(nv.kind === "event" ? "[name=title]" : "[name=client]", pop)?.focus();
   }
   // ---------- the forms (D96, after the event-forms research, 22 Oct): rows led by an icon instead of labelled
@@ -855,7 +871,9 @@
   phone.addEventListener("change", render);
   trayWide.addEventListener("change", renderTray);
   finePointer.addEventListener("change", render);
-  addEventListener("resize", () => { fitMonth(); if (popFor) BolsterShell.placePopover(pop, popFor.from); });
+  addEventListener("resize", () => { fitMonth(); place(); });
+  // it follows its opener as the page or the hours scroll (phones: a sheet, it stays)
+  addEventListener("scroll", (e) => { if (!phone.matches && !pop.contains(e.target)) place(); }, { capture: true, passive: true });
 
   // what hides and sticks as you scroll is the shell's (BolsterShell.scrolling): this page says where the
   // calendar starts, and that a drag counts as in use
