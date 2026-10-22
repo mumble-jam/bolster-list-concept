@@ -4,7 +4,7 @@
 // every card; moving by dragging, where a stage that needs something asks for it. Made-up data.
 (() => {
   const { TODAY, esc, fmt, kit } = window.BDS_CONCEPT;
-  const { OWNERS, avatar, jobHue } = kit;
+  const { OWNERS, avatar } = kit;
   const ic = (n, s = 16, o) => window.BolsterIcons(n, s, o);
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -25,14 +25,16 @@
   const nameOf = (p) => (p.me ? "You" : p.name);
 
   // ---------- the stages: two kinds of record (P-kinds), each stage's groups in the order they need doing (P-groups) ----------
-  // a job's stage is drawn with the job list's marks (D49), filling a quarter at a time; a person's with an icon
+  // three kinds of record (your answers, 21 and 22 Oct): people (a customer's record, no job yet), jobs, and invoices,
+  // each with its own window. A job's stage is drawn with the job list's marks (D49), filling a quarter at a time; a
+  // person's or an invoice's with an icon
   const STAGES = [
     { key: "leads", label: "Leads", kind: "person", icon: "user", groups: [["new", "New"], ["talking", "Talking"]] },
     { key: "visits", label: "Appointments", kind: "person", icon: "calendar-check", groups: [["visited", "Visited"], ["today", "Today"], ["coming", "Coming up"]] },
     { key: "pending", label: "Pending", kind: "job", mark: "quarter", dot: "var(--color-status-pending-mark)", groups: [["drafts", "Drafts"], ["unsent", "Never sent"], ["changed", "Changes not sent yet"], ["sent", "Sent"]] },
     { key: "booked", label: "Booked", kind: "job", mark: "half", dot: "var(--color-status-booked-dot)", groups: [["unscheduled", "Not scheduled"], ["scheduled", "Scheduled"]] },
     { key: "progress", label: "In progress", kind: "job", mark: "three", dot: "var(--color-status-in-progress-mark)", groups: [["done", "Work done"], ["underway", "Underway"]] },
-    { key: "invoices", label: "Invoices", kind: "job", mark: "full", dot: "var(--color-status-outstanding-dot)", groups: [["overdue", "Overdue"], ["unsent", "Not sent"], ["sent", "Sent"], ["paid", "Paid"]] },
+    { key: "invoices", label: "Getting paid", kind: "invoice", icon: "file-invoice", groups: [["overdue", "Overdue"], ["unsent", "Not sent"], ["sent", "Sent"], ["paid", "Paid"]] },
   ];
   const stageOf = (key) => STAGES.find((s) => s.key === key);
   const groupLabel = (r) => stageOf(r.stage).groups.find(([g]) => g === r.group)[1];
@@ -41,6 +43,9 @@
   let seq = 0;
   const person = (stage, group, name, ask, place, source, at, owner, extra = {}) => ({ id: `r${++seq}`, kind: "person", stage, group, name, ask, place, source, at, owner, ...extra });
   const job = (stage, group, name, client, place, value, at, owner, extra = {}) => ({ id: `r${++seq}`, kind: "job", stage, group, name, client, place, value, at, owner, ...extra });
+  // an invoice is named by its client, then its number and its job (as the invoices list has it)
+  let invNo = 1046;
+  const invoice = (group, client, jobName, place, value, at, owner, { label, due } = {}) => ({ id: `r${++seq}`, kind: "invoice", stage: "invoices", group, name: client, client, job: jobName, number: `#${invNo++}`, label, place, value, at, owner, due });
   let records = [
     person("leads", "new", "Joe Johnson", "Basement, about 900 sq ft to hang and finish", "4 Alder Way", "Website", 0, "hm"),
     person("leads", "new", "Elena Sorensen", "Soundproofing a home office", "19 Summit Avenue", "Google", -3, "dc"),
@@ -69,10 +74,10 @@
     job("progress", "done", "Garage drywall", "Ortiz", "88 Quarry Road", 8400, -2, "pn", { start: -9, end: -2 }),
     job("progress", "underway", "Lakeside kitchen", "Hale residence", "14 Birch Lane", 27450, -3, "mr", { start: -3, end: 13 }),
     job("progress", "underway", "Attic insulation", "Novak", "41 Hill Road", 4800, 0, "dc", { start: 0, end: 1 }),
-    job("invoices", "overdue", "Unit turnover drywall", "Oakline Rentals", "Unit 3B, 40 River Road", 12940, -23, "hm", { invoice: "Final invoice", due: -9 }),
-    job("invoices", "unsent", "Basement soundproofing", "Ruiz-Ortega", "9 Summit Avenue", 9300, 0, "mr", { invoice: "Final invoice" }),
-    job("invoices", "sent", "Treatment rooms soundproofing", "Summit Dental Studio", "2 Main Street", 7200, -8, "dc", { invoice: "Progress invoice", due: 6 }),
-    job("invoices", "paid", "Skylight drywall return", "Kowalski", "60 Hillcrest Road", 1850, -2, "pn", { invoice: "Final invoice" }),
+    invoice("overdue", "Oakline Rentals", "Unit turnover drywall", "Unit 3B, 40 River Road", 12940, -23, "hm", { label: "Final invoice", due: -9 }),
+    invoice("unsent", "Ruiz-Ortega", "Basement soundproofing", "9 Summit Avenue", 9300, 0, "mr", { label: "Final invoice" }),
+    invoice("sent", "Summit Dental Studio", "Treatment rooms soundproofing", "2 Main Street", 7200, -8, "dc", { label: "Progress invoice", due: 6 }),
+    invoice("paid", "Kowalski", "Skylight drywall return", "60 Hillcrest Road", 1850, -2, "pn", { label: "Final invoice" }),
   ];
   // what left the board (P-closed), with its reason, to reopen
   let lost = [
@@ -115,7 +120,7 @@
   // ---------- each card's steps: the first is its next step, on the card (P-next); the rest in its summary ----------
   const STEP = {
     create: "Create job", visit: "Book visit", finish: "Finish estimate", send: "Send estimate", resend: "Send changes",
-    book: "Mark as booked", schedule: "Schedule", start: "Mark as started", complete: "Mark work done", invoice: "Invoice",
+    book: "Mark as booked", schedule: "Schedule", start: "Mark as started", complete: "Mark work done", invoice: "Create invoice",
     sendInvoice: "Send invoice", pay: "Record payment", remind: "Send reminder", lose: "Mark as lost",
   };
   function steps(r) {
@@ -143,8 +148,10 @@
   function canGo(r, to) {
     if (to === r.stage) return { ok: false, same: true };
     const a = ORDER.indexOf(r.stage), b = ORDER.indexOf(to), target = stageOf(to);
+    if (r.kind === "invoice") return { ok: false, why: "An invoice changes in the invoice" };
     if (r.kind === "job" && target.kind === "person") return { ok: false, why: "A job doesn't go back to being a lead" };
-    if (r.stage === "invoices") return { ok: false, why: "An invoice changes in the invoice" };
+    // a record crosses to the next kind by the step that makes it: Create job, Create invoice
+    if (target.kind === "invoice") return r.stage === "progress" ? { ok: true, step: "invoice" } : { ok: false, why: r.kind === "person" ? "Create the job first, in Pending" : "Invoice it from In progress" };
     if (r.kind === "person" && target.kind === "job" && to !== "pending") return { ok: false, why: "Create the job first, in Pending" };
     if (r.kind === "person" && to === "pending") return { ok: true, step: "create" };
     if (Math.abs(b - a) > 1) return { ok: false, why: `One stage at a time: ${stageOf(ORDER[a + Math.sign(b - a)]).label} first` };
@@ -152,7 +159,6 @@
     if (to === "leads") return { ok: true, step: "unvisit" };
     if (to === "booked" && r.stage === "pending") return { ok: true, step: "book" };
     if (to === "progress") return { ok: true, step: "start" };
-    if (to === "invoices") return { ok: true, step: "invoice" };
     if (to === "pending") return { ok: true, step: "unbook" };
     if (to === "booked") return { ok: true, step: "unstart" };
     return { ok: false, why: "Not from here" };
@@ -163,7 +169,7 @@
   const st = { q: "", people: null, folded: new Set(), tab: "leads" };
   try { st.folded = new Set(JSON.parse(localStorage.getItem("pl-folded") || "[]")); } catch {}
   const keepFolded = () => { try { localStorage.setItem("pl-folded", JSON.stringify([...st.folded])); } catch {} };
-  const shown = (r) => (!st.people || st.people.has(r.owner)) && (!st.q || `${r.name} ${r.client || ""} ${r.place} ${r.ask || ""}`.toLowerCase().includes(st.q));
+  const shown = (r) => (!st.people || st.people.has(r.owner)) && (!st.q || `${r.name} ${r.client || ""} ${r.job || ""} ${r.number || ""} ${r.place} ${r.ask || ""}`.toLowerCase().includes(st.q));
   const filtered = () => st.q || st.people;
 
   // ---------- a column's line under its name (P-money): what its money adds up, in full ----------
@@ -184,32 +190,30 @@
   try { LAYOUT = localStorage.getItem("pl-cards") || "quiet"; } catch {}
   if (!["quiet", "compact", "footer"].includes(LAYOUT)) LAYOUT = "quiet";
   function card(r) {
-    const w = when(r), [next] = steps(r), hue = r.kind === "job" ? jobHue(r.name) : null, job = r.kind === "job";
-    const label = `${job ? `${r.name}, ${r.client}` : r.name}, ${stageOf(r.stage).label}, ${groupLabel(r)}${job ? `, ${r.value ? money(r.value) : "no price yet"}` : ""}. ${w.text}`;
-    const attrs = `class="pl-card" data-id="${r.id}" data-kind="${r.kind}"${hue ? ` data-hue="${hue}"` : ""}${w.late ? " data-late" : ""}${r.group === "paid" ? " data-past" : ""}`;
-    // a job's colour, the calendar's, as a dot before its name; a person has none
-    const dot = hue ? '<span class="pl-dot" aria-hidden="true"></span>' : "";
+    const w = when(r), [next] = steps(r), job = r.kind === "job", inv = r.kind === "invoice", priced = job || inv;
+    const label = `${job ? `${r.name}, ${r.client}` : inv ? `Invoice ${r.number}, ${r.client}, ${r.job}` : r.name}, ${stageOf(r.stage).label}, ${groupLabel(r)}${priced ? `, ${r.value ? money(r.value) : "no price yet"}` : ""}. ${w.text}`;
+    const attrs = `class="pl-card" data-id="${r.id}" data-kind="${r.kind}"${w.late ? " data-late" : ""}${r.group === "paid" ? " data-past" : ""}`;
     const open = (inner) => `<button type="button" class="pl-open" data-open="${r.id}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(label)}">${inner}</button>`;
-    const value = job ? `<span class="pl-value">${r.value ? money(r.value) : '<span class="pl-none">No price</span>'}</span>` : "";
+    const value = priced ? `<span class="pl-value">${r.value ? money(r.value) : '<span class="pl-none">No price</span>'}</span>` : "";
     const stepAria = next ? `aria-label="${esc(`${STEP[next]}: ${r.name}`)}" data-step="${next}" data-for="${r.id}"` : "";
     const who2 = avatar(who(r.owner), "xs");
     if (LAYOUT === "compact") {
       // two lines: the name and its money; who it's for and how long it's been, the owner and the next step as an icon
-      const line = job ? `${esc(r.client)} · <span class="pl-when-text">${esc(w.text)}</span>` : `<span class="pl-when-text">${esc(w.text)}</span>`;
-      return `<article ${attrs}><div class="pl-row">${open(`${dot}<span>${esc(r.name)}</span>`)}${value}</div>
+      const line = priced ? `${esc(inv ? r.number : r.client)} · <span class="pl-when-text">${esc(w.text)}</span>` : `<span class="pl-when-text">${esc(w.text)}</span>`;
+      return `<article ${attrs}><div class="pl-row">${open(`<span>${esc(r.name)}</span>`)}${value}</div>
         <div class="pl-row pl-meta"><p class="pl-line">${line}</p>${who2}${next ? `<button type="button" class="button pl-next" data-variant="ghost" data-size="sm" data-icon-only ${stepAria} data-tip="${STEP[next]}">${ic("chevron-right", 14, { optical: true })}</button>` : '<span class="pl-next-slot" aria-hidden="true"></span>'}</div></article>`;
     }
     if (LAYOUT === "footer") {
       // the card's facts on top, quiet; its next step as a strip across its foot, the one thing on it that acts
-      const sub = job ? `${r.client} · ${r.invoice || r.place}` : r.ask;
-      return `<article ${attrs}><div class="pl-row">${open(`${dot}<span>${esc(r.name)}</span>`)}${value}</div>
+      const sub = job ? `${r.client} · ${r.place}` : inv ? `${r.number} · ${r.job}` : r.ask;
+      return `<article ${attrs}><div class="pl-row">${open(`<span>${esc(r.name)}</span>`)}${value}</div>
         <p class="pl-line pl-sub">${esc(sub)}</p><p class="pl-line pl-when-text pl-meta">${esc(w.text)}</p>
         ${next ? `<button type="button" class="pl-next pl-strip" ${stepAria}><span>${STEP[next]}</span>${ic("chevron-right", 12, { optical: true })}</button>` : ""}</article>`;
     }
     // Quiet: the name and its money, who or what it's for, then how long it's been beside the next step as a link;
     // the owner is in the summary (and People picks whose)
-    const sub = job ? `${r.client} · ${r.invoice || r.place}` : r.ask;
-    return `<article ${attrs}><div class="pl-row">${open(`${dot}<span>${esc(r.name)}</span>`)}${value}</div>
+    const sub = job ? `${r.client} · ${r.place}` : inv ? `${r.number} · ${r.job}` : r.ask;
+    return `<article ${attrs}><div class="pl-row">${open(`<span>${esc(r.name)}</span>`)}${value}</div>
       <p class="pl-line pl-sub">${esc(sub)}</p>
       <div class="pl-row pl-meta"><p class="pl-line pl-when-text">${esc(w.text)}</p>${next ? `<button type="button" class="pl-next pl-link" ${stepAria}>${STEP[next]}${ic("chevron-right", 12, { optical: true })}</button>` : ""}</div></article>`;
   }
@@ -224,24 +228,32 @@
     }).join("");
     const empty = `<p class="pl-empty">${filtered() ? "No matches" : "Nothing here"}</p>`;
     return `<section class="pl-col" id="col-${s.key}" data-stage="${s.key}" data-kind="${s.kind}" aria-labelledby="h-${s.key}">
-      <header class="pl-col-head"><h3 id="h-${s.key}">${markOf(s)}<span>${esc(s.label)}</span><span class="pl-n">${rows.length}</span></h3>${s.kind === "job" ? `<p class="pl-figure">${figure(s, rows)}</p>` : ""}</header>
+      <header class="pl-col-head"><h3 id="h-${s.key}">${markOf(s)}<span>${esc(s.label)}</span><span class="pl-n">${rows.length}</span></h3>${s.kind !== "person" ? `<p class="pl-figure">${figure(s, rows)}</p>` : ""}</header>
       <div class="pl-col-body" tabindex="-1">${groups || empty}</div></section>`;
   }
   const board = $("#board");
   function render() {
     const left = board.scrollLeft, top = board.scrollTop;
-    const people = STAGES.filter((s) => s.kind === "person"), jobs = STAGES.filter((s) => s.kind === "job");
-    // People and Jobs over their columns, the seam between them where a person becomes a job (P-kinds, P-cross)
-    board.innerHTML = `<p class="pl-kind" data-kind="person">${ic("user", 12, { optical: true })}People, no job yet</p><p class="pl-kind" data-kind="job">${ic("briefcase", 12, { optical: true })}Jobs</p>
-      ${people.map(column).join("")}<div class="pl-seam" aria-hidden="true"></div>${jobs.map(column).join("")}`;
+    // People, Jobs and Invoices over their columns, a seam where one kind becomes the next (P-kinds, P-cross)
+    const KINDS = [["person", "user", "People, no job yet"], ["job", "briefcase", "Jobs"], ["invoice", "file-invoice", "Invoices"]];
+    let col = 1, cols = "", heads = "";
+    KINDS.forEach(([k, icon, name], i) => {
+      if (i) cols += `<div class="pl-seam" style="grid-column:${col++}" aria-hidden="true"></div>`;
+      const list = STAGES.filter((x) => x.kind === k);
+      heads += `<p class="pl-kind" data-kind="${k}" style="grid-column:${col} / span ${list.length}">${ic(icon, 12, { optical: true })}${name}</p>`;
+      cols += list.map((x) => column(x).replace('<section class="pl-col"', `<section class="pl-col" style="grid-column:${col++}"`)).join("");
+    });
+    board.innerHTML = heads + cols;
     board.scrollLeft = left; board.scrollTop = top;
     const n = records.filter(shown).length;
-    $("#count").textContent = filtered() ? `${fmt.plural(n, "card", "cards")} match` : "";
+    // the count, as the list's: all of them, or how many of them a search or People lets through
+    const all = records.length;
+    $("#count").innerHTML = filtered() ? `<strong>${fmt.count(n)}</strong> of ${fmt.plural(all, "card", "cards")}` : `<strong>${fmt.count(all)}</strong> ${all === 1 ? "card" : "cards"}`;
     $("#tabs").innerHTML = STAGES.map((s) => `<button type="button" data-tab="${s.key}"${s.key === st.tab ? ' aria-current="true"' : ""}>${markOf(s)}<span>${esc(s.label)}</span><span class="pl-n">${records.filter((r) => r.stage === s.key && shown(r)).length}</span></button>`).join("");
     const p = !st.people ? "Everyone" : OWNERS.filter((o) => st.people.has(o.id)).map((o) => (o.me ? "You" : o.name.split(" ")[0])).join(", ");
     $("#people-text").textContent = p; $("#pick-people").setAttribute("aria-label", `People: ${p}`);
-    $("#lost-text").textContent = `Lost${lost.length ? ` · ${lost.length}` : ""}`;
-    $("#pick-lost").setAttribute("aria-label", `Lost, ${lost.length ? fmt.plural(lost.length, "card", "cards") : "none"}`);
+    const lostName = `Lost, ${lost.length ? fmt.plural(lost.length, "card", "cards") : "none"}`;
+    $("#pick-lost").setAttribute("aria-label", lostName); $("#pick-lost").dataset.tip = lostName;
     fit();
   }
   // on wider screens the board fills the screen down to its bottom edge and scrolls as one, both ways
@@ -309,18 +321,25 @@
       case "schedule": return ask({
         title: `Schedule ${esc(r.name)}`, submit: "Schedule",
         body: `<div class="pl-step-row">${field("s-start", "Starts", `<input class="input" type="date" id="s-start" name="start" value="${iso(4)}" required>`)}${field("s-days", "Working days", `<input class="input" type="number" id="s-days" name="days" min="1" max="60" value="3" data-numeric required>`)}</div>
-          <p class="pl-step-note">${ic("calendar", 14, { optical: true })}<span>It goes on the calendar, in ${esc(r.name)}'s colour.</span></p>`,
+          <p class="pl-step-note">${ic("calendar", 14, { optical: true })}<span>It goes on the calendar.</span></p>`,
         onSubmit: (v) => { const start = offset(v.start); change(() => set(r, "booked", "scheduled", { start, end: start + Math.max(1, +v.days) - 1 }), `${r.name} scheduled from ${short(start)}`); },
       });
       // started today, keeping the length it was scheduled for (four days if it had none)
       case "start": return change(() => set(r, "progress", "underway", { start: 0, end: r.start != null ? r.end - r.start : 4 }), `${r.name} started today`);
       case "unstart": return change(() => { set(r, "booked", "unscheduled"); delete r.start; delete r.end; }, `${r.name} back in ${s("booked")}, not scheduled`);
       case "complete": return change(() => set(r, "progress", "done", { end: 0 }), `${r.name}: work done`);
-      case "invoice": return ask({
-        title: `Invoice ${esc(r.name)}`, submit: "Create invoice",
-        body: `${field("i-amount", "Final invoice", moneyInput("i-amount", r.value), "What's left of the contract. Payments taken so far come off it in the invoice.")}`,
-        onSubmit: (v) => change(() => set(r, "invoices", "unsent", { value: amount(v["i-amount"]), invoice: "Final invoice" }), `Invoice for ${r.name} created, not sent yet`),
-      });
+      case "invoice": {
+        const final = r.group === "done";
+        return ask({
+          title: `${final ? "Final" : "Progress"} invoice for ${esc(r.name)}`, submit: "Create invoice",
+          body: `${field("i-amount", "Amount", moneyInput("i-amount", final ? r.value : Math.round(r.value / 2)), final ? "What's left of the contract. Payments taken so far come off it in the invoice." : "What the work so far is worth.")}
+            <p class="pl-step-note">${ic("file-invoice", 14, { optical: true })}<span>${final ? `An invoice of its own from here, in ${s("invoices")}. ${esc(r.name)} is done, so it leaves the board; it stays in the job list.` : `An invoice of its own, in ${s("invoices")}; ${esc(r.name)} stays where it is.`}</span></p>`,
+          onSubmit: (v) => {
+            const made = invoice("unsent", r.client, r.name, r.place, amount(v["i-amount"]), 0, r.owner, { label: final ? "Final invoice" : "Progress invoice" });
+            change(() => { if (final) records = records.filter((x) => x !== r); records.push(made); }, `Invoice ${made.number} for ${r.name} created, not sent yet${final ? `; ${r.name} leaves the board` : ""}`);
+          },
+        });
+      }
       case "sendInvoice": return change(() => set(r, "invoices", "sent", { due: 14 }), `Invoice sent to ${r.client}, due ${short(14)}`);
       case "pay": return change(() => set(r, "invoices", "paid"), `${r.name}: paid in full`);
       case "remind": return change(() => (r.reminded = true), `Reminder sent to ${r.client}`);
@@ -364,16 +383,16 @@
   const closeBtn = () => `<button type="button" class="button cal-pop-close" data-variant="ghost" data-size="sm" data-icon-only data-close-pop aria-label="Close" data-tip="Close">${ic("xmark", 16, { optical: true })}</button>`;
   const dd = (term, html) => `<dt>${term}</dt><dd>${html}</dd>`;
   function summaryHtml(r) {
-    const s = stageOf(r.stage), w = when(r, true), [next, ...more] = steps(r), hue = r.kind === "job" ? jobHue(r.name) : null;
+    const s = stageOf(r.stage), w = when(r, true), [next, ...more] = steps(r);
     const moves = STAGES.map((t) => ({ t, g: canGo(r, t.key) })).filter((x) => x.g.ok);
-    return `<div class="cal-sum pl-sum"${hue ? ` data-hue="${hue}"` : ""}><div class="cal-sum-top"><p class="cal-sum-kind">${markOf(s)}${esc(s.label)} · ${esc(groupLabel(r))}</p>${closeBtn()}</div>
-      <h3 tabindex="-1">${esc(r.name)}</h3>
+    return `<div class="cal-sum pl-sum"><div class="cal-sum-top"><p class="cal-sum-kind">${markOf(s)}${esc(s.label)} · ${esc(groupLabel(r))}</p>${closeBtn()}</div>
+      <h3 tabindex="-1">${r.kind === "invoice" ? `Invoice ${esc(r.number)}` : esc(r.name)}</h3>
       <p class="cal-sum-when${w.late ? " pl-late" : ""}">${esc(w.text)}</p>
-      <dl>${r.kind === "job" ? dd("Client", esc(r.client)) + dd(r.invoice ? "Invoice" : r.stage === "pending" ? "Estimate" : "Contract", r.value ? money(r.value) : "No price yet") : dd("Asked for", esc(r.ask)) + dd("Source", esc(r.source))}
+      <dl>${r.kind === "job" ? dd("Client", esc(r.client)) + dd(r.stage === "pending" ? "Estimate" : "Contract", r.value ? money(r.value) : "No price yet") : r.kind === "invoice" ? dd("Client", esc(r.client)) + dd("Invoice", `${esc(r.number)}, ${esc(r.label.toLowerCase())}`) + dd("Job", esc(r.job)) + dd("Amount", money(r.value)) : dd("Asked for", esc(r.ask)) + dd("Source", esc(r.source))}
         ${dd("Where", esc(r.place))}${dd("Owner", `${avatar(who(r.owner), "sm")}<span>${esc(who(r.owner).me ? `${who(r.owner).name} (you)` : who(r.owner).name)}</span>`)}</dl>
       ${moves.length ? `<form class="cal-sum-move" data-move="${r.id}"><div class="field" data-size="sm"><label class="field-label" for="mv-to">Move to</label><div class="select"><select class="input" id="mv-to" name="to">${moves.map(({ t }) => `<option value="${t.key}">${esc(t.label)}</option>`).join("")}</select></div></div><button type="submit" class="button" data-variant="secondary" data-size="sm">Move</button></form>` : ""}
       <div class="cal-sum-actions pl-sum-actions">${next ? `<button type="button" class="button" data-size="sm" data-step="${next}" data-for="${r.id}">${STEP[next]}</button>` : ""}${more.filter((x) => x !== "lose").map((x) => `<button type="button" class="button" data-variant="secondary" data-size="sm" data-step="${x}" data-for="${r.id}">${STEP[x]}</button>`).join("")}
-        <a class="button" data-variant="ghost" data-size="sm" href="../index.html#${r.kind === "job" ? "jobs" : "customers"}">${r.kind === "job" ? "Open job" : "Open lead"}</a>${more.includes("lose") ? `<button type="button" class="button pl-lose" data-variant="ghost" data-size="sm" data-step="lose" data-for="${r.id}">${STEP.lose}</button>` : ""}</div></div>`;
+        <a class="button" data-variant="ghost" data-size="sm" href="../index.html#${{ job: "jobs", invoice: "invoices", person: "customers" }[r.kind]}">${{ job: "Open job", invoice: "Open invoice", person: "Open lead" }[r.kind]}</a>${more.includes("lose") ? `<button type="button" class="button pl-lose" data-variant="ghost" data-size="sm" data-step="lose" data-for="${r.id}">${STEP.lose}</button>` : ""}</div></div>`;
   }
   function peopleHtml() {
     const rows = [OWNERS.find((p) => p.me), ...OWNERS.filter((p) => !p.me)];
@@ -489,16 +508,6 @@
     st.people = ids.length && ids.length < OWNERS.length ? new Set(ids) : null;
     render(); popFor.from = $("#pick-people"); popFor.from.setAttribute("aria-expanded", "true");
   });
-  // column colour, being tried: which, and how strong (Concept controls), kept in this browser
-  const keep = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} };
-  const kept = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
-  const colour = $("#cc-colour"), tint = $("#cc-tint");
-  board.dataset.colour = colour.value = ["none", "stage", "head", "kinds", "ramp"].includes(kept("pl-colour")) ? kept("pl-colour") : "stage";
-  const showTint = () => { const v = parseFloat(getComputedStyle(board).getPropertyValue("--pl-tint")); tint.value = v; $("#cc-tint-out").textContent = `${v}%`; tint.disabled = colour.value === "none"; };
-  if (kept("pl-tint")) board.style.setProperty("--pl-tint", `${kept("pl-tint")}%`);
-  showTint();
-  colour.addEventListener("change", () => { board.dataset.colour = colour.value; keep("pl-colour", colour.value); showTint(); });
-  tint.addEventListener("input", () => { board.style.setProperty("--pl-tint", `${tint.value}%`); keep("pl-tint", tint.value); showTint(); });
   $("#cc-cards").value = LAYOUT;
   $("#cc-cards").addEventListener("change", (e) => { LAYOUT = e.target.value; try { localStorage.setItem("pl-cards", LAYOUT); } catch {} board.dataset.cards = LAYOUT; render(); });
   board.dataset.cards = LAYOUT;

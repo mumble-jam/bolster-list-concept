@@ -84,8 +84,8 @@
     ["Crawl space insulation", "Marsh", "12 Fern Road", "Vapour barrier", 2],
     ["Water damage repair", "Calloway", "17 Bay Street", "Demolition and dry-out", 4],
   ].map(([job, client, place, phase, days]) => ({ id: `u${++seq}`, job, client, place, phase, days }));
-  // each job its own colour, so its phases read as one across the month, the week and the crew, and the job
-  // keeps it on the pipeline: the shared sample's (kit.jobHue). Colour says which job, never what kind: the
+  // each job its own colour, so its phases read as one across the month, the week and the crew: the shared
+  // sample's (kit.jobHue). Colour says which job, never what kind: the
   // job's name is on every bar
   const hueOf = kit.jobHue;
   const byId = (id) => items.find((x) => x.id === id);

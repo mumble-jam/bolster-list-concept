@@ -83,7 +83,7 @@
     CLIENTS.push({ id: `c${CLIENTS.length + 1}`, name, initials: initials(name), color: (hash(name) % 8) + 1, city, address: `${int(12, 980)} ${pick(STREETS)}, ${city}` });
   }
 
-  // each site job its own colour, the same on every page that shows it (the calendar, the pipeline): the
+  // each site job its own colour, the same on every page that shows it (the calendar, for now): the
   // system's avatar hues (D13), in turn, skipping its black and grey. Colour says which job, never what kind
   const JOB_HUES = new Map();
   const jobHue = (job) => { if (!JOB_HUES.has(job)) JOB_HUES.set(job, (JOB_HUES.size % 6) + 2); return JOB_HUES.get(job); };

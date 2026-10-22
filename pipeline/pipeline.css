@@ -9,17 +9,20 @@
   .pl-page { --pl-col: 18.5rem; --pl-seam: var(--space-6); }
 
   /* ---------- the toolbar, on the page: search on the left, whose and what's lost on the right ---------- */
-  .pl-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); }
-  .pl-search { flex: 0 1 18rem; min-inline-size: 0; margin: 0; }
-  .pl-bar .result-count { margin: 0; }
-  .pl-controls { display: flex; align-items: center; gap: var(--space-2); margin-inline-start: auto; }
-  .pl-controls > .button { flex: none; }
+  /* on the page, not in a card: the to-do's way (no sticking, no edge, no surface of its own); the search is a field
+     with an edge there, the bare one's hover reading as nothing on the canvas */
+  .pl-toolbar { position: static; border-block-end: 0; background: none; }
+  :root[data-chrome-hidden] .pl-toolbar { translate: none; }
+  .pl-toolbar .list-bar { padding: 0; }
+  .pl-toolbar .result-count { margin: 0; }
+  .pl-search { flex: 0 1 18rem; margin-inline-start: auto; padding-inline: var(--space-3); border: var(--border-width-default) solid var(--color-line-card); background: var(--color-surface-default); }
+  @media (hover: hover) { .pl-search:hover { border-color: var(--color-line-strong); background: var(--color-surface-default); } }
 
   /* ---------- the board: People | seam | Jobs, the kinds named over their columns (P-kinds) ---------- */
   /* one scroll for the whole board, never one per column: the columns grow with their cards (at the least to the
      board's foot) and move together, their heads staying at the top */
   .pl-board {
-    display: grid; grid-template-columns: repeat(2, var(--pl-col)) var(--pl-seam) repeat(4, var(--pl-col)); grid-template-rows: auto 1fr;
+    display: grid; grid-template-columns: repeat(2, var(--pl-col)) var(--pl-seam) repeat(3, var(--pl-col)) var(--pl-seam) var(--pl-col); grid-template-rows: auto 1fr;
     column-gap: var(--space-3); row-gap: var(--space-2); justify-content: start;
     block-size: var(--pl-h, auto); overflow: auto; overscroll-behavior: contain;
     /* room for a focus ring and the hovered column's ring at the edges */
@@ -28,9 +31,8 @@
   /* each kind's name over its columns, quietly: a word and its mark, in line with the columns' names */
   .pl-kind { display: flex; align-items: center; gap: var(--space-1-5, 6px); margin: 0; padding-inline-start: calc(var(--inset-card) + var(--border-width-default) + var(--space-3)); font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-tertiary); white-space: nowrap; }
   .pl-kind svg { flex: none; inline-size: 14px; }
-  .pl-kind[data-kind="person"] { grid-column: 1 / 3; }
-  .pl-kind[data-kind="job"] { grid-column: 4 / -1; }
-  /* the seam: where a person becomes a job (P-cross), a hairline down the gap */
+  /* each kind's place on the grid is the script's (render): People, a seam, Jobs, a seam, Invoices */
+  /* a seam: where one kind becomes the next (P-cross), a person a job, a job an invoice: a hairline down the gap */
   .pl-seam { grid-row: 1 / -1; justify-self: center; inline-size: 0; border-inline-start: var(--border-width-default) solid var(--color-line-default); }
 
   /* ---------- a column: a tint, no frame; its name, count and money on one line, then its groups ---------- */
@@ -43,34 +45,20 @@
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pl-page { --pl-tint: 10%; } }
   :root[data-theme="dark"] .pl-page { --pl-tint: 10%; }
 
-  /* ---------- a column's colour, being tried (Concept controls → Column colour): a hue mixed faintly into the
-     column's tint, never into the cards. --_hue is the column's hue, --_k how much of the strength it takes ---------- */
-  .pl-col { --_hue: var(--pl-col-base); --_k: 1; --pl-col-bg: color-mix(in srgb, var(--_hue) calc(var(--pl-tint) * var(--_k)), var(--pl-col-base)); }
-  /* Stage: the job list's status colours, the ones its marks already wear; people's stages stay neutral */
-  .pl-board:is([data-colour="stage"], [data-colour="head"]) .pl-col[data-stage="pending"] { --_hue: var(--color-status-pending-dot); }
-  .pl-board:is([data-colour="stage"], [data-colour="head"]) .pl-col[data-stage="booked"] { --_hue: var(--color-status-booked-dot); }
-  .pl-board:is([data-colour="stage"], [data-colour="head"]) .pl-col[data-stage="progress"] { --_hue: var(--color-status-in-progress-dot); }
-  .pl-board:is([data-colour="stage"], [data-colour="head"]) .pl-col[data-stage="invoices"] { --_hue: var(--color-status-outstanding-dot); }
-  /* People and jobs: two tints, warm for people, cool for jobs, the board's one split said in colour too */
-  .pl-board[data-colour="kinds"] .pl-col[data-kind="person"] { --_hue: var(--color-status-outstanding-dot); }
-  .pl-board[data-colour="kinds"] .pl-col[data-kind="job"] { --_hue: var(--color-status-active-dot); }
-  /* Progress: one hue, deepening stage by stage, from the first enquiry to the invoice */
-  .pl-board[data-colour="ramp"] .pl-col { --_hue: var(--color-status-active-dot); }
-  .pl-board[data-colour="ramp"] .pl-col[data-stage="leads"] { --_k: 0.2; }
-  .pl-board[data-colour="ramp"] .pl-col[data-stage="visits"] { --_k: 0.4; }
-  .pl-board[data-colour="ramp"] .pl-col[data-stage="pending"] { --_k: 0.6; }
-  .pl-board[data-colour="ramp"] .pl-col[data-stage="booked"] { --_k: 0.8; }
-  .pl-board[data-colour="ramp"] .pl-col[data-stage="progress"] { --_k: 1; }
-  .pl-board[data-colour="ramp"] .pl-col[data-stage="invoices"] { --_k: 1.2; }
-  /* Stage, head only: the stage's colour on the column's head alone, a little stronger, the cards on the neutral tint */
-  .pl-board[data-colour="head"] .pl-col { --pl-head-bg: color-mix(in srgb, var(--_hue) calc(var(--pl-tint) * 1.6), var(--pl-col-base)); --pl-col-bg: var(--pl-col-base); }
+  /* ---------- a column's colour (P-colour): the stage's status colour, the one its mark wears in the job list, mixed
+     faintly into the column's tint, never into the cards; the people's stages stay neutral, so a lead is never red ---------- */
+  .pl-col { --_hue: var(--pl-col-base); --pl-col-bg: color-mix(in srgb, var(--_hue) var(--pl-tint), var(--pl-col-base)); }
+  .pl-col[data-stage="pending"] { --_hue: var(--color-status-pending-dot); }
+  .pl-col[data-stage="booked"] { --_hue: var(--color-status-booked-dot); }
+  .pl-col[data-stage="progress"] { --_hue: var(--color-status-in-progress-dot); }
+  .pl-col[data-stage="invoices"] { --_hue: var(--color-status-outstanding-dot); }
   /* cards an inset from the column's edge, so their corners share its centre (D35); the column's words in line
      with the cards' text (from inside the column's edge: the inset, the card's edge, its padding) */
   .pl-col { --_pad: calc(var(--inset-card) - var(--border-width-default)); --_in: calc(var(--_pad) + var(--border-width-default) + var(--space-3)); }
   /* the head stays at the board's top as the cards pass under it: it draws the column's rounded top itself, over the
      canvas's colour, so no card shows in its corners */
   .pl-col-head::before { content: ""; position: absolute; inset: calc(-1 * var(--border-width-default)) calc(-1 * var(--border-width-default)) 0; z-index: -1;
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0; background: var(--pl-head-bg, var(--pl-col-bg)); }
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0; background: var(--pl-col-bg); }
   .pl-col-head { position: sticky; inset-block-start: calc(-1 * var(--pl-ring, 0px)); z-index: 2; background: var(--color-surface-canvas); display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); padding: var(--space-3) var(--_in) var(--space-2); }
   .pl-col-head h3 { display: flex; align-items: center; gap: var(--space-1-5, 6px); min-inline-size: 0; margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); }
   .pl-col-head h3 > span:not(.mark):not(.pl-n) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -114,12 +102,9 @@
   .pl-open::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
   .pl-open:focus-visible { outline: 0; }
   .pl-card:has(.pl-open:focus-visible) { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
-  /* a job's colour, the calendar's, as a dot before its name (P-colour) */
-  .pl-dot { flex: none; inline-size: 8px; block-size: 8px; border-radius: var(--radius-full); background: var(--_edge); translate: 0 -1px; }
   .pl-value { flex: none; font-size: var(--text-sm); line-height: var(--leading-sm); font-variant-numeric: tabular-nums; color: var(--color-content-primary); }
   .pl-none { color: var(--color-content-tertiary); }
   .pl-line { margin: 0; min-inline-size: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .pl-card[data-hue] :is(.pl-sub, .pl-meta) { padding-inline-start: calc(8px + var(--space-2)); }
   .pl-meta { align-items: center; margin-block-start: var(--space-1); min-block-size: 1.25rem; }
   .pl-when-text { color: var(--color-content-tertiary); }
   /* stuck: the line turns red and says what's waiting (P-stuck) */
@@ -140,7 +125,6 @@
   /* Compact: the owner and an icon for the next step at the second line's end */
   .pl-board[data-cards="compact"] .pl-meta { gap: var(--space-2); margin-block: 2px -2px; margin-inline-end: -7px; }
   .pl-board[data-cards="compact"] .pl-meta .pl-line { flex: 1; }
-  .pl-board[data-cards="compact"] .pl-card[data-hue] .pl-meta { padding-inline-start: calc(8px + var(--space-2)); }
   /* round, so it sits in the card's corner whatever the gap (D35) */
   .pl-board[data-cards="compact"] .pl-meta .pl-next { inline-size: 1.75rem; block-size: 1.75rem; min-block-size: 0; border-radius: var(--radius-full); margin-block: -3px; }
   .pl-board[data-cards="compact"] .pl-next-slot { inline-size: 1.75rem; }
@@ -153,7 +137,6 @@
     border: 0; border-block-start: var(--border-width-default) solid var(--color-line-subtle); border-radius: 0 0 calc(var(--radius-md) - var(--border-width-default)) calc(var(--radius-md) - var(--border-width-default));
     background: none; color: var(--color-content-primary); font: inherit; font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); text-align: start; cursor: pointer;
   }
-  .pl-card[data-hue] .pl-strip { padding-inline-start: calc(var(--space-3) + 8px + var(--space-2)); }
   .pl-strip svg { color: var(--color-content-tertiary); }
   @media (hover: hover) { .pl-strip:hover { background: var(--color-surface-hover); } }
   .pl-strip:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
@@ -197,10 +180,11 @@
   /* ---------- phones: a stage at a time, as tabs with their counts, swiped or picked (P-phone) ---------- */
   .pl-tabs { display: none; }
   @media (max-width: 767px) {
-    .pl-search { flex: 1 1 100%; }
-    .pl-bar .result-count { display: none; }
-    .pl-controls { inline-size: 100%; margin: 0; }
-    .pl-controls > #pick-people { flex: 1 1 0; min-inline-size: 0; }
+    /* phones: the search first, its own line; whose and Lost under it */
+    .pl-toolbar .list-bar { flex-wrap: wrap; }
+    .pl-search { order: -1; flex: 1 1 100%; margin: 0; }
+    .pl-toolbar #pick-people { flex: 1 1 0; min-inline-size: 0; }
+    .pl-bar-wide { display: none; }
     /* they stay at the top while a long stage scrolls, on the canvas's colour so cards pass under them */
     .pl-tabs {
       position: sticky; inset-block-start: 0; z-index: 2; display: flex; gap: var(--space-1);
@@ -224,9 +208,3 @@
   }
 }
 
-/* Concept controls: the column colour's strength */
-@layer components {
-  .pl-cc-strength { display: flex; justify-content: space-between; margin-block-start: var(--space-2); }
-  .pl-cc-strength output { color: var(--color-content-secondary); font-variant-numeric: tabular-nums; }
-  #cc-tint { inline-size: 100%; accent-color: var(--color-action-accent); }
-}

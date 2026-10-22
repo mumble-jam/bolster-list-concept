@@ -10,11 +10,11 @@
 <link rel="apple-touch-icon" href="../shared/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../system/bolster.css?v=dd77acd0">
-<link rel="stylesheet" href="../shared/shell.css?v=dd77acd0">
-<link rel="stylesheet" href="../data-list.css?v=dd77acd0">
-<link rel="stylesheet" href="../calendar/calendar.css?v=dd77acd0">
-<link rel="stylesheet" href="pipeline.css?v=dd77acd0">
+<link rel="stylesheet" href="../system/bolster.css?v=66844734">
+<link rel="stylesheet" href="../shared/shell.css?v=66844734">
+<link rel="stylesheet" href="../data-list.css?v=66844734">
+<link rel="stylesheet" href="../calendar/calendar.css?v=66844734">
+<link rel="stylesheet" href="pipeline.css?v=66844734">
 </head>
 <body>
 <div class="app-shell">
@@ -29,15 +29,18 @@
     </header>
 
     <div class="app-content list-page pl-page" data-width="full">
-      <!-- the toolbar on the page, as the calendar has it: what's shown on the left, whose and what's closed on the right -->
-      <div class="pl-bar" role="toolbar" aria-label="Pipeline">
-        <div class="field pl-search" data-size="sm"><div class="input-group"><span class="input-adornment"><i data-icon="search" data-size="16"></i></span><input class="input" type="search" id="search" aria-label="Search the pipeline" placeholder="Search by name, client or address" enterkeyhint="search" autocomplete="off"></div></div>
-        <p class="result-count" id="count" aria-live="polite"></p>
-        <div class="pl-controls">
+      <!-- the system's toolbar (toolbar.css), on the page as the calendar and the to-do have it: whose (a picker that reads
+           back its value, D80), a rule, the count; the search; a rule, then Lost, a tool beside the board (an icon button
+           with its count in its name, as Unscheduled is, D82) -->
+      <div class="list-toolbar pl-toolbar" role="search" aria-label="Search and filter">
+        <div class="list-bar">
           <button type="button" class="button" data-variant="secondary" data-size="sm" id="pick-people" aria-haspopup="dialog" aria-expanded="false"><span class="button-value" id="people-text">Everyone</span><i data-icon="chevron-down" data-size="14"></i></button>
+          <span class="list-bar-sep pl-bar-wide" aria-hidden="true"></span>
+          <p class="result-count pl-bar-wide" id="count" aria-live="polite"></p>
+          <label class="list-search pl-search"><i data-icon="search" data-size="16"></i><input type="search" id="search" aria-label="Search the pipeline" placeholder="Search by name, client or address" enterkeyhint="search" autocomplete="off"></label>
           <span class="list-bar-sep" aria-hidden="true"></span>
           <!-- what left the board: lost leads and jobs, with their reasons, to reopen (P-closed) -->
-          <button type="button" class="button" data-variant="ghost" data-size="sm" id="pick-lost" aria-haspopup="dialog" aria-expanded="false"><i data-icon="ban" data-size="16"></i><span id="lost-text">Lost</span></button>
+          <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only id="pick-lost" aria-haspopup="dialog" aria-expanded="false" aria-label="Lost" data-tip="Lost"><i data-icon="ban" data-size="16"></i></button>
         </div>
       </div>
       <!-- phones: one stage at a time, picked here or by swiping (P-phone) -->
@@ -64,9 +67,9 @@
     <section>
       <h3>Principles</h3>
       <ol>
-        <li><b>One board, two kinds of record, said plainly (P-kinds).</b> Leads and Appointments hold people with no job yet; from Pending jobs on, every card is a job. The board says so over its columns, and the cards look it: a person's card is their name and what they asked for, a job's is the job, its client and its money.</li>
-        <li><b>A person becomes a job in one step (P-cross).</b> Create job, on the card or by dragging it onto Pending jobs, asks only for the job's name and makes a draft estimate. The person leaves the leads: they're a customer with a job now.</li>
-        <li><b>Stages say what they are with a shape, and faintly with a colour (P-colour).</b> The jobs' stages carry the job list's marks, filling a quarter at a time (D49): a quarter for Pending, half for Booked, three quarters for In progress, full for Invoices; the people's stages, an icon. Their columns take the same status colours as a faint tint (being tried: other ways in Concept controls → Column colour); the people's stay neutral, so a lead is never red. A job's own colour (the calendar's, D75) is a dot before its name, so it's the same job on both pages; red means something stuck, and nothing else.</li>
+        <li><b>One board, three kinds of record, said plainly (P-kinds).</b> Leads and Appointments hold people with no job yet; Pending, Booked and In progress hold jobs; Getting paid holds invoices, records of their own. The board names each kind over its columns, with a seam before the next, and the cards look it: a person's card is their name and what they asked for, a job's is the job, its client and its money, an invoice's is its client, its number and job, and its amount.</li>
+        <li><b>One kind becomes the next in one step (P-cross).</b> Create job, on the card or by dragging it onto Pending, asks only for the job's name and makes a draft estimate; the person leaves the leads, a customer with a job now. Create invoice, from In progress, makes the final invoice from work that's done (the job leaves the board, into the job list) or a progress invoice while it's underway (the job stays).</li>
+        <li><b>Stages say what they are with a shape, and faintly with a colour (P-colour).</b> The jobs' stages carry the job list's marks, filling a quarter at a time (D49): a quarter for Pending, half for Booked, three quarters for In progress, the people's and the invoices' stages, an icon. Their columns take the same status colours as a faint tint; the people's stay neutral, so a lead is never red. Red means something stuck, and nothing else.</li>
         <li><b>Red means stuck, and says why (P-stuck).</b> Every card says how long it's been where it is; past its stage's limit, that line turns red and says what's waiting: “No reply for 9 days”. Limits, until settings have them: a new lead 2 days, a visit with no job 2 days, an estimate never sent 3 days, a sent one 7, a booked job with no dates 7, finished work not invoiced 3, an invoice past its due date.</li>
         <li><b>The next step is on the card (P-next).</b> Each card shows its one next step, always, not on hover (a link, an icon or a strip: three card layouts to compare in Concept controls): Create job, Send estimate, Mark as booked, Schedule, Mark as started, Invoice, Record payment. Opening the card shows the rest.</li>
         <li><b>Sub-statuses are groups inside their stage (P-groups).</b> Drafts, Never sent, Changes not sent yet, Sent; Not scheduled, Scheduled; Underway, Work done; Not sent, Sent, Overdue, Paid. Each folds, with its count, and what needs doing comes first; space between them, no rules. Within a group, the order is the date's, never your own.</li>
@@ -99,16 +102,6 @@
 <details class="concept-controls" id="concept-controls" data-more-entry="Concept controls" data-more-icon="sliders">
   <summary><span class="concept-tag">Concept</span> Controls</summary>
   <div class="concept-body">
-    <div class="field" data-size="sm"><label class="field-label" for="cc-colour">Column colour</label>
-      <div class="select"><select class="input" id="cc-colour">
-        <option value="none">None: one neutral tint</option>
-        <option value="stage">Stage: the job list's status colours</option>
-        <option value="head">Stage, on the head only</option>
-        <option value="kinds">People and jobs: two tints</option>
-        <option value="ramp">Progress: one hue, deepening</option>
-      </select></div>
-      <label class="field-label pl-cc-strength" for="cc-tint">Strength <output id="cc-tint-out"></output></label>
-      <input type="range" id="cc-tint" min="2" max="24" step="1"></div>
     <div class="field" data-size="sm"><label class="field-label" for="cc-cards">Cards</label>
       <div class="select"><select class="input" id="cc-cards">
         <option value="quiet">Quiet: next step as a link</option>
@@ -121,10 +114,10 @@
     </div>
   </div>
 </details>
-<script src="../shared/icons.js?v=dd77acd0"></script>
-<script src="../shared/shell.js?v=dd77acd0"></script>
-<script src="../system/specimens/specimen.js?v=dd77acd0"></script>
-<script src="../data.js?v=dd77acd0"></script>
-<script src="pipeline.js?v=dd77acd0"></script>
+<script src="../shared/icons.js?v=66844734"></script>
+<script src="../shared/shell.js?v=66844734"></script>
+<script src="../system/specimens/specimen.js?v=66844734"></script>
+<script src="../data.js?v=66844734"></script>
+<script src="pipeline.js?v=66844734"></script>
 </body>
 </html>
