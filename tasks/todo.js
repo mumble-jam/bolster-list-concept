@@ -12,7 +12,7 @@
   const PRIO = ["No priority", "Low", "Med", "High"];
   const mark = (level) => `<span class="prio-mark" data-level="${level}" aria-hidden="true"><i></i><i></i><i></i></span>`;
 
-  BolsterShell.mount({ current: "tasks", links: { tasks: "index.html", calendar: "../calendar/", pipeline: "../pipeline/", "job-list": "../index.html#jobs", "vendor-orders": "../index.html?d=pages/list/vendor-orders.json", invoices: "../index.html#invoices", "leads-and-customers": "../index.html#customers", catalog: "../index.html#catalog" } });
+  BolsterShell.mount({ current: "tasks", links: { tasks: "index.html", calendar: "../calendar/", pipeline: "../pipeline/", timeline: "../timeline/", "job-list": "../index.html#jobs", "vendor-orders": "../index.html?d=pages/list/vendor-orders.json", invoices: "../index.html#invoices", "leads-and-customers": "../index.html#customers", catalog: "../index.html#catalog" } });
 
   // ---------- sample tasks: [name, job, kind, hours, due (days from today, null for none), priority 0-3, who, done (days ago)] ----------
   const RAW = [

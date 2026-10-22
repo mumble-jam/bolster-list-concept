@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolster timeline concept</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="../shared/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../shared/assets/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../shared/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../system/bolster.css?v=bb08b14d">
+<link rel="stylesheet" href="../shared/shell.css?v=bb08b14d">
+<link rel="stylesheet" href="../data-list.css?v=bb08b14d">
+<link rel="stylesheet" href="../calendar/calendar.css?v=bb08b14d">
+<link rel="stylesheet" href="timeline.css?v=bb08b14d">
+</head>
+<body>
+<div class="app-shell">
+  <main class="app-main">
+    <header class="page-header">
+      <div class="page-title">
+        <h1 id="page-title">Timeline</h1>
+      </div>
+      <div class="page-header-actions">
+        <button class="button" data-float id="create" data-tip="Schedule a job" aria-haspopup="dialog" aria-expanded="false"><span class="float-label">Schedule a job</span></button>
+      </div>
+    </header>
+
+    <div class="app-content list-page tl-page" data-width="full">
+      <!-- the calendar's toolbar (D80): where you are on the left; the scale, what's shown and Unscheduled on the right -->
+      <div class="cal-bar tl-toolbar" role="toolbar" aria-label="Timeline">
+        <div class="cal-where">
+          <button type="button" class="button" data-variant="secondary" data-size="sm" id="go-today">Today</button>
+          <span class="cal-arrows">
+            <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only id="go-prev" aria-label="Earlier" data-tip="Earlier"><i data-icon="chevron-left" data-size="16"></i></button>
+            <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only id="go-next" aria-label="Later" data-tip="Later"><i data-icon="chevron-right" data-size="16"></i></button>
+          </span>
+          <h2 class="cal-period" id="period" aria-live="polite"></h2>
+        </div>
+        <div class="cal-controls">
+          <div class="segmented tl-scales" role="radiogroup" aria-label="Scale" id="scales">
+            <label class="segmented-option"><input type="radio" name="scale" value="weeks"> Weeks</label>
+            <label class="segmented-option"><input type="radio" name="scale" value="months"> Months</label>
+            <label class="segmented-option"><input type="radio" name="scale" value="quarters"> Quarters</label>
+            <label class="segmented-option"><input type="radio" name="scale" value="fit"> Fit</label>
+          </div>
+          <button type="button" class="button" data-variant="secondary" data-size="sm" id="pick-show" aria-haspopup="dialog" aria-expanded="false"><span class="button-value" id="show-text">Show</span><i data-icon="chevron-down" data-size="14"></i></button>
+          <span class="list-bar-sep cal-sep" aria-hidden="true"></span>
+          <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only id="tray-toggle" aria-haspopup="dialog" aria-expanded="false" aria-label="Unscheduled" data-tip="Unscheduled"><i data-icon="calendar-circle-minus" data-size="16"></i></button>
+        </div>
+      </div>
+      <!-- wider screens: the jobs' plans as a grid beside bars, one scroll (TL-two-parts); phones: a list (TL-phone) -->
+      <section class="card tl-card" id="tl" aria-labelledby="page-title"></section>
+    </div>
+  </main>
+</div>
+<div class="pop" id="pop" popover></div>
+<div class="cal-ghost" id="ghost" aria-hidden="true" hidden></div>
+<div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
+<p class="visually-hidden" id="live" aria-live="polite"></p>
+<dialog class="dialog notes" id="notes" aria-labelledby="notes-title">
+  <header class="dialog-header"><h2 id="notes-title">About this concept</h2>
+    <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close data-tip="Close"><i data-icon="xmark" data-size="16"></i></button></header>
+  <div class="dialog-body">
+    <section>
+      <h3>What it is</h3>
+      <p class="text-secondary">Bolster's Timeline (Jobs → Timeline) as the “Timeline · research” board in Figma draws it (19 Oct), with your answers (22 Oct): every job's plan on a line of days. A job's phases and stages, a stage's labor and materials folded under it, the links between stages, today, and what has no dates yet. The same jobs and dates as the Calendar. Made-up sample data.</p>
+    </section>
+    <section>
+      <h3>Principles</h3>
+      <ol>
+        <li><b>Two parts, one scroll (TL-two-parts).</b> A grid of the work on the left (name, start, working days), its bars on the right, rows lined up. Every fact on a bar is in its row too, so the grid is what a screen reader reads.</li>
+        <li><b>Job, phase, stage; items folded (TL-levels).</b> A job's and a phase's dates and progress come from their stages and are drawn as a bracket, never typed, so a stage can't sit outside its job. A stage's labor and materials open under it.</li>
+        <li><b>Weeks, Months, Quarters, Fit (TL-scale).</b> Today and the arrows to move; weekends shaded; today a line in the alert colour; lengths in working days.</li>
+        <li><b>Moving is dragging (TL-move).</b> Drag a stage to move it, its end to stretch it, a job or phase to move all of it; dates and working days show while you do; the drop saves, with Undo. Moved later, what waits on it keeps its gap (your call, 22 Oct).</li>
+        <li><b>Links, finish to start (TL-links).</b> A stage waits for another: an elbow line from one's end to the next's start, drawn by dragging from a bar's end onto another; red and dashed when it starts too early. Named in the stage's summary (Waits for, Holds up), where it's removed. Show turns the lines off.</li>
+        <li><b>A click opens a summary (TL-open).</b> A stage's dates, crew, links and Move; a job's span, status and Open job.</li>
+        <li><b>Nothing hidden by default (TL-undated).</b> Finished jobs stay, muted, left of today (your call, 22 Oct), Show hides them; jobs with no dates wait under Unscheduled, to schedule from.</li>
+        <li><b>On phones, a list (TL-phone).</b> No chart: each job with its phases and stages, their dates, and a track showing where each stage falls in its job. A tap opens the summary as a sheet; no dragging.</li>
+      </ol>
+    </section>
+    <section>
+      <h3>Open questions</h3>
+      <ul>
+        <li>Calendar and Timeline as two pages (assumed, as Bolster has them) or two views of one Schedule page.</li>
+        <li>A stage waits for one other here; Bolster may allow several.</li>
+        <li>Moving an item on its own (items follow their stage here).</li>
+        <li>Days off from the company's settings; weekends here.</li>
+      </ul>
+    </section>
+  </div>
+</dialog>
+<details class="concept-controls" id="concept-controls" data-more-entry="Concept controls" data-more-icon="sliders">
+  <summary><span class="concept-tag">Concept</span> Controls</summary>
+  <div class="concept-body">
+    <button class="button" data-variant="secondary" data-size="sm" data-open-dialog="notes">About this concept</button>
+    <div class="cluster" style="justify-content:space-between">
+      <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+    </div>
+  </div>
+</details>
+<script src="../shared/icons.js?v=bb08b14d"></script>
+<script src="../shared/shell.js?v=bb08b14d"></script>
+<script src="../system/specimens/specimen.js?v=bb08b14d"></script>
+<script src="../data.js?v=bb08b14d"></script>
+<script src="timeline.js?v=bb08b14d"></script>
+</body>
+</html>

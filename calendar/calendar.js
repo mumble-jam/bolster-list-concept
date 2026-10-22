@@ -10,7 +10,7 @@
   const toast = (message, undo) => BolsterShell.toast(message, { undo });
   const say = (t) => { $("#live").textContent = t; };
 
-  BolsterShell.mount({ current: "calendar", links: { calendar: "index.html", tasks: "../tasks/", pipeline: "../pipeline/", "job-list": "../index.html#jobs", "vendor-orders": "../index.html?d=pages/list/vendor-orders.json", invoices: "../index.html#invoices", "leads-and-customers": "../index.html#customers", catalog: "../index.html#catalog" } });
+  BolsterShell.mount({ current: "calendar", links: { calendar: "index.html", tasks: "../tasks/", pipeline: "../pipeline/", timeline: "../timeline/", "job-list": "../index.html#jobs", "vendor-orders": "../index.html?d=pages/list/vendor-orders.json", invoices: "../index.html#invoices", "leads-and-customers": "../index.html#customers", catalog: "../index.html#catalog" } });
 
   // ---------- days: ISO dates, read at noon so a clock change never moves one ----------
   const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -40,23 +40,8 @@
   const together = (names) => (names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`);
   const faces = (ids) => `<span class="cal-faces" aria-hidden="true">${ids.map(who).filter(Boolean).slice(0, 3).map((p) => avatar(p, "sm")).join("")}</span>`;
   let seq = 0;
-  // a job's phases: [job, client, place, phase, start (days from today), length in days, who]
-  const PHASES = [
-    ["Lakeside kitchen", "Hale residence", "14 Birch Lane", "Demolition", -3, 2, ["mr"]],
-    ["Lakeside kitchen", "Hale residence", "14 Birch Lane", "Framing", -1, 6, ["mr", "pn"]],
-    ["Lakeside kitchen", "Hale residence", "14 Birch Lane", "Drywall", 5, 4, ["mr", "dc"]],
-    ["Lakeside kitchen", "Hale residence", "14 Birch Lane", "Finish", 11, 3, ["dc"]],
-    ["Garage drywall", "Ortiz", "88 Quarry Road", "Hang and tape", -9, 4, ["pn"]],
-    ["Garage drywall", "Ortiz", "88 Quarry Road", "Prime and paint", -3, 2, ["pn"]],
-    ["Basement finish", "Brennan", "3 Elm Street", "Framing", 4, 4, ["pn"]],
-    ["Basement finish", "Brennan", "3 Elm Street", "Insulation", 8, 1, ["dc"]],
-    ["Basement finish", "Brennan", "3 Elm Street", "Drywall", 11, 5, ["mr", "pn"]],
-    ["Attic insulation", "Novak", "41 Hill Road", "Blown-in, R-49", 0, 2, ["dc"]],
-    ["Stairwell skim coat", "Galloway", "9 Mill Lane", "Skim coat", 6, 2, []],
-    ["Office build-out", "Northgate Property Group", "200 Harbor Way, suite 4", "Steel studs", 12, 4, ["mr"]],
-    ["Office build-out", "Northgate Property Group", "200 Harbor Way, suite 4", "Board and tape", 18, 5, ["mr", "pn", "dc"]],
-    ["Fire-rated walls", "Pinecrest Builders", "Lot 12, Pinecrest", "Two layers, type X", 19, 3, ["dc"]],
-  ];
+  // jobs' stages, the shared schedule's (the timeline's too); a milestone, with no length, is the timeline's alone
+  const PHASES = kit.SCHEDULE.filter((x) => x.days > 0).map((x) => [x.job, x.client, x.place, x.stage, x.start, x.days, x.who]);
   // appointments: [type, title, place, day (from today), from, to, who]
   const APPTS = [
     ["Site visit", "Estimate visit · Delgado", "7 Pine Court", 0, "9:00", "10:00", ["hm"]],
@@ -81,11 +66,8 @@
     ...BUSY.map(([d, a, b, w]) => ({ id: `b${++seq}`, kind: "busy", date: D(d), from: minutes(a), to: minutes(b), who: [w], source: "Google Calendar" })),
   ];
   // jobs with no dates yet: [job, client, place, first phase, length]
-  let tray = [
-    ["Popcorn ceiling removal", "Lindqvist", "31 Cedar Street", "Scrape and skim", 3],
-    ["Crawl space insulation", "Marsh", "12 Fern Road", "Vapour barrier", 2],
-    ["Water damage repair", "Calloway", "17 Bay Street", "Demolition and dry-out", 4],
-  ].map(([job, client, place, phase, days]) => ({ id: `u${++seq}`, job, client, place, phase, days }));
+  let tray = kit.UNSCHEDULED.map(({ job, client, place, stage, days }) => [job, client, place, stage, days])
+    .map(([job, client, place, phase, days]) => ({ id: `u${++seq}`, job, client, place, phase, days }));
   // each job its own colour, so its phases read as one across the month, the week and the crew: the shared
   // sample's (kit.jobHue). Colour says which job, never what kind: the
   // job's name is on every bar

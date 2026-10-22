@@ -8,9 +8,9 @@
 /* Cera Pro is licensed, so this repo doesn't ship the files. It
    renders when installed locally or when the consuming app declares
    its own @font-face for "Cera Pro" (the React prototype does). */
-@font-face { font-family: "Cera Pro"; src: local("Cera Pro"), local("CeraPro-Regular"), url("../fonts/Cera-Pro-Regular.ttf?v=e58e6137") format("truetype"); font-weight: 400; font-display: swap; }
-@font-face { font-family: "Cera Pro"; src: local("Cera Pro Medium"), local("CeraPro-Medium"), url("../fonts/Cera-Pro-Medium.ttf?v=e58e6137") format("truetype"); font-weight: 500; font-display: swap; }
-@font-face { font-family: "Cera Pro"; src: local("Cera Pro Bold"), local("CeraPro-Bold"), url("../fonts/Cera-Pro-Bold.ttf?v=e58e6137") format("truetype"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Cera Pro"; src: local("Cera Pro"), local("CeraPro-Regular"), url("../fonts/Cera-Pro-Regular.ttf?v=bb08b14d") format("truetype"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Cera Pro"; src: local("Cera Pro Medium"), local("CeraPro-Medium"), url("../fonts/Cera-Pro-Medium.ttf?v=bb08b14d") format("truetype"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Cera Pro"; src: local("Cera Pro Bold"), local("CeraPro-Bold"), url("../fonts/Cera-Pro-Bold.ttf?v=bb08b14d") format("truetype"); font-weight: 700; font-display: swap; }
 
 @layer base {
   *, *::before, *::after { box-sizing: border-box; }

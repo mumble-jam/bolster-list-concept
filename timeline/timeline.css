@@ -1,0 +1,135 @@
+/* Timeline concept: every job's plan on a line of days (TL-rules). A grid of the work beside its bars, one scroll both
+   ways inside the card, the grid and the scale staying put; brackets for jobs and phases, bars for stages, a diamond
+   for a milestone, links as elbow lines, today a line. The calendar's toolbar, popover and job colours (calendar.css);
+   what's new lives here until it settles. */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  .tl-page { --tl-row: 36px; --cal-off: color-mix(in srgb, var(--color-surface-sunken) 30%, var(--color-surface-default)); }
+  .tl-card { display: block; padding: 0; overflow: hidden; border-color: var(--color-line-card); }
+  /* one scroll for both parts: the grid sticks to the left, the scale to the top */
+  .tl-scroll { position: relative; overflow: auto; overscroll-behavior: contain; }
+  /* a narrow card: the grid keeps the name and the length; the start is on the bar and in the summary */
+  .tl-scroll[data-narrow] .tl-start { display: none; }
+  .tl-scroll[data-narrow] .tl-corner { grid-template-columns: minmax(0, 1fr) 3rem; }
+  .tl-scroll[data-narrow] .tl-cells { grid-template-columns: 1.25rem minmax(0, 1fr) 3rem; }
+
+  /* ---------- the head: the grid's column names, then the scale ---------- */
+  .tl-head { position: sticky; inset-block-start: 0; z-index: 6; display: flex; inline-size: calc(var(--_grid) + var(--_w)); background: var(--color-surface-default); border-block-end: var(--border-width-default) solid var(--color-line-default); }
+  .tl-corner { position: sticky; inset-inline-start: 0; z-index: 7; flex: none; inline-size: var(--_grid); display: grid; grid-template-columns: minmax(0, 1fr) 3.5rem 3rem; align-items: end; gap: var(--space-2); padding: 0 var(--space-3) var(--space-2) var(--space-4); background: var(--color-surface-default); border-inline-end: var(--border-width-default) solid var(--color-line-default); font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
+  .tl-scale { position: relative; flex: none; block-size: 3.25rem; }
+  .tl-scale-top > span, .tl-scale-bottom > span { position: absolute; display: flex; align-items: center; overflow: hidden; white-space: nowrap; font-size: var(--text-xs); line-height: var(--leading-xs); }
+  /* a month's name stays in view beside the grid while its days scroll under it */
+  .tl-scale-top > span { inset-block-start: 0; block-size: 1.625rem; overflow: visible; font-weight: var(--font-weight-medium); color: var(--color-content-primary); border-inline-start: var(--border-width-default) solid var(--color-line-subtle); }
+  .tl-scale-top b { position: sticky; inset-inline-start: calc(var(--_grid) + var(--space-2)); padding-inline: var(--space-2); font-weight: inherit; }
+  .tl-scale-bottom > span { inset-block-start: 1.625rem; block-size: 1.625rem; justify-content: center; gap: 3px; color: var(--color-content-secondary); font-variant-numeric: tabular-nums; }
+  .tl-scale-bottom[data-tier="weeks"] > span, .tl-scale-bottom[data-tier="months"] > span { justify-content: flex-start; padding-inline-start: var(--space-1); border-inline-start: var(--border-width-default) solid var(--color-line-subtle); }
+  .tl-scale-bottom small { font-size: 0.625rem; color: var(--color-content-tertiary); }
+  .tl-scale-bottom > span[data-off] { color: var(--color-content-tertiary); }
+  /* today in the scale: the alert colour, as its line */
+  .tl-scale-bottom > span[data-today] { color: var(--color-feedback-danger-content); font-weight: var(--font-weight-medium); }
+  .tl-scale-bottom > span[data-today] small { color: inherit; }
+
+  /* ---------- the body: rows across both parts, weekends shaded behind the bars ---------- */
+  .tl-body { position: relative; inline-size: calc(var(--_grid) + var(--_w)); }
+  .tl-grid-bg { position: absolute; inset-block: 0; inset-inline-start: var(--_grid); inline-size: var(--_w);
+    background-image: repeating-linear-gradient(to right, transparent 0 calc(var(--_day) * 5), var(--cal-off) calc(var(--_day) * 5) var(--_wk)); }
+  .tl-scroll[data-tier="months"] .tl-grid-bg { background-image: repeating-linear-gradient(to right, var(--color-line-subtle) 0 1px, transparent 1px calc(var(--_day) * 30.4)); }
+  .tl-row { position: absolute; inset-inline-start: 0; display: flex; inline-size: 100%; block-size: var(--tl-row); }
+  .tl-cells {
+    position: sticky; inset-inline-start: 0; z-index: 5; flex: none; inline-size: var(--_grid); block-size: 100%;
+    display: grid; grid-template-columns: 1.25rem minmax(0, 1fr) 3.5rem 3rem; align-items: center; gap: var(--space-2);
+    padding-inline: calc(var(--space-2) + var(--_lvl) * var(--space-4)) var(--space-3);
+    background: var(--color-surface-default); border-inline-end: var(--border-width-default) solid var(--color-line-default); border-block-end: var(--border-width-default) solid var(--color-line-subtle);
+    font-size: var(--text-sm); line-height: var(--leading-sm);
+  }
+  .tl-track { position: relative; flex: none; inline-size: var(--_w); block-size: 100%; border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
+  @media (hover: hover) { .tl-row:hover .tl-cells, .tl-row:hover .tl-track { background-color: color-mix(in srgb, var(--color-surface-hover) 60%, transparent); } .tl-row:hover .tl-cells { background-color: color-mix(in srgb, var(--color-surface-hover) 60%, var(--color-surface-default)); } }
+  .tl-fold { display: grid; place-items: center; inline-size: 1.25rem; block-size: 1.25rem; padding: 0; border: 0; border-radius: var(--radius-sm); background: none; color: var(--color-content-tertiary); cursor: pointer; }
+  .tl-fold svg { transition: rotate var(--duration-fast, 120ms) var(--ease-out); }
+  .tl-fold[aria-expanded="false"] svg { rotate: -90deg; }
+  @media (hover: hover) { .tl-fold:hover { background: var(--color-surface-hover); color: var(--color-content-primary); } }
+  .tl-fold:focus-visible, .tl-name:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -1px; }
+  .tl-name { display: flex; align-items: baseline; gap: var(--space-2); min-inline-size: 0; padding: 0; border: 0; background: none; color: var(--color-content-primary); font: inherit; text-align: start; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+  button.tl-name:hover { text-decoration: underline; text-underline-offset: 2px; text-decoration-color: var(--color-line-strong); }
+  .tl-name b { font-weight: var(--font-weight-medium); overflow: hidden; text-overflow: ellipsis; }
+  .tl-name span { font-size: var(--text-xs); color: var(--color-content-secondary); overflow: hidden; text-overflow: ellipsis; }
+  .tl-name-phase { cursor: default; color: var(--color-content-secondary); font-size: var(--text-xs); font-weight: var(--font-weight-medium); }
+  .tl-name-item { cursor: default; align-items: center; color: var(--color-content-secondary); font-size: var(--text-xs); }
+  .tl-name-item svg { flex: none; color: var(--color-content-tertiary); }
+  .tl-start, .tl-days { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); font-variant-numeric: tabular-nums; text-align: end; white-space: nowrap; }
+  .tl-fold-space { inline-size: 1.25rem; }
+  /* finished jobs, muted, left of today */
+  .tl-row[data-past] :is(.tl-name, .tl-start, .tl-days) { color: var(--color-content-tertiary); }
+  .tl-row[data-past] :is(.tl-bar, .tl-bracket, .tl-item-bar, .tl-milestone) { opacity: 0.5; }
+
+  /* ---------- bars: a stage on its days, its progress, its end to stretch, its link handle ---------- */
+  .tl-bar {
+    position: absolute; inset-block-start: 7px; z-index: 3; display: flex; align-items: center; block-size: 22px; padding: 0 var(--space-2);
+    border: 0; border-radius: var(--radius-sm); background: var(--color-surface-tint); color: var(--color-content-primary);
+    box-shadow: inset var(--border-width-strong) 0 0 var(--color-content-secondary); font: inherit; font-size: var(--text-xs); font-weight: var(--font-weight-medium); text-align: start; white-space: nowrap; cursor: grab; overflow: visible;
+  }
+  .tl-bar[data-hue] { background: linear-gradient(to right, color-mix(in srgb, var(--_hue) calc(var(--cal-tint) + 16%), var(--color-surface-default)) var(--_pct), var(--_fill) var(--_pct)); box-shadow: inset var(--border-width-strong) 0 0 var(--_edge); }
+  .tl-bar > span { position: relative; overflow: hidden; text-overflow: ellipsis; }
+  @media (hover: hover) { .tl-bar:hover { --cal-tint: var(--cal-tint-hover); } }
+  /* broken: it starts before what it waits for ends */
+  .tl-bar[data-broken] { outline: var(--border-width-default) dashed var(--color-feedback-danger-accent); outline-offset: 1px; }
+  .tl-end { position: absolute; inset-block: 0; inset-inline-end: 0; inline-size: 8px; cursor: ew-resize; }
+  .tl-link-handle { position: absolute; inset-block-start: 50%; inset-inline-end: -14px; inline-size: 10px; block-size: 10px; translate: 0 -50%; border: var(--border-width-strong) solid var(--color-action-accent); border-radius: var(--radius-full); background: var(--color-surface-default); cursor: crosshair; opacity: 0; transition: opacity var(--duration-fast, 120ms) var(--ease-out); }
+  @media (hover: hover) { .tl-bar:hover .tl-link-handle, .tl-bar:hover .tl-end { opacity: 1; } }
+  .tl-bar-label { position: absolute; inset-block-start: 0; z-index: 3; line-height: var(--tl-row); font-size: var(--text-xs); color: var(--color-content-secondary); white-space: nowrap; pointer-events: none; }
+  /* a job and a phase: a bracket over their stages, never read as work of their own */
+  .tl-bracket { position: absolute; inset-block-start: 13px; z-index: 3; block-size: 9px; border: var(--border-width-strong) solid var(--_edge, var(--color-content-secondary)); border-block-end: 0; border-radius: 2px 2px 0 0; cursor: grab; }
+  .tl-bracket[data-phase] { inset-block-start: 15px; block-size: 7px; border-width: var(--border-width-default); border-color: var(--color-content-tertiary); }
+  /* a milestone: a diamond on its day, a date with no length */
+  .tl-milestone { position: absolute; inset-block-start: 11px; z-index: 3; inline-size: 14px; block-size: 14px; translate: -7px 0; rotate: 45deg; padding: 0; border: 0; border-radius: 2px; background: var(--color-content-primary); cursor: grab; }
+  /* a stage's labor and materials: thin, on its days */
+  .tl-item-bar { position: absolute; inset-block-start: 15px; z-index: 3; block-size: 6px; border-radius: var(--radius-full); background: var(--color-status-pending-dot); opacity: 0.7; }
+  .tl-item-bar[data-kind="materials"] { background: var(--color-status-active-dot); }
+
+  /* ---------- over the bars: the links and today ---------- */
+  .tl-overlay { position: absolute; inset-block: 0; inset-inline-start: var(--_grid); inline-size: var(--_w); z-index: 2; pointer-events: none; }
+  .tl-links { position: absolute; inset: 0; overflow: visible; }
+  .tl-links path { fill: none; stroke: var(--color-content-tertiary); stroke-width: 1.5; }
+  .tl-links path[data-broken] { stroke: var(--color-feedback-danger-accent); stroke-dasharray: 4 3; }
+  .tl-links marker path { fill: var(--color-content-tertiary); stroke: none; }
+  .tl-links #tl-arrow-broken path { fill: var(--color-feedback-danger-accent); }
+  .tl-today { position: absolute; inset-block: 0; inline-size: var(--border-width-strong); translate: -1px 0; background: var(--color-feedback-danger-accent); }
+
+  /* ---------- dragging ---------- */
+  :root[data-tl-dragging], :root[data-tl-dragging] * { cursor: grabbing !important; user-select: none; }
+  :root[data-tl-dragging="stretch"], :root[data-tl-dragging="stretch"] * { cursor: ew-resize !important; }
+  :root[data-tl-dragging="link"], :root[data-tl-dragging="link"] * { cursor: crosshair !important; }
+  .tl-link-draft { position: fixed; inset: 0; z-index: 999; inline-size: 100vw; block-size: 100vh; pointer-events: none; overflow: visible; }
+  .tl-link-draft line { stroke: var(--color-action-accent); stroke-width: 2; stroke-dasharray: 4 3; }
+  [data-link-over] { outline: var(--border-width-strong) solid var(--color-action-accent); outline-offset: 1px; }
+  .tl-late { color: var(--color-feedback-danger-content); }
+  .tl-link-name { min-inline-size: 0; }
+  .pop[data-kind="summary"] dd .button { margin-block: -6px; margin-inline-start: auto; }
+
+  /* ---------- phones: a list, no chart (TL-phone) ---------- */
+  @media (max-width: 767px) {
+    .tl-scales { display: none; }
+    /* no chart to move along: the period stays, Today and the arrows go */
+    .tl-toolbar .cal-where > :not(.cal-period) { display: none; }
+    .tl-bar { gap: var(--space-2); }
+  }
+  .tl-card[data-view="list"] { background: none; border: 0; box-shadow: none; overflow: visible; }
+  .tl-phone { display: grid; gap: var(--space-3); }
+  .tl-pjob { display: grid; padding: var(--space-3) var(--space-4) var(--space-2); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-xl); background: var(--color-surface-default); }
+  .tl-pjob[data-past] { opacity: 0.65; }
+  .tl-pjob-head { display: grid; gap: 2px; padding: 0 0 var(--space-1); border: 0; background: none; color: var(--color-content-primary); font: inherit; text-align: start; cursor: pointer; }
+  .tl-pjob-head b { font-size: var(--text-base); line-height: var(--leading-base); font-weight: var(--font-weight-medium); }
+  .tl-pjob-head span { font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
+  .tl-pjob h3 { margin: var(--space-2) 0 0; font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
+  .tl-pstage { display: grid; gap: 2px; padding: var(--space-2) 0; border: 0; border-block-start: var(--border-width-default) solid var(--color-line-subtle); background: none; color: var(--color-content-primary); font: inherit; text-align: start; cursor: pointer; }
+  .tl-pjob h3 + .tl-pstage { border-block-start: 0; }
+  .tl-pstage b { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); font-weight: var(--font-weight-medium); }
+  .tl-pstage > span { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  .tl-pstage[data-broken] .tl-pwaits { color: var(--color-feedback-danger-content); }
+  .tl-pdiamond { inline-size: 9px; block-size: 9px; rotate: 45deg; border-radius: 1px; background: var(--color-content-primary); }
+  .tl-ptrack { position: relative; display: block; block-size: 4px; margin-block-start: var(--space-1); border-radius: var(--radius-full); background: var(--color-surface-sunken); }
+  .tl-ptrack i { position: absolute; inset-block: 0; border-radius: var(--radius-full); background: var(--_edge); }
+  .tl-pstage:focus-visible, .tl-pjob-head:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); border-radius: var(--radius-sm); }
+}
