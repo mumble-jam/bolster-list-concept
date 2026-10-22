@@ -341,9 +341,6 @@
   .cal-pick-time select { padding-inline-end: var(--space-2); font-variant-numeric: tabular-nums; }
   .cal-pick-time > svg { display: none; }
   .cal-pick-empty select { color: var(--color-content-tertiary); }
-  /* a row's lead (a sales appointment's customer): as large as an event's title */
-  .cal-row-lead .cal-txt { block-size: 2.5rem; font-size: var(--text-lg); font-weight: var(--font-weight-medium); }
-  .cal-row-lead .cal-row-icon { block-size: 2.5rem; }
   /* the date opens the browser's own picker, which sits on the button */
   .cal-pick-date .cal-date-input { position: absolute; inset: 0; opacity: 0; pointer-events: none; inline-size: 100%; }
   .cal-when-to, .cal-when-len { color: var(--color-content-tertiary); font-size: var(--text-sm); padding-inline: var(--space-0-5); }
@@ -389,7 +386,7 @@
   @media (hover: hover) { .cal-slot-day:hover:not(:disabled) { background: var(--color-surface-hover); } }
   .cal-slot-day[aria-pressed="true"] { background: var(--color-surface-inverse); color: var(--color-content-inverse); }
   .cal-slot-day[aria-pressed="true"] small { color: inherit; opacity: 0.75; }
-  .cal-slot-day:disabled { color: var(--color-content-tertiary); cursor: default; }
+  .cal-slot-day:disabled:not([aria-pressed="true"]) { color: var(--color-content-tertiary); cursor: default; }
   .cal-slot-day:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
   .cal-slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(4.5rem, 1fr)); gap: var(--space-1); }
   .cal-slot { position: relative; }

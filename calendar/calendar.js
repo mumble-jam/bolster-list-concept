@@ -581,7 +581,8 @@
     const start = weekStart(nv.date), len = lenOf();
     const days = Array.from({ length: 7 }, (_, i) => add(start, i)).map((d) => {
       let free = 0; for (let m = WORK[0]; m + len <= WORK[1]; m += 30) if (!busyAt(nv.with, d, m, m + len)) free++;
-      const off = d < T || isOff(d);
+      // past days and days off can't be picked, unless it's the day already picked (a past slot clicked, an edit)
+      const off = (d < T || isOff(d)) && d !== nv.date;
       return `<button type="button" class="cal-slot-day" data-slot-day="${d}"${d === nv.date ? ' aria-pressed="true"' : ""}${off ? " disabled" : ""} aria-label="${esc(`${f.long(d)}${off ? "" : `, ${free} free`}`)}"><small>${day(d).toLocaleDateString("en-GB", { weekday: "short" })}</small><b>${day(d).getDate()}</b></button>`;
     }).join("");
     const slots = [];
