@@ -39,7 +39,10 @@
     { key: "progress", label: "In progress", kind: "job", mark: "three", dot: "var(--color-status-in-progress-mark)", groups: [["done", "Work done"], ["underway", "Underway"]] },
     { key: "invoices", label: "Getting paid", kind: "invoice", icon: "file-invoice", groups: [["overdue", "Overdue"], ["unsent", "Not sent"], ["sent", "Sent"], ["paid", "Paid"]] },
   ];
-  const stageOf = (key) => STAGES.find((s) => s.key === key);
+  // what's lost waits in a column of its own after the last stage, out of the flow, shown only when Show asks for it
+  // (P-closed, your call, 22 Oct): its groups are what it was, a lead or a job, since that's where it would reopen
+  const LOST = { key: "lost", label: "Lost", kind: "lost", icon: "ban", groups: [["person", "Leads"], ["job", "Jobs"]] };
+  const stageOf = (key) => (key === "lost" ? LOST : STAGES.find((s) => s.key === key));
   const groupLabel = (r) => stageOf(r.stage).groups.find(([g]) => g === r.group)[1];
 
   // ---------- sample: at is the day it got where it is (0 today, -3 three days ago) ----------
@@ -87,7 +90,8 @@
     { rec: job("pending", "sent", "Ceiling tiles", "Fairview Café", "8 Market Square", 5400, -20, "dc"), reason: "Went with someone else", at: -6 },
     { rec: person("leads", "talking", "Morgan Reese", "Garage insulation, one wall", "3 Quarry Road", "Google", -15, "pn"), reason: "Not a fit", at: -12 },
   ];
-  const byId = (id) => records.find((r) => r.id === id);
+  const lostOf = (r) => lost.find((x) => x.rec === r);
+  const byId = (id) => records.find((r) => r.id === id) || lost.find((x) => x.rec.id === id)?.rec;
 
   // ---------- what a card says about time, and when it's stuck (P-stuck) ----------
   // stuck turns the line red and says what's waiting; the limits are the company's to set, assumed here
@@ -124,8 +128,10 @@
   const STEP = {
     create: "Create job", visit: "Book visit", finish: "Finish estimate", send: "Send estimate", resend: "Send changes",
     book: "Mark as booked", schedule: "Schedule", start: "Mark as started", complete: "Mark work done", invoice: "Create invoice",
-    sendInvoice: "Send invoice", pay: "Record payment", remind: "Send reminder", lose: "Mark as lost",
+    sendInvoice: "Send invoice", pay: "Record payment", remind: "Send reminder", lose: "Mark as lost", reopen: "Reopen",
   };
+  // a lost card's one step says where it goes back to
+  const stepName = (step, r) => (step === "reopen" ? `Reopen in ${stageOf(r.stage).label}` : STEP[step]);
   function steps(r) {
     switch (`${r.stage}/${r.group}`) {
       case "leads/new": case "leads/talking": return ["create", "visit", "lose"];
@@ -167,11 +173,25 @@
     return { ok: false, why: "Not from here" };
   }
   const canLose = (r) => r.stage === "leads" || r.stage === "visits" || r.stage === "pending";
+  // where a card may be dropped, Lost too: what can be lost goes there with a reason; a lost card goes back only to the
+  // stage it left, as Reopen does
+  function canDrop(r, to) {
+    if (lostOf(r)) return to === "lost" ? { ok: false, same: true } : to === r.stage ? { ok: true, step: "reopen" } : { ok: false, why: `It reopens where it was, in ${stageOf(r.stage).label}` };
+    if (to === "lost") return canLose(r) ? { ok: true, step: "lose" } : { ok: false, why: r.kind === "invoice" ? "An invoice changes in the invoice" : "Only leads and estimates are lost" };
+    return canGo(r, to);
+  }
 
   // ---------- filters: search, and whose ----------
-  const st = { q: "", people: null, folded: new Set(), tab: "leads" };
+  const st = { q: "", people: null, folded: new Set(), tab: "leads", lost: false };
   try { st.folded = new Set(JSON.parse(localStorage.getItem("pl-folded") || "[]")); } catch {}
+  // Show: the Lost column, off until it's asked for, remembered as the folds are
+  try { st.lost = localStorage.getItem("pl-lost") === "on"; } catch {}
   const keepFolded = () => { try { localStorage.setItem("pl-folded", JSON.stringify([...st.folded])); } catch {} };
+  // People and Show are filters under Add filter, each a chip once it's set (as Tasks', your call, 22 Oct): People when
+  // it's not everyone, Show when Lost is in
+  const FILTERS = [{ key: "people", label: "People", icon: "user" }, { key: "show", label: "Show", icon: "list" }];
+  const isSet = (k) => (k === "people" ? !!st.people : st.lost);
+  const keepLost = () => { try { localStorage.setItem("pl-lost", st.lost ? "on" : "off"); } catch {} };
   const shown = (r) => (!st.people || st.people.has(r.owner)) && (!st.q || `${r.name} ${r.client || ""} ${r.job || ""} ${r.number || ""} ${r.place} ${r.ask || ""}`.toLowerCase().includes(st.q));
   const filtered = () => st.q || st.people;
 
@@ -182,6 +202,7 @@
       case "pending": return `${money(total(rows.filter((r) => r.group === "sent" || r.group === "changed")))} quoted`;
       case "booked": case "progress": return `${money(total(rows))} contracted`;
       case "invoices": return `${money(total(rows.filter((r) => r.group !== "paid")))} owed`;
+      case "lost": return `${money(total(rows.filter((r) => r.kind === "job")))} lost`;
     }
     return "";
   }
@@ -195,30 +216,34 @@
   // the line under a card's name: who or what it's for
   const subOf = (r) => (r.kind === "job" ? `${r.client} · ${r.place}` : r.kind === "invoice" ? `${r.number} · ${r.job}` : r.ask);
   function card(r) {
-    const w = when(r), [next] = steps(r), job = r.kind === "job", inv = r.kind === "invoice", priced = job || inv;
-    const label = `${job ? `${r.name}, ${r.client}` : inv ? `Invoice ${r.number}, ${r.client}, ${r.job}` : r.name}, ${stageOf(r.stage).label}, ${groupLabel(r)}${priced ? `, ${r.value ? money(r.value) : "no price yet"}` : ""}. ${w.text}`;
-    const attrs = `class="pl-card" data-id="${r.id}" data-kind="${r.kind}"${w.late ? " data-late" : ""}${r.group === "paid" ? " data-past" : ""}`;
-    const open = (inner) => `<button type="button" class="pl-open" data-open="${r.id}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(label)}">${inner}</button>`;
-    const value = priced ? `<span class="pl-value">${r.value ? money(r.value) : '<span class="pl-none">No price</span>'}</span>` : "";
-    const stepAria = next ? `aria-label="${esc(`${STEP[next]}: ${r.name}`)}" data-step="${next}" data-for="${r.id}"` : "";
+    const gone = lostOf(r), w = gone ? lostWhen(gone) : when(r), [next] = gone ? ["reopen"] : steps(r), job = r.kind === "job", inv = r.kind === "invoice", priced = job || inv;
+    const label = `${job ? `${r.name}, ${r.client}` : inv ? `Invoice ${r.number}, ${r.client}, ${r.job}` : r.name}, ${gone ? "lost from " : ""}${stageOf(r.stage).label}, ${groupLabel(r)}${priced ? `, ${r.value ? money(r.value) : "no price yet"}` : ""}. ${w.text}`;
+    const attrs = `class="pl-card" data-id="${r.id}" data-kind="${r.kind}"${w.late ? " data-late" : ""}${r.group === "paid" && !gone ? " data-past" : ""}${gone ? " data-lost" : ""}`;
+    // a job opens the job (its own window); its summary is Quick look, in the card's corner (your call, 22 Oct). A lead
+    // or an invoice opens its summary
+    const open = (inner) => job ? `<button type="button" class="pl-open" data-open-job="${r.id}" aria-label="${esc(label)}">${inner}</button>`
+      : `<button type="button" class="pl-open" data-open="${r.id}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(label)}">${inner}</button>`;
+    const quick = job ? `<button type="button" class="button pl-quick" data-variant="ghost" data-size="sm" data-icon-only data-open="${r.id}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(`Quick look: ${r.name}`)}" data-tip="Quick look">${ic("sidebar-right", 16, { optical: true })}</button>` : "";
+    const value = (priced ? `<span class="pl-value">${r.value ? money(r.value) : '<span class="pl-none">No price</span>'}</span>` : "") + quick;
+    const stepAria = next ? `aria-label="${esc(`${stepName(next, r)}: ${r.name}`)}" data-step="${next}" data-for="${r.id}"` : "";
     const who2 = avatar(who(r.owner), "xs");
     if (LAYOUT === "compact") {
       // two lines: the name and its money; who it's for and how long it's been, the owner and the next step as an icon
       const line = priced ? `${esc(inv ? r.number : r.client)} · <span class="pl-when-text">${esc(w.text)}</span>` : `<span class="pl-when-text">${esc(w.text)}</span>`;
       return `<article ${attrs}><div class="pl-row">${open(`<span>${esc(r.name)}</span>`)}${value}</div>
-        <div class="pl-row pl-meta"><p class="pl-line">${line}</p>${who2}${next ? `<button type="button" class="button pl-next" data-variant="ghost" data-size="sm" data-icon-only ${stepAria} data-tip="${STEP[next]}">${ic("chevron-right", 14, { optical: true })}</button>` : '<span class="pl-next-slot" aria-hidden="true"></span>'}</div></article>`;
+        <div class="pl-row pl-meta"><p class="pl-line">${line}</p>${who2}${next ? `<button type="button" class="button pl-next" data-variant="ghost" data-size="sm" data-icon-only ${stepAria} data-tip="${stepName(next, r)}">${ic("chevron-right", 14, { optical: true })}</button>` : '<span class="pl-next-slot" aria-hidden="true"></span>'}</div></article>`;
     }
     if (LAYOUT === "footer") {
       // the card's facts on top, quiet; its next step as a strip across its foot, the one thing on it that acts
       return `<article ${attrs}><div class="pl-row">${open(`<span>${esc(r.name)}</span>`)}${value}</div>
         <p class="pl-line pl-sub">${esc(subOf(r))}</p><p class="pl-line pl-when-text pl-meta">${esc(w.text)}</p>
-        ${next ? `<button type="button" class="pl-next pl-strip" ${stepAria}><span>${STEP[next]}</span>${ic("chevron-right", 12, { optical: true })}</button>` : ""}</article>`;
+        ${next ? `<button type="button" class="pl-next pl-strip" ${stepAria}><span>${stepName(next, r)}</span>${ic("chevron-right", 12, { optical: true })}</button>` : ""}</article>`;
     }
     // Quiet: the name and its money, who or what it's for, then how long it's been beside the next step as a link;
     // the owner is in the summary (and People picks whose)
     return `<article ${attrs}><div class="pl-row">${open(`<span>${esc(r.name)}</span>`)}${value}</div>
       <p class="pl-line pl-sub">${esc(subOf(r))}</p>
-      <div class="pl-row pl-meta"><p class="pl-line pl-when-text">${esc(w.text)}</p>${next ? `<button type="button" class="pl-next pl-link" ${stepAria}>${STEP[next]}${ic("chevron-right", 12, { optical: true })}</button>` : ""}</div></article>`;
+      <div class="pl-row pl-meta"><p class="pl-line pl-when-text">${esc(w.text)}</p>${next ? `<button type="button" class="pl-next pl-link" ${stepAria}>${stepName(next, r)}${ic("chevron-right", 12, { optical: true })}</button>` : ""}</div></article>`;
   }
   // within a group, the date's order (P-groups): scheduled jobs by their start, visits to come by their day and time,
   // the rest by when they got there
@@ -226,10 +251,14 @@
   const order = (key) => (key === "booked/scheduled" ? (a, b) => a.start - b.start
     : key === "visits/today" || key === "visits/coming" ? (a, b) => a.visit.day - b.visit.day || mins(a.visit.time) - mins(b.visit.time)
     : (a, b) => a.at - b.at);
+  // a lost card says when it was lost and why; most recently lost first
+  const lostWhen = (x) => ({ text: `Lost ${ago(-x.at)}: ${x.reason.toLowerCase()}`, late: false });
+  const newest = (a, b) => lostOf(b).at - lostOf(a).at;
+  const rowsOf = (key) => (key === "lost" ? lost.map((x) => x.rec) : records.filter((r) => r.stage === key)).filter(shown);
   function column(s) {
-    const rows = records.filter((r) => r.stage === s.key && shown(r));
+    const rows = rowsOf(s.key), gone = s === LOST;
     const groups = s.groups.map(([g, label]) => {
-      const list = rows.filter((r) => r.group === g).sort(order(`${s.key}/${g}`));
+      const list = rows.filter((r) => (gone ? r.kind : r.group) === g).sort(gone ? newest : order(`${s.key}/${g}`));
       if (!list.length) return "";
       const key = `${s.key}/${g}`, folded = st.folded.has(key);
       return `<section class="pl-group" data-group="${key}"><h4 class="pl-group-head"><button type="button" class="pl-group-toggle" data-fold="${key}" aria-expanded="${!folded}" aria-controls="g-${s.key}-${g}">${ic("chevron-down", 12, { optical: true })}<span>${esc(label)}</span><span class="pl-n">${list.length}</span></button></h4>
@@ -252,18 +281,28 @@
       heads += `<p class="pl-kind" data-kind="${k}" style="grid-column:${col} / span ${list.length}">${ic(icon, 12, { optical: true })}${name}</p>`;
       cols += list.map((x) => column(x).replace('<section class="pl-col"', `<section class="pl-col" style="grid-column:${col++}"`)).join("");
     });
+    // Lost after a seam, out of the flow, while Show has it
+    if (st.lost) cols += `<div class="pl-seam" style="grid-column:${col++}" aria-hidden="true"></div>${column(LOST).replace('<section class="pl-col"', `<section class="pl-col" style="grid-column:${col++}"`)}`;
+    board.toggleAttribute("data-lost", st.lost);
     board.innerHTML = heads + cols;
     board.scrollLeft = left;
     const n = records.filter(shown).length;
-    // the count, as the list's: all of them, or how many of them a search or People lets through
+    // the count, as the list's: all of them, or how many of them a search or People lets through; the board's own
+    // cards, never what's lost (its column counts those)
     const all = records.length;
     $("#count").innerHTML = filtered() ? `<strong>${fmt.count(n)}</strong> of ${fmt.plural(all, "card", "cards")}` : `<strong>${fmt.count(all)}</strong> ${all === 1 ? "card" : "cards"}`;
-    $("#tabs").innerHTML = STAGES.map((s) => `<button type="button" data-tab="${s.key}"${s.key === st.tab ? ' aria-current="true"' : ""}>${markOf(s)}<span>${esc(s.label)}</span><span class="pl-n">${records.filter((r) => r.stage === s.key && shown(r)).length}</span></button>`).join("");
-    const p = !st.people ? "Everyone" : OWNERS.filter((o) => st.people.has(o.id)).map((o) => (o.me ? "You" : o.name.split(" ")[0])).join(", ");
-    $("#people-text").textContent = p; $("#pick-people").setAttribute("aria-label", `People: ${p}`);
-    const lostName = `Lost, ${lost.length ? fmt.plural(lost.length, "card", "cards") : "none"}`;
-    $("#pick-lost").setAttribute("aria-label", lostName); $("#pick-lost").dataset.tip = lostName;
+    if (!st.lost && st.tab === "lost") st.tab = "invoices";
+    $("#tabs").innerHTML = [...STAGES, ...(st.lost ? [LOST] : [])].map((s) => `<button type="button" data-tab="${s.key}"${s.key === st.tab ? ' aria-current="true"' : ""}>${markOf(s)}<span>${esc(s.label)}</span><span class="pl-n">${rowsOf(s.key).length}</span></button>`).join("");
+    chips();
     fit();
+  }
+  // the set filters as chips on the row under the bar, then Clear all; Add filter offers what isn't set
+  function chips() {
+    const text = (k) => (k === "people" ? OWNERS.filter((o) => st.people.has(o.id)).map((o) => (o.me ? "You" : o.name.split(" ")[0])).join(", ") : "Lost leads and jobs");
+    const list = FILTERS.filter((f) => isSet(f.key)).map((f) => `<span class="chip" data-active><button type="button" class="chip-main" data-chip="${f.key}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(f.label)}: ${esc(text(f.key))}. Change filter"><span class="chip-field">${esc(f.label)}:</span><span class="chip-value">${esc(text(f.key))}</span></button><button type="button" class="chip-remove" data-remove="${f.key}" aria-label="Remove ${f.label.toLowerCase()} filter" data-tip="Remove filter">${ic("xmark", 14)}</button></span>`);
+    if (list.length) list.push(`<button type="button" class="button clear-all" data-variant="ghost" data-size="sm" data-clear-all>Clear all</button>`);
+    $("#filters").innerHTML = list.join("");
+    $("#add-filter").disabled = FILTERS.every((f) => isSet(f.key));
   }
   const phone = matchMedia("(max-width: 767px)");
   // each column's head comes down its column under the toolbar (pipeline.css): how far it may go (the column's height
@@ -283,8 +322,21 @@
       c.style.setProperty("--_room", `${Math.max(0, c.clientHeight - h)}px`);
     });
     edges();
+    sizeBar();
     follow();
   }
+  // the board's scrollbar at the window's foot (768 up, pipeline.css): as wide a scroll as the board's, there only
+  // while the board has more sideways; each follows the other, and an equal one isn't set again, so neither loops
+  const bar = $("#hscroll"), spacer = bar.firstElementChild;
+  function sizeBar() {
+    bar.hidden = phone.matches || board.scrollWidth <= board.clientWidth + 1;
+    if (bar.hidden) return;
+    spacer.style.inlineSize = `${board.scrollWidth - board.clientWidth + bar.clientWidth}px`;
+    bar.scrollLeft = board.scrollLeft;
+  }
+  const mirror = (from, to) => { if (Math.abs(to.scrollLeft - from.scrollLeft) > 0.5) to.scrollTo({ left: from.scrollLeft, behavior: "instant" }); };
+  bar.addEventListener("scroll", () => mirror(bar, board), { passive: true });
+  new ResizeObserver(sizeBar).observe(board);
   // an edge with more beyond it fades (pipeline.css), as the table's
   function edges() {
     const max = board.scrollWidth - board.clientWidth;
@@ -411,12 +463,14 @@
       case "lose": return ask({
         title: `Mark ${esc(r.name)} as lost`, submit: "Mark as lost",
         body: `<fieldset class="pl-reasons"><legend class="field-label">Why</legend>${["Price", "Timing", "Went with someone else", "No reply", "Not a fit"].map((x, i) => `<label class="choice"><input type="radio" class="radio" name="reason" value="${x}"${i ? "" : " checked"}> ${x}</label>`).join("")}</fieldset>
-          <p class="pl-step-note">${ic("ban", 14, { optical: true })}<span>It leaves the board and waits under Lost, to reopen.</span></p>`,
+          <p class="pl-step-note">${ic("ban", 14, { optical: true })}<span>${st.lost ? "It goes to Lost, at the board's end, to reopen." : "It leaves the board and waits in Lost (Show brings it in), to reopen."}</span></p>`,
         onSubmit: (v) => change(() => { records = records.filter((x) => x !== r); lost.unshift({ rec: r, reason: v.reason, at: 0 }); }, `${r.name} marked as lost: ${v.reason.toLowerCase()}`, r),
       });
+      // back in the stage and group it left, as it was
+      case "reopen": return change(() => { lost = lost.filter((x) => x.rec !== r); records.push(r); }, `${r.name} reopened, in ${s(r.stage)}`, r);
     }
   }
-  const moveTo = (r, to) => { const g = canGo(r, to); if (g.ok) run(g.step, r); };
+  const moveTo = (r, to) => { const g = canDrop(r, to); if (g.ok) run(g.step, r); };
 
   // ---------- the summary, the pickers: one shared popover ----------
   const pop = $("#pop");
@@ -460,26 +514,28 @@
   const closeBtn = () => `<button type="button" class="button cal-pop-close" data-variant="ghost" data-size="sm" data-icon-only data-close-pop aria-label="Close" data-tip="Close">${ic("xmark", 16, { optical: true })}</button>`;
   const dd = (term, html) => `<dt>${term}</dt><dd>${html}</dd>`;
   function summaryHtml(r) {
-    const s = stageOf(r.stage), w = when(r, true), [next, ...more] = steps(r);
-    const moves = STAGES.map((t) => ({ t, g: canGo(r, t.key) })).filter((x) => x.g.ok);
-    return `<div class="cal-sum pl-sum"><div class="cal-sum-top"><p class="cal-sum-kind">${markOf(s)}${esc(s.label)} · ${esc(groupLabel(r))}</p>${closeBtn()}</div>
+    // a lost one says where it was lost from, and moves only back there (Reopen)
+    const s = stageOf(r.stage), gone = lostOf(r), w = gone ? lostWhen(gone) : when(r, true), [next, ...more] = gone ? ["reopen"] : steps(r);
+    const moves = STAGES.map((t) => ({ t, g: canDrop(r, t.key) })).filter((x) => x.g.ok);
+    return `<div class="cal-sum pl-sum"><div class="cal-sum-top"><p class="cal-sum-kind">${gone ? `${markOf(LOST)}Lost · from ${esc(s.label)}, ${esc(groupLabel(r).toLowerCase())}` : `${markOf(s)}${esc(s.label)} · ${esc(groupLabel(r))}`}</p>${closeBtn()}</div>
       <h3 tabindex="-1">${r.kind === "invoice" ? `Invoice ${esc(r.number)}` : esc(r.name)}</h3>
       <p class="cal-sum-when${w.late ? " pl-late" : ""}">${esc(w.text)}</p>
       <dl>${r.kind === "job" ? dd("Client", esc(r.client)) + dd(r.stage === "pending" ? "Estimate" : "Contract", r.value ? money(r.value) : "No price yet") : r.kind === "invoice" ? dd("Client", esc(r.client)) + dd("Invoice", `${esc(r.number)}, ${esc(r.label.toLowerCase())}`) + dd("Job", esc(r.job)) + dd("Amount", money(r.value)) : dd("Asked for", esc(r.ask)) + dd("Source", esc(r.source))}
         ${dd("Where", esc(r.place))}${dd("Owner", `${avatar(who(r.owner), "sm")}<span>${esc(who(r.owner).me ? `${who(r.owner).name} (you)` : who(r.owner).name)}</span>`)}</dl>
-      ${moves.length ? `<form class="cal-sum-move" data-move="${r.id}"><div class="field" data-size="sm"><label class="field-label" for="mv-to">Move to</label><div class="select"><select class="input" id="mv-to" name="to">${moves.map(({ t }) => `<option value="${t.key}">${esc(t.label)}</option>`).join("")}</select></div></div><button type="submit" class="button" data-variant="secondary" data-size="sm">Move</button></form>` : ""}
-      <div class="cal-sum-actions pl-sum-actions">${next ? `<button type="button" class="button" data-size="sm" data-step="${next}" data-for="${r.id}">${STEP[next]}</button>` : ""}${more.filter((x) => x !== "lose").map((x) => `<button type="button" class="button" data-variant="secondary" data-size="sm" data-step="${x}" data-for="${r.id}">${STEP[x]}</button>`).join("")}
+      ${moves.length ? `<form class="cal-sum-move" data-move="${r.id}"><div class="field" data-size="sm"><label class="field-label" for="mv-to">Move to</label><div class="select"><select class="input" id="mv-to" name="to">${moves.map(({ t }) => `<option value="${t.key}">${esc(gone ? `${t.label}, reopened` : t.label)}</option>`).join("")}</select></div></div><button type="submit" class="button" data-variant="secondary" data-size="sm">${gone ? "Reopen" : "Move"}</button></form>` : ""}
+      <div class="cal-sum-actions pl-sum-actions">${next ? `<button type="button" class="button" data-size="sm" data-step="${next}" data-for="${r.id}">${stepName(next, r)}</button>` : ""}${more.filter((x) => x !== "lose").map((x) => `<button type="button" class="button" data-variant="secondary" data-size="sm" data-step="${x}" data-for="${r.id}">${STEP[x]}</button>`).join("")}
         <a class="button" data-variant="ghost" data-size="sm" href="../index.html#${{ job: "jobs", invoice: "invoices", person: "customers" }[r.kind]}">${{ job: "Open job", invoice: "Open invoice", person: "Open lead" }[r.kind]}</a>${more.includes("lose") ? `<button type="button" class="button pl-lose" data-variant="ghost" data-size="sm" data-step="lose" data-for="${r.id}">${STEP.lose}</button>` : ""}</div></div>`;
   }
   function peopleHtml() {
     const rows = [OWNERS.find((p) => p.me), ...OWNERS.filter((p) => !p.me)];
     return `<div class="pop-head"><h3>People</h3>${closeBtn()}</div><div class="pop-body">${rows.map((p) => `<label class="option"><input type="checkbox" class="checkbox" data-person-pick="${p.id}"${!st.people || st.people.has(p.id) ? " checked" : ""}><span class="option-label"><span class="menu-icon">${avatar(p, "sm")}</span>${esc(p.me ? `${p.name} (you)` : p.name)}</span></label>`).join("")}</div>`;
   }
-  function lostHtml() {
-    return `<div class="pop-head"><h3>Lost</h3>${closeBtn()}</div><div class="pop-body pl-lost">${lost.length ? lost.map((x, i) => `<div class="pl-lost-row"><p><b>${esc(x.rec.name)}</b><span>${esc(x.rec.kind === "job" ? x.rec.client : "Lead")} · ${esc(x.reason)} · ${ago(-x.at)}</span></p><button type="button" class="button" data-variant="secondary" data-size="sm" data-reopen="${i}" aria-label="${esc(`Reopen ${x.rec.name}`)}">Reopen</button></div>`).join("") : `<p class="pl-empty">Nothing lost.</p>`}</div>`;
-  }
+  const filterMenu = () => `<div class="pop-body">${FILTERS.filter((f) => !isSet(f.key)).map((f) => `<button type="button" class="menu-item" role="menuitem" data-add-filter="${f.key}"><span class="menu-icon">${ic(`m-${f.icon}`, 14)}</span><span>${f.label}</span></button>`).join("")}</div>`;
+  const pickFilter = (k, from) => openPop(k, from, k === "people" ? peopleHtml : showHtml, { label: k === "people" ? "People" : "Show", start: true });
+  // Show: what the board holds besides its stages, as the calendar's and the timeline's Show; one thing for now
+  const showHtml = () => `<div class="pop-head"><h3>Show</h3>${closeBtn()}</div><div class="pop-body"><label class="option"><input type="checkbox" class="checkbox" data-show="lost"${st.lost ? " checked" : ""}><span class="option-label"><span class="menu-icon">${ic("ban", 14)}</span>Lost leads and jobs</span></label></div>`;
 
-  // ---------- dragging: onto a stage, or onto Mark as lost (P-move) ----------
+  // ---------- dragging: onto a stage, or onto Lost (its column if it's shown, else Mark as lost at the foot) (P-move) ----------
   // Mouse and pen only: on touch a press scrolls, and phones move cards from the summary (P-phone).
   // Held (your call, 22 Oct): the card's place stays as a quiet outline, and the card goes with the pointer, lifted,
   // where it was held; what a drop there would do at its foot
@@ -491,10 +547,56 @@
     const col = el?.closest?.(".pl-col");
     return col ? { stage: col.dataset.stage } : null;
   }
+  // where it would land (the system's drop line, drop-line.css): the group the step puts it in, at its place in that
+  // group's order, in the gap between two cards; under the head of a folded group (said in the hint), where a group
+  // not drawn would be; at the top of Lost's group, the latest first. None where a drop is refused
+  const dropLine = Object.assign(document.createElement("div"), { className: "drop-line" });
+  dropLine.setAttribute("aria-hidden", "true");
+  // the record as the step would leave it: a move is today (at 0); a visit the dialog's default, tomorrow at 9
+  function landingOf(r, step) {
+    const now = { ...r, at: 0 };
+    switch (step) {
+      case "create": return { ...now, kind: "job", stage: "pending", group: "drafts" };
+      case "visit": return { ...now, stage: "visits", group: "coming", visit: { day: 1, time: "9:00" } };
+      case "unvisit": return { ...now, stage: "leads", group: "talking" };
+      case "book": case "unstart": return { ...now, stage: "booked", group: "unscheduled" };
+      case "unbook": return { ...now, stage: "pending", group: "sent" };
+      case "start": return { ...now, stage: "progress", group: "underway", start: 0 };
+      case "invoice": return { ...now, kind: "invoice", stage: "invoices", group: "unsent" };
+      case "lose": return { ...r, stage: "lost", group: r.kind };
+    }
+    return r; // reopen: where it was
+  }
+  // draws the line; says the group's name if it's folded
+  function showDropLine(r, step) {
+    const to = landingOf(r, step), key = `${to.stage}/${to.group}`, body = $(`#col-${to.stage} .pl-col-body`, board);
+    if (!body) return hideDropLine();
+    const box = body.getBoundingClientRect(), pad = parseFloat(getComputedStyle(body).paddingInlineStart) || 0;
+    const rect = (el) => el.getBoundingClientRect(), sec = $(`[data-group="${key}"]`, body);
+    const half = (parseFloat(getComputedStyle($(".pl-cards", body) || body).rowGap) || 6) / 2, apart = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--space-2")) || 8) / 2;
+    let y, folded = "";
+    if (sec && $(".pl-cards", sec).hidden) { y = rect($(".pl-group-head", sec)).bottom + half; folded = stageOf(to.stage).groups.find(([g]) => g === to.group)[1]; }
+    else if (sec) {
+      const cards = $$(".pl-card", sec), n = cards.length;
+      const i = to.stage === "lost" ? 0 : cards.filter((c) => order(key)(byId(c.dataset.id), to) <= 0).length;
+      y = i === 0 ? rect(cards[0]).top - half : i === n ? rect(cards[n - 1]).bottom + half : (rect(cards[i - 1]).bottom + rect(cards[i]).top) / 2;
+    } else {
+      // not drawn: before the next group that is, after the last before it, or where the column says it's empty
+      const keys = stageOf(to.stage).groups.map(([g]) => `${to.stage}/${g}`), at = keys.indexOf(key), drawn = (k) => $(`[data-group="${k}"]`, body);
+      const next = keys.slice(at + 1).map(drawn).find(Boolean), prev = keys.slice(0, at).map(drawn).filter(Boolean).pop();
+      y = next ? rect(next).top - apart : prev ? rect(prev).bottom + apart : rect($(".pl-empty", body) || body).top;
+    }
+    // never above the column's body, where its head would cover it
+    y = Math.max(y, box.top + 1);
+    if (dropLine.parentElement !== body) body.append(dropLine);
+    Object.assign(dropLine.style, { insetBlockStart: `${y - box.top - 1}px`, insetInlineStart: `${pad}px`, inlineSize: `${box.width - 2 * pad}px` });
+    return folded;
+  }
+  const hideDropLine = () => dropLine.remove();
   document.addEventListener("pointerdown", (e) => {
     if (e.button !== 0 || e.pointerType === "touch" || phone.matches) return;
     const el = e.target.closest(".pl-card");
-    if (!el || e.target.closest(".pl-next")) return;
+    if (!el || e.target.closest(".pl-next, .pl-quick")) return;
     const b = el.getBoundingClientRect();
     drag = { id: el.dataset.id, x: e.clientX, y: e.clientY, dx: e.clientX - b.left, dy: e.clientY - b.top, w: b.width, started: false };
   });
@@ -507,8 +609,8 @@
       if (pop.matches(":popover-open")) pop.hidePopover();
       document.documentElement.setAttribute("data-pl-dragging", "");
       $(`.pl-card[data-id="${drag.id}"]`)?.setAttribute("data-dragging-item", "");
-      $$(".pl-col", board).forEach((c) => { const g = canGo(r, c.dataset.stage); c.dataset.drop = g.same ? "home" : g.ok ? "yes" : "no"; });
-      dropbar.hidden = !canLose(r);
+      $$(".pl-col", board).forEach((c) => { const g = canDrop(r, c.dataset.stage); c.dataset.drop = g.same ? "home" : g.ok ? "yes" : "no"; });
+      dropbar.hidden = st.lost || !!lostOf(r) || !canLose(r);
       const priced = r.kind !== "person";
       ghost.innerHTML = `<div class="pl-row"><b>${esc(r.name)}</b>${priced ? `<span class="pl-value">${r.value ? money(r.value) : '<span class="pl-none">No price</span>'}</span>` : ""}</div>
         <p class="pl-line">${esc(subOf(r))}</p><p class="pl-ghost-hint"></p>`;
@@ -519,14 +621,16 @@
     const t = targetAt(e.clientX, e.clientY);
     $$(".pl-col[data-over], [data-drop-lost][data-over]").forEach((x) => x.removeAttribute("data-over"));
     let line = "Drop on a stage", ok = false;
-    if (t?.lost && canLose(r)) { $("[data-drop-lost]").setAttribute("data-over", ""); line = "Mark as lost, with a reason"; drag.to = { lost: true }; ok = true; }
+    if (t?.lost && canLose(r)) { $("[data-drop-lost]").setAttribute("data-over", ""); line = "Mark as lost, with a reason"; drag.to = { lost: true }; ok = true; hideDropLine(); }
     else if (t?.stage) {
-      const g = canGo(r, t.stage), s = stageOf(t.stage);
+      const g = canDrop(r, t.stage), s = stageOf(t.stage);
       $(`#col-${t.stage}`).setAttribute("data-over", "");
-      line = g.same ? "Where it is now" : g.ok ? (g.step === "create" ? `Create its job, in ${s.label}` : g.step === "visit" ? "Book a visit" : g.step === "book" ? "Mark as booked: contract and start" : g.step === "invoice" ? "Invoice it" : `Move to ${s.label}`) : g.why;
+      line = g.same ? "Where it is now" : g.ok ? (g.step === "create" ? `Create its job, in ${s.label}` : g.step === "visit" ? "Book a visit" : g.step === "book" ? "Mark as booked: contract and start" : g.step === "invoice" ? "Invoice it" : g.step === "lose" ? "Mark as lost, with a reason" : g.step === "reopen" ? `Reopen in ${s.label}` : `Move to ${s.label}`) : g.why;
+      const folded = g.ok ? showDropLine(r, g.step) : hideDropLine();
+      if (folded) line += `, into ${folded} (folded)`;
       drag.to = g.ok ? { stage: t.stage } : null;
       ok = g.ok;
-    } else drag.to = null;
+    } else { drag.to = null; hideDropLine(); }
     const hint = $(".pl-ghost-hint", ghost);
     hint.textContent = line; hint.toggleAttribute("data-ok", ok);
     // held where it was picked up, kept on the screen so its foot can be read
@@ -541,7 +645,7 @@
     $$("[data-over], [data-drop]").forEach((x) => { x.removeAttribute("data-over"); x.removeAttribute("data-drop"); });
     $$("[data-dragging-item]").forEach((x) => x.removeAttribute("data-dragging-item"));
     document.documentElement.removeAttribute("data-pl-dragging");
-    ghost.hidden = true; dropbar.hidden = true;
+    ghost.hidden = true; dropbar.hidden = true; hideDropLine();
     drag = null;
   }
   document.addEventListener("pointerup", () => {
@@ -565,6 +669,7 @@
     if (q("[data-close-pop]")) return pop.hidePopover();
     if (q("[data-close-step]")) return dlg.close();
     if ((el = q("[data-step]"))) return run(el.dataset.step, byId(el.dataset.for));
+    if (q("[data-open-job]")) return BolsterShell.toast("Open job: its own full-screen window, not part of this concept. Quick look is on the card.");
     if ((el = q("[data-open]"))) return openPop("summary", el, () => summaryHtml(byId(el.dataset.open)), { label: byId(el.dataset.open).name });
     if ((el = q("[data-fold]"))) {
       const k = el.dataset.fold, folded = !st.folded.has(k);
@@ -573,12 +678,14 @@
       return;
     }
     if ((el = q("[data-tab]"))) { st.tab = el.dataset.tab; show(st.tab); return tabs(); }
-    if ((el = q("#pick-people"))) return openPop("people", el, peopleHtml, { label: "People", start: true });
-    if ((el = q("#pick-lost"))) return openPop("lost", el, lostHtml, { label: "Lost" });
-    if ((el = q("[data-reopen]"))) {
-      const x = lost[+el.dataset.reopen];
-      pop.hidePopover();
-      return change(() => { lost = lost.filter((y) => y !== x); records.push(x.rec); }, `${x.rec.name} reopened, in ${stageOf(x.rec.stage).label}`, x.rec);
+    if ((el = q("#add-filter"))) { openPop("add-filter", el, filterMenu, { label: "Add filter", start: true }); pop.setAttribute("role", "menu"); return; }
+    if ((el = q("[data-add-filter]"))) { pop.hidePopover(); return pickFilter(el.dataset.addFilter, $("#add-filter")); }
+    if ((el = q("[data-chip]"))) return pickFilter(el.dataset.chip, el);
+    if ((el = q("[data-remove], [data-clear-all]"))) {
+      const k = el.dataset.remove;
+      if (!k || k === "people") st.people = null;
+      if (!k || k === "show") { st.lost = false; keepLost(); }
+      render(); return $("#add-filter").focus({ preventScroll: true });
     }
     // Add: a lead (a person, no job yet) or a job (Bolster's Create job window, an empty estimate)
     if ((el = q("#create"))) { openPop("add", el, () => `<div class="pop-body">${[["lead", "user", "Lead"], ["job", "briefcase", "Job"]].map(([k, icon, l]) => `<button type="button" class="menu-item" role="menuitem" data-add="${k}"><span class="menu-icon">${ic(icon, 14)}</span>${l}</button>`).join("")}</div>`, { label: "Add" }); pop.setAttribute("role", "menu"); return; }
@@ -592,17 +699,36 @@
     pop.hidePopover();
     moveTo(r, to);
   });
+  // a pick applies at once; the picker stays on its chip, or where it is if its chip has gone
+  function picked(k) {
+    render();
+    if (popFor.from?.isConnected) return popFor.from.setAttribute("aria-expanded", "true");
+    const chip = $(`[data-chip="${k}"]`);
+    if (!chip) return;
+    popFor.from = chip; chip.setAttribute("aria-expanded", "true");
+    BolsterShell.placePopover(pop, chip, { start: true });
+  }
   document.addEventListener("change", (e) => {
+    const sh = e.target.closest("[data-show]");
+    if (sh) {
+      st.lost = sh.checked; keepLost();
+      picked("show");
+      // brought in, the board goes to it at its end
+      if (st.lost) show("lost");
+      return;
+    }
     const p = e.target.closest("[data-person-pick]");
     if (!p) return;
     const ids = $$("[data-person-pick]", pop).filter((x) => x.checked).map((x) => x.dataset.personPick);
     st.people = ids.length && ids.length < OWNERS.length ? new Set(ids) : null;
-    render(); popFor.from = $("#pick-people"); popFor.from.setAttribute("aria-expanded", "true");
+    picked("people");
   });
   $("#cc-cards").value = LAYOUT;
   $("#cc-cards").addEventListener("change", (e) => { LAYOUT = e.target.value; try { localStorage.setItem("pl-cards", LAYOUT); } catch {} board.dataset.cards = LAYOUT; render(); });
   board.dataset.cards = LAYOUT;
   $("#search").addEventListener("input", (e) => { st.q = e.target.value.trim().toLowerCase(); render(); });
+  // the search as the system's button (toolbar.css): Escape empties it, and the board's drawn again
+  BolsterShell.searchButton($(".pl-toolbar .list-bar"), { onClear: () => { st.q = ""; render(); } });
 
   // phones: the tab of the stage in view follows the swipe; the tabs and the board scroll sideways only, never the page
   const sideways = (box, el, pad = 0) => {
@@ -630,7 +756,7 @@
     if (near.dataset.stage !== st.tab) { st.tab = near.dataset.stage; tabs(); }
   }
   function steered() { clearTimeout(steerTimer); steering = false; inView(); }
-  board.addEventListener("scroll", () => { edges(); keepPop(); inView(); }, { passive: true });
+  board.addEventListener("scroll", () => { edges(); if (!bar.hidden) mirror(board, bar); keepPop(); inView(); }, { passive: true });
   board.addEventListener("scrollend", () => { if (steering) steered(); });
 
   phone.addEventListener("change", render);

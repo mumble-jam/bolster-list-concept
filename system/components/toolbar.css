@@ -107,6 +107,30 @@
     }
     .list-chips > *, .list-chips .filters > * { flex: none; }
   }
+  /* the search as a button (a toolbar on the page, not a card: tasks, the pipeline): <div class="list-bar"
+     data-search="button"> holds the field, then <button class="button list-search-open" data-variant="ghost"
+     data-size="sm" data-icon-only aria-controls="…" aria-expanded="false">, wired by BolsterShell.searchButton.
+     The field opens out of the button, one control (your call, 22 Oct): shut, it's the button's size under it,
+     its magnifier where the button's is; open, it grows leftwards, the magnifier riding its edge, and shrinks back
+     the same way. Clipped, not scrolled (focusing the field would scroll it). The button stays in the bar (over
+     the field's end), so nothing beside moves. It stays open while it holds words */
+  .list-search-open { display: none; }
+  .list-bar[data-search="button"] .list-search { flex: 0 1 var(--control-height-sm); min-inline-size: 0; overflow: clip; margin-inline-start: auto; border: var(--border-width-default) solid transparent; background: none; padding-inline: calc(var(--space-2) - var(--border-width-default)); }
+  .list-bar[data-search="button"] .list-search > * { visibility: hidden; }
+  .list-bar[data-search="button"] .list-search-open { display: inline-flex; margin-inline-start: calc(-1 * (var(--control-height-sm) + var(--space-2))); }
+  .list-bar[data-search="button"]:is([data-search-open], :has(.list-search input:not(:placeholder-shown))) .list-search { flex-basis: 14rem; border-color: var(--color-line-card); background: var(--color-surface-default); padding-inline: var(--space-3); }
+  .list-bar[data-search="button"]:is([data-search-open], :has(.list-search input:not(:placeholder-shown))) .list-search > * { visibility: visible; }
+  .list-bar[data-search="button"]:is([data-search-open], :has(.list-search input:not(:placeholder-shown))) .list-search-open { visibility: hidden; }
+  /* opening swaps at once and grows; closing shrinks, then swaps back: the field's magnifier lands on the
+     button's before the button shows its own. Reduced motion takes the durations away (base.css) */
+  .list-bar[data-search="button"] .list-search { transition: flex var(--duration-medium) var(--ease-out), padding var(--duration-medium) var(--ease-out), border-color var(--duration-medium) var(--ease-out), background-color var(--duration-medium) var(--ease-out); }
+  .list-bar[data-search="button"] :is(.list-search > *, .list-search-open > svg) { transition: visibility 0s var(--duration-medium); }
+  .list-bar[data-search="button"]:is([data-search-open], :has(.list-search input:not(:placeholder-shown))) :is(.list-search > *, .list-search-open > svg) { transition-delay: 0s; }
+  @media (hover: hover) { .list-bar[data-search="button"] .list-search:hover { border-color: var(--color-line-strong); background: var(--color-surface-default); } }
+  /* phones: the open field takes what the bar has left, and keeps that width as you type */
+  @media (max-width: 767px) {
+    .list-bar[data-search="button"]:is([data-search-open], :has(.list-search input:not(:placeholder-shown))) .list-search { flex: 1 1 0; }
+  }
   /* the search field's hover sits on white, like a menu's: a step stronger than a row's */
   .list-toolbar { --color-surface-hover: var(--color-surface-hover-control); }
 }

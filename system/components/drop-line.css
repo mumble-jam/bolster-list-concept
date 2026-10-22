@@ -1,0 +1,13 @@
+/* Drop line: where a dragged thing lands, in the seam between two others.
+   <div class="drop-line" aria-hidden="true"></div>, placed by the page's script (position: absolute, its top, start
+   and width), inside the box it's drawn over. Tasks (between rows) and the pipeline (between cards) draw it; first
+   in Tasks, moved here when the pipeline needed it. Only while dragging. */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  /* a line in the seam, a dot at its start; never a row's or a card's own edge, which follows its rounded corners
+     and reads as picking that one */
+  .drop-line { position: absolute; z-index: 1; block-size: var(--border-width-strong); border-radius: var(--radius-full); background: var(--color-action-accent); pointer-events: none; }
+  .drop-line::before { content: ""; position: absolute; inset-inline-start: calc(-1 * var(--space-1)); inset-block-start: 50%; inline-size: var(--space-2); block-size: var(--space-2); translate: 0 -50%; border: var(--border-width-strong) solid var(--color-action-accent); border-radius: var(--radius-full); background: var(--color-surface-default); box-sizing: border-box; }
+}

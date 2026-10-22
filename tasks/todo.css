@@ -21,7 +21,7 @@
   :root[data-todo-bar="surface"] .todo-bar .list-toolbar { border-radius: 0; }
   /* the search: on the card, the table card's bare field; on the page, an icon on the right that opens into
      a small field (and stays open while it holds words) */
-  .todo-search-open, .todo-bar-only { display: none; }
+  .todo-bar-only { display: none; }
   /* on the page: Add filter is an icon button, the count beside it after a rule, as on the right; the chips
      get the row below only when there are some */
   :root[data-todo-bar="surface"] .todo-bar .todo-bar-only { display: block; }
@@ -32,21 +32,7 @@
   :root[data-todo-bar="surface"] .todo-bar .add-filter[aria-expanded="true"] { background: var(--color-action-ghost-hover); }
   :root[data-todo-bar="surface"] .todo-bar #result-count { display: none; }
   :root[data-todo-bar="surface"] .todo-bar .list-chips:not(:has(.chip)) { display: none; }
-  /* the field opens out of the button, one control (your call, 22 Oct): shut, it's the button's size under
-     it, its magnifier where the button's is; open, it grows leftwards, the magnifier riding its edge, and
-     shrinks back the same way. Clipped, not scrolled (focusing the field would scroll it). The button stays in the bar (over the field's end), so nothing beside moves */
-  :root[data-todo-bar="surface"] .todo-bar .list-search { flex: 0 1 var(--control-height-sm); min-inline-size: 0; overflow: clip; margin-inline-start: auto; border: var(--border-width-default) solid transparent; background: none; padding-inline: calc(var(--space-2) - var(--border-width-default)); }
-  :root[data-todo-bar="surface"] .todo-bar .list-search > * { visibility: hidden; }
-  :root[data-todo-bar="surface"] .todo-search-open { display: inline-flex; margin-inline-start: calc(-1 * (var(--control-height-sm) + var(--space-2))); }
-  :root[data-todo-bar="surface"] .todo-bar :is(.list-bar[data-search-open], .list-bar:has(input:not(:placeholder-shown))) .list-search { flex-basis: 14rem; border-color: var(--color-line-card); background: var(--color-surface-default); padding-inline: var(--space-3); }
-  :root[data-todo-bar="surface"] .todo-bar :is(.list-bar[data-search-open], .list-bar:has(input:not(:placeholder-shown))) .list-search > * { visibility: visible; }
-  :root[data-todo-bar="surface"] :is(.list-bar[data-search-open], .list-bar:has(input:not(:placeholder-shown))) .todo-search-open { visibility: hidden; }
-  /* opening swaps at once and grows; closing shrinks, then swaps back: the field's magnifier lands on the
-     button's before the button shows its own. Reduced motion takes the durations away (base.css) */
-  :root[data-todo-bar="surface"] .todo-bar .list-search { transition: flex var(--duration-medium) var(--ease-out), padding var(--duration-medium) var(--ease-out), border-color var(--duration-medium) var(--ease-out), background-color var(--duration-medium) var(--ease-out); }
-  :root[data-todo-bar="surface"] .todo-bar .list-search > *, :root[data-todo-bar="surface"] .todo-search-open > svg { transition: visibility 0s var(--duration-medium); }
-  :root[data-todo-bar="surface"] .todo-bar :is(.list-bar[data-search-open], .list-bar:has(input:not(:placeholder-shown))) :is(.list-search > *, .todo-search-open > svg) { transition-delay: 0s; }
-  @media (hover: hover) { :root[data-todo-bar="surface"] .todo-bar .list-search:hover { border-color: var(--color-line-strong); background: var(--color-surface-default); } }
+  /* the search on the page is the system's search as a button (toolbar.css): the script sets the bar's data-search */
   :root[data-todo-bar="surface"] .todo-bar .list-chips { padding: var(--space-2) 0 0; }
   .todo-groups { display: grid; gap: var(--space-3); }
 
@@ -91,10 +77,7 @@
   .todo-row:hover .todo-grip, .todo-grip:focus-visible { opacity: 1; }
   .todo-grip:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
   .todo-row[data-dragging] { opacity: 0.4; }
-  /* where a dragged task lands: a line in the seam between two rows, from the check to the row's end, a dot
-     at its start; never a row's own edge, which follows its rounded corners and reads as picking that row */
-  .todo-drop-line { position: absolute; z-index: 1; block-size: var(--border-width-strong); border-radius: var(--radius-full); background: var(--color-action-accent); pointer-events: none; }
-  .todo-drop-line::before { content: ""; position: absolute; inset-inline-start: calc(-1 * var(--space-1)); inset-block-start: 50%; inline-size: var(--space-2); block-size: var(--space-2); translate: 0 -50%; border: var(--border-width-strong) solid var(--color-action-accent); border-radius: var(--radius-full); background: var(--color-surface-default); box-sizing: border-box; }
+  /* where a dragged task lands: the system's drop line (drop-line.css), from the check to the row's end */
 
   /* the check: round, so it never reads as selecting (T-check); a real checkbox named after its task. A thin
      light ring, quieter than the name beside it (as Todoist, Things and Linear draw it); hover shows the tick */
@@ -207,9 +190,7 @@
 
   /* ---------- phones: the title wraps, when · job · who on a line under it; empty fields live in the task ---------- */
   @media (max-width: 767px) {
-    /* the open search and the count share the bar on fixed bases, so the field keeps its width as you type
-       and a long count gives way */
-    :root[data-todo-bar="surface"] .todo-bar :is(.list-bar[data-search-open], .list-bar:has(input:not(:placeholder-shown))) .list-search { flex: 1 1 0; }
+    /* the open search takes what's left (toolbar.css), a long count gives way */
     :root[data-todo-bar="surface"] .todo-bar #bar-count { flex: 0 1 8rem; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     /* on its card, Clear all wraps into the card's bottom corner here: its corner shares the card's (D35) */
     :root:not([data-todo-bar="surface"]) .todo-bar .clear-all { border-radius: calc(var(--radius-xl) - var(--border-width-default) - var(--space-3)); }

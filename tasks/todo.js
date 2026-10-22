@@ -383,7 +383,7 @@
     requestAnimationFrame(() => li.setAttribute("data-dragging", ""));
   });
   // the line that shows where it lands, in the seam between two rows of the target's card
-  const line = Object.assign(document.createElement("div"), { className: "todo-drop-line" });
+  const line = Object.assign(document.createElement("div"), { className: "drop-line" });
   line.setAttribute("aria-hidden", "true");
   function showLine(tg) {
     const card = tg.el.closest(".todo-group"), c = card.getBoundingClientRect(), r = tg.el.getBoundingClientRect();
@@ -406,7 +406,7 @@
   document.addEventListener("dragover", (e) => {
     if (!drag) return;
     const tg = dropTarget(e);
-    if (!tg || !canDrop(drag.group, tg.group)) { if (!e.target.closest?.(".todo-drop-line")) hideLine(); return; }
+    if (!tg || !canDrop(drag.group, tg.group)) { if (!e.target.closest?.(".drop-line")) hideLine(); return; }
     e.preventDefault();
     showLine(tg);
   });
@@ -616,7 +616,6 @@
     if (q("[data-clear-all]")) { st.filters = {}; render(); return $("#add-filter").focus({ preventScroll: true }); }
     if ((el = q("#view-options"))) return openPick("display", el);
     if ((el = q("[data-group-by]"))) { st.group = el.dataset.groupBy; st.adding = null; pop.hidePopover(); render(); return; }
-    if (q("#search-open")) return openSearch();
     if ((el = q("[data-bulk]"))) { if (el.dataset.bulk === "complete") { const ids = [...st.sel]; st.sel.clear(); setDone(ids, true); return renderBulk(); } return openPick(el.dataset.bulk, el, { bulk: true }); }
     if ((el = q("[data-set-due]"))) { const v = el.dataset.setDue; const d = v === "none" ? null : daysFrom(TODAY, +v); return apply((t) => (t.due = d), v === "none" ? "have no due date" : `due ${dueInline(d)}`); }
     if ((el = q("[data-cal]"))) { const m = calMonth || new Date(targets()[0]?.due || TODAY); calMonth = new Date(m.getFullYear(), m.getMonth() + +el.dataset.cal, 1); fillPop(); place(); $(`[data-cal="${el.dataset.cal}"]`, pop)?.focus(); return; }
@@ -662,13 +661,9 @@
   });
   let typing;
   $("#search").addEventListener("input", (e) => { clearTimeout(typing); typing = setTimeout(() => { st.q = e.target.value; render(); }, 120); });
-  // on the page (trying out), the search is an icon on the right that opens into a small field; it closes
-  // again when it's left empty, and Escape empties and closes it
+  // on the page (trying out), the search is an icon on the right that opens into a small field (the shell's)
   const bar = $("#list-bar");
-  function openSearch() { bar.setAttribute("data-search-open", ""); $("#search-open").setAttribute("aria-expanded", "true"); $("#search").focus(); }
-  function closeSearch(back) { bar.removeAttribute("data-search-open"); $("#search-open").setAttribute("aria-expanded", "false"); if (back) $("#search-open").focus({ preventScroll: true }); }
-  $("#search").addEventListener("blur", () => { if (!$("#search").value) closeSearch(); });
-  $("#search").addEventListener("keydown", (e) => { if (e.key === "Escape") { e.preventDefault(); $("#search").value = ""; st.q = ""; render(); closeSearch(true); } });
+  BolsterShell.searchButton(bar, { onClear: () => { st.q = ""; render(); } });
   addEventListener("resize", () => popFor && place());
 
   // trying out: the toolbar on the page instead of a card (on by default, remembered per browser)
@@ -676,7 +671,7 @@
     const box = $("#cc-bar"), root = document.documentElement;
     let on = true;
     try { on = localStorage.getItem("todo-bar") !== "card"; } catch {}
-    const show = () => { box.checked = on; on ? root.setAttribute("data-todo-bar", "surface") : root.removeAttribute("data-todo-bar"); };
+    const show = () => { box.checked = on; on ? root.setAttribute("data-todo-bar", "surface") : root.removeAttribute("data-todo-bar"); on ? bar.setAttribute("data-search", "button") : bar.removeAttribute("data-search"); };
     box.addEventListener("change", () => { on = box.checked; try { localStorage.setItem("todo-bar", on ? "surface" : "card"); } catch {} show(); });
     show();
   })();
