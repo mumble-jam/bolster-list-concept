@@ -528,11 +528,32 @@
     beside(el);
     $(nv.kind === "event" ? "[name=title]" : "[name=client]", pop)?.focus();
   }
-  const kindSeg = () => `<div class="segmented cal-new-kind" role="radiogroup" aria-label="What to make" data-size="sm">${KIND2.map(([v, l]) => `<label class="segmented-option"><input type="radio" name="kind" value="${v}"${v === nv.kind ? " checked" : ""}> ${l}</label>`).join("")}</div>`;
-  const opt = (v, l, cur) => `<option value="${esc(v)}"${v === cur ? " selected" : ""}>${esc(l)}</option>`;
-  const customerSelect = (id) => `<div class="select"><select class="input" id="${id}" name="client"><option value="">Choose customer</option>${CUSTOMERS.map((c) => opt(c.name, c.name, nv.client)).join("")}<option value="+new">Create new customer…</option></select></div>`;
-  const withSelect = (id) => `<div class="select"><select class="input" id="${id}" name="with">${[OWNERS.find((p) => p.me), ...OWNERS.filter((p) => !p.me)].map((p) => opt(p.id, p.me ? `${p.name} (you)` : p.name, nv.with)).join("")}</select></div>`;
-  const typeSelect = (id, len = true) => `<div class="select"><select class="input" id="${id}" name="apptType">${APPT_TYPES.map(([t, m]) => opt(t, len ? `${t} · ${m} min` : t, nv.apptType)).join("")}</select></div>`;
+  // ---------- the forms (D96, after the event-forms research, 22 Oct): rows led by an icon instead of labelled
+  // boxes, the title a large plain line, controls that read as text until pointed at (time in 15-minute lists, the
+  // end saying the length), a sales appointment's times as a strip of days and only the free half hours ----------
+  const KIND_ICON = { "appointment-schedule": "user", event: "calendar" };
+  const kindTabs = () => `<div class="cal-tabs" role="radiogroup" aria-label="What to make">${KIND2.map(([v, l]) => `<label class="cal-tab"><input type="radio" name="kind" value="${v}"${v === nv.kind ? " checked" : ""}><span>${l}</span></label>`).join("")}</div>`;
+  const opt = (v, l, cur) => `<option value="${esc(v)}"${String(v) === String(cur) ? " selected" : ""}>${esc(l)}</option>`;
+  // a picker that reads as text: the value, a small chevron after it
+  const pick = (name, id, label, options, cls = "") => `<span class="cal-pick ${cls}"><label class="visually-hidden" for="${id}">${label}</label><select class="cal-txt" id="${id}" name="${name}">${options}</select>${ic("chevron-down", 12, { optical: true })}</span>`;
+  const row = (icon, inner, cls = "") => `<div class="cal-row${cls ? ` ${cls}` : ""}"><span class="cal-row-icon" aria-hidden="true">${icon}</span><div class="cal-row-body">${inner}</div></div>`;
+  const iconOf = (k) => ic(k, 16, { optical: true });
+  const customerPick = (id) => pick("client", id, "Customer", `<option value="">Choose customer</option>${CUSTOMERS.map((c) => opt(c.name, c.name, nv.client)).join("")}<option value="+new">Create new customer…</option>`, `cal-pick-lead${nv.client ? "" : " cal-pick-empty"}`);
+  const withPick = (id) => pick("with", id, "Appointment with", [OWNERS.find((p) => p.me), ...OWNERS.filter((p) => !p.me)].map((p) => opt(p.id, p.me ? `${p.name} (you)` : p.name, nv.with)).join(""));
+  const typePick = (id) => pick("apptType", id, "Appointment type", APPT_TYPES.map(([t, m]) => opt(t, `${t} · ${m} min`, nv.apptType)).join(""));
+  const lenText = (d) => (d < 60 ? `${d} min` : `${+(d / 60).toFixed(2)} ${d === 60 ? "hr" : "hrs"}`);
+  // when: the date (it opens the browser's own picker), then from → to as lists, the end saying how long
+  function whenRow(pre) {
+    const ev = nv.kind === "event", all = ev && nv.allDay;
+    const date = `<span class="cal-pick cal-pick-date"><button type="button" class="cal-txt" data-pick-date="${pre}-date" aria-label="Date, ${esc(f.long(nv.date))}">${esc(f.dayWord(nv.date) ? `${f.dayWord(nv.date)}, ${f.short(nv.date)}` : f.short(nv.date))}</button><input class="cal-date-input" type="date" id="${pre}-date" name="date" value="${nv.date}" tabindex="-1" aria-hidden="true"></span>`;
+    const froms = Array.from({ length: 96 }, (_, i) => i * 15).map((m) => opt(m, f.time(m), nv.from)).join("");
+    const tos = Array.from({ length: Math.floor((24 * 60 - 15 - nv.from) / 15) + 1 }, (_, i) => nv.from + 15 * (i + 1)).filter((m) => m < 24 * 60).map((m) => opt(m, `${f.time(m)}  (${lenText(m - nv.from)})`, nv.to)).join("");
+    const time = all ? "" : `${pick("from", `${pre}-from`, "Starts", froms, "cal-pick-time")}${ev ? `<span class="cal-when-to" aria-hidden="true">→</span>${pick("to", `${pre}-to`, "Ends", tos, "cal-pick-time")}` : `<span class="cal-when-len">${lenText(lenOf())}</span>`}`;
+    return row(iconOf("clock"), `${date}${time}${ev ? `<label class="cal-check"><input type="checkbox" class="checkbox" name="allDay"${nv.allDay ? " checked" : ""}> All day</label>` : ""}`, "cal-row-when");
+  }
+  const ghostInput = (name, id, label, placeholder, value) => `<label class="visually-hidden" for="${id}">${label}</label><input class="cal-txt cal-txt-input" id="${id}" name="${name}" value="${esc(value)}" placeholder="${placeholder}" autocomplete="off">`;
+  const ghostArea = (name, id, label, placeholder, value) => `<label class="visually-hidden" for="${id}">${label}</label><textarea class="cal-txt cal-txt-input" id="${id}" name="${name}" rows="2" placeholder="${placeholder}">${esc(value)}</textarea>`;
+  const titleInput = () => `<label class="visually-hidden" for="new-title-input">Title</label><input class="cal-new-title" id="new-title-input" name="title" value="${esc(nv.title)}" placeholder="Add title" autocomplete="off">`;
   // the person's own things that day, which a sales appointment shouldn't land on
   const busyAt = (person, date, a, b) => items.some((x) => !x.draft && x !== editing && x.date === date && (x.kind === "appt" || x.kind === "busy") && !x.allDay && x.who.includes(person) && x.from < b && x.to > a);
   function conflict() {
@@ -541,60 +562,62 @@
     if (a < WORK[0] || b > WORK[1]) return `Outside ${p.me ? "your" : `${p.name.split(" ")[0]}'s`} work hours (${f.time(WORK[0])}–${f.time(WORK[1])})`;
     return busyAt(nv.with, nv.date, a, b) ? `${p.me ? "You're" : `${p.name.split(" ")[0]}'s`} busy then` : "";
   }
-  // when: the date, then from and to; in the card, one line as Google's (its labels for screen readers only)
-  const whenFields = (pre) => {
-    const quick = pre === "q", lab = quick ? "visually-hidden" : "field-label", ev = nv.kind === "event";
-    return `<div class="cal-new-when"${quick ? " data-compact" : ""}>${quick ? ic("clock", 16, { optical: true }) : ""}<div class="field cal-new-date" data-size="sm"><label class="${lab}" for="${pre}-date">Date</label><input class="input" type="date" id="${pre}-date" name="date" value="${nv.date}" required></div>
-      ${ev && nv.allDay ? "" : `<div class="field cal-new-time" data-size="sm"><label class="${lab}" for="${pre}-from">Starts</label><input class="input" type="time" id="${pre}-from" name="from" step="900" value="${hhmm(nv.from)}" required></div>
-      ${ev ? `${quick ? '<span class="cal-new-dash" aria-hidden="true">–</span>' : ""}<div class="field cal-new-time" data-size="sm"><label class="${lab}" for="${pre}-to">Ends</label><input class="input" type="time" id="${pre}-to" name="to" step="900" value="${hhmm(nv.to)}" required></div>` : quick ? `<span class="cal-new-len">${lenOf()} min</span>` : ""}`}
-      ${ev ? `<label class="choice cal-new-allday"><input type="checkbox" class="checkbox" name="allDay"${nv.allDay ? " checked" : ""}> All day</label>` : ""}</div>`;
-  };
+  const withRow = (pre) => row(avatar(who(nv.with), "xs"), withPick(`${pre}-with`));
   function quickHtml() {
-    const clash = conflict();
-    return `<form class="cal-new" data-new="quick" novalidate><div class="cal-new-top">${kindSeg()}${closeBtn()}</div>
-      ${nv.kind === "event" ? `<input class="input cal-new-title" name="title" value="${esc(nv.title)}" placeholder="Add title" aria-label="Title" autocomplete="off">`
-        : `<div class="field" data-size="sm"><label class="field-label" for="q-client">Customer</label>${customerSelect("q-client")}</div>`}
-      ${whenFields("q")}
-      ${nv.kind === "event" ? `<div class="cal-new-row">${ic("location", 16, { optical: true })}<div class="field" data-size="sm"><label class="visually-hidden" for="q-loc">Location</label><input class="input" id="q-loc" name="location" value="${esc(nv.location)}" placeholder="Add location"></div></div>`
-        : `<div class="cal-new-pair"><div class="field" data-size="sm"><label class="field-label" for="q-type">Type</label>${typeSelect("q-type", false)}</div><div class="field" data-size="sm"><label class="field-label" for="q-with">With</label>${withSelect("q-with")}</div></div>
-          ${clash ? `<p class="cal-new-note" data-tone="warning">${ic("clock", 14, { optical: true })}<span>${esc(clash)}. You can still book it.</span></p>` : ""}`}
+    const ev = nv.kind === "event", clash = conflict();
+    return `<form class="cal-new" data-new="quick" novalidate><div class="cal-new-top">${kindTabs()}${closeBtn()}</div>
+      ${ev ? titleInput() : row(iconOf("user"), customerPick("q-client"), "cal-row-lead")}
+      ${whenRow("q")}
+      ${ev ? row(iconOf("location"), ghostInput("location", "q-loc", "Location", "Add location", nv.location))
+        : `${row(iconOf("tag"), typePick("q-type"))}${withRow("q")}${clash ? `<p class="cal-new-note" data-tone="warning">${esc(clash)}. You can still book it.</p>` : ""}`}
       <p class="cal-new-error" role="alert" hidden></p>
-      <div class="cal-new-actions"><button type="button" class="button" data-variant="ghost" data-size="sm" data-more-options>More options</button><button type="submit" class="button" data-size="sm">${nv.kind === "event" ? "Save" : clash ? "Book anyway" : "Schedule"}</button></div></form>`;
+      <div class="cal-new-actions"><button type="button" class="button" data-variant="ghost" data-size="sm" data-more-options>More options</button><button type="submit" class="button" data-size="sm">${ev ? "Save" : clash ? "Book anyway" : "Schedule"}</button></div></form>`;
   }
-  // the whole dialog: Bolster's fields, Google's order
+  // the whole dialog: Bolster's fields, the same rows
   const dlgNew = $("#new-event");
-  function slotsHtml() {
-    const len = lenOf(), out = [];
+  // a sales appointment's times: the week's days as a strip, the picked day's free half hours (busy ones too with
+  // Book anyway, struck)
+  function timesHtml() {
+    const start = weekStart(nv.date), len = lenOf();
+    const days = Array.from({ length: 7 }, (_, i) => add(start, i)).map((d) => {
+      let free = 0; for (let m = WORK[0]; m + len <= WORK[1]; m += 30) if (!busyAt(nv.with, d, m, m + len)) free++;
+      const off = d < T || isOff(d);
+      return `<button type="button" class="cal-slot-day" data-slot-day="${d}"${d === nv.date ? ' aria-pressed="true"' : ""}${off ? " disabled" : ""} aria-label="${esc(`${f.long(d)}${off ? "" : `, ${free} free`}`)}"><small>${day(d).toLocaleDateString("en-GB", { weekday: "short" })}</small><b>${day(d).getDate()}</b></button>`;
+    }).join("");
+    const slots = [];
     for (let m = WORK[0]; m + len <= WORK[1]; m += 30) {
       const busy = busyAt(nv.with, nv.date, m, m + len);
-      out.push(`<label class="cal-slot"${busy ? " data-busy" : ""}><input type="radio" name="slot" value="${m}"${m === nv.from ? " checked" : ""}${busy && !nv.anyway ? " disabled" : ""}><span>${f.time(m)}</span></label>`);
+      if (busy && !nv.anyway) continue;
+      slots.push(`<label class="cal-slot"${busy ? " data-busy" : ""}><input type="radio" name="slot" value="${m}"${m === nv.from ? " checked" : ""}><span>${f.time(m)}</span></label>`);
     }
-    const free = out.filter((x) => !x.includes("data-busy")).length;
-    return `<div class="cal-slots" role="radiogroup" aria-label="Available times">${out.join("")}</div>
-      ${free ? "" : `<p class="cal-new-note">No available times for this day.</p>`}
-      <label class="choice cal-new-anyway"><input type="checkbox" class="checkbox" name="anyway"${nv.anyway ? " checked" : ""}> Book anyway<span class="cal-new-hint">You can still book within their normal work hours.</span></label>`;
+    const p = who(nv.with);
+    return `<div class="cal-slot-head"><p>${esc(f.long(nv.date))}</p><span><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-slot-week="-1" aria-label="Previous week" data-tip="Previous week">${ic("chevron-left", 16, { optical: true })}</button><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only data-slot-week="1" aria-label="Next week" data-tip="Next week">${ic("chevron-right", 16, { optical: true })}</button></span></div>
+      <div class="cal-slot-days">${days}</div><input type="hidden" name="date" value="${nv.date}">
+      ${slots.length ? `<div class="cal-slots" role="radiogroup" aria-label="Available times">${slots.join("")}</div>` : `<p class="cal-new-note">${isOff(nv.date) ? "A day off." : "No available times for this day."}</p>`}
+      <label class="cal-check cal-anyway"><input type="checkbox" class="checkbox" name="anyway"${nv.anyway ? " checked" : ""}> Book anyway<span>Shows ${p.me ? "your" : `${esc(p.name.split(" ")[0])}'s`} busy times too, within ${p.me ? "your" : "their"} work hours</span></label>`;
   }
   function fullHtml() {
     const ev = nv.kind === "event", c = CUSTOMERS.find((x) => x.name === nv.client);
     if (!ev && c && !nv.address) nv.address = c.address;
     const me = OWNERS.find((p) => p.me);
-    return `<form class="cal-new-full" data-new="full" novalidate><header class="dialog-header"><h2 id="new-event-title">${editing ? "Edit" : "New"} ${ev ? "event" : "sales appointment"}</h2>${`<button type="button" class="button" data-variant="ghost" data-icon-only data-close-new aria-label="Close" data-tip="Close">${ic("xmark", 16, { optical: true })}</button>`}</header>
-      <div class="dialog-body">${editing ? "" : kindSeg()}
-      ${ev ? `<input class="input cal-new-title" name="title" value="${esc(nv.title)}" placeholder="Add title" aria-label="Title" autocomplete="off">
-        ${whenFields("f")}
-        <p class="cal-new-owner">${avatar(me, "sm")}<span><b>${esc(me.name)}</b><small>Busy · Default visibility · Notify 30 minutes before</small></span></p>
-        <div class="field"><label class="field-label" for="f-guest">Guests</label><div class="cal-guests">${nv.guests.map((g, i) => `<span class="cal-guest">${esc(g)}<button type="button" data-guest-remove="${i}" aria-label="${esc(`Remove ${g}`)}" data-tip="Remove">${ic("xmark", 12, { optical: true })}</button></span>`).join("")}<input class="cal-guest-input" id="f-guest" list="f-guest-list" placeholder="${nv.guests.length ? "" : "Add customers or email addresses"}" autocomplete="off" enterkeyhint="done"></div>
-          <datalist id="f-guest-list">${[...OWNERS.filter((p) => !p.me).map((p) => p.name), ...CUSTOMERS.map((x) => x.name)].map((n) => `<option value="${esc(n)}">`).join("")}</datalist>
-          <p class="field-helper">Enter adds one; Backspace takes the last off.</p></div>
-        <div class="field"><label class="field-label" for="f-loc">Location</label><input class="input" id="f-loc" name="location" value="${esc(nv.location)}" placeholder="Add location"></div>
-        <div class="field"><label class="field-label" for="f-notes">Description</label><textarea class="input" id="f-notes" name="notes" rows="3" placeholder="Add description">${esc(nv.notes)}</textarea></div>`
-      : `<div class="field"><label class="field-label" for="f-client">Customer</label>${customerSelect("f-client")}</div>
-        <div class="cal-new-pair"><div class="field"><label class="field-label" for="f-type">Appointment type</label>${typeSelect("f-type")}</div><div class="field"><label class="field-label" for="f-with">Appointment with</label>${withSelect("f-with")}</div></div>
-        <fieldset class="cal-new-times"><legend class="field-label">Choose a date and time</legend><div class="field" data-size="sm"><label class="visually-hidden" for="f-date">Date</label><input class="input" type="date" id="f-date" name="date" value="${nv.date}" required></div>${slotsHtml()}</fieldset>
-        <div class="field"><label class="field-label" for="f-addr">Site visit address</label><input class="input" id="f-addr" name="address" value="${esc(nv.address)}" placeholder="Where the visit is"${c && !nv.address ? ' aria-invalid="true"' : ""}>${c && !c.address ? '<p class="field-helper">This customer has no address saved.</p>' : ""}</div>
-        <div class="field"><label class="field-label" for="f-notes">Additional notes</label><textarea class="input" id="f-notes" name="notes" rows="3" placeholder="Add any additional information…">${esc(nv.notes)}</textarea></div>`}
+    const guests = `<div class="cal-guests">${nv.guests.map((g, i) => `<span class="cal-guest">${esc(g)}<button type="button" data-guest-remove="${i}" aria-label="${esc(`Remove ${g}`)}" data-tip="Remove">${ic("xmark", 12, { optical: true })}</button></span>`).join("")}<label class="visually-hidden" for="f-guest">Guests</label><input class="cal-guest-input" id="f-guest" list="f-guest-list" placeholder="${nv.guests.length ? "Add another" : "Add customers or email addresses"}" autocomplete="off" enterkeyhint="done"></div>
+      <datalist id="f-guest-list">${[...OWNERS.filter((p) => !p.me).map((p) => p.name), ...CUSTOMERS.map((x) => x.name)].map((n) => `<option value="${esc(n)}">`).join("")}</datalist>`;
+    return `<form class="cal-new-full" data-new="full" novalidate><header class="dialog-header"><h2 id="new-event-title">${editing ? "Edit" : "New"} ${ev ? "event" : "sales appointment"}</h2><button type="button" class="button" data-variant="ghost" data-icon-only data-close-new aria-label="Close" data-tip="Close">${ic("xmark", 16, { optical: true })}</button></header>
+      <div class="dialog-body">${editing ? "" : kindTabs()}
+      ${ev ? `${titleInput()}
+        ${whenRow("f")}
+        ${row(iconOf("users"), guests)}
+        ${row(iconOf("location"), ghostInput("location", "f-loc", "Location", "Add location", nv.location))}
+        ${row(iconOf("text"), ghostArea("notes", "f-notes", "Description", "Add description", nv.notes))}
+        ${row(avatar(me, "xs"), `<p class="cal-new-owner"><b>${esc(me.name)}</b><span>Busy · Default visibility · Notify 30 minutes before</span></p>`)}`
+      : `${row(iconOf("user"), customerPick("f-client"), "cal-row-lead")}
+        ${row(iconOf("tag"), typePick("f-type"))}
+        ${withRow("f")}
+        ${row(iconOf("clock"), timesHtml(), "cal-row-times")}
+        ${row(iconOf("location"), `${ghostInput("address", "f-addr", "Site visit address", "Site visit address", nv.address)}${c && !c.address ? '<p class="cal-new-note" data-tone="warning">This customer has no address saved.</p>' : ""}`)}
+        ${row(iconOf("text"), ghostArea("notes", "f-notes", "Additional notes", "Add any additional information…", nv.notes))}`}
       <p class="cal-new-error" role="alert" hidden></p></div>
-      <footer class="dialog-footer">${editing ? `<button type="button" class="button cal-new-delete" data-variant="ghost" data-delete="${editing.id}">Delete</button>` : ""}<button type="button" class="button" data-variant="ghost" data-close-new>Cancel</button><button type="submit" class="button">${ev ? "Save" : editing ? "Save" : "Schedule appointment"}</button></footer></form>`;
+      <footer class="dialog-footer">${editing ? `<button type="button" class="button cal-new-delete" data-variant="ghost" data-delete="${editing.id}">Delete</button>` : ""}<button type="button" class="button" data-variant="ghost" data-close-new>Cancel</button><button type="submit" class="button">${ev || editing ? "Save" : "Schedule appointment"}</button></footer></form>`;
   }
   let saved = false;
   function openFull(seed) {
@@ -634,13 +657,19 @@
     toast(message, () => { items.splice(at, 0, it); render(); say("Undone"); });
   }
   // read what's in a form into what's being made
-  function read(form) {
+  function read(form, changed = "") {
     const v = Object.fromEntries(new FormData(form));
     if (v.kind) { if (v.kind !== nv.kind) { nv.kind = v.kind; lastKind = v.kind; try { localStorage.setItem("cal-new-kind", v.kind); } catch {} } }
     if ("title" in v) nv.title = v.title;
     if (v.date) nv.date = v.date;
-    if (v.from) { const len = nv.to - nv.from; nv.from = minutes(v.from); nv.to = v.to ? minutes(v.to) : nv.from + len; if (v.to && nv.to <= nv.from) nv.to = nv.from + 15; }
-    else if (v.slot) nv.from = +v.slot;
+    if (v.from != null && v.from !== "") {
+      const len = nv.to - nv.from;
+      nv.from = +v.from;
+      // a new start keeps the length; a new end is the end
+      nv.to = changed === "from" || !v.to ? nv.from + len : +v.to;
+      if (nv.to <= nv.from) nv.to = nv.from + 15;
+      nv.to = Math.min(nv.to, 24 * 60 - 1);
+    } else if (v.slot) nv.from = +v.slot;
     nv.allDay = !!v.allDay && nv.kind === "event";
     for (const k of ["location", "notes", "apptType", "with", "address"]) if (k in v) nv[k] = v[k];
     if ("client" in v) {
@@ -729,7 +758,7 @@
   document.addEventListener("change", (e) => {
     const form = e.target.closest?.("[data-new]");
     if (!form) return;
-    read(form);
+    read(form, e.target.name);
     // typing only needs reading: a redraw on its change (which comes as you leave the field, say for Save) would
     // swap the button under the pointer
     if (e.target.matches("input[type=text], input:not([type]), input[type=search], textarea")) return;
@@ -760,6 +789,18 @@
   document.addEventListener("click", (e) => {
     if (e.target.closest("[data-more-options]")) { read(e.target.closest("form")); return openFull(); }
     if (e.target.closest("[data-close-new]")) return dlgNew.close();
+    const pd = e.target.closest("[data-pick-date]");
+    if (pd) { const inp = document.getElementById(pd.dataset.pickDate); try { inp.showPicker(); } catch { inp.focus(); } return; }
+    const sd = e.target.closest("[data-slot-day]"), sw = e.target.closest("[data-slot-week]");
+    if (sd || sw) {
+      read(dlgNew.querySelector("form"));
+      if (sd) nv.date = sd.dataset.slotDay;
+      else { const d = add(nv.date, 7 * +sw.dataset.slotWeek); nv.date = d < T ? T : d; }
+      syncDraft(); render();
+      dlgNew.innerHTML = fullHtml(); BolsterShell.hydrateIcons(dlgNew);
+      (sd ? $(`[data-slot-day="${nv.date}"]`, dlgNew) : $(`[data-slot-week="${sw.dataset.slotWeek}"]`, dlgNew))?.focus();
+      return;
+    }
     const ed = e.target.closest("[data-edit]"), del = e.target.closest("[data-delete]");
     if (ed) return openEdit(byId(ed.dataset.edit));
     if (del) return removeItem(byId(del.dataset.delete));
