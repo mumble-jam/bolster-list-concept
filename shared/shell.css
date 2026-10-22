@@ -4,6 +4,8 @@
 
 /* the menu's edge over the page (D98), moving: one length for its clip and for the fade just inside it */
 @property --bs-edge { syntax: "<length-percentage>"; inherits: true; initial-value: 0px; }
+/* and the room past it for the menu's shadow, once it's out */
+@property --bs-room { syntax: "<length>"; inherits: true; initial-value: 0px; }
 
 @layer concept {
   /* the folded rail opens as wide as the menu is pinned (D92), so opening it on hover and pinning it are the same
@@ -282,21 +284,25 @@
        same way as the pointer leaves. Shut, it's out of reach (hidden), so nothing in it takes focus */
     .app-shell[data-sidebar-hidden] .sidebar {
       display: flex; position: fixed; inset-block: var(--shell-top-bar-height) 0; inset-inline-start: 0; z-index: calc(var(--z-popover) + 1);
-      block-size: auto; visibility: hidden; --bs-edge: var(--shell-rail-width); clip-path: inset(0 calc(100% - var(--bs-edge)) 0 0);
+      block-size: auto; visibility: hidden; --bs-edge: var(--shell-rail-width); --bs-room: 0px; clip-path: inset(0 calc(100% - var(--bs-edge) - var(--bs-room)) 0 0);
       --_d: var(--menu-close-dur, 80ms); --_e: var(--menu-close-ease, var(--menu-ease, cubic-bezier(0.2, 0.8, 0, 1)));
-      transition: --bs-edge var(--_d) var(--_e), translate var(--_d) var(--_e), box-shadow var(--_d) var(--_e), visibility 0s linear var(--_d);
+      transition: --bs-edge var(--_d) var(--_e), --bs-room 0s, translate var(--_d) var(--_e), box-shadow var(--_d) var(--_e), visibility 0s linear var(--_d);
     }
-    /* open, the edge is past the menu's own by the fade and room for the shadow */
-    .app-shell[data-sidebar-hidden][data-menu-over] .sidebar { --_d: var(--menu-open-dur, 420ms); --_e: var(--menu-ease, cubic-bezier(0.2, 0.8, 0, 1)); visibility: visible; --bs-edge: calc(100% + var(--_fade) + 0.5rem); box-shadow: var(--menu-over-shadow, var(--shadow-raised)); transition-delay: 0s; }
-    /* the labels fade in as the edge passes them, from nothing at it to whole a fade behind it (your note, 22 Oct: the
-       first frame showed their first letters, inside the rail's width); the icons stay whole. On the menu's rows, not
-       on it, so its ground stays whole to the edge */
+    /* open, the edge goes as far as the menu's own and no further, so it moves as the logo's cell above it, landing with
+       it (your note, 22 Oct: the logo's came out slower once the edge went further, past it); the room for the shadow
+       past it opens in the last 40%, when the edge is all but there, and shuts at once as it folds */
+    .app-shell[data-sidebar-hidden][data-menu-over] .sidebar { --_d: var(--menu-open-dur, 420ms); --_e: var(--menu-ease, cubic-bezier(0.2, 0.8, 0, 1)); visibility: visible; --bs-edge: 100%; --bs-room: 2rem; box-shadow: var(--menu-over-shadow, var(--shadow-raised)); transition-delay: 0s; }
+    .app-shell[data-sidebar-hidden][data-menu-over] .sidebar { transition: --bs-edge var(--_d) var(--_e), --bs-room calc(var(--_d) * 0.4) linear calc(var(--_d) * 0.6), translate var(--_d) var(--_e), box-shadow var(--_d) var(--_e), visibility 0s; }
     .app-shell[data-sidebar-hidden] .sidebar { --_fade: var(--menu-edge-fade, 3rem); }
-    .app-shell[data-sidebar-hidden] .sidebar > :is(.bs-nav-main, .bs-nav-bottom) {
-      --_x: var(--space-2); /* where the part starts in the menu: the mask is drawn in the part's own box */
-      mask-image: linear-gradient(to right, #000 calc(max(2.75rem, var(--bs-edge) - var(--_fade) - 0.5rem) - var(--_x)), transparent calc(max(2.75rem, var(--bs-edge) - 0.5rem) - var(--_x)));
+    /* the labels and pages fade in after the edge, from 5% into its opening, over 60% of it, and out first as it folds
+       (your values, 22 Oct, from the playground; before, they faded at the edge, and before that its first frame showed
+       their first letters, inside the rail's 60): the first frame is the rail's icons alone */
+    .app-shell[data-sidebar-hidden] .sidebar :is(.sidebar-item > span, .bs-acc-body, .sidebar-title, .bs-rail-more, .bs-acc-more) {
+      opacity: 0; transition: opacity calc(var(--menu-close-dur, 80ms) * 0.4) ease-out;
     }
-    .app-shell[data-sidebar-hidden] .sidebar > .bs-nav-bottom { --_x: 0px; }
+    .app-shell[data-sidebar-hidden][data-menu-over] .sidebar :is(.sidebar-item > span, .bs-acc-body, .sidebar-title, .bs-rail-more, .bs-acc-more) {
+      opacity: 1; transition: opacity calc(var(--menu-open-dur, 420ms) * 0.6) var(--menu-ease, cubic-bezier(0.2, 0.8, 0, 1)) calc(var(--menu-open-dur, 420ms) * var(--menu-label-lag, 0.05));
+    }
     :root[data-chrome-hidden] .app-shell[data-sidebar-hidden] .sidebar { inset-block-start: 0; }
     @media (prefers-reduced-motion: reduce) { .app-shell[data-sidebar-hidden] .sidebar { transition: none; } }
     /* a section with pages says so in the open rail (the keyboard's way in): a chevron at the row's end */
