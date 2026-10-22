@@ -18,6 +18,9 @@
   const iso = (n) => { const d = dateOf(n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
   const offset = (s) => Math.round((new Date(`${s}T12:00:00`) - TODAY) / DAY);
   const short = (n) => (n === 0 ? "today" : n === 1 ? "tomorrow" : dateOf(n).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }));
+  // times are 12-hour, for North America (your call, 22 Oct): lowercase, a space before am or pm, no “:00” on the hour
+  // (“9 am”, “1:30 pm”, “12 pm”); kept as “13:30” underneath, for sorting and the pickers' values
+  const clock = (t) => { const [h, m] = t.split(":").map(Number); return `${h % 12 || 12}${m ? `:${String(m).padStart(2, "0")}` : ""} ${h < 12 ? "am" : "pm"}`; };
   const ago = (n) => (n <= 0 ? "today" : n === 1 ? "yesterday" : `${n} days ago`);
   const cap = (s) => s[0].toUpperCase() + s.slice(1);
   const money = (n) => fmt.whole(n);
@@ -99,8 +102,8 @@
       case "leads/new": return over ? late(`Not contacted, ${days(n)}`, `New ${ago(n)}, not contacted yet`) : ok(`New ${ago(n)}`);
       case "leads/talking": return ok(`Contacted ${ago(n)}`);
       case "visits/visited": return over ? late(`No job, ${days(n)}`, `Visited ${ago(n)}, no job yet`) : ok(`Visited ${ago(n)}`);
-      case "visits/today": return ok(full ? `${r.visit.what} today, ${r.visit.time}` : `Today, ${r.visit.time}`);
-      case "visits/coming": return ok(full ? `${r.visit.what} ${short(r.visit.day)}, ${r.visit.time}` : `${cap(short(r.visit.day))}, ${r.visit.time}`);
+      case "visits/today": return ok(full ? `${r.visit.what} today, ${clock(r.visit.time)}` : `Today, ${clock(r.visit.time)}`);
+      case "visits/coming": return ok(full ? `${r.visit.what} ${short(r.visit.day)}, ${clock(r.visit.time)}` : `${cap(short(r.visit.day))}, ${clock(r.visit.time)}`);
       case "pending/drafts": return ok(`Started ${ago(n)}`);
       case "pending/unsent": return over ? late(`Not sent, ${days(n)}`, `Ready ${ago(n)}, never sent`) : ok(`Ready ${ago(n)}`);
       case "pending/changed": return ok(full ? `Changed ${ago(n)}, not sent` : `Changed ${ago(n)}`);
@@ -189,6 +192,8 @@
   let LAYOUT = "footer";
   try { LAYOUT = localStorage.getItem("pl-cards") || "footer"; } catch {}
   if (!["quiet", "compact", "footer"].includes(LAYOUT)) LAYOUT = "footer";
+  // the line under a card's name: who or what it's for
+  const subOf = (r) => (r.kind === "job" ? `${r.client} · ${r.place}` : r.kind === "invoice" ? `${r.number} · ${r.job}` : r.ask);
   function card(r) {
     const w = when(r), [next] = steps(r), job = r.kind === "job", inv = r.kind === "invoice", priced = job || inv;
     const label = `${job ? `${r.name}, ${r.client}` : inv ? `Invoice ${r.number}, ${r.client}, ${r.job}` : r.name}, ${stageOf(r.stage).label}, ${groupLabel(r)}${priced ? `, ${r.value ? money(r.value) : "no price yet"}` : ""}. ${w.text}`;
@@ -205,16 +210,14 @@
     }
     if (LAYOUT === "footer") {
       // the card's facts on top, quiet; its next step as a strip across its foot, the one thing on it that acts
-      const sub = job ? `${r.client} · ${r.place}` : inv ? `${r.number} · ${r.job}` : r.ask;
       return `<article ${attrs}><div class="pl-row">${open(`<span>${esc(r.name)}</span>`)}${value}</div>
-        <p class="pl-line pl-sub">${esc(sub)}</p><p class="pl-line pl-when-text pl-meta">${esc(w.text)}</p>
+        <p class="pl-line pl-sub">${esc(subOf(r))}</p><p class="pl-line pl-when-text pl-meta">${esc(w.text)}</p>
         ${next ? `<button type="button" class="pl-next pl-strip" ${stepAria}><span>${STEP[next]}</span>${ic("chevron-right", 12, { optical: true })}</button>` : ""}</article>`;
     }
     // Quiet: the name and its money, who or what it's for, then how long it's been beside the next step as a link;
     // the owner is in the summary (and People picks whose)
-    const sub = job ? `${r.client} · ${r.place}` : inv ? `${r.number} · ${r.job}` : r.ask;
     return `<article ${attrs}><div class="pl-row">${open(`<span>${esc(r.name)}</span>`)}${value}</div>
-      <p class="pl-line pl-sub">${esc(sub)}</p>
+      <p class="pl-line pl-sub">${esc(subOf(r))}</p>
       <div class="pl-row pl-meta"><p class="pl-line pl-when-text">${esc(w.text)}</p>${next ? `<button type="button" class="pl-next pl-link" ${stepAria}>${STEP[next]}${ic("chevron-right", 12, { optical: true })}</button>` : ""}</div></article>`;
   }
   // within a group, the date's order (P-groups): scheduled jobs by their start, visits to come by their day and time,
@@ -305,7 +308,29 @@
     // in a folded group, its group's toggle
     const to = card && (card.closest(".pl-cards[hidden]") ? $(`[aria-controls="${card.parentElement.id}"]`, board) : $(".pl-open", card));
     (to || $(`#col-${stage} .pl-col-body`, board))?.focus({ preventScroll: true });
-    if (to) (to === card.querySelector(".pl-open") ? card : to).scrollIntoView({ block: "nearest", inline: "nearest" });
+    if (!to) return;
+    const seen = to === card.querySelector(".pl-open") ? card : to;
+    seen.scrollIntoView({ block: "nearest", inline: "nearest" });
+    landed(seen);
+  }
+  // where it landed lights up for a moment, once it's in view (pipeline.css, your call, 22 Oct): the card, or its
+  // folded group's toggle; after the dialog or the sheet that made the change has gone, so it's seen
+  let landing = null;
+  async function landed(el) {
+    landing?.disconnect(); landing = null;
+    const leaving = [dlg, pop].flatMap((x) => x.getAnimations({ subtree: true }));
+    if (leaving.length) await Promise.allSettled(leaving.map((a) => a.finished));
+    if (!el.isConnected) return;
+    landing?.disconnect();
+    landing = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      landing.disconnect(); landing = null;
+      el.removeAttribute("data-landed"); void el.offsetWidth; el.setAttribute("data-landed", "");
+      // gone when it's faded (with less motion, nothing fades: it's held still as long)
+      clearTimeout(el.landTimer);
+      el.landTimer = setTimeout(() => el.removeAttribute("data-landed"), (parseFloat(getComputedStyle(el).getPropertyValue("--duration-medium")) || 240) * 3);
+    }, { threshold: 0.9 });
+    landing.observe(el);
   }
   const set = (r, stage, group, extra = {}) => Object.assign(r, { stage, group, at: 0 }, extra);
 
@@ -322,6 +347,10 @@
   }
   const field = (id, label, input, help = "") => `<div class="field"><label class="field-label" for="${id}">${label}</label>${input}${help ? `<p class="field-helper">${help}</p>` : ""}</div>`;
   const moneyInput = (id, v) => `<div class="input-group"><span class="input-adornment">$</span><input class="input" id="${id}" name="${id}" inputmode="decimal" data-numeric value="${v.toLocaleString("en-US")}" required></div>`;
+  // a visit's time, picked from the working day in quarter hours and read as the board prints it (a time field reads
+  // “09:00 AM”, the browser's way)
+  const times = (at = "9:00") => Array.from({ length: (20 - 6) * 4 + 1 }, (_, i) => `${6 + Math.floor(i / 4)}:${String((i % 4) * 15).padStart(2, "0")}`)
+    .map((t) => `<option value="${t}"${t === at ? " selected" : ""}>${clock(t)}</option>`).join("");
   const amount = (s) => Math.round(parseFloat(String(s).replace(/[^0-9.]/g, "")) || 0);
 
   function run(step, r) {
@@ -340,9 +369,9 @@
       case "visit": return ask({
         title: `Book a visit with ${esc(r.name)}`, submit: "Book visit",
         body: `${field("v-what", "What for", `<div class="select"><select class="input" id="v-what" name="what"><option>Estimate visit</option><option>Measure</option></select></div>`)}
-          <div class="pl-step-row">${field("v-day", "Day", `<input class="input" type="date" id="v-day" name="day" value="${iso(1)}" required>`)}${field("v-time", "Time", `<input class="input" type="time" id="v-time" name="time" step="900" value="09:00" required>`)}</div>
+          <div class="pl-step-row">${field("v-day", "Day", `<input class="input" type="date" id="v-day" name="day" value="${iso(1)}" required>`)}${field("v-time", "Time", `<div class="select"><select class="input" id="v-time" name="time">${times()}</select></div>`)}</div>
           <p class="pl-step-note">${ic("calendar-check", 14, { optical: true })}<span>It goes on the calendar too.</span></p>`,
-        onSubmit: (v) => { const d = offset(v.day); change(() => set(r, "visits", d < 0 ? "visited" : d === 0 ? "today" : "coming", { visit: { day: d, time: v.time.replace(/^0/, ""), what: v.what } }), `Visit with ${r.name} booked for ${short(d)}, ${v.time.replace(/^0/, "")}`, r); },
+        onSubmit: (v) => { const d = offset(v.day); change(() => set(r, "visits", d < 0 ? "visited" : d === 0 ? "today" : "coming", { visit: { day: d, time: v.time, what: v.what } }), `Visit with ${r.name} booked for ${short(d)}, ${clock(v.time)}`, r); },
       });
       case "unvisit": return change(() => { set(r, "leads", "talking"); delete r.visit; }, `${r.name} back in ${s("leads")}, visit cancelled`, r);
       case "finish": return BolsterShell.toast(`Concept only: ${r.name}'s estimate opens in the job.`);
@@ -452,6 +481,8 @@
 
   // ---------- dragging: onto a stage, or onto Mark as lost (P-move) ----------
   // Mouse and pen only: on touch a press scrolls, and phones move cards from the summary (P-phone).
+  // Held (your call, 22 Oct): the card's place stays as a quiet outline, and the card goes with the pointer, lifted,
+  // where it was held; what a drop there would do at its foot
   let drag = null, swallow = false;
   const ghost = $("#ghost"), dropbar = $("#dropbar");
   function targetAt(x, y) {
@@ -464,7 +495,8 @@
     if (e.button !== 0 || e.pointerType === "touch" || phone.matches) return;
     const el = e.target.closest(".pl-card");
     if (!el || e.target.closest(".pl-next")) return;
-    drag = { id: el.dataset.id, x: e.clientX, y: e.clientY, started: false };
+    const b = el.getBoundingClientRect();
+    drag = { id: el.dataset.id, x: e.clientX, y: e.clientY, dx: e.clientX - b.left, dy: e.clientY - b.top, w: b.width, started: false };
   });
   document.addEventListener("pointermove", (e) => {
     if (!drag) return;
@@ -477,22 +509,29 @@
       $(`.pl-card[data-id="${drag.id}"]`)?.setAttribute("data-dragging-item", "");
       $$(".pl-col", board).forEach((c) => { const g = canGo(r, c.dataset.stage); c.dataset.drop = g.same ? "home" : g.ok ? "yes" : "no"; });
       dropbar.hidden = !canLose(r);
+      const priced = r.kind !== "person";
+      ghost.innerHTML = `<div class="pl-row"><b>${esc(r.name)}</b>${priced ? `<span class="pl-value">${r.value ? money(r.value) : '<span class="pl-none">No price</span>'}</span>` : ""}</div>
+        <p class="pl-line">${esc(subOf(r))}</p><p class="pl-ghost-hint"></p>`;
+      ghost.style.inlineSize = `${drag.w}px`;
+      ghost.style.transformOrigin = `${drag.dx}px ${drag.dy}px`;
       ghost.hidden = false;
     }
     const t = targetAt(e.clientX, e.clientY);
     $$(".pl-col[data-over], [data-drop-lost][data-over]").forEach((x) => x.removeAttribute("data-over"));
-    let line = "Drop on a stage";
-    if (t?.lost && canLose(r)) { $("[data-drop-lost]").setAttribute("data-over", ""); line = "Mark as lost, with a reason"; drag.to = { lost: true }; }
+    let line = "Drop on a stage", ok = false;
+    if (t?.lost && canLose(r)) { $("[data-drop-lost]").setAttribute("data-over", ""); line = "Mark as lost, with a reason"; drag.to = { lost: true }; ok = true; }
     else if (t?.stage) {
       const g = canGo(r, t.stage), s = stageOf(t.stage);
       $(`#col-${t.stage}`).setAttribute("data-over", "");
       line = g.same ? "Where it is now" : g.ok ? (g.step === "create" ? `Create its job, in ${s.label}` : g.step === "visit" ? "Book a visit" : g.step === "book" ? "Mark as booked: contract and start" : g.step === "invoice" ? "Invoice it" : `Move to ${s.label}`) : g.why;
       drag.to = g.ok ? { stage: t.stage } : null;
+      ok = g.ok;
     } else drag.to = null;
-    ghost.innerHTML = `<b>${esc(r.name)}</b><span>${esc(line)}</span>`;
-    // beside the pointer, above it where it would run off the foot
-    const gy = e.clientY + 14 + ghost.offsetHeight > innerHeight - 8 ? e.clientY - 14 - ghost.offsetHeight : e.clientY + 14;
-    ghost.style.translate = `${Math.min(e.clientX + 14, innerWidth - ghost.offsetWidth - 8)}px ${gy}px`;
+    const hint = $(".pl-ghost-hint", ghost);
+    hint.textContent = line; hint.toggleAttribute("data-ok", ok);
+    // held where it was picked up, kept on the screen so its foot can be read
+    const gx = Math.max(8, Math.min(e.clientX - drag.dx, innerWidth - ghost.offsetWidth - 8)), gy = Math.max(8, Math.min(e.clientY - drag.dy, innerHeight - ghost.offsetHeight - 8));
+    ghost.style.translate = `${gx}px ${gy}px`;
     // near the board's edges, it scrolls to the stages beyond and the cards below
     const b = board.getBoundingClientRect(), edge = 64;
     board.scrollLeft += e.clientX < b.left + edge ? -14 : e.clientX > b.right - edge ? 14 : 0;

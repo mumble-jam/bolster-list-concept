@@ -80,6 +80,10 @@
   /* the date range names its date once set (Created · Last 30 days); on phones only the value shows, and
      it gives way before the search field does */
   .date-range-label { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
+  @keyframes chips-more {
+    from, 96% { mask-image: linear-gradient(to left, transparent, #000 var(--space-8)); }
+    to { mask-image: linear-gradient(to right, transparent, #000 var(--space-8)); }
+  }
   @media (max-width: 767px) {
     .date-range-button { flex: 0 1 auto; min-inline-size: 0; max-inline-size: 55%; }
     .date-range-field { display: none; }
@@ -92,6 +96,16 @@
       --_fg: var(--color-content-secondary); --_fg-hover: var(--color-content-primary);
       --_border: transparent; --_border-hover: transparent; --_b: 0; }
     .add-filter span { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    /* the count and the chips on one line that scrolls sideways, so a chip never takes two lines and Clear all
+       never a line of its own (your call, 22 Oct); room above and below for a chip's focus ring */
+    .list-chips { flex-wrap: nowrap; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none;
+      padding-block-start: var(--space-1); margin-block-start: calc(var(--space-1) * -1); }
+    .list-chips::-webkit-scrollbar { display: none; }
+    /* while there's more, its edge fades, as the table's (only when it scrolls: an idle scroll timeline draws nothing) */
+    @supports (animation-timeline: scroll()) {
+      .list-chips { animation: chips-more linear both; animation-timeline: scroll(self inline); }
+    }
+    .list-chips > *, .list-chips .filters > * { flex: none; }
   }
   /* the search field's hover sits on white, like a menu's: a step stronger than a row's */
   .list-toolbar { --color-surface-hover: var(--color-surface-hover-control); }

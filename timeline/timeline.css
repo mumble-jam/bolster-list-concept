@@ -93,6 +93,10 @@
   .tl-link-handle { position: absolute; inset-block-start: 50%; inset-inline-end: -14px; inline-size: 10px; block-size: 10px; translate: 0 -50%; border: var(--border-width-strong) solid var(--color-action-accent); border-radius: var(--radius-full); background: var(--color-surface-default); cursor: crosshair; opacity: 0; transition: opacity var(--duration-fast, 120ms) var(--ease-out); }
   @media (hover: hover) { .tl-bar:hover .tl-link-handle, .tl-bar:hover .tl-end { opacity: 1; } }
   .tl-bar-label { position: absolute; inset-block-start: 0; z-index: 3; line-height: var(--tl-row); font-size: var(--text-xs); color: var(--color-content-secondary); white-space: nowrap; pointer-events: none; }
+  /* a backing in the row's ground, soft at its edges, so the today line and the grid stop at the words (your call,
+     22 Oct) */
+  .tl-bar-label { --_halo: var(--color-surface-default); block-size: 1lh; inset-block-start: calc((var(--tl-row) - 1lh) / 2); line-height: var(--leading-xs); padding-inline: 2px; margin-inline-start: -2px; background: var(--_halo); box-shadow: 0 0 3px 1px var(--_halo); }
+  .tl-row[data-type="job"] .tl-bar-label { --_halo: var(--color-surface-group); }
   /* a job and a phase: a bracket over their stages, never read as work of their own */
   .tl-bracket { position: absolute; inset-block-start: 13px; z-index: 3; block-size: 9px; border: var(--border-width-strong) solid var(--color-content-secondary); border-block-end: 0; border-radius: var(--radius-xs) var(--radius-xs) 0 0; cursor: grab; }
   /* a bracket hovered outlines its job's or phase's rows (your ask, 22 Oct): dashed, its legs carried down to its last row,

@@ -101,14 +101,16 @@ window.BolsterShell = (() => {
     return built ? `href="${href(built.id)}"` : `href="#" data-not-built="${s.id}"`;
   };
 
+  // the top bar's menus open on the page's light surface, so their icons are the page's Regular, not the chrome's
+  // Light (your call, 22 Oct)
   function topBar() {
     return `<header class="top-bar bs-top">
       <button class="bs-icon-btn bs-hamburger" type="button" data-toggle-sidebar aria-label="Open menu" data-tip="Menu">${chrome("menu")}</button>
       <div class="bs-logo"><a class="bs-logo-link" href="#" data-not-built="home" aria-label="Bolster home" data-tip="Home">${LOGO}</a>${pinButton()}</div>
       <button class="bs-company" type="button" popovertarget="bs-company-menu" aria-haspopup="menu">${esc(COMPANY)}${chrome("chevron-down", 16)}</button>
       <div class="menu" id="bs-company-menu" popover role="menu" aria-label="Company">
-        <button class="menu-item" role="menuitem" data-not-built="switch-company">${chrome("arrow-left-right", 16)}Switch company</button>
-        <button class="menu-item" role="menuitem" data-open-settings="company-settings">${chrome("briefcase", 16)}Company settings</button>
+        <button class="menu-item" role="menuitem" data-not-built="switch-company">${icon("arrow-left-right", 16)}Switch company</button>
+        <button class="menu-item" role="menuitem" data-open-settings="company-settings">${icon("briefcase", 16)}Company settings</button>
       </div>
       <button class="top-bar-search" type="button" data-not-built="search" data-tip="Search">${chrome("search", 16)}<span>Search customers, jobs, invoices, files…</span><kbd>⌘K</kbd></button>
       <div class="bs-top-actions">
@@ -116,10 +118,10 @@ window.BolsterShell = (() => {
         <button class="bs-icon-btn bs-assistant" type="button" aria-label="Ask Bolton" data-not-built="assistant" data-tip="Ask Bolton"><img src="${ASSETS}bolton-head.svg" alt=""></button>
         <button class="bs-avatar" type="button" popovertarget="bs-user-menu" aria-haspopup="menu" aria-label="${esc(USER.name)}" data-tip="Your account"><span class="avatar" data-color="${USER.color}" aria-hidden="true">${USER.initials}</span></button>
         <div class="menu" id="bs-user-menu" popover role="menu" aria-label="Account">
-          <button class="menu-item" role="menuitem" data-not-built="profile">${chrome("user", 16)}Edit profile</button>
-          <button class="menu-item" role="menuitem" data-not-built="users">${chrome("users", 16)}Manage users</button>
+          <button class="menu-item" role="menuitem" data-not-built="profile">${icon("user", 16)}Edit profile</button>
+          <button class="menu-item" role="menuitem" data-not-built="users">${icon("users", 16)}Manage users</button>
           <hr class="menu-separator">
-          <button class="menu-item" role="menuitem" data-not-built="logout">${chrome("log-out", 16)}Log out</button>
+          <button class="menu-item" role="menuitem" data-not-built="logout">${icon("log-out", 16)}Log out</button>
         </div>
       </div>
     </header>`;

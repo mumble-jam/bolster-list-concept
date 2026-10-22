@@ -29,12 +29,13 @@
   .bs-logo-link { display: flex; align-items: center; flex: none; align-self: stretch; border-radius: var(--radius-sm); }
   .bs-logo-link:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; } /* inside the cell, which clips */
   /* folding the menu, at the logo cell's far end (D92): its right edge in line with the menu's rows (the menu's 8 in,
-     past the cell's edge), the menu's shape (a row's corners, 32 square), the chrome's quiet ink; it rides the edge
-     out as the folded rail opens, and the cell clips it while the rail is shut */
+     past the cell's edge), the menu's shape (a row's corners, 32 square), the chrome's quiet ink; the cell clips it
+     while the rail is shut */
   .bs-pin {
-    /* held to the cell's end, so it rides the edge from the first frame (the audit: it stood still until the cell
-       passed the wordmark), its right edge on the rows' (8 in from the menu's, inside its border) */
-    position: absolute; inset-block: 0; inset-inline-end: var(--space-2); margin-block: auto;
+    /* where it is when the cell's open, its right edge on the rows' (8 in from the menu's, inside its border): the
+       folded cell clips it and the edge brings it in, as the labels (held to the cell's end, it sat on the logo
+       folded, your note, 22 Oct) */
+    position: absolute; inset-block: 0; inset-inline-start: calc(var(--shell-rail-expanded-width) - var(--border-width-default) - var(--space-2) - 2rem); margin-block: auto;
     display: inline-grid; place-items: center; flex: none;
     inline-size: 2rem; block-size: 2rem; padding: 0; border: 0; border-radius: var(--radius-md); background: none;
     color: var(--color-content-on-chrome-muted); cursor: pointer;
@@ -373,8 +374,9 @@
     /* the menu pushes the page aside rather than covering it, leaving a column on the right as wide as the
        button and the air around it; the button rides with the page into that column as the ✕, and a tap
        anywhere in the column closes the menu (the page takes no taps while it's aside) */
-    /* on a tablet the menu stays the pinned menu's width, the page pushed aside by as much */
-    .app-shell { --_aside: calc(3.5rem + var(--space-4) * 2); --_menu-w: min(calc(100vw - var(--_aside)), var(--shell-sidebar-width, 16rem)); overflow-x: clip; }
+    /* on a tablet the menu is a little wider than the pinned one (272), so the phone's larger type keeps every label on
+       one line ("Leads and customers" wrapped at 256, your call, 22 Oct), the page pushed aside by as much */
+    .app-shell { --_aside: calc(3.5rem + var(--space-4) * 2); --_menu-w: min(calc(100vw - var(--_aside)), 17rem); overflow-x: clip; }
     @media (max-width: 767px) { .app-shell { --_menu-w: calc(100vw - var(--_aside)); } }
     .bs-sidebar { inline-size: var(--_menu-w); box-shadow: none; transition: translate 320ms cubic-bezier(0.2, 0.8, 0, 1); }
     /* shut, just its own width off the screen (there's no rail to clear here), so it and the page move as one */

@@ -9,6 +9,8 @@
 window.BDS_RECIPE = (() => {
   const { fmt, esc, TODAY, ageDays, kit } = window.BDS_CONCEPT;
   const { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, person, main, PHOTOS, photoAt, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf } = kit;
+  // the clock as North America reads it: "9 am", "1:30 pm" (your call, 22 Oct), as the calendar and the pipeline
+  const clock = (d) => { const h = d.getHours(), m = d.getMinutes(); return `${h % 12 || 12}${m ? `:${String(m).padStart(2, "0")}` : ""} ${h < 12 ? "am" : "pm"}`; };
   const NUMERIC = new Set(["money", "number", "percent", "count", "duration"]);
   // the first click on a header sorts the type's way (rules.json → types): biggest, newest and most
   // flagged first; names, words and the lifecycle from the top
@@ -150,7 +152,7 @@ window.BDS_RECIPE = (() => {
       case "count": return (x) => (x[c.key] ? (c.unit ? fmt.plural(x[c.key], c.unit, `${c.unit}s`) : fmt.count(x[c.key])) : none("–"));
       case "duration": return (x) => fmt.plural(x[c.key], c.unit || "day", `${c.unit || "day"}s`);
       case "date": return (x) => (x[c.key] ? muted(shortDate(x[c.key])) : none("–"));
-      case "datetime": return (x) => !x[c.key] ? none("–") : muted(ageDays(x[c.key]) <= 1 ? `${fmt.ago(x[c.key])} ${x[c.key].toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }).toLowerCase().replace(" ", "")}` : shortDate(x[c.key]));
+      case "datetime": return (x) => !x[c.key] ? none("–") : muted(ageDays(x[c.key]) <= 1 ? `${fmt.ago(x[c.key])} ${clock(x[c.key])}` : shortDate(x[c.key]));
       case "status": return (x) => badge(empty.statusMap[x[c.key]]);
       case "person": return (x) => (x[c.key] ? person(x[c.key]) : none("–"));
       // a linked person or company leads with its avatar; a job or a quote is its name alone (D87)

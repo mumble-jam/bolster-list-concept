@@ -174,7 +174,7 @@
       ${lead}
       <button type="button" class="todo-prio" data-pick="prio" data-id="${t.id}" aria-haspopup="menu" aria-expanded="false" aria-label="Priority: ${PRIO[t.priority]}. Change" data-tip="${t.priority ? PRIO[t.priority] : "Set priority"}">${mark(t.priority)}</button>
       <div class="todo-main">
-        <button type="button" class="todo-title" data-open-task="${t.id}">${esc(t.name)}</button>${st.group !== "job" && t.job ? `<span class="todo-sep" aria-hidden="true">·</span><a class="todo-job" href="../index.html#jobs" data-tip="Open ${esc(t.job)}">${esc(t.job)}</a>` : ""}
+        <button type="button" class="todo-title" data-open-task="${t.id}">${esc(t.name)}</button>${st.group !== "job" && t.job ? `<a class="todo-job" href="../index.html#jobs" data-tip="Open ${esc(t.job)}">${esc(t.job)}</a>` : ""}
         <p class="todo-meta">${meta(t)}</p>
       </div>
       <div class="todo-side">${sideHtml(t)}</div>
@@ -182,8 +182,9 @@
   }
   const addHint = (g) => (g.completed || g.late ? "" : g.job !== undefined ? (g.job ? `for ${g.job}` : "no job") : g.due == null ? "no due date" : `due ${dueInline(daysFrom(TODAY, g.due))}`);
   function addHtml(g) {
-    if (g.completed || g.late || st.selecting) return "";
-    if (st.adding !== g.key) return `<button type="button" class="todo-add" data-add="${esc(g.key)}">${ic("circle-plus", 14)}<span>Add task<span class="todo-add-hint">${esc(addHint(g))}</span></span></button>`;
+    if (g.completed || g.late) return "";
+    // selecting keeps the row where it is, switched off, so nothing under it moves (your call, 22 Oct)
+    if (st.adding !== g.key || st.selecting) return `<button type="button" class="todo-add" data-add="${esc(g.key)}"${st.selecting ? " disabled" : ""}>${ic("circle-plus", 14)}<span>Add task<span class="todo-add-hint">${esc(addHint(g))}</span></span></button>`;
     return `<form class="todo-add-form" data-add-form="${esc(g.key)}"><input type="checkbox" class="todo-check" disabled aria-hidden="true" tabindex="-1">
       <input class="input" data-size="sm" name="name" placeholder="Task name" aria-label="New task, ${esc(addHint(g))}" autocomplete="off"><p class="field-helper">Enter adds it, ${esc(addHint(g))}; Escape stops.</p></form>`;
   }
@@ -622,7 +623,7 @@
     if ((el = q("[data-set-prio]"))) return apply((t) => (t.priority = +el.dataset.setPrio), `set to ${PRIO[+el.dataset.setPrio].toLowerCase()}`);
     if ((el = q("[data-open-task]"))) { if (st.selecting) return tickRow(el.closest(".todo-row")); return openTask(el.dataset.openTask, e.detail === 0); }
     if (q("[data-close-task]")) return closeTask();
-    if ((el = q("[data-add]"))) { st.adding = el.dataset.add; return render({ keepFresh: true }); }
+    if ((el = q("[data-add]:not(:disabled)"))) { st.adding = el.dataset.add; return render({ keepFresh: true }); }
     if (q("[data-fold]")) {
       const was = st.completedOpen; st.completedOpen = !was; render({ keepFresh: true });
       const nb = $("[data-fold]"); nb?.focus({ preventScroll: true });

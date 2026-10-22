@@ -27,9 +27,13 @@
     short: (s) => day(s).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short" }),
     long: (s) => day(s).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" }),
     dayWord: (s) => (s === T ? "Today" : s === D(1) ? "Tomorrow" : s === D(-1) ? "Yesterday" : null),
-    time: (m) => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, "0")}`,
-    span: (a, b) => `${f.time(a)}–${f.time(b)}`,
+    // 12-hour, as North America reads it (your call, 22 Oct): “9 am”, “1:30 pm”, “12 pm”
+    time: (m) => { const h = Math.floor(m / 60) % 24, mm = m % 60; return `${h % 12 || 12}${mm ? `:${String(mm).padStart(2, "0")}` : ""} ${h < 12 ? "am" : "pm"}`; },
+    // am or pm once where both ends share it: “9–10 am”, “11:30 am–1 pm”
+    span: (a, b) => { const x = f.time(a), y = f.time(b); return x.slice(-2) === y.slice(-2) ? `${x.slice(0, -3)}–${y}` : `${x}–${y}`; },
   };
+  // a time field's own value, 24-hour: “09:30”
+  const hhmm = (m) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
   const minutes = (hhmm) => { const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; };
   // an event's time: its span, or All day (Bolster's events are one day long, all day or from a time to a time)
   const spanOf = (it) => (it.allDay ? "All day" : f.span(it.from, it.to));
@@ -88,11 +92,14 @@
   const cat = (it) => (it.kind === "appt" ? (it.type === "Site visit" ? "sales" : "event") : it.kind);
   let VIEW = "month";
   try { VIEW = localStorage.getItem("cal-view") || "month"; } catch {}
-  // Unscheduled opens beside the calendar the first time (from 1024 wide; a sheet below it never opens on
-  // its own), then stays as it was last left, in this browser
-  let TRAY = true;
-  try { TRAY = localStorage.getItem("cal-tray") !== "closed"; } catch {}
+  // Unscheduled opens beside the calendar the first time from 1280 wide, closed below it (your call, 22 Oct: at 1024
+  // it left Crew's days too narrow to read; a sheet below 1024 never opens on its own); once opened or closed, it
+  // stays as it was last left, in this browser
+  const roomy = matchMedia("(min-width: 1280px)");
+  let TRAY = null;
+  try { TRAY = { open: true, closed: false }[localStorage.getItem("cal-tray")] ?? null; } catch {}
   const st = { view: VIEW, at: T, show: { job: true, sales: true, event: true, busy: true }, people: null, trayOpen: TRAY };
+  const trayOpen = () => st.trayOpen ?? roomy.matches;
   const keepTray = () => { try { localStorage.setItem("cal-tray", st.trayOpen ? "open" : "closed"); } catch {} };
   const shown = (it) => it.draft || (st.show[cat(it)] && (!st.people || it.who.some((p) => st.people.has(p))));
   const spansIn = (a, b, filter = () => true) => items.filter((it) => it.kind === "job" && shown(it) && it.start <= b && endOf(it) >= a && filter(it));
@@ -104,24 +111,29 @@
   // all-day row of Week and Day, and by each person's row in Crew.
   const phone = matchMedia("(max-width: 767px)");
   const finePointer = matchMedia("(hover: hover) and (pointer: fine)");
-  function weekRow({ start, n = 7, spans, things = () => [], dates = true, maxLanes = 3, lines = 5, person = null, month = null }) {
+  // the row's spans, each in the first lane free from its start
+  function laneSegs(start, n, spans) {
     const end = add(start, n - 1);
     const segs = spans.map((sp) => ({ sp, s: Math.max(0, diff(start, sp.start)), e: Math.min(n - 1, diff(start, endOf(sp))), contL: sp.start < start, contR: endOf(sp) > end }))
       .sort((a, b) => a.s - b.s || (b.e - b.s) - (a.e - a.s));
     const lanes = [];
     for (const g of segs) { let l = lanes.findIndex((e) => e < g.s); if (l < 0) { l = lanes.length; lanes.push(-1); } lanes[l] = g.e; g.lane = l; }
-    const shownLanes = Math.min(lanes.length, maxLanes), top = dates ? 2 : 1;
-    let html = "";
-    for (let i = 0; i < n; i++) {
-      const d = add(start, i), other = month != null && day(d).getMonth() !== month;
-      html += `<button type="button" class="cal-day" tabindex="-1" data-add-day="${d}" style="grid-column:${i + 1}"${isOff(d) ? " data-off" : ""} aria-label="Add on ${esc(f.short(d))}"></button>`;
-      if (dates) html += `<span class="cal-date" style="grid-column:${i + 1}"${d === T ? " data-today" : d < T ? " data-past" : ""}${other ? " data-other" : ""}>${day(d).getDate() === 1 ? day(d).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : day(d).getDate()}</span>`;
-    }
-    for (const g of segs.filter((x) => x.lane < shownLanes)) {
-      const sp = g.sp, first = !g.contL;
-      html += `<button type="button" class="cal-span" data-item="${sp.id}"${person ? ` data-person="${person}"` : ""} style="grid-column:${g.s + 1} / ${g.e + 2};grid-row:${g.lane + top}"${g.contL ? " data-cont-l" : ""}${g.contR ? " data-cont-r" : ""}${isPast(sp) ? " data-past" : ""}
-        aria-haspopup="dialog" aria-expanded="false" ${first ? `aria-label="${esc(`${spanLabel(sp)}, ${f.short(sp.start)} to ${f.short(endOf(sp))}, job phase`)}"` : `tabindex="-1" aria-hidden="true" data-tip="${esc(spanLabel(sp))}"`}>${ic("briefcase", 12)}<span>${esc(sp.job)}<span class="cal-sub"> · ${esc(sp.phase)}</span></span>${!g.contR && finePointer.matches ? `<span class="cal-resize" data-resize="${sp.id}" aria-hidden="true"></span>` : ""}</button>`;
-    }
+    return { segs, lanes: lanes.length };
+  }
+  const dayCells = (start, n, dates, month) => Array.from({ length: n }, (_, i) => {
+    const d = add(start, i), other = month != null && day(d).getMonth() !== month;
+    return `<button type="button" class="cal-day" tabindex="-1" data-add-day="${d}" style="grid-column:${i + 1}"${isOff(d) ? " data-off" : ""} aria-label="Add on ${esc(f.short(d))}"></button>${dates
+      ? `<span class="cal-date" style="grid-column:${i + 1}"${d === T ? " data-today" : d < T ? " data-past" : ""}${other ? " data-other" : ""}>${day(d).getDate() === 1 ? day(d).toLocaleDateString("en-GB", { day: "numeric", month: "short" }) : day(d).getDate()}</span>` : ""}`;
+  }).join("");
+  // a bar from day s to day e, squared where it carries on; named where it starts, the rest of it hidden from the keyboard
+  const spanBar = (sp, s, e, row, contL, contR, person) => `<button type="button" class="cal-span" data-item="${sp.id}"${person ? ` data-person="${person}"` : ""} style="grid-column:${s + 1} / ${e + 2};grid-row:${row}"${contL ? " data-cont-l" : ""}${contR ? " data-cont-r" : ""}${isPast(sp) ? " data-past" : ""}
+        aria-haspopup="dialog" aria-expanded="false" ${!contL ? `aria-label="${esc(`${spanLabel(sp)}, ${f.short(sp.start)} to ${f.short(endOf(sp))}, job phase`)}"` : `tabindex="-1" aria-hidden="true" data-tip="${esc(spanLabel(sp))}"`}>${ic("briefcase", 12)}<span>${esc(sp.job)}<span class="cal-sub"> · ${esc(sp.phase)}</span></span>${!contR && finePointer.matches ? `<span class="cal-resize" data-resize="${sp.id}" aria-hidden="true"></span>` : ""}</button>`;
+  const moreBtn = (d, n, person, allDay) => `<button type="button" class="cal-more" data-more="${d}"${person ? ` data-person="${person}"` : ""}${allDay ? " data-all-day" : ""} aria-haspopup="dialog" aria-expanded="false" aria-label="${n} more on ${esc(f.short(d))}">+${n} more</button>`;
+  function weekRow({ start, n = 7, spans, things = () => [], dates = true, maxLanes = 3, lines = 5, person = null, month = null }) {
+    const { segs, lanes } = laneSegs(start, n, spans);
+    const shownLanes = Math.min(lanes, maxLanes), top = dates ? 2 : 1;
+    let html = dayCells(start, n, dates, month);
+    for (const g of segs.filter((x) => x.lane < shownLanes)) html += spanBar(g.sp, g.s, g.e, g.lane + top, g.contL, g.contR, person);
     for (let i = 0; i < n; i++) {
       const d = add(start, i), list = things(d);
       const hidden = segs.filter((g) => g.lane >= shownLanes && g.s <= i && g.e >= i).length;
@@ -129,11 +141,47 @@
       const room = Math.max(1, lines - shownLanes);
       // a bar past the lanes always counts in “+n more”: nothing is left out without a count
       const over = hidden > 0 || list.length > room, show = over ? list.slice(0, Math.max(0, room - 1)) : list;
-      html += `<div class="cal-items" style="grid-column:${i + 1}">${show.map((it) => itemBtn(it, person)).join("")}${over ? `<button type="button" class="cal-more" data-more="${d}"${person ? ` data-person="${person}"` : ""} aria-haspopup="dialog" aria-expanded="false" aria-label="${list.length - show.length + hidden} more on ${esc(f.short(d))}">+${list.length - show.length + hidden} more</button>` : ""}</div>`;
+      html += `<div class="cal-items" style="grid-column:${i + 1}">${show.map((it) => itemBtn(it, person)).join("")}${over ? moreBtn(d, list.length - show.length + hidden, person) : ""}</div>`;
     }
     // the rows: the dates, a lane per span, then the day's items
     const rows = `${dates ? "auto " : ""}${shownLanes ? `repeat(${shownLanes}, var(--_lane)) ` : ""}${month != null ? "minmax(0, 1fr)" : "auto"}`;
     return `<div class="cal-week" style="--_n:${n};grid-template-rows:${rows}" data-start="${start}" data-n="${n}"${person ? ` data-person="${person}"` : ""}>${html}</div>`;
+  }
+  // Week and Day's all-day row: always two lanes, so the hours under it stay put as you page (your call, 22 Oct). A
+  // day with more than two shows its first and “+n more” in the second's place, as Month does: spans first, each
+  // keeping its lane where it can (a bar cut by a day's “+n more” goes on squared past it), then the day's all-day
+  // events. The draft being made is always the one shown
+  const ALLDAY_LANES = 2;
+  function alldayRow({ start, n, spans, things }) {
+    const { segs } = laneSegs(start, n, spans);
+    let html = dayCells(start, n, false);
+    const slots = Array.from({ length: n }, (_, i) => {
+      const on = segs.filter((g) => g.s <= i && g.e >= i).sort((a, b) => a.lane - b.lane), list = things(add(start, i));
+      const s = Array(ALLDAY_LANES).fill(null), all = on.length + list.length;
+      if (all <= ALLDAY_LANES) {
+        on.filter((g) => g.lane < ALLDAY_LANES).forEach((g) => (s[g.lane] = g));
+        for (const x of [...on.filter((g) => g.lane >= ALLDAY_LANES), ...list]) s[s.indexOf(null)] = x;
+      } else {
+        const first = list.find((x) => x.draft) || on[0] || list[0];
+        s[0] = first; s[ALLDAY_LANES - 1] = { more: all - (ALLDAY_LANES - 1) };
+      }
+      return s;
+    });
+    // each bar in runs of days on one lane
+    for (const g of segs) {
+      for (let i = g.s; i <= g.e; i++) {
+        const k = slots[i].indexOf(g);
+        if (k < 0) continue;
+        let j = i; while (j < g.e && slots[j + 1].indexOf(g) === k) j++;
+        html += spanBar(g.sp, i, j, k + 1, g.contL || i > g.s, g.contR || j < g.e, null);
+        i = j;
+      }
+    }
+    slots.forEach((s, i) => s.forEach((x, k) => {
+      if (!x || x.sp) return;
+      html += `<div class="cal-items" style="grid-column:${i + 1};grid-row:${k + 1}">${x.more ? moreBtn(add(start, i), x.more, null, true) : itemBtn(x)}</div>`;
+    }));
+    return `<div class="cal-week" style="--_n:${n};grid-template-rows:repeat(${ALLDAY_LANES}, var(--_lane))" data-start="${start}" data-n="${n}">${html}</div>`;
   }
   // an appointment, or busy time: its time, then what (C-show)
   function itemBtn(it, person) {
@@ -168,7 +216,7 @@
   function timeHtml(n) {
     const start = n === 7 ? weekStart(st.at) : st.at, end = add(start, n - 1);
     let gutter = "", cols = "";
-    for (let h = H0 + 1; h < H1; h++) gutter += `<span class="cal-gutter-label" style="top:calc(var(--_hour) * ${h - H0})">${h <= 12 ? h : h - 12} ${h < 12 ? "am" : "pm"}</span>`;
+    for (let h = H0 + 1; h < H1; h++) gutter += `<span class="cal-gutter-label" style="top:calc(var(--_hour) * ${h - H0})">${f.time(h * 60)}</span>`;
     for (let i = 0; i < n; i++) {
       const d = add(start, i), list = dayThings(d, (it) => !it.allDay);
       // side by side where they overlap
@@ -187,7 +235,7 @@
       cols += `<div class="cal-col" data-col="${d}"${isOff(d) ? " data-off" : ""}>${blocks}${now}</div>`;
     }
     return `<div class="cal-time" style="--_n:${n}">${weekdayHead(start, n, "<div></div>")}
-      <div class="cal-allday"><span class="cal-gutter-label">All day</span>${weekRow({ start, n, spans: spansIn(start, end), things: (d) => dayThings(d, (it) => it.allDay), dates: false, maxLanes: 6 })}</div>
+      <div class="cal-allday"><span class="cal-gutter-label">All day</span>${alldayRow({ start, n, spans: spansIn(start, end), things: (d) => dayThings(d, (it) => it.allDay) })}</div>
       <div class="cal-hours" style="--_span-h:${H1 - H0}"><div class="cal-gutter" aria-hidden="true">${gutter}</div>${cols}</div></div>`;
   }
 
@@ -236,7 +284,8 @@
       const s = day(weekStart(st.at)), e = day(add(weekStart(st.at), 6)), same = s.getMonth() === e.getMonth();
       return `${s.getDate()}${same ? "" : ` ${s.toLocaleDateString("en-GB", { month: "short" })}`} – ${e.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`;
     }
-    if (st.view === "day") return a.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+    // Day's short, so the bar fits one row from 1280 (your call, 22 Oct): “Wed 14 Oct 2026”
+    if (st.view === "day") return `${a.toLocaleDateString("en-GB", { weekday: "short" })} ${a.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`;
     return a.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
   };
   function render() {
@@ -266,8 +315,8 @@
     $("#tray-list").innerHTML = tray.length ? tray.map((u) => `<li><button type="button" class="cal-tray-item" data-tray="${u.id}" aria-haspopup="dialog"><b>${esc(u.job)}</b><span>${esc(u.phase)} · ${u.days} ${u.days === 1 ? "day" : "days"} · ${esc(u.client)}</span></button></li>`).join("")
       : `<li><p class="cal-tray-empty">Every job has its dates.</p></li>`;
     const wide = trayWide.matches;
-    $("#tray").hidden = !(wide && st.trayOpen);
-    $("#tray-toggle").setAttribute("aria-expanded", String(wide ? st.trayOpen : popFor?.kind === "tray"));
+    $("#tray").hidden = !(wide && trayOpen());
+    $("#tray-toggle").setAttribute("aria-expanded", String(wide ? trayOpen() : popFor?.kind === "tray"));
   }
 
   // ---------- changes, every one with Undo (C-move) ----------
@@ -346,7 +395,7 @@
     refocus = null;
   });
   // every popover closes from its corner as well as with Escape or a click outside
-  const closeBtn = () => `<button type="button" class="button cal-pop-close" data-variant="ghost" data-size="sm" data-icon-only data-close-pop aria-label="Close" data-tip="Close">${ic("xmark", 16, { optical: true })}</button>`;
+  const closeBtn = (size = 16) => `<button type="button" class="button cal-pop-close" data-variant="ghost" data-size="sm" data-icon-only data-close-pop aria-label="Close" data-tip="Close">${ic("xmark", size, { optical: true })}</button>`;
   const dd = (term, html) => `<dt>${term}</dt><dd>${html}</dd>`;
   const peopleHtml = (ids) => (ids.length ? `${faces(ids)}<span>${esc(together(ids.map((p) => nameOf(who(p)))))}</span>` : `<span class="text-secondary">No one yet</span>`);
   function summaryHtml(it) {
@@ -361,13 +410,14 @@
         <div class="cal-sum-actions"><a class="button" data-size="sm" href="../index.html#jobs">Open job</a></div></div>`;
     }
     if (it.kind === "appt") {
-      const tool = (attr, icon, name) => `<button type="button" class="button cal-pop-close" data-variant="ghost" data-size="sm" data-icon-only ${attr}="${it.id}" aria-label="${name}" data-tip="${name}">${ic(icon, 16, { optical: true })}</button>`;
-      return `<div class="cal-sum" data-cat="${cat(it)}"><div class="cal-sum-top"><p class="cal-sum-kind">${ic(cat(it) === "sales" ? "calendar-check" : "calendar", 14)}${esc(it.type)}</p><span class="cal-sum-tools">${tool("data-edit", "pen", "Edit")}${tool("data-delete", "trash", "Delete")}${closeBtn()}</span></div>
+      // edit and delete at 14 beside a 20 close: an × fills less of its box, so it's matched by ink (D41)
+      const tool = (attr, icon, name) => `<button type="button" class="button cal-pop-close" data-variant="ghost" data-size="sm" data-icon-only ${attr}="${it.id}" aria-label="${name}" data-tip="${name}">${ic(icon, 14, { optical: true })}</button>`;
+      return `<div class="cal-sum" data-cat="${cat(it)}"><div class="cal-sum-top"><p class="cal-sum-kind">${ic(cat(it) === "sales" ? "calendar-check" : "calendar", 14)}${esc(it.type)}</p><span class="cal-sum-tools">${tool("data-edit", "pen", "Edit")}${tool("data-delete", "trash", "Delete")}${closeBtn(20)}</span></div>
         <h3 tabindex="-1">${esc(it.title)}</h3>
         <p class="cal-sum-when">${esc(f.long(it.date))}<small>${spanOf(it)}</small></p>
         <dl>${it.place ? dd("Where", esc(it.place)) : ""}${it.client ? dd("Customer", esc(it.client)) : ""}${dd("With", peopleHtml(it.who))}${it.guests?.length ? dd("Guests", esc(together(it.guests))) : ""}${it.notes ? dd("Notes", esc(it.notes)) : ""}</dl>
         <form class="cal-sum-move" data-move="${it.id}"><div class="field" data-size="sm"><label class="field-label" for="mv-date">Day</label><input class="input" type="date" id="mv-date" name="date" value="${it.date}" required></div>
-          <div class="field cal-move-time" data-size="sm"><label class="field-label" for="mv-time">Starts</label><input class="input" type="time" id="mv-time" name="time" step="900" value="${f.time(it.from).padStart(5, "0")}" required></div><button type="submit" class="button" data-variant="secondary" data-size="sm">Move</button></form></div>`;
+          <div class="field cal-move-time" data-size="sm"><label class="field-label" for="mv-time">Starts</label><input class="input" type="time" id="mv-time" name="time" step="900" value="${hhmm(it.from)}" required></div><button type="submit" class="button" data-variant="secondary" data-size="sm">Move</button></form></div>`;
     }
     return `<div class="cal-sum"><div class="cal-sum-top"><p class="cal-sum-kind">${ic("clock", 14)}Other calendar</p>${closeBtn()}</div>
       <h3 tabindex="-1">Busy</h3>
@@ -376,9 +426,10 @@
       <p class="cal-sum-note">Only the time shows: what it is stays in their own calendar, and it changes there.</p></div>`;
   }
   const openSummary = (id, from) => { const it = byId(id); openPop("summary", from, () => summaryHtml(it), { label: titleOf(it) }); pop.dataset.item = id; };
-  function moreHtml(d, person) {
+  // the day's list; from the all-day row, only what's in it
+  function moreHtml(d, person, allDay) {
     const mine = person ? (it) => (person === "none" ? !it.who.length : it.who.includes(person)) : () => true;
-    const spans = spansIn(d, d, mine), things = dayThings(d, mine);
+    const spans = spansIn(d, d, mine), things = dayThings(d, (it) => mine(it) && (!allDay || it.allDay));
     return `<div class="pop-head"><h3>${esc(f.long(d))}</h3>${closeBtn()}</div><div class="pop-body cal-day-list">${spans.map((sp) => `<button type="button" class="cal-span" data-item="${sp.id}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(`${spanLabel(sp)}, ${f.short(sp.start)} to ${f.short(endOf(sp))}, job phase`)}">${ic("briefcase", 12)}<span>${esc(sp.job)}<span class="cal-sub"> · ${esc(sp.phase)}</span></span></button>`).join("")}${things.map((it) => itemBtn(it)).join("")}</div>`;
   }
   function checksHtml(title, rows) {
@@ -489,7 +540,6 @@
   const KIND2 = [["appointment-schedule", "Sales appointment"], ["event", "Event"]]; // Bolster's order; it opens on the first
   const CUSTOMERS = [...kit.CLIENTS].sort((a, b) => a.name.localeCompare(b.name)).slice(0, 40);
   const nextHalf = (m) => Math.floor(m / 30) * 30 + 30; // Bolster's default start: the next half hour
-  const hhmm = (m) => f.time(Math.min(m, 24 * 60 - 1)).padStart(5, "0");
   const surname = (n) => n.split(" ").slice(-1)[0];
   let lastKind = "appointment-schedule";
   try { lastKind = localStorage.getItem("cal-new-kind") || lastKind; } catch {}
@@ -560,7 +610,7 @@
   function conflict() {
     if (nv.kind === "event") return "";
     const p = who(nv.with), a = nv.from, b = a + lenOf();
-    if (a < WORK[0] || b > WORK[1]) return `Outside ${p.me ? "your" : `${p.name.split(" ")[0]}'s`} work hours (${f.time(WORK[0])}–${f.time(WORK[1])})`;
+    if (a < WORK[0] || b > WORK[1]) return `Outside ${p.me ? "your" : `${p.name.split(" ")[0]}'s`} work hours (${f.span(WORK[0], WORK[1])})`;
     return busyAt(nv.with, nv.date, a, b) ? `${p.me ? "You're" : `${p.name.split(" ")[0]}'s`} busy then` : "";
   }
   const withRow = (pre) => row(avatar(who(nv.with), "xs"), withPick(`${pre}-with`));
@@ -830,12 +880,12 @@
     if ((el = q("#pick-show"))) return openPop("show", el, showHtml, { label: "Show" });
     if ((el = q("#pick-people"))) return openPop("people", el, peopleChecks, { label: "People" });
     if ((el = q("#tray-toggle"))) {
-      if (trayWide.matches) { st.trayOpen = !st.trayOpen; keepTray(); return renderTray(); }
+      if (trayWide.matches) { st.trayOpen = !trayOpen(); keepTray(); return renderTray(); }
       return openPop("tray", el, trayListHtml, { label: "Unscheduled" });
     }
     if (q("[data-close-tray]")) { st.trayOpen = false; keepTray(); renderTray(); return $("#tray-toggle").focus(); }
     if ((el = q("[data-tray]"))) { const u = tray.find((x) => x.id === el.dataset.tray); return openPop("schedule", trayWide.matches ? el : $("#tray-toggle"), () => scheduleHtml(u), { label: `Schedule ${u.job}` }); }
-    if ((el = q("[data-more]"))) { const d = el.dataset.more, person = el.dataset.person; return openPop("more", el, () => moreHtml(d, person), { start: true, label: f.long(d) }); }
+    if ((el = q("[data-more]"))) { const d = el.dataset.more, person = el.dataset.person, allDay = el.hasAttribute("data-all-day"); return openPop("more", el, () => moreHtml(d, person, allDay), { start: true, label: f.long(d) }); }
     if (q("[data-draft]")) return openQuick();
     if ((el = q("[data-item]"))) { const from = pop.contains(el) && popFor ? popFor.from : el; if (pop.contains(el)) pop.hidePopover(); return openSummary(el.dataset.item, from.isConnected ? from : el); }
     if ((el = q("[data-add-day]"))) return startDraft({ date: el.dataset.addDay, person: el.closest("[data-person]")?.dataset.person, allDay: !!el.closest(".cal-allday") });
@@ -870,6 +920,7 @@
   const trayWide = matchMedia("(min-width: 1024px)");
   phone.addEventListener("change", render);
   trayWide.addEventListener("change", renderTray);
+  roomy.addEventListener("change", renderTray);
   finePointer.addEventListener("change", render);
   addEventListener("resize", () => { fitMonth(); place(); });
   // it follows its opener as the page or the hours scroll (phones: a sheet, it stays)

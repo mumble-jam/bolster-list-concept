@@ -42,10 +42,11 @@
      isn't squeezed into a square and drawn smaller than the rest (D41) */
   #tray-toggle > svg { inline-size: auto; block-size: 1rem; }
   /* the bar's layout never follows its words, so the calendar under it doesn't jump as you page, switch views or
-     pick: the period has room for its longest (a Wednesday in September, in Day), Show and People a width of
-     their own, what they read back cut short (it's whole in their names). The timeline's bar is its own */
+     pick: the period has room for its longest (a week across two months, “28 Aug – 3 Sept 2028”, now Day's is short),
+     Show and People a width of their own, what they read back cut short (it's whole in their names). One row from
+     1280, two below it, whatever the view (your call, 22 Oct). The timeline's bar is its own */
   @media (min-width: 768px) {
-    .cal-page .cal-where { min-inline-size: 29.5rem; }
+    .cal-page .cal-where { min-inline-size: 22.5rem; }
     .cal-page :is(#pick-show, #pick-people) { inline-size: 8rem; justify-content: space-between; }
   }
 
@@ -151,8 +152,9 @@
   .cal-time { --_cols: 3.5rem repeat(var(--_n), minmax(0, 1fr)); }
   .cal-allday { display: grid; grid-template-columns: 3.5rem minmax(0, 1fr); border-block-end: var(--border-width-default) solid var(--color-line-default); }
   .cal-allday > .cal-gutter-label { align-self: center; }
-  /* empty, it still keeps a lane, so its label and its + clear the rules */
-  .cal-allday .cal-week { min-block-size: calc(var(--_pt) + var(--_lane) + var(--_pb)); --_pt: var(--space-1); }
+  /* always two lanes, full or empty, so the hours under it never move as you page (your call, 22 Oct); a fuller
+     day says “+n more” (calendar.js, alldayRow) */
+  .cal-allday .cal-week { --_pt: var(--space-1); min-block-size: 0; block-size: calc(var(--_pt) + 2 * var(--_lane) + var(--_gap) + var(--_pb)); }
   /* its first day keeps the rule the hours have beside the gutter (Month's first day is the card's edge) */
   .cal-allday .cal-day:first-child { border-inline-start: var(--border-width-default) solid var(--color-line-subtle); }
   .cal-allday .cal-week .cal-date { display: none; }
@@ -180,9 +182,11 @@
   /* under an hour, two lines would be cut (your note, 22 Oct): one line, the title, then when it starts (the
      rest is in its name and summary); 15 minutes, smaller still */
   .cal-block[data-size] { flex-direction: row; align-items: center; gap: var(--space-1); padding-block: 0; }
-  /* side by side, the title gives way first, down to 3rem (or all there is), then the time */
-  .cal-block[data-size] b { flex: 0 1000 auto; min-inline-size: min(3rem, 100%); }
-  .cal-block[data-size] span { flex: 0 1 auto; min-inline-size: 0; font-variant-numeric: tabular-nums; }
+  /* side by side, the title gives way first, down to 2rem (or all there is: a few letters, so a 12-hour start like
+     “1:30 pm” stays whole in a week's day from 1440, the tray open), then the time */
+  .cal-block[data-size] b { flex: 0 1000 auto; min-inline-size: min(2rem, 100%); }
+  /* the time shrinks next to nothing until the title can't (else it loses a hair to it, and its ellipsis shows) */
+  .cal-block[data-size] span { flex: 0 0.001 auto; min-inline-size: 0; font-variant-numeric: tabular-nums; }
   .cal-block[data-size="xs"] { font-size: 0.625rem; line-height: 1; }
   /* busy: the hatch over a colour of its own, so a hover changes the colour and keeps the hatch */
   .cal-block[data-kind="busy"] { border-color: var(--color-line-subtle); border-inline-start-color: var(--color-line-strong); color: var(--color-content-secondary);

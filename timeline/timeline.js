@@ -139,6 +139,8 @@
     narrow = cardW < 1000; GRID = narrow ? 300 : 400;
     const room = cardW - GRID; // clientWidth is inside the border already
     dw = st.scale === "fit" ? Math.max(3, room / N) : DW[st.scale];
+    // never narrower than the card: a short plan at a small scale runs on in empty days to its edge (your call, 22 Oct)
+    if (st.scale !== "fit") N = Math.max(N, Math.ceil(room / dw / 7) * 7);
   }
   const X = (n) => (n - R0) * dw;
   const tier = () => (dw >= 28 ? "days" : dw >= 9 ? "weeks" : "months");
@@ -266,6 +268,8 @@
   const tl = $("#tl");
   function render() {
     const sc = $(".tl-scroll"), keepDay = sc ? R0 + sc.scrollLeft / dw : null, keepTop = sc?.scrollTop || 0;
+    // the day in the middle of the view, kept there when the scale changes (your call, 22 Oct: it went back to today)
+    const mid = sc ? R0 + (sc.scrollLeft + (sc.clientWidth - GRID) / 2) / dw : null;
     range();
     if (!shownJobs().length) {
       tl.dataset.view = "empty";
@@ -280,7 +284,10 @@
       const s2 = $(".tl-scroll");
       s2.style.setProperty("--_head", `${s2.querySelector(".tl-head").offsetHeight}px`);
       s2.scrollTop = keepTop;
-      if (keepDay != null && !moved.scale) s2.scrollLeft = (keepDay - R0) * dw; else { goToday(false); moved.scale = false; }
+      if (moved.scale === "keep" && mid != null) s2.scrollLeft = (mid - R0) * dw - (s2.clientWidth - GRID) / 2;
+      else if (keepDay != null && !moved.scale) s2.scrollLeft = (keepDay - R0) * dw;
+      else goToday(false);
+      moved.scale = false;
     }
     BolsterShell.hydrateIcons(tl);
     // the toolbar reads back its values
@@ -593,7 +600,7 @@
     if (sh) { st[sh.dataset.show] = sh.checked; keep(`tl-${sh.dataset.show}`, sh.checked ? "on" : "off"); render(); popFor.from = $("#pick-show"); popFor.from.setAttribute("aria-expanded", "true"); return; }
   });
   document.addEventListener("input", (e) => { if (e.target.matches("#pop [data-opt-find]")) findIn(e.target.value); });
-  $("#scales").addEventListener("change", (e) => { st.scale = e.target.value; keep("tl-scale", st.scale); moved.scale = true; render(); });
+  $("#scales").addEventListener("change", (e) => { st.scale = e.target.value; keep("tl-scale", st.scale); moved.scale = "keep"; render(); });
   document.addEventListener("submit", (e) => {
     const mv = e.target.closest("[data-move]"), sc = e.target.closest("[data-schedule-form]");
     if (!mv && !sc) return;
@@ -610,7 +617,7 @@
   tl.addEventListener("pointerout", (e) => outline(e, false));
   document.addEventListener("scroll", (e) => { if (e.target.classList?.contains("tl-scroll")) period(); }, { capture: true, passive: true });
   phone.addEventListener("change", () => { moved.scale = true; render(); });
-  addEventListener("resize", () => { fit(); if (st.scale === "fit") { moved.scale = true; render(); } if (popFor) BolsterShell.placePopover(pop, popFor.from); });
+  addEventListener("resize", () => { fit(); if (st.scale === "fit") { moved.scale = "keep"; render(); } if (popFor) BolsterShell.placePopover(pop, popFor.from); });
   BolsterShell.scrolling({ into: (top) => tl.getBoundingClientRect().top < top, busy: () => !!drag?.started });
   render();
 })();

@@ -32,10 +32,20 @@
   :root[data-todo-bar="surface"] .todo-bar .add-filter[aria-expanded="true"] { background: var(--color-action-ghost-hover); }
   :root[data-todo-bar="surface"] .todo-bar #result-count { display: none; }
   :root[data-todo-bar="surface"] .todo-bar .list-chips:not(:has(.chip)) { display: none; }
-  :root[data-todo-bar="surface"] .todo-bar .list-search { display: none; flex: 0 1 14rem; margin-inline-start: auto; border: var(--border-width-default) solid var(--color-line-card); background: var(--color-surface-default); padding-inline: var(--space-3); }
-  :root[data-todo-bar="surface"] .todo-bar :is(.list-bar[data-search-open], .list-bar:has(input:not(:placeholder-shown))) .list-search { display: flex; }
-  :root[data-todo-bar="surface"] .todo-search-open { display: inline-flex; margin-inline-start: auto; }
-  :root[data-todo-bar="surface"] :is(.list-bar[data-search-open], .list-bar:has(input:not(:placeholder-shown))) .todo-search-open { display: none; }
+  /* the field opens out of the button, one control (your call, 22 Oct): shut, it's the button's size under
+     it, its magnifier where the button's is; open, it grows leftwards, the magnifier riding its edge, and
+     shrinks back the same way. Clipped, not scrolled (focusing the field would scroll it). The button stays in the bar (over the field's end), so nothing beside moves */
+  :root[data-todo-bar="surface"] .todo-bar .list-search { flex: 0 1 var(--control-height-sm); min-inline-size: 0; overflow: clip; margin-inline-start: auto; border: var(--border-width-default) solid transparent; background: none; padding-inline: calc(var(--space-2) - var(--border-width-default)); }
+  :root[data-todo-bar="surface"] .todo-bar .list-search > * { visibility: hidden; }
+  :root[data-todo-bar="surface"] .todo-search-open { display: inline-flex; margin-inline-start: calc(-1 * (var(--control-height-sm) + var(--space-2))); }
+  :root[data-todo-bar="surface"] .todo-bar :is(.list-bar[data-search-open], .list-bar:has(input:not(:placeholder-shown))) .list-search { flex-basis: 14rem; border-color: var(--color-line-card); background: var(--color-surface-default); padding-inline: var(--space-3); }
+  :root[data-todo-bar="surface"] .todo-bar :is(.list-bar[data-search-open], .list-bar:has(input:not(:placeholder-shown))) .list-search > * { visibility: visible; }
+  :root[data-todo-bar="surface"] :is(.list-bar[data-search-open], .list-bar:has(input:not(:placeholder-shown))) .todo-search-open { visibility: hidden; }
+  /* opening swaps at once and grows; closing shrinks, then swaps back: the field's magnifier lands on the
+     button's before the button shows its own. Reduced motion takes the durations away (base.css) */
+  :root[data-todo-bar="surface"] .todo-bar .list-search { transition: flex var(--duration-medium) var(--ease-out), padding var(--duration-medium) var(--ease-out), border-color var(--duration-medium) var(--ease-out), background-color var(--duration-medium) var(--ease-out); }
+  :root[data-todo-bar="surface"] .todo-bar .list-search > *, :root[data-todo-bar="surface"] .todo-search-open > svg { transition: visibility 0s var(--duration-medium); }
+  :root[data-todo-bar="surface"] .todo-bar :is(.list-bar[data-search-open], .list-bar:has(input:not(:placeholder-shown))) :is(.list-search > *, .todo-search-open > svg) { transition-delay: 0s; }
   @media (hover: hover) { :root[data-todo-bar="surface"] .todo-bar .list-search:hover { border-color: var(--color-line-strong); background: var(--color-surface-default); } }
   :root[data-todo-bar="surface"] .todo-bar .list-chips { padding: var(--space-2) 0 0; }
   .todo-groups { display: grid; gap: var(--space-3); }
@@ -58,8 +68,11 @@
   /* ---------- a row ---------- */
   .todo-row {
     position: relative;
-    display: grid; grid-template-columns: var(--space-4) var(--space-5) var(--space-4) minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-2);
-    min-block-size: var(--control-height-lg); padding: var(--space-1) var(--space-2) var(--space-1) 0;
+    display: grid; grid-template-columns: var(--space-4) var(--space-5) var(--space-4) minmax(0, 1fr) auto; align-items: start; align-content: center; column-gap: var(--space-2);
+    min-block-size: var(--control-height-lg); padding: var(--space-2) var(--space-2) var(--space-2) 0; /* 8 above and below a title and its job (56) */
+    /* the title's first line: the check, the mark, the handle and the columns sit on it, however many lines
+       the title takes (your call, 22 Oct); a title and its job fill the row, one alone is centred in it */
+    --_first-line: var(--leading-sm);
     border-radius: var(--radius-md);
     /* the row's own background, which the faces' rings are drawn in */
     --_row-bg: var(--color-surface-default);
@@ -73,7 +86,8 @@
   .todo-row:is([data-open], [data-selected]) + .todo-row:is([data-open], [data-selected]) { border-start-start-radius: 0; border-start-end-radius: 0; }
 
   /* the handle: shown on hover and focus, dragged to reorder (Alt and the arrows from the keyboard) */
-  .todo-grip { display: grid; place-items: center; inline-size: var(--space-4); block-size: var(--space-6); padding: 0; border: 0; border-radius: var(--radius-xs); background: none; color: var(--color-content-tertiary); cursor: grab; opacity: 0; }
+  /* on the first line, reaching the row's top edge: in its corner, so it takes the row's corner (D35) */
+  .todo-grip { --_box: calc(var(--_first-line) + 2 * var(--space-1)); display: grid; place-items: center; inline-size: var(--space-4); block-size: var(--_box); padding: 0; border: 0; border-radius: var(--radius-md); background: none; color: var(--color-content-tertiary); cursor: grab; opacity: 0; }
   .todo-row:hover .todo-grip, .todo-grip:focus-visible { opacity: 1; }
   .todo-grip:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
   .todo-row[data-dragging] { opacity: 0.4; }
@@ -86,7 +100,7 @@
      light ring, quieter than the name beside it (as Todoist, Things and Linear draw it); hover shows the tick */
   .todo-check {
     appearance: none; margin: 0; display: grid; place-content: center;
-    inline-size: var(--space-5); block-size: var(--space-5); border-radius: var(--radius-full);
+    --_box: var(--space-5); inline-size: var(--_box); block-size: var(--_box); border-radius: var(--radius-full);
     border: var(--border-width-default) solid var(--color-line-strong); background: var(--color-surface-default);
     cursor: pointer; transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
   }
@@ -97,11 +111,14 @@
   .todo-check:checked::before { opacity: 1; }
   .todo-check:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
   /* selecting: the system's square box in the check's place */
-  .todo-row .checkbox { justify-self: center; }
+  .todo-row .checkbox { justify-self: center; --_box: 1rem; /* the system's box */ }
+  /* each centred on the first line, whatever its own height: its margins take the difference, so a one-line
+     row is as tall as before */
+  .todo-row > :is(.todo-grip, .todo-check, .checkbox, .todo-prio, .todo-side) { margin-block: calc((var(--_first-line) - var(--_box)) / 2); }
 
   /* priority, as Linear marks it: bars for Low, Med, High, in grey (the count of bars says it, not a
      colour); faint dots for none */
-  .todo-prio { display: grid; place-items: center; inline-size: var(--space-4); block-size: var(--space-6); padding: 0; border: 0; border-radius: var(--radius-xs); background: none; cursor: pointer; }
+  .todo-prio { --_box: var(--space-6); display: grid; place-items: center; inline-size: var(--space-4); block-size: var(--space-6); padding: 0; border: 0; border-radius: var(--radius-xs); background: none; cursor: pointer; }
   .todo-prio:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
   .prio-mark { display: inline-flex; align-items: flex-end; gap: 2px; block-size: 12px; }
   .prio-mark i { inline-size: 3px; border-radius: 1px; background: var(--color-line-strong); }
@@ -110,17 +127,15 @@
   .prio-mark[data-level="0"] { align-items: center; }
   .prio-mark[data-level="0"] i { block-size: 3px; inline-size: 3px; border-radius: var(--radius-full); background: var(--color-line-default); }
 
-  /* the title and its job */
-  /* the title and its job flow as text, wrapping as words do: a wrapping flex row aligned on the baseline
-     kept a stale height in some browsers when the list narrowed (the record opening beside it) */
-  .todo-main { min-inline-size: 0; }
-  .todo-main > .todo-title, .todo-main > .todo-sep, .todo-main > .todo-job { display: inline; vertical-align: baseline; }
-  /* the dot parts the title from its job, outside the link, so it isn't underlined with it */
-  .todo-main > .todo-sep { margin-inline: var(--space-2) var(--space-1); font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-tertiary); }
-  .todo-title { padding: var(--space-1) 0; border: 0; background: none; color: var(--color-content-primary); font: inherit; font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); text-align: start; overflow-wrap: anywhere; cursor: pointer; }
+  /* the title, wrapping as it needs, and its job on a line under it, as phones show it (your call, 22 Oct) */
+  .todo-main { display: grid; min-inline-size: 0; }
+  /* its padding gives the focus ring room; the margins keep it out of the row's height */
+  .todo-title { padding: var(--space-1) 0; margin-block: calc(-1 * var(--space-1)); border: 0; background: none; color: var(--color-content-primary); font: inherit; font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); text-align: start; overflow-wrap: anywhere; cursor: pointer; }
   @media (hover: hover) { .todo-page:not([data-selecting]) .todo-title:hover { text-decoration: underline; text-underline-offset: 3px; } }
   .todo-title:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); border-radius: var(--radius-xs); }
-  .todo-job { font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); text-decoration: none; white-space: nowrap; }
+  /* the line under the title: the job on wider screens (the rest is in the columns), when · job · hours · who on phones */
+  .todo-main > .todo-job, .todo-meta { margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
+  .todo-main > .todo-job { justify-self: start; max-inline-size: 100%; overflow: hidden; text-overflow: ellipsis; text-decoration: none; white-space: nowrap; }
   @media (hover: hover) { .todo-job:hover { color: var(--color-content-primary); text-decoration: underline; } }
   .todo-meta { display: none; }
   .todo-row[data-done] .todo-title { color: var(--color-content-tertiary); text-decoration: line-through; }
@@ -129,7 +144,7 @@
   /* hours, when, who: set in place, saved on pick (T-in-place) */
   /* in columns, so every row's hours, date and faces line up: the date in 8em (Wednesday fits), who as wide
      as three faces, at its end */
-  .todo-side { display: grid; grid-template-columns: 3.5em 8em calc(var(--control-height-sm) * 2 + var(--space-1)); align-items: center; gap: var(--space-2); }
+  .todo-side { --_box: var(--control-height-sm); display: grid; grid-template-columns: 3.5em 8em calc(var(--control-height-sm) * 2 + var(--space-1)); align-items: center; gap: var(--space-2); }
   .todo-side > .todo-due { justify-self: start; }
   .todo-side > .todo-who { justify-self: end; }
   .todo-hours { font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-tertiary); font-variant-numeric: tabular-nums; text-align: end; white-space: nowrap; }
@@ -155,11 +170,13 @@
   /* Add task, at the end of each group, with the group's value (T-add) */
   /* on the rows' columns: its icon centred in the check's, its words (and the field's) where the titles start */
   .todo-add { display: grid; grid-template-columns: var(--space-4) var(--space-5) var(--space-4) minmax(0, 1fr); align-items: center; column-gap: var(--space-2); inline-size: 100%; min-block-size: var(--control-height-md); padding: 0 var(--space-2) 0 0; border: 0; border-radius: var(--radius-md); background: none; color: var(--color-content-tertiary); font: inherit; font-size: var(--text-sm); text-align: start; cursor: pointer; }
-  @media (hover: hover) { .todo-add:hover { color: var(--color-content-primary); background: var(--color-surface-hover); } }
+  @media (hover: hover) { .todo-add:hover:not(:disabled) { color: var(--color-content-primary); background: var(--color-surface-hover); } }
   .todo-add:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
   .todo-add > svg { grid-column: 2; justify-self: center; }
   .todo-add > span { grid-column: 4; }
   .todo-add-hint { margin-inline-start: var(--space-2); color: var(--color-content-tertiary); }
+  /* while selecting: in place but off, in the system's disabled ink */
+  .todo-add:disabled, .todo-add:disabled .todo-add-hint { color: var(--color-content-disabled); cursor: default; }
   .todo-add-form { display: grid; grid-template-columns: var(--space-4) var(--space-5) var(--space-4) minmax(0, 1fr); align-items: center; column-gap: var(--space-2); padding: var(--space-1) var(--space-2) var(--space-1) 0; }
   .todo-add-form .todo-check { grid-column: 2; cursor: default; }
   /* small, as the row it opens from: its words on the titles' line, its edge in the gap before them */
@@ -192,23 +209,23 @@
   @media (max-width: 767px) {
     /* the open search and the count share the bar on fixed bases, so the field keeps its width as you type
        and a long count gives way */
-    :root[data-todo-bar="surface"] .todo-bar .list-search { flex: 1 1 0; min-inline-size: 0; }
+    :root[data-todo-bar="surface"] .todo-bar :is(.list-bar[data-search-open], .list-bar:has(input:not(:placeholder-shown))) .list-search { flex: 1 1 0; }
     :root[data-todo-bar="surface"] .todo-bar #bar-count { flex: 0 1 8rem; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     /* on its card, Clear all wraps into the card's bottom corner here: its corner shares the card's (D35) */
     :root:not([data-todo-bar="surface"]) .todo-bar .clear-all { border-radius: calc(var(--radius-xl) - var(--border-width-default) - var(--space-3)); }
-    .todo-row { grid-template-columns: var(--space-6) var(--space-4) minmax(0, 1fr); align-items: start; padding: var(--space-3) var(--space-2) var(--space-3) var(--space-1); column-gap: var(--space-2); }
+    .todo-row { grid-template-columns: var(--space-6) var(--space-4) minmax(0, 1fr); padding: var(--space-3) var(--space-2) var(--space-3) var(--space-1); column-gap: var(--space-2); --_first-line: var(--leading-base); }
     .todo-row + .todo-row::before { inset-inline-start: var(--space-8); }
     .todo-grip { display: none; }
     /* a long press lifts a task to reorder it: no text selection or callout under the finger */
     .todo-row { -webkit-touch-callout: none; user-select: none; transition: scale var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
     .todo-row[data-lifted] { z-index: 2; background: var(--color-surface-default); box-shadow: var(--shadow-raised); scale: 1.02; }
-    .todo-check, .todo-row .checkbox { grid-column: 1; justify-self: center; inline-size: var(--space-6); block-size: var(--space-6); }
-    .todo-prio { grid-column: 2; block-size: var(--space-6); }
+    .todo-check, .todo-row .checkbox { grid-column: 1; justify-self: center; --_box: var(--space-6); inline-size: var(--_box); block-size: var(--_box); }
+    .todo-prio { grid-column: 2; }
     .todo-main { grid-column: 3; display: grid; row-gap: var(--space-0-5); }
-    .todo-title { padding: 0; font-size: var(--text-base); line-height: var(--leading-base); }
-    /* the job is in the line under the title here: the link and its dot go (as specific as the rule that shows them) */
-    .todo-main > :is(.todo-sep, .todo-job), .todo-side { display: none; }
-    .todo-meta { display: block; margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
+    .todo-title { padding: 0; margin: 0; font-size: var(--text-base); line-height: var(--leading-base); }
+    /* the line under the title carries the job here, with the rest: the link goes (as specific as the rule that shows it) */
+    .todo-main > .todo-job, .todo-side { display: none; }
+    .todo-meta { display: block; }
     .todo-meta [data-late] { color: var(--color-feedback-danger-content); }
     .todo-add, .todo-add-form { grid-template-columns: var(--space-6) var(--space-4) minmax(0, 1fr); padding-inline-start: var(--space-1); }
     .todo-add { min-block-size: var(--control-height-lg); }

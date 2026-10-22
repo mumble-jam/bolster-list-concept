@@ -10,11 +10,11 @@
 <link rel="apple-touch-icon" href="../shared/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../system/bolster.css?v=0a95c2b7">
-<link rel="stylesheet" href="../shared/shell.css?v=0a95c2b7">
-<link rel="stylesheet" href="../data-list.css?v=0a95c2b7">
-<link rel="stylesheet" href="../calendar/calendar.css?v=0a95c2b7">
-<link rel="stylesheet" href="pipeline.css?v=0a95c2b7">
+<link rel="stylesheet" href="../system/bolster.css?v=1a1a95e9">
+<link rel="stylesheet" href="../shared/shell.css?v=1a1a95e9">
+<link rel="stylesheet" href="../data-list.css?v=1a1a95e9">
+<link rel="stylesheet" href="../calendar/calendar.css?v=1a1a95e9">
+<link rel="stylesheet" href="pipeline.css?v=1a1a95e9">
 </head>
 <body>
 <div class="app-shell">
@@ -53,7 +53,8 @@
 <!-- while a card is dragged, what it can be dropped on besides a stage -->
 <div class="pl-dropbar" id="dropbar" hidden><div class="pl-drop-lost" data-drop-lost><i data-icon="ban" data-size="16"></i>Mark as lost</div></div>
 <div class="pop" id="pop" popover></div>
-<div class="cal-ghost" id="ghost" aria-hidden="true" hidden></div>
+<!-- the card being held, carried with the pointer -->
+<div class="pl-ghost" id="ghost" aria-hidden="true" hidden></div>
 <dialog class="dialog" id="step" aria-labelledby="step-title" data-size="sm"></dialog>
 <div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
 <p class="visually-hidden" id="live" aria-live="polite"></p>
@@ -75,7 +76,7 @@
         <li><b>The next step is on the card (P-next).</b> Each card shows its one next step, always, not on hover (a link, an icon or a strip: three card layouts to compare in Concept controls): Create job, Send estimate, Mark as booked, Schedule, Mark as started, Invoice, Record payment. Opening the card shows the rest.</li>
         <li><b>Sub-statuses are groups inside their stage (P-groups).</b> Drafts, Never sent, Changes not sent yet, Sent; Not scheduled, Scheduled; Underway, Work done; Not sent, Sent, Overdue, Paid. Each folds, with its count, and what needs doing comes first; space between them, no rules. Within a group, the order is the date's, never your own.</li>
         <li><b>A column's money says what it adds up (P-money).</b> Quoted (sent estimates) on Pending jobs; contracted on Booked and In progress; owed on Invoices. In full, never “3M”. Weighted odds aren't Bolster's yet; people stages show none.</li>
-        <li><b>Moving is dragging; a drop that needs something asks for it (P-move).</b> A card goes to the next stage or back one. Where the next stage needs something (a visit's time, the job's name, the contract and start, the invoice's amount) the drop opens a short dialog; otherwise it moves, with Undo. Stages a card can't go to say why as you drag over them. While dragging, Mark as lost waits at the foot. The card's summary does the same from the keyboard and on phones.</li>
+        <li><b>Moving is dragging; a drop that needs something asks for it (P-move).</b> A card goes to the next stage or back one. Where the next stage needs something (a visit's time, the job's name, the contract and start, the invoice's amount) the drop opens a short dialog; otherwise it moves, with Undo. Stages a card can't go to say why as you drag over them. The card you hold leaves an outline in its place and goes with the pointer, lifted; where it lands lights up for a moment. While dragging, Mark as lost waits at the foot. The card's summary does the same from the keyboard and on phones.</li>
         <li><b>What leaves the board (P-closed).</b> Booked is won. Lost leads and jobs leave with a reason (price, timing, went with someone else, no reply, not a fit) and wait under Lost, to reopen; paid invoices stay a week, then the job lives in the job list.</li>
         <li><b>On phones, a stage at a time (P-phone).</b> Stages as tabs with their counts, swiped or picked; cards full width, their next step on them; no dragging, Move to in the summary.</li>
       </ol>
@@ -115,10 +116,10 @@
     </div>
   </div>
 </details>
-<script src="../shared/icons.js?v=0a95c2b7"></script>
-<script src="../shared/shell.js?v=0a95c2b7"></script>
-<script src="../system/specimens/specimen.js?v=0a95c2b7"></script>
-<script src="../data.js?v=0a95c2b7"></script>
-<script src="pipeline.js?v=0a95c2b7"></script>
+<script src="../shared/icons.js?v=1a1a95e9"></script>
+<script src="../shared/shell.js?v=1a1a95e9"></script>
+<script src="../system/specimens/specimen.js?v=1a1a95e9"></script>
+<script src="../data.js?v=1a1a95e9"></script>
+<script src="pipeline.js?v=1a1a95e9"></script>
 </body>
 </html>
