@@ -489,6 +489,16 @@
     st.people = ids.length && ids.length < OWNERS.length ? new Set(ids) : null;
     render(); popFor.from = $("#pick-people"); popFor.from.setAttribute("aria-expanded", "true");
   });
+  // column colour, being tried: which, and how strong (Concept controls), kept in this browser
+  const keep = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch {} };
+  const kept = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+  const colour = $("#cc-colour"), tint = $("#cc-tint");
+  board.dataset.colour = colour.value = ["none", "stage", "head", "kinds", "ramp"].includes(kept("pl-colour")) ? kept("pl-colour") : "stage";
+  const showTint = () => { const v = parseFloat(getComputedStyle(board).getPropertyValue("--pl-tint")); tint.value = v; $("#cc-tint-out").textContent = `${v}%`; tint.disabled = colour.value === "none"; };
+  if (kept("pl-tint")) board.style.setProperty("--pl-tint", `${kept("pl-tint")}%`);
+  showTint();
+  colour.addEventListener("change", () => { board.dataset.colour = colour.value; keep("pl-colour", colour.value); showTint(); });
+  tint.addEventListener("input", () => { board.style.setProperty("--pl-tint", `${tint.value}%`); keep("pl-tint", tint.value); showTint(); });
   $("#cc-cards").value = LAYOUT;
   $("#cc-cards").addEventListener("change", (e) => { LAYOUT = e.target.value; try { localStorage.setItem("pl-cards", LAYOUT); } catch {} board.dataset.cards = LAYOUT; render(); });
   board.dataset.cards = LAYOUT;

@@ -39,14 +39,38 @@
     border: var(--border-width-default) solid transparent; border-radius: var(--radius-xl);
     background: var(--pl-col-bg);
   }
-  .pl-page { --pl-col-bg: color-mix(in srgb, var(--color-surface-sunken) 55%, var(--color-surface-canvas)); }
+  .pl-page { --pl-col-base: color-mix(in srgb, var(--color-surface-sunken) 55%, var(--color-surface-canvas)); --pl-tint: 8%; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pl-page { --pl-tint: 10%; } }
+  :root[data-theme="dark"] .pl-page { --pl-tint: 10%; }
+
+  /* ---------- a column's colour, being tried (Concept controls → Column colour): a hue mixed faintly into the
+     column's tint, never into the cards. --_hue is the column's hue, --_k how much of the strength it takes ---------- */
+  .pl-col { --_hue: var(--pl-col-base); --_k: 1; --pl-col-bg: color-mix(in srgb, var(--_hue) calc(var(--pl-tint) * var(--_k)), var(--pl-col-base)); }
+  /* Stage: the job list's status colours, the ones its marks already wear; people's stages stay neutral */
+  .pl-board:is([data-colour="stage"], [data-colour="head"]) .pl-col[data-stage="pending"] { --_hue: var(--color-status-pending-dot); }
+  .pl-board:is([data-colour="stage"], [data-colour="head"]) .pl-col[data-stage="booked"] { --_hue: var(--color-status-booked-dot); }
+  .pl-board:is([data-colour="stage"], [data-colour="head"]) .pl-col[data-stage="progress"] { --_hue: var(--color-status-in-progress-dot); }
+  .pl-board:is([data-colour="stage"], [data-colour="head"]) .pl-col[data-stage="invoices"] { --_hue: var(--color-status-outstanding-dot); }
+  /* People and jobs: two tints, warm for people, cool for jobs, the board's one split said in colour too */
+  .pl-board[data-colour="kinds"] .pl-col[data-kind="person"] { --_hue: var(--color-status-outstanding-dot); }
+  .pl-board[data-colour="kinds"] .pl-col[data-kind="job"] { --_hue: var(--color-status-active-dot); }
+  /* Progress: one hue, deepening stage by stage, from the first enquiry to the invoice */
+  .pl-board[data-colour="ramp"] .pl-col { --_hue: var(--color-status-active-dot); }
+  .pl-board[data-colour="ramp"] .pl-col[data-stage="leads"] { --_k: 0.2; }
+  .pl-board[data-colour="ramp"] .pl-col[data-stage="visits"] { --_k: 0.4; }
+  .pl-board[data-colour="ramp"] .pl-col[data-stage="pending"] { --_k: 0.6; }
+  .pl-board[data-colour="ramp"] .pl-col[data-stage="booked"] { --_k: 0.8; }
+  .pl-board[data-colour="ramp"] .pl-col[data-stage="progress"] { --_k: 1; }
+  .pl-board[data-colour="ramp"] .pl-col[data-stage="invoices"] { --_k: 1.2; }
+  /* Stage, head only: the stage's colour on the column's head alone, a little stronger, the cards on the neutral tint */
+  .pl-board[data-colour="head"] .pl-col { --pl-head-bg: color-mix(in srgb, var(--_hue) calc(var(--pl-tint) * 1.6), var(--pl-col-base)); --pl-col-bg: var(--pl-col-base); }
   /* cards an inset from the column's edge, so their corners share its centre (D35); the column's words in line
      with the cards' text (from inside the column's edge: the inset, the card's edge, its padding) */
   .pl-col { --_pad: calc(var(--inset-card) - var(--border-width-default)); --_in: calc(var(--_pad) + var(--border-width-default) + var(--space-3)); }
   /* the head stays at the board's top as the cards pass under it: it draws the column's rounded top itself, over the
      canvas's colour, so no card shows in its corners */
   .pl-col-head::before { content: ""; position: absolute; inset: calc(-1 * var(--border-width-default)) calc(-1 * var(--border-width-default)) 0; z-index: -1;
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0; background: var(--pl-col-bg); }
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0; background: var(--pl-head-bg, var(--pl-col-bg)); }
   .pl-col-head { position: sticky; inset-block-start: calc(-1 * var(--pl-ring, 0px)); z-index: 2; background: var(--color-surface-canvas); display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); padding: var(--space-3) var(--_in) var(--space-2); }
   .pl-col-head h3 { display: flex; align-items: center; gap: var(--space-1-5, 6px); min-inline-size: 0; margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); }
   .pl-col-head h3 > span:not(.mark):not(.pl-n) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -198,4 +222,11 @@
     .pl-col { flex: 0 0 calc(100% - var(--space-6)); scroll-snap-align: start; align-self: start; }
     .pl-dropbar { display: none; }
   }
+}
+
+/* Concept controls: the column colour's strength */
+@layer components {
+  .pl-cc-strength { display: flex; justify-content: space-between; margin-block-start: var(--space-2); }
+  .pl-cc-strength output { color: var(--color-content-secondary); font-variant-numeric: tabular-nums; }
+  #cc-tint { inline-size: 100%; accent-color: var(--color-action-accent); }
 }
