@@ -323,6 +323,10 @@
   .cal-new-note svg { flex: none; margin-block-start: 3px; }
   .cal-new-error { margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-feedback-danger-content); }
   .cal-new-actions { display: flex; justify-content: flex-end; gap: var(--space-2); }
+  /* a summary's tools: Edit, Delete and Close together in its corner, as Google's are */
+  .cal-sum-tools { display: inline-flex; flex: none; }
+  /* editing: Delete at the dialog's start, away from Save */
+  .cal-new-delete { margin-inline-end: auto; color: var(--color-feedback-danger-content); }
 
   /* the whole dialog */
   .cal-new-dlg { --_w: 36rem; }

@@ -360,13 +360,13 @@
         <div class="cal-sum-actions"><a class="button" data-size="sm" href="../index.html#jobs">Open job</a></div></div>`;
     }
     if (it.kind === "appt") {
-      return `<div class="cal-sum"><div class="cal-sum-top"><p class="cal-sum-kind">${ic("calendar-check", 14)}${esc(it.type)}</p>${closeBtn()}</div>
+      const tool = (attr, icon, name) => `<button type="button" class="button cal-pop-close" data-variant="ghost" data-size="sm" data-icon-only ${attr}="${it.id}" aria-label="${name}" data-tip="${name}">${ic(icon, 16, { optical: true })}</button>`;
+      return `<div class="cal-sum"><div class="cal-sum-top"><p class="cal-sum-kind">${ic("calendar-check", 14)}${esc(it.type)}</p><span class="cal-sum-tools">${tool("data-edit", "pen", "Edit")}${tool("data-delete", "trash", "Delete")}${closeBtn()}</span></div>
         <h3 tabindex="-1">${esc(it.title)}</h3>
         <p class="cal-sum-when">${esc(f.long(it.date))}<small>${spanOf(it)}</small></p>
         <dl>${it.place ? dd("Where", esc(it.place)) : ""}${it.client ? dd("Customer", esc(it.client)) : ""}${dd("With", peopleHtml(it.who))}${it.guests?.length ? dd("Guests", esc(together(it.guests))) : ""}${it.notes ? dd("Notes", esc(it.notes)) : ""}</dl>
         <form class="cal-sum-move" data-move="${it.id}"><div class="field" data-size="sm"><label class="field-label" for="mv-date">Day</label><input class="input" type="date" id="mv-date" name="date" value="${it.date}" required></div>
-          <div class="field cal-move-time" data-size="sm"><label class="field-label" for="mv-time">Starts</label><input class="input" type="time" id="mv-time" name="time" step="900" value="${f.time(it.from).padStart(5, "0")}" required></div><button type="submit" class="button" data-variant="secondary" data-size="sm">Move</button></form>
-        <div class="cal-sum-actions"><button type="button" class="button" data-size="sm" data-not-built="appointment" aria-label="Open appointment">Open appointment</button></div></div>`;
+          <div class="field cal-move-time" data-size="sm"><label class="field-label" for="mv-time">Starts</label><input class="input" type="time" id="mv-time" name="time" step="900" value="${f.time(it.from).padStart(5, "0")}" required></div><button type="submit" class="button" data-variant="secondary" data-size="sm">Move</button></form></div>`;
     }
     return `<div class="cal-sum"><div class="cal-sum-top"><p class="cal-sum-kind">${ic("clock", 14)}Other calendar</p>${closeBtn()}</div>
       <h3 tabindex="-1">Busy</h3>
@@ -374,7 +374,7 @@
       <dl>${dd("Who", peopleHtml(it.who))}${dd("From", esc(it.source))}</dl>
       <p class="cal-sum-note">Only the time shows: what it is stays in their own calendar, and it changes there.</p></div>`;
   }
-  const openSummary = (id, from) => { const it = byId(id); openPop("summary", from, () => summaryHtml(it), { label: titleOf(it) }); };
+  const openSummary = (id, from) => { const it = byId(id); openPop("summary", from, () => summaryHtml(it), { label: titleOf(it) }); pop.dataset.item = id; };
   function moreHtml(d, person) {
     const mine = person ? (it) => (person === "none" ? !it.who.length : it.who.includes(person)) : () => true;
     const spans = spansIn(d, d, mine), things = dayThings(d, mine);
@@ -492,12 +492,13 @@
   let lastKind = "appointment-schedule";
   try { lastKind = localStorage.getItem("cal-new-kind") || lastKind; } catch {}
   // what's being made, its draft drawn on the calendar while it is
-  let nv = null, draft = null, keepDraft = false;
+  let nv = null, draft = null, keepDraft = false, editing = null;
   const fresh = (o = {}) => ({ kind: lastKind, title: "", date: o.date || (st.at < T ? T : st.at), from: o.from ?? nextHalf(NOW_MIN), to: null, allDay: false, location: "", notes: "", guests: [],
     client: "", apptType: APPT_TYPES[0][0], with: o.person && o.person !== "none" ? o.person : "hm", address: "", anyway: false });
   const lenOf = () => (nv.kind === "event" ? LEN : APPT_TYPES.find(([t]) => t === nv.apptType)[1]);
   function syncDraft() {
     if (!nv.to || nv.to <= nv.from) nv.to = Math.min(nv.from + lenOf(), 24 * 60);
+    if (editing) return; // an event being edited stays itself until it's saved
     if (!draft) { draft = { id: "draft", kind: "appt", draft: true, who: [] }; items.push(draft); }
     const c = CUSTOMERS.find((x) => x.name === nv.client);
     Object.assign(draft, { date: nv.date, from: nv.from, to: nv.kind === "event" ? nv.to : nv.from + lenOf(), allDay: nv.kind === "event" && nv.allDay,
@@ -533,7 +534,7 @@
   const withSelect = (id) => `<div class="select"><select class="input" id="${id}" name="with">${[OWNERS.find((p) => p.me), ...OWNERS.filter((p) => !p.me)].map((p) => opt(p.id, p.me ? `${p.name} (you)` : p.name, nv.with)).join("")}</select></div>`;
   const typeSelect = (id, len = true) => `<div class="select"><select class="input" id="${id}" name="apptType">${APPT_TYPES.map(([t, m]) => opt(t, len ? `${t} · ${m} min` : t, nv.apptType)).join("")}</select></div>`;
   // the person's own things that day, which a sales appointment shouldn't land on
-  const busyAt = (person, date, a, b) => items.some((x) => !x.draft && x.date === date && (x.kind === "appt" || x.kind === "busy") && !x.allDay && x.who.includes(person) && x.from < b && x.to > a);
+  const busyAt = (person, date, a, b) => items.some((x) => !x.draft && x !== editing && x.date === date && (x.kind === "appt" || x.kind === "busy") && !x.allDay && x.who.includes(person) && x.from < b && x.to > a);
   function conflict() {
     if (nv.kind === "event") return "";
     const p = who(nv.with), a = nv.from, b = a + lenOf();
@@ -577,8 +578,8 @@
     const ev = nv.kind === "event", c = CUSTOMERS.find((x) => x.name === nv.client);
     if (!ev && c && !nv.address) nv.address = c.address;
     const me = OWNERS.find((p) => p.me);
-    return `<form class="cal-new-full" data-new="full" novalidate><header class="dialog-header"><h2 id="new-event-title">New ${ev ? "event" : "sales appointment"}</h2>${`<button type="button" class="button" data-variant="ghost" data-icon-only data-close-new aria-label="Close" data-tip="Close">${ic("xmark", 16, { optical: true })}</button>`}</header>
-      <div class="dialog-body">${kindSeg()}
+    return `<form class="cal-new-full" data-new="full" novalidate><header class="dialog-header"><h2 id="new-event-title">${editing ? "Edit" : "New"} ${ev ? "event" : "sales appointment"}</h2>${`<button type="button" class="button" data-variant="ghost" data-icon-only data-close-new aria-label="Close" data-tip="Close">${ic("xmark", 16, { optical: true })}</button>`}</header>
+      <div class="dialog-body">${editing ? "" : kindSeg()}
       ${ev ? `<input class="input cal-new-title" name="title" value="${esc(nv.title)}" placeholder="Add title" aria-label="Title" autocomplete="off">
         ${whenFields("f")}
         <p class="cal-new-owner">${avatar(me, "sm")}<span><b>${esc(me.name)}</b><small>Busy · Default visibility · Notify 30 minutes before</small></span></p>
@@ -593,7 +594,7 @@
         <div class="field"><label class="field-label" for="f-addr">Site visit address</label><input class="input" id="f-addr" name="address" value="${esc(nv.address)}" placeholder="Where the visit is"${c && !nv.address ? ' aria-invalid="true"' : ""}>${c && !c.address ? '<p class="field-helper">This customer has no address saved.</p>' : ""}</div>
         <div class="field"><label class="field-label" for="f-notes">Additional notes</label><textarea class="input" id="f-notes" name="notes" rows="3" placeholder="Add any additional information…">${esc(nv.notes)}</textarea></div>`}
       <p class="cal-new-error" role="alert" hidden></p></div>
-      <footer class="dialog-footer"><button type="button" class="button" data-variant="ghost" data-close-new>Cancel</button><button type="submit" class="button">${ev ? "Save" : "Schedule appointment"}</button></footer></form>`;
+      <footer class="dialog-footer">${editing ? `<button type="button" class="button cal-new-delete" data-variant="ghost" data-delete="${editing.id}">Delete</button>` : ""}<button type="button" class="button" data-variant="ghost" data-close-new>Cancel</button><button type="submit" class="button">${ev ? "Save" : editing ? "Save" : "Schedule appointment"}</button></footer></form>`;
   }
   let saved = false;
   function openFull(seed) {
@@ -606,7 +607,32 @@
     dlgNew.showModal();
     $(nv.kind === "event" ? "[name=title]" : "[name=client]", dlgNew)?.focus();
   }
-  dlgNew.addEventListener("close", () => { if (!saved) { clearDraft(); nv = null; } });
+  dlgNew.addEventListener("close", () => { if (!saved) { clearDraft(); nv = null; } editing = null; });
+  // editing: the event's own values in the dialog; a sales appointment is one with a customer
+  function openEdit(it) {
+    if (pop.matches(":popover-open")) pop.hidePopover();
+    clearDraft(false);
+    editing = it; saved = false;
+    const sales = !!it.client, type = it.title.split(" · ")[0];
+    nv = { ...fresh({ date: it.date, from: it.from }), kind: sales ? "appointment-schedule" : "event", title: it.title === "(No title)" ? "" : it.title, to: it.to, allDay: !!it.allDay,
+      location: sales ? "" : it.place || "", notes: it.notes || "", guests: [...(it.guests || [])], client: it.client || "", apptType: APPT_TYPES.some(([t]) => t === type) ? type : APPT_TYPES[0][0],
+      with: it.who[0] || "hm", address: sales ? it.place || "" : "", anyway: true };
+    dlgNew.innerHTML = fullHtml();
+    BolsterShell.hydrateIcons(dlgNew);
+    dlgNew.showModal();
+    $(sales ? "[name=client]" : "[name=title]", dlgNew)?.focus();
+  }
+  // deleting: at once, with Undo (Google's way); a job's phases change in the job, busy time in its own calendar
+  function removeItem(it) {
+    const at = items.indexOf(it);
+    if (pop.matches(":popover-open")) pop.hidePopover();
+    if (dlgNew.open) { saved = true; dlgNew.close(); }
+    items = items.filter((x) => x !== it);
+    render();
+    const message = `${it.client ? "Appointment" : "Event"} deleted: ${it.title}`;
+    say(message);
+    toast(message, () => { items.splice(at, 0, it); render(); say("Undone"); });
+  }
   // read what's in a form into what's being made
   function read(form) {
     const v = Object.fromEntries(new FormData(form));
@@ -630,6 +656,14 @@
     if (nv.kind === "appointment-schedule" && !nv.client) return showError(form, "Choose a customer for the sales appointment.");
     if (nv.kind === "event" && !nv.allDay && nv.to <= nv.from) return showError(form, "Choose a valid date and time.");
     const ev = nv.kind === "event", c = CUSTOMERS.find((x) => x.name === nv.client);
+    if (editing) {
+      const it = editing, len = lenOf();
+      saved = true; dlgNew.close();
+      return change(it, (x) => Object.assign(x, ev
+        ? { title: nv.title.trim() || "(No title)", place: nv.location.trim(), date: nv.date, from: nv.allDay ? 0 : nv.from, to: nv.allDay ? 24 * 60 - 1 : nv.to, allDay: nv.allDay, guests: [...nv.guests], notes: nv.notes.trim() }
+        : { title: `${nv.apptType} · ${surname(c.name)}`, place: nv.address.trim(), date: nv.date, from: nv.from, to: nv.from + len, who: [nv.with], client: c.name, notes: nv.notes.trim() }),
+        `${ev ? "Event" : "Appointment"} saved: ${ev ? nv.title.trim() || "(No title)" : `${nv.apptType} · ${surname(c.name)}`}`);
+    }
     const it = ev ? { id: `a${++seq}`, kind: "appt", type: "Event", title: nv.title.trim() || "(No title)", place: nv.location.trim(), date: nv.date, from: nv.allDay ? 0 : nv.from, to: nv.allDay ? 24 * 60 - 1 : nv.to, allDay: nv.allDay, who: ["hm"], guests: [...nv.guests], notes: nv.notes.trim() }
       : { id: `a${++seq}`, kind: "appt", type: "Site visit", title: `${nv.apptType} · ${surname(c.name)}`, place: nv.address.trim(), date: nv.date, from: nv.from, to: nv.from + lenOf(), who: [nv.with], client: c.name, notes: nv.notes.trim() };
     saved = true;
@@ -675,6 +709,13 @@
     swallow = true; setTimeout(() => (swallow = false), 0);
     openQuick();
   });
+  // Google's keys: Delete (or Backspace) on an event's summary deletes it, with Undo
+  document.addEventListener("keydown", (e) => {
+    if (!["Delete", "Backspace"].includes(e.key) || popFor?.kind !== "summary" || e.target.closest?.("input, textarea, select")) return;
+    const it = byId(pop.dataset.item);
+    if (it?.kind !== "appt") return;
+    e.preventDefault(); removeItem(it);
+  });
   // Google's key: c creates
   document.addEventListener("keydown", (e) => {
     if (e.key !== "c" || e.metaKey || e.ctrlKey || e.altKey || e.target.closest?.("input, textarea, select, [contenteditable]") || document.querySelector("dialog[open]")) return;
@@ -719,6 +760,9 @@
   document.addEventListener("click", (e) => {
     if (e.target.closest("[data-more-options]")) { read(e.target.closest("form")); return openFull(); }
     if (e.target.closest("[data-close-new]")) return dlgNew.close();
+    const ed = e.target.closest("[data-edit]"), del = e.target.closest("[data-delete]");
+    if (ed) return openEdit(byId(ed.dataset.edit));
+    if (del) return removeItem(byId(del.dataset.delete));
     const rm = e.target.closest("[data-guest-remove]");
     if (rm) { read(dlgNew.querySelector("form")); nv.guests.splice(+rm.dataset.guestRemove, 1); dlgNew.innerHTML = fullHtml(); BolsterShell.hydrateIcons(dlgNew); $(".cal-guest-input", dlgNew).focus(); }
   });
