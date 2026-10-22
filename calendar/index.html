@@ -68,6 +68,8 @@
   </main>
 </div>
 <div class="pop" id="pop" popover></div>
+<!-- the whole dialog for a new event or sales appointment (D96): More options, Create event, or c -->
+<dialog class="dialog cal-new-dlg" id="new-event" aria-labelledby="new-event-title"></dialog>
 <div class="cal-ghost" id="ghost" aria-hidden="true" hidden></div>
 <div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
 <p class="visually-hidden" id="live" aria-live="polite"></p>
@@ -90,6 +92,7 @@
         <li><b>A click opens a summary (C-open).</b> What, when (with “day 2 of 4” on a running phase), where, who, and the step: Open job. The full record is one step further.</li>
         <li><b>Moving is dragging; the drop is the save (C-move).</b> Drag to another day (in Week and Day, another time too; in Crew, onto another person), drag a bar's end to stretch it; Undo in the toast. The summary's dates are the keyboard's and the phone's way. Busy time doesn't move.</li>
         <li><b>Undated work waits beside (C-unscheduled).</b> Unscheduled (a calendar with a circled minus, after the rule, its count in its tooltip) opens a tray of jobs with no dates, open beside the calendar the first time you come; drag one onto a day, or open it to pick a start.</li>
+        <li><b>Making one, Google's way, with Bolster's fields (C-add).</b> A click on empty time (or a day) draws a draft and opens a short card beside it; a drag over the hours draws its start and end; the all-day row makes an all-day event. The card is Bolster's two kinds: an Event (title, time, location) or a Sales appointment (customer, time, type, who it's with, saying when that person is busy). More options, Create event or c open the whole dialog: guests, description, a sales appointment's available times with Book anyway, its address and notes. Saved, it shows on its day with Undo.</li>
         <li><b>On phones, an agenda (C-phone).</b> A week strip over the days, each with a heading: spans first, appointments by time, a phase that only runs through a day as one line, an empty day as one line. A tap opens the summary as a sheet; no dragging.</li>
       </ol>
     </section>

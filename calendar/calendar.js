@@ -31,6 +31,8 @@
     span: (a, b) => `${f.time(a)}–${f.time(b)}`,
   };
   const minutes = (hhmm) => { const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; };
+  // an event's time: its span, or All day (Bolster's events are one day long, all day or from a time to a time)
+  const spanOf = (it) => (it.allDay ? "All day" : f.span(it.from, it.to));
 
   // ---------- sample data ----------
   const who = (id) => OWNERS.find((o) => o.id === id);
@@ -110,9 +112,10 @@
   try { TRAY = localStorage.getItem("cal-tray") !== "closed"; } catch {}
   const st = { view: VIEW, at: T, show: { job: true, appt: true, busy: true }, people: null, trayOpen: TRAY };
   const keepTray = () => { try { localStorage.setItem("cal-tray", st.trayOpen ? "open" : "closed"); } catch {} };
-  const shown = (it) => st.show[it.kind] && (!st.people || it.who.some((p) => st.people.has(p)));
+  const shown = (it) => it.draft || (st.show[it.kind] && (!st.people || it.who.some((p) => st.people.has(p))));
   const spansIn = (a, b, filter = () => true) => items.filter((it) => it.kind === "job" && shown(it) && it.start <= b && endOf(it) >= a && filter(it));
-  const dayThings = (s, filter = () => true) => items.filter((it) => it.kind !== "job" && shown(it) && it.date === s && filter(it)).sort((a, b) => a.from - b.from);
+  const dayThings = (s, filter = () => true) => items.filter((it) => it.kind !== "job" && shown(it) && it.date === s && filter(it)).sort((a, b) => (b.allDay ? 1 : 0) - (a.allDay ? 1 : 0) || a.from - b.from);
+  const nameIt = (it) => (it.kind === "busy" ? "Busy" : it.title || "(No title)");
 
   // ---------- a week's row: day cells behind, spans in lanes, each day's items under them ----------
   // spans first, then appointments by time; past what fits, “+n more” (C-more). Used by Month, by the
@@ -152,8 +155,8 @@
   }
   // an appointment, or busy time: its time, then what (C-show)
   function itemBtn(it, person) {
-    const label = it.kind === "busy" ? `${f.short(it.date)}, ${f.span(it.from, it.to)}, ${together(it.who.map((p) => who(p).name))} busy, from ${it.source}` : `${f.short(it.date)}, ${f.span(it.from, it.to)}, ${it.type}: ${it.title}`;
-    return `<button type="button" class="cal-item" data-item="${it.id}" data-kind="${it.kind}"${person ? ` data-person="${person}"` : ""}${isPast(it) ? " data-past" : ""} aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(label)}"><span class="cal-time">${f.time(it.from)}</span><span>${esc(it.kind === "busy" ? "Busy" : it.title)}</span></button>`;
+    const label = it.kind === "busy" ? `${f.short(it.date)}, ${spanOf(it)}, ${together(it.who.map((p) => who(p).name))} busy, from ${it.source}` : `${f.short(it.date)}, ${spanOf(it)}, ${it.draft ? "new event" : `${it.type}: ${it.title}`}`;
+    return `<button type="button" class="cal-item" data-item="${it.id}" data-kind="${it.kind}"${person ? ` data-person="${person}"` : ""}${isPast(it) && !it.draft ? " data-past" : ""}${it.allDay ? " data-all-day" : ""}${it.draft ? " data-draft" : ""} aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(label)}">${it.allDay ? "" : `<span class="cal-time">${f.time(it.from)}</span>`}<span>${esc(nameIt(it))}</span></button>`;
   }
   const weekdayHead = (start, n, lead = "") => `<div class="cal-head" aria-hidden="true">${lead}${Array.from({ length: n }, (_, i) => { const d = add(start, i); return `<div${d === T ? " data-today" : ""}>${day(d).toLocaleDateString("en-GB", { weekday: "short" })}${n < 7 || lead ? `<span class="cal-head-num">${day(d).getDate()}</span>` : ""}</div>`; }).join("")}</div>`;
 
@@ -185,7 +188,7 @@
     let gutter = "", cols = "";
     for (let h = H0 + 1; h < H1; h++) gutter += `<span class="cal-gutter-label" style="top:calc(var(--_hour) * ${h - H0})">${h <= 12 ? h : h - 12} ${h < 12 ? "am" : "pm"}</span>`;
     for (let i = 0; i < n; i++) {
-      const d = add(start, i), list = dayThings(d);
+      const d = add(start, i), list = dayThings(d, (it) => !it.allDay);
       // side by side where they overlap
       const placed = []; let cluster = [], clusterEnd = -1;
       const flush = () => { const cs = []; for (const it of cluster) { let c = cs.findIndex((e) => e <= it.from); if (c < 0) { c = cs.length; cs.push(0); } cs[c] = it.to; it._c = c; } cluster.forEach((it) => placed.push({ it, c: it._c, of: cs.length })); cluster = []; };
@@ -193,14 +196,14 @@
       flush();
       const blocks = placed.map(({ it, c, of }) => {
         const a = Math.max(it.from, H0 * 60), b = Math.min(Math.max(it.to, a + 15), H1 * 60);
-        return `<button type="button" class="cal-block" data-item="${it.id}" data-kind="${it.kind}"${isPast(it) ? " data-past" : ""} style="--_top:calc(var(--_hour) * ${(a - H0 * 60) / 60});--_h:calc(var(--_hour) * ${(b - a) / 60});--_x:${c / of};--_w:${1 / of}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(`${f.short(d)}, ${f.span(it.from, it.to)}, ${it.kind === "busy" ? "busy, from another calendar" : `${it.type}: ${it.title}`}`)}"><b>${esc(it.kind === "busy" ? "Busy" : it.title)}</b><span>${f.span(it.from, it.to)}${it.place ? ` · ${esc(it.place)}` : it.kind === "busy" ? ` · ${esc(together(it.who.map((p) => nameOf(who(p)))))}` : ""}</span></button>`;
+        return `<button type="button" class="cal-block" data-item="${it.id}" data-kind="${it.kind}"${isPast(it) && !it.draft ? " data-past" : ""}${it.draft ? " data-draft" : ""} style="--_top:calc(var(--_hour) * ${(a - H0 * 60) / 60});--_h:calc(var(--_hour) * ${(b - a) / 60});--_x:${c / of};--_w:${1 / of}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(`${f.short(d)}, ${f.span(it.from, it.to)}, ${it.kind === "busy" ? "busy, from another calendar" : it.draft ? "new event" : `${it.type}: ${it.title}`}`)}"><b>${esc(nameIt(it))}</b><span>${f.span(it.from, it.to)}${it.place ? ` · ${esc(it.place)}` : it.kind === "busy" ? ` · ${esc(together(it.who.map((p) => nameOf(who(p)))))}` : ""}</span></button>`;
       }).join("");
       const nowMin = 9 * 60 + 40; // the sample's “now”: twenty to ten
       const now = d === T ? `<span class="cal-now" style="--_top:calc(var(--_hour) * ${(nowMin - H0 * 60) / 60})" aria-hidden="true"></span>` : "";
       cols += `<div class="cal-col" data-col="${d}"${isOff(d) ? " data-off" : ""}>${blocks}${now}</div>`;
     }
     return `<div class="cal-time" style="--_n:${n}">${weekdayHead(start, n, "<div></div>")}
-      <div class="cal-allday"><span class="cal-gutter-label">All day</span>${weekRow({ start, n, spans: spansIn(start, end), dates: false, maxLanes: 6 })}</div>
+      <div class="cal-allday"><span class="cal-gutter-label">All day</span>${weekRow({ start, n, spans: spansIn(start, end), things: (d) => dayThings(d, (it) => it.allDay), dates: false, maxLanes: 6 })}</div>
       <div class="cal-hours" style="--_span-h:${H1 - H0}"><div class="cal-gutter" aria-hidden="true">${gutter}</div>${cols}</div></div>`;
   }
 
@@ -232,7 +235,7 @@
       const cards = [
         ...starts.map((sp) => `<button type="button" class="cal-card-item" data-item="${sp.id}" data-hue="${hueOf(sp.job)}" aria-haspopup="dialog"><b>${ic("briefcase", 16, { optical: true })}${esc(spanLabel(sp))}</b><span>${sp.start === d ? `${workDays(sp)} working ${workDays(sp) === 1 ? "day" : "days"}, to ${esc(f.short(endOf(sp)))}` : `Day ${workDayOn(sp, d)} of ${workDays(sp)}`}${sp.who.length ? ` · ${esc(together(sp.who.map((p) => nameOf(who(p)))))}` : " · No one yet"}</span></button>`),
         ...runs.map((sp) => `<button type="button" class="cal-line" data-item="${sp.id}" data-hue="${hueOf(sp.job)}" aria-haspopup="dialog">${ic("briefcase", 14)}${esc(spanLabel(sp))}, day ${workDayOn(sp, d)} of ${workDays(sp)}</button>`),
-        ...things.map((it) => `<button type="button" class="cal-card-item" data-item="${it.id}" data-kind="${it.kind}" aria-haspopup="dialog"><b>${esc(it.kind === "busy" ? "Busy" : it.title)}</b><span>${f.span(it.from, it.to)}${it.kind === "busy" ? ` · ${esc(together(it.who.map((p) => nameOf(who(p)))))}, ${esc(it.source)}` : ` · ${esc(it.place)}`}</span></button>`),
+        ...things.filter((it) => !it.draft).map((it) => `<button type="button" class="cal-card-item" data-item="${it.id}" data-kind="${it.kind}" aria-haspopup="dialog"><b>${esc(nameIt(it))}</b><span>${spanOf(it)}${it.kind === "busy" ? ` · ${esc(together(it.who.map((p) => nameOf(who(p)))))}, ${esc(it.source)}` : it.place ? ` · ${esc(it.place)}` : ""}</span></button>`),
       ];
       const word = f.dayWord(d);
       days += `<section class="cal-agenda-day" id="ag-${d}" aria-labelledby="agh-${d}"><h3 id="agh-${d}"${d === T ? " data-today" : ""}>${word ? `${word} · ` : ""}${esc(f.short(d))}</h3>${cards.join("") || `<p class="cal-none">Nothing on${isOff(d) ? " · day off" : ""}</p>`}</section>`;
@@ -253,7 +256,7 @@
     return a.toLocaleDateString("en-GB", { month: "long", year: "numeric" });
   };
   function render() {
-    const cal = $("#cal");
+    const cal = $("#cal"), hoursTop = $(".cal-hours", cal)?.scrollTop || 0;
     cal.dataset.view = phone.matches ? "agenda" : st.view;
     cal.innerHTML = phone.matches ? phoneHtml() : `<div class="cal-desk">${st.view === "month" ? monthHtml() : st.view === "week" ? timeHtml(7) : st.view === "day" ? timeHtml(1) : crewHtml()}</div>`;
     if (phone.matches) stripHeader(); // a day picked from the header keeps it down
@@ -268,6 +271,7 @@
     renderTray();
     $("#go-today").setAttribute("aria-label", `Today, ${f.long(T)}`);
     if (cal.dataset.view === "month") fitMonth();
+    const hours = $(".cal-hours", cal); if (hours) hours.scrollTop = hoursTop;
   }
   function renderTray() {
     $("#tray-list").innerHTML = tray.length ? tray.map((u) => `<li><button type="button" class="cal-tray-item" data-tray="${u.id}" data-hue="${hueOf(u.job)}" aria-haspopup="dialog"><b>${esc(u.job)}</b><span>${esc(u.phase)} · ${u.days} ${u.days === 1 ? "day" : "days"} · ${esc(u.client)}</span></button></li>`).join("")
@@ -330,6 +334,7 @@
   let refocus = null;
   pop.addEventListener("beforetoggle", (e) => {
     if (e.newState !== "closed") return;
+    if (popFor?.kind === "create" && !keepDraft) setTimeout(() => { if (!dlgNew.open) { clearDraft(); nv = null; } }, 0);
     const from = popFor?.from; popFor = null;
     from?.setAttribute("aria-expanded", "false");
     if (from?.id === "tray-toggle") renderTray();
@@ -357,8 +362,8 @@
     if (it.kind === "appt") {
       return `<div class="cal-sum"><div class="cal-sum-top"><p class="cal-sum-kind">${ic("calendar-check", 14)}${esc(it.type)}</p>${closeBtn()}</div>
         <h3 tabindex="-1">${esc(it.title)}</h3>
-        <p class="cal-sum-when">${esc(f.long(it.date))}<small>${f.span(it.from, it.to)}</small></p>
-        <dl>${dd("Where", esc(it.place))}${dd("With", peopleHtml(it.who))}</dl>
+        <p class="cal-sum-when">${esc(f.long(it.date))}<small>${spanOf(it)}</small></p>
+        <dl>${it.place ? dd("Where", esc(it.place)) : ""}${it.client ? dd("Customer", esc(it.client)) : ""}${dd("With", peopleHtml(it.who))}${it.guests?.length ? dd("Guests", esc(together(it.guests))) : ""}${it.notes ? dd("Notes", esc(it.notes)) : ""}</dl>
         <form class="cal-sum-move" data-move="${it.id}"><div class="field" data-size="sm"><label class="field-label" for="mv-date">Day</label><input class="input" type="date" id="mv-date" name="date" value="${it.date}" required></div>
           <div class="field cal-move-time" data-size="sm"><label class="field-label" for="mv-time">Starts</label><input class="input" type="time" id="mv-time" name="time" step="900" value="${f.time(it.from).padStart(5, "0")}" required></div><button type="submit" class="button" data-variant="secondary" data-size="sm">Move</button></form>
         <div class="cal-sum-actions"><button type="button" class="button" data-size="sm" data-not-built="appointment" aria-label="Open appointment">Open appointment</button></div></div>`;
@@ -427,7 +432,7 @@
     const rz = e.target.closest("[data-resize]"), el = e.target.closest(".cal-desk [data-item], [data-tray]");
     if (!rz && !el) return;
     const id = rz ? rz.dataset.resize : el.dataset.item || el.dataset.tray, it = byId(id);
-    if (it?.kind === "busy") return; // other calendars change there
+    if (it?.kind === "busy" || it?.draft) return; // other calendars change there; a draft is being made
     const t0 = targetAt(e.clientX, e.clientY);
     drag = { id, x: e.clientX, y: e.clientY, started: false, el: rz ? rz.closest("[data-item]") : el, tray: !!el?.dataset.tray && !rz, mode: rz ? "resize" : "move",
       grab: it?.kind === "job" && t0 ? diff(it.start, t0.day) : 0, grabMins: it && it.kind !== "job" && t0?.mins != null ? t0.mins - it.from : 0, person: (rz || el).closest("[data-person]")?.dataset.person || null };
@@ -472,6 +477,252 @@
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && drag?.started) { endDrag(); say("Move cancelled"); } });
   document.addEventListener("click", (e) => { if (swallow) { swallow = false; e.preventDefault(); e.stopImmediatePropagation(); } }, true);
 
+  // ---------- creating (D96, I18): Bolster's own dialog (audit/patterns/create-event.md), an Event or a Sales
+  // appointment, made the way Google Calendar makes one: draw it on the grid (a click, or a drag over the hours), a
+  // short card beside it, More options for the whole dialog; Create event (or c) opens the dialog straight away ----------
+  const NOW_MIN = 9 * 60 + 40; // the sample's “now”, as Week's line
+  const LEN = 60; // the company's default length (a company setting; assumed an hour)
+  const WORK = [8 * 60, 17 * 60]; // a person's work hours (a company setting; assumed 8 to 5)
+  const APPT_TYPES = [["Estimate visit", 60], ["Measure", 60], ["Project consultation", 30]]; // the company's types (assumed)
+  const KIND2 = [["appointment-schedule", "Sales appointment"], ["event", "Event"]]; // Bolster's order; it opens on the first
+  const CUSTOMERS = [...kit.CLIENTS].sort((a, b) => a.name.localeCompare(b.name)).slice(0, 40);
+  const nextHalf = (m) => Math.floor(m / 30) * 30 + 30; // Bolster's default start: the next half hour
+  const hhmm = (m) => f.time(Math.min(m, 24 * 60 - 1)).padStart(5, "0");
+  const surname = (n) => n.split(" ").slice(-1)[0];
+  let lastKind = "appointment-schedule";
+  try { lastKind = localStorage.getItem("cal-new-kind") || lastKind; } catch {}
+  // what's being made, its draft drawn on the calendar while it is
+  let nv = null, draft = null, keepDraft = false;
+  const fresh = (o = {}) => ({ kind: lastKind, title: "", date: o.date || (st.at < T ? T : st.at), from: o.from ?? nextHalf(NOW_MIN), to: null, allDay: false, location: "", notes: "", guests: [],
+    client: "", apptType: APPT_TYPES[0][0], with: o.person && o.person !== "none" ? o.person : "hm", address: "", anyway: false });
+  const lenOf = () => (nv.kind === "event" ? LEN : APPT_TYPES.find(([t]) => t === nv.apptType)[1]);
+  function syncDraft() {
+    if (!nv.to || nv.to <= nv.from) nv.to = Math.min(nv.from + lenOf(), 24 * 60);
+    if (!draft) { draft = { id: "draft", kind: "appt", draft: true, who: [] }; items.push(draft); }
+    const c = CUSTOMERS.find((x) => x.name === nv.client);
+    Object.assign(draft, { date: nv.date, from: nv.from, to: nv.kind === "event" ? nv.to : nv.from + lenOf(), allDay: nv.kind === "event" && nv.allDay,
+      title: nv.kind === "event" ? nv.title : c ? `${nv.apptType} · ${surname(c.name)}` : "", who: [nv.kind === "event" ? "hm" : nv.with] });
+  }
+  function clearDraft(draw = true) { if (!draft) return; items = items.filter((x) => x !== draft); draft = null; if (draw) render(); }
+  function startDraft(o) {
+    clearDraft(false);
+    nv = fresh(o);
+    if (o.allDay) { nv.kind = "event"; nv.allDay = true; } // the all-day row makes an all-day event
+    syncDraft(); render(); openQuick();
+  }
+  // the card sits beside the draft, as Google's does (a sheet on phones)
+  function beside(el) {
+    if (phone.matches || !el) return;
+    const r = el.getBoundingClientRect(), w = pop.offsetWidth, h = pop.offsetHeight;
+    let left = r.right + 8;
+    if (left + w > innerWidth - 12) left = r.left - w - 8;
+    if (left < 12) left = Math.max(12, Math.min(r.left, innerWidth - w - 12));
+    pop.style.left = `${left}px`; pop.style.top = `${Math.max(12, Math.min(r.top, innerHeight - h - 12))}px`;
+  }
+  const draftEl = () => $("#cal [data-draft]") || $(`#cal [data-add-day="${nv?.date}"]`) || $("#create");
+  function openQuick() {
+    const el = draftEl();
+    if (pop.matches(":popover-open")) { keepDraft = true; pop.hidePopover(); keepDraft = false; }
+    openPop("create", el, quickHtml, { label: "New event", start: true });
+    beside(el);
+    $(nv.kind === "event" ? "[name=title]" : "[name=client]", pop)?.focus();
+  }
+  const kindSeg = () => `<div class="segmented cal-new-kind" role="radiogroup" aria-label="What to make" data-size="sm">${KIND2.map(([v, l]) => `<label class="segmented-option"><input type="radio" name="kind" value="${v}"${v === nv.kind ? " checked" : ""}> ${l}</label>`).join("")}</div>`;
+  const opt = (v, l, cur) => `<option value="${esc(v)}"${v === cur ? " selected" : ""}>${esc(l)}</option>`;
+  const customerSelect = (id) => `<div class="select"><select class="input" id="${id}" name="client"><option value="">Choose customer</option>${CUSTOMERS.map((c) => opt(c.name, c.name, nv.client)).join("")}<option value="+new">Create new customer…</option></select></div>`;
+  const withSelect = (id) => `<div class="select"><select class="input" id="${id}" name="with">${[OWNERS.find((p) => p.me), ...OWNERS.filter((p) => !p.me)].map((p) => opt(p.id, p.me ? `${p.name} (you)` : p.name, nv.with)).join("")}</select></div>`;
+  const typeSelect = (id, len = true) => `<div class="select"><select class="input" id="${id}" name="apptType">${APPT_TYPES.map(([t, m]) => opt(t, len ? `${t} · ${m} min` : t, nv.apptType)).join("")}</select></div>`;
+  // the person's own things that day, which a sales appointment shouldn't land on
+  const busyAt = (person, date, a, b) => items.some((x) => !x.draft && x.date === date && (x.kind === "appt" || x.kind === "busy") && !x.allDay && x.who.includes(person) && x.from < b && x.to > a);
+  function conflict() {
+    if (nv.kind === "event") return "";
+    const p = who(nv.with), a = nv.from, b = a + lenOf();
+    if (a < WORK[0] || b > WORK[1]) return `Outside ${p.me ? "your" : `${p.name.split(" ")[0]}'s`} work hours (${f.time(WORK[0])}–${f.time(WORK[1])})`;
+    return busyAt(nv.with, nv.date, a, b) ? `${p.me ? "You're" : `${p.name.split(" ")[0]}'s`} busy then` : "";
+  }
+  // when: the date, then from and to; in the card, one line as Google's (its labels for screen readers only)
+  const whenFields = (pre) => {
+    const quick = pre === "q", lab = quick ? "visually-hidden" : "field-label", ev = nv.kind === "event";
+    return `<div class="cal-new-when"${quick ? " data-compact" : ""}>${quick ? ic("clock", 16, { optical: true }) : ""}<div class="field cal-new-date" data-size="sm"><label class="${lab}" for="${pre}-date">Date</label><input class="input" type="date" id="${pre}-date" name="date" value="${nv.date}" required></div>
+      ${ev && nv.allDay ? "" : `<div class="field cal-new-time" data-size="sm"><label class="${lab}" for="${pre}-from">Starts</label><input class="input" type="time" id="${pre}-from" name="from" step="900" value="${hhmm(nv.from)}" required></div>
+      ${ev ? `${quick ? '<span class="cal-new-dash" aria-hidden="true">–</span>' : ""}<div class="field cal-new-time" data-size="sm"><label class="${lab}" for="${pre}-to">Ends</label><input class="input" type="time" id="${pre}-to" name="to" step="900" value="${hhmm(nv.to)}" required></div>` : quick ? `<span class="cal-new-len">${lenOf()} min</span>` : ""}`}
+      ${ev ? `<label class="choice cal-new-allday"><input type="checkbox" class="checkbox" name="allDay"${nv.allDay ? " checked" : ""}> All day</label>` : ""}</div>`;
+  };
+  function quickHtml() {
+    const clash = conflict();
+    return `<form class="cal-new" data-new="quick" novalidate><div class="cal-new-top">${kindSeg()}${closeBtn()}</div>
+      ${nv.kind === "event" ? `<input class="input cal-new-title" name="title" value="${esc(nv.title)}" placeholder="Add title" aria-label="Title" autocomplete="off">`
+        : `<div class="field" data-size="sm"><label class="field-label" for="q-client">Customer</label>${customerSelect("q-client")}</div>`}
+      ${whenFields("q")}
+      ${nv.kind === "event" ? `<div class="cal-new-row">${ic("location", 16, { optical: true })}<div class="field" data-size="sm"><label class="visually-hidden" for="q-loc">Location</label><input class="input" id="q-loc" name="location" value="${esc(nv.location)}" placeholder="Add location"></div></div>`
+        : `<div class="cal-new-pair"><div class="field" data-size="sm"><label class="field-label" for="q-type">Type</label>${typeSelect("q-type", false)}</div><div class="field" data-size="sm"><label class="field-label" for="q-with">With</label>${withSelect("q-with")}</div></div>
+          ${clash ? `<p class="cal-new-note" data-tone="warning">${ic("clock", 14, { optical: true })}<span>${esc(clash)}. You can still book it.</span></p>` : ""}`}
+      <p class="cal-new-error" role="alert" hidden></p>
+      <div class="cal-new-actions"><button type="button" class="button" data-variant="ghost" data-size="sm" data-more-options>More options</button><button type="submit" class="button" data-size="sm">${nv.kind === "event" ? "Save" : clash ? "Book anyway" : "Schedule"}</button></div></form>`;
+  }
+  // the whole dialog: Bolster's fields, Google's order
+  const dlgNew = $("#new-event");
+  function slotsHtml() {
+    const len = lenOf(), out = [];
+    for (let m = WORK[0]; m + len <= WORK[1]; m += 30) {
+      const busy = busyAt(nv.with, nv.date, m, m + len);
+      out.push(`<label class="cal-slot"${busy ? " data-busy" : ""}><input type="radio" name="slot" value="${m}"${m === nv.from ? " checked" : ""}${busy && !nv.anyway ? " disabled" : ""}><span>${f.time(m)}</span></label>`);
+    }
+    const free = out.filter((x) => !x.includes("data-busy")).length;
+    return `<div class="cal-slots" role="radiogroup" aria-label="Available times">${out.join("")}</div>
+      ${free ? "" : `<p class="cal-new-note">No available times for this day.</p>`}
+      <label class="choice cal-new-anyway"><input type="checkbox" class="checkbox" name="anyway"${nv.anyway ? " checked" : ""}> Book anyway<span class="cal-new-hint">You can still book within their normal work hours.</span></label>`;
+  }
+  function fullHtml() {
+    const ev = nv.kind === "event", c = CUSTOMERS.find((x) => x.name === nv.client);
+    if (!ev && c && !nv.address) nv.address = c.address;
+    const me = OWNERS.find((p) => p.me);
+    return `<form class="cal-new-full" data-new="full" novalidate><header class="dialog-header"><h2 id="new-event-title">New ${ev ? "event" : "sales appointment"}</h2>${`<button type="button" class="button" data-variant="ghost" data-icon-only data-close-new aria-label="Close" data-tip="Close">${ic("xmark", 16, { optical: true })}</button>`}</header>
+      <div class="dialog-body">${kindSeg()}
+      ${ev ? `<input class="input cal-new-title" name="title" value="${esc(nv.title)}" placeholder="Add title" aria-label="Title" autocomplete="off">
+        ${whenFields("f")}
+        <p class="cal-new-owner">${avatar(me, "sm")}<span><b>${esc(me.name)}</b><small>Busy · Default visibility · Notify 30 minutes before</small></span></p>
+        <div class="field"><label class="field-label" for="f-guest">Guests</label><div class="cal-guests">${nv.guests.map((g, i) => `<span class="cal-guest">${esc(g)}<button type="button" data-guest-remove="${i}" aria-label="${esc(`Remove ${g}`)}" data-tip="Remove">${ic("xmark", 12, { optical: true })}</button></span>`).join("")}<input class="cal-guest-input" id="f-guest" list="f-guest-list" placeholder="${nv.guests.length ? "" : "Add customers or email addresses"}" autocomplete="off" enterkeyhint="done"></div>
+          <datalist id="f-guest-list">${[...OWNERS.filter((p) => !p.me).map((p) => p.name), ...CUSTOMERS.map((x) => x.name)].map((n) => `<option value="${esc(n)}">`).join("")}</datalist>
+          <p class="field-helper">Enter adds one; Backspace takes the last off.</p></div>
+        <div class="field"><label class="field-label" for="f-loc">Location</label><input class="input" id="f-loc" name="location" value="${esc(nv.location)}" placeholder="Add location"></div>
+        <div class="field"><label class="field-label" for="f-notes">Description</label><textarea class="input" id="f-notes" name="notes" rows="3" placeholder="Add description">${esc(nv.notes)}</textarea></div>`
+      : `<div class="field"><label class="field-label" for="f-client">Customer</label>${customerSelect("f-client")}</div>
+        <div class="cal-new-pair"><div class="field"><label class="field-label" for="f-type">Appointment type</label>${typeSelect("f-type")}</div><div class="field"><label class="field-label" for="f-with">Appointment with</label>${withSelect("f-with")}</div></div>
+        <fieldset class="cal-new-times"><legend class="field-label">Choose a date and time</legend><div class="field" data-size="sm"><label class="visually-hidden" for="f-date">Date</label><input class="input" type="date" id="f-date" name="date" value="${nv.date}" required></div>${slotsHtml()}</fieldset>
+        <div class="field"><label class="field-label" for="f-addr">Site visit address</label><input class="input" id="f-addr" name="address" value="${esc(nv.address)}" placeholder="Where the visit is"${c && !nv.address ? ' aria-invalid="true"' : ""}>${c && !c.address ? '<p class="field-helper">This customer has no address saved.</p>' : ""}</div>
+        <div class="field"><label class="field-label" for="f-notes">Additional notes</label><textarea class="input" id="f-notes" name="notes" rows="3" placeholder="Add any additional information…">${esc(nv.notes)}</textarea></div>`}
+      <p class="cal-new-error" role="alert" hidden></p></div>
+      <footer class="dialog-footer"><button type="button" class="button" data-variant="ghost" data-close-new>Cancel</button><button type="submit" class="button">${ev ? "Save" : "Schedule appointment"}</button></footer></form>`;
+  }
+  let saved = false;
+  function openFull(seed) {
+    if (!nv || seed) { clearDraft(false); nv = fresh(seed); }
+    if (pop.matches(":popover-open")) { keepDraft = true; pop.hidePopover(); keepDraft = false; }
+    saved = false;
+    syncDraft(); render();
+    dlgNew.innerHTML = fullHtml();
+    BolsterShell.hydrateIcons(dlgNew);
+    dlgNew.showModal();
+    $(nv.kind === "event" ? "[name=title]" : "[name=client]", dlgNew)?.focus();
+  }
+  dlgNew.addEventListener("close", () => { if (!saved) { clearDraft(); nv = null; } });
+  // read what's in a form into what's being made
+  function read(form) {
+    const v = Object.fromEntries(new FormData(form));
+    if (v.kind) { if (v.kind !== nv.kind) { nv.kind = v.kind; lastKind = v.kind; try { localStorage.setItem("cal-new-kind", v.kind); } catch {} } }
+    if ("title" in v) nv.title = v.title;
+    if (v.date) nv.date = v.date;
+    if (v.from) { const len = nv.to - nv.from; nv.from = minutes(v.from); nv.to = v.to ? minutes(v.to) : nv.from + len; if (v.to && nv.to <= nv.from) nv.to = nv.from + 15; }
+    else if (v.slot) nv.from = +v.slot;
+    nv.allDay = !!v.allDay && nv.kind === "event";
+    for (const k of ["location", "notes", "apptType", "with", "address"]) if (k in v) nv[k] = v[k];
+    if ("client" in v) {
+      if (v.client === "+new") { toast("Concept only: Create new customer isn't wired up."); }
+      else { if (v.client !== nv.client) nv.address = CUSTOMERS.find((x) => x.name === v.client)?.address || ""; nv.client = v.client; }
+    }
+    nv.anyway = !!v.anyway;
+    syncDraft();
+  }
+  function showError(form, text) { const e = $(".cal-new-error", form); e.textContent = text; e.hidden = !text; }
+  function create(form) {
+    read(form);
+    if (nv.kind === "appointment-schedule" && !nv.client) return showError(form, "Choose a customer for the sales appointment.");
+    if (nv.kind === "event" && !nv.allDay && nv.to <= nv.from) return showError(form, "Choose a valid date and time.");
+    const ev = nv.kind === "event", c = CUSTOMERS.find((x) => x.name === nv.client);
+    const it = ev ? { id: `a${++seq}`, kind: "appt", type: "Event", title: nv.title.trim() || "(No title)", place: nv.location.trim(), date: nv.date, from: nv.allDay ? 0 : nv.from, to: nv.allDay ? 24 * 60 - 1 : nv.to, allDay: nv.allDay, who: ["hm"], guests: [...nv.guests], notes: nv.notes.trim() }
+      : { id: `a${++seq}`, kind: "appt", type: "Site visit", title: `${nv.apptType} · ${surname(c.name)}`, place: nv.address.trim(), date: nv.date, from: nv.from, to: nv.from + lenOf(), who: [nv.with], client: c.name, notes: nv.notes.trim() };
+    saved = true;
+    clearDraft(false); nv = null;
+    if (pop.matches(":popover-open")) { keepDraft = true; pop.hidePopover(); keepDraft = false; }
+    if (dlgNew.open) dlgNew.close();
+    items.push(it);
+    // show what was made where it went: its day, in the view you're in
+    st.at = it.date; render();
+    const message = ev ? `Event created: ${it.title}, ${f.short(it.date)}${it.allDay ? "" : `, ${f.time(it.from)}`}` : `Appointment scheduled: ${it.title}, ${f.short(it.date)}, ${f.time(it.from)}`;
+    say(message);
+    toast(message, () => { items = items.filter((x) => x !== it); render(); say("Undone"); });
+  }
+  // drawing it: a drag over the hours in Week and Day sets its start and end, 15 minutes at a time
+  let making = null;
+  const minsAt = (col, y) => { const r = col.getBoundingClientRect(); return H0 * 60 + ((y - r.top) / r.height) * (H1 - H0) * 60; };
+  document.addEventListener("pointerdown", (e) => {
+    if (e.button !== 0 || e.pointerType === "touch" || phone.matches) return;
+    const col = e.target.closest?.(".cal-desk [data-col]");
+    if (!col || e.target !== col) return;
+    making = { day: col.dataset.col, a: Math.floor(minsAt(col, e.clientY) / 15) * 15, y: e.clientY, moved: false };
+  });
+  document.addEventListener("pointermove", (e) => {
+    if (!making) return;
+    if (!making.moved) {
+      if (Math.abs(e.clientY - making.y) < 5) return;
+      making.moved = true;
+      if (pop.matches(":popover-open")) pop.hidePopover();
+      clearDraft(false); nv = fresh({ date: making.day, from: making.a });
+      document.documentElement.setAttribute("data-cal-dragging", "make");
+    }
+    const col = $(`.cal-desk [data-col="${making.day}"]`);
+    const b = Math.max(H0 * 60, Math.min(H1 * 60 - 15, Math.floor(minsAt(col, e.clientY) / 15) * 15));
+    const from = Math.min(making.a, b), to = Math.max(making.a, b) + 15;
+    if (from === nv.from && to === nv.to) return;
+    nv.from = from; nv.to = to; nv.kind = "event"; syncDraft(); render();
+  });
+  document.addEventListener("pointerup", () => {
+    if (!making) return;
+    const m = making; making = null;
+    if (!m.moved) return; // a click: the click handler starts the draft at the half hour
+    document.documentElement.removeAttribute("data-cal-dragging");
+    swallow = true; setTimeout(() => (swallow = false), 0);
+    openQuick();
+  });
+  // Google's key: c creates
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "c" || e.metaKey || e.ctrlKey || e.altKey || e.target.closest?.("input, textarea, select, [contenteditable]") || document.querySelector("dialog[open]")) return;
+    e.preventDefault(); openFull({});
+  });
+  // the card and the dialog: what changes, redraws the draft; switching what's made redraws the form
+  document.addEventListener("input", (e) => {
+    const form = e.target.closest?.("[data-new]");
+    if (!form || e.target.name === "title" && form.dataset.new === "quick") { if (form) { nv.title = e.target.value; syncDraft(); const d = $("#cal [data-draft] b, #cal [data-draft] span:last-child"); if (d) d.textContent = nv.title || "(No title)"; } return; }
+  });
+  document.addEventListener("change", (e) => {
+    const form = e.target.closest?.("[data-new]");
+    if (!form) return;
+    read(form);
+    // typing only needs reading: a redraw on its change (which comes as you leave the field, say for Save) would
+    // swap the button under the pointer
+    if (e.target.matches("input[type=text], input:not([type]), input[type=search], textarea")) return;
+    render();
+    if (form.dataset.new === "quick") { pop.innerHTML = quickHtml(); BolsterShell.hydrateIcons(pop); popFor.from = draftEl(); beside(popFor.from); $(`[name="${e.target.name}"]`, pop)?.focus(); }
+    else { const keep = e.target.name; dlgNew.innerHTML = fullHtml(); BolsterShell.hydrateIcons(dlgNew); $(`[name="${keep}"]${e.target.type === "radio" ? ":checked" : ""}`, dlgNew)?.focus(); }
+  });
+  document.addEventListener("keydown", (e) => {
+    const inp = e.target.closest?.(".cal-guest-input");
+    if (!inp) return;
+    const v = inp.value.trim();
+    if (e.key === "Enter") {
+      e.preventDefault();
+      if (!v) return;
+      const known = [...OWNERS.map((p) => p.name), ...CUSTOMERS.map((x) => x.name)].find((n) => n.toLowerCase() === v.toLowerCase());
+      if (!known && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) return showError(dlgNew.querySelector("form"), "Select a customer or enter a valid email address.");
+      read(dlgNew.querySelector("form")); nv.guests.push(known || v);
+    } else if (e.key === "Backspace" && !v && nv.guests.length) { read(dlgNew.querySelector("form")); nv.guests.pop(); }
+    else return;
+    dlgNew.innerHTML = fullHtml(); BolsterShell.hydrateIcons(dlgNew); $(".cal-guest-input", dlgNew).focus();
+  });
+  document.addEventListener("submit", (e) => {
+    const form = e.target.closest("[data-new]");
+    if (!form) return;
+    e.preventDefault(); e.stopImmediatePropagation();
+    create(form);
+  }, true);
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-more-options]")) { read(e.target.closest("form")); return openFull(); }
+    if (e.target.closest("[data-close-new]")) return dlgNew.close();
+    const rm = e.target.closest("[data-guest-remove]");
+    if (rm) { read(dlgNew.querySelector("form")); nv.guests.splice(+rm.dataset.guestRemove, 1); dlgNew.innerHTML = fullHtml(); BolsterShell.hydrateIcons(dlgNew); $(".cal-guest-input", dlgNew).focus(); }
+  });
+
   // ---------- events ----------
   function go(dir) {
     if (phone.matches || st.view === "week" || st.view === "crew") st.at = add(st.at, 7 * dir);
@@ -497,9 +748,11 @@
     if (q("[data-close-tray]")) { st.trayOpen = false; keepTray(); renderTray(); return $("#tray-toggle").focus(); }
     if ((el = q("[data-tray]"))) { const u = tray.find((x) => x.id === el.dataset.tray); return openPop("schedule", trayWide.matches ? el : $("#tray-toggle"), () => scheduleHtml(u), { label: `Schedule ${u.job}` }); }
     if ((el = q("[data-more]"))) { const d = el.dataset.more, person = el.dataset.person; return openPop("more", el, () => moreHtml(d, person), { start: true, label: f.long(d) }); }
+    if (q("[data-draft]")) return openQuick();
     if ((el = q("[data-item]"))) { const from = pop.contains(el) && popFor ? popFor.from : el; if (pop.contains(el)) pop.hidePopover(); return openSummary(el.dataset.item, from.isConnected ? from : el); }
-    if ((el = q("[data-add-day]"))) return toast(`Concept only: adding on ${f.short(el.dataset.addDay)} isn't wired up.`);
-    if (q("#create")) return toast("Concept only: Create event isn't wired up.");
+    if ((el = q("[data-add-day]"))) return startDraft({ date: el.dataset.addDay, person: el.closest("[data-person]")?.dataset.person, allDay: !!el.closest(".cal-allday") });
+    if ((el = q(".cal-desk [data-col]")) && e.target === el) { const r = el.getBoundingClientRect(), hour = r.height / (H1 - H0); return startDraft({ date: el.dataset.col, from: H0 * 60 + Math.floor(((e.clientY - r.top) / hour) * 2) * 30 }); }
+    if (q("#create")) return openFull({});
   });
   $("#views").addEventListener("change", (e) => { st.view = e.target.value; try { localStorage.setItem("cal-view", st.view); } catch {} render(); });
   document.addEventListener("change", (e) => {
