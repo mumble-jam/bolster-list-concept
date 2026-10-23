@@ -121,12 +121,26 @@
   }
   .pl-col-head { position: relative; z-index: 2; background: var(--color-surface-canvas); box-shadow: 0 calc(-1 * var(--border-width-default)) var(--color-surface-canvas); display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-2); padding: var(--space-3) var(--_in) var(--space-2); }
   .pl-col-head h3 { display: flex; align-items: center; gap: var(--space-1-5, 6px); min-inline-size: 0; margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); }
-  .pl-col-head h3 > span:not(.mark):not(.pl-n) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pl-col-head h3 > span:not(.mark, .pl-n, .pl-lead) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   /* the name and its count give the head its baseline (not the icon), so the figure sits on it */
-  .pl-col-head h3 > span:not(.mark) { align-self: baseline; }
+  .pl-col-head h3 > span:not(.mark, .pl-lead) { align-self: baseline; }
   .pl-col-head h3 svg { flex: none; inline-size: 14px; color: var(--color-content-secondary); }
   .pl-col-head h3 .mark { margin-inline: 1px; }
   .pl-col-head h3 .pl-n { margin-inline-start: var(--space-0-5); }
+  /* the stage's mark; pointed at (or tabbed to), View in list in its place (your call, 23 Oct, D117): a round 20
+     button, as round as the marks, centred on the mark and over it, so the name never moves */
+  .pl-lead { position: relative; display: inline-grid; place-items: center; flex: none; }
+  .pl-lead > :not(.pl-view) { transition: opacity var(--duration-fast) var(--ease-standard); }
+  .pl-view { position: absolute; inset-block-start: 50%; inset-inline-start: 50%; translate: -50% -50%; display: grid; place-items: center; inline-size: var(--space-5); block-size: var(--space-5); border-radius: var(--radius-full); color: var(--color-content-secondary); opacity: 0; transition: opacity var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard); }
+  .pl-col-head h3 .pl-view svg { color: currentColor; }
+  @media (hover: hover) {
+    .pl-col-head:hover .pl-view { opacity: 1; }
+    .pl-col-head:hover .pl-lead > :not(.pl-view) { opacity: 0; }
+    .pl-view:hover { background: var(--color-surface-hover-control); color: var(--color-content-primary); }
+  }
+  .pl-col-head:focus-within .pl-view { opacity: 1; }
+  .pl-col-head:focus-within .pl-lead > :not(.pl-view) { opacity: 0; }
+  .pl-view:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
   .pl-figure { flex: none; margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .pl-n { color: var(--color-content-tertiary); font-weight: var(--font-weight-regular); font-variant-numeric: tabular-nums; }
   /* it holds the drop line while a card's dragged over it (drop-line.css) */

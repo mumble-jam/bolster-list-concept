@@ -70,7 +70,7 @@
   /* Bolton's head at Bolster's own size: 28 tall in the 36 circle, as the product draws it (its head fills its
      28px image), bigger than the (?) beside it */
   .bs-assistant img { block-size: 1.75rem; inline-size: auto; }
-  /* all three corner circles share one size: help, assistant, avatar */
+  /* the corner circles share one size: assistant, avatar (Help moved to the menu's foot, D118) */
   .bs-avatar .avatar { inline-size: 100%; block-size: 100%; }
   @media (hover: hover) {
     .bs-company:hover, .bs-icon-btn:hover { background: var(--color-surface-chrome-hover); color: var(--color-content-on-chrome); }
@@ -257,7 +257,7 @@
     .bs-menu-fab { transition: scale 120ms var(--ease-out); }
   }
   .bs-menu-fab { display: none; }
-  /* what the top bar holds joins the menu on phones (search, help, Bolton, your account) */
+  /* what the top bar holds joins the menu on phones (search, Bolton, your account) */
   .bs-phone { display: none; }
   @media (max-width: 1023px) { .bs-sidebar .bs-phone { display: flex; } .bs-sidebar details.bs-phone { display: block; } }
   .bs-sidebar .bs-bolton { inline-size: 1.75rem; block-size: 1.25rem; object-fit: contain; flex: none; }
@@ -403,7 +403,7 @@
     .bs-company { display: none; }
     .bs-top .top-bar-search { margin-inline-start: auto; }
     /* phones (D88): no tab bar and no top bar; one floating menu button, bottom left across from Create, opens
-       the same sidebar over the page (search, help, Bolton and your account in it) and closes it; while rows
+       the same sidebar over the page (search, Bolton and your account in it) and closes it; while rows
        are ticked it steps aside for the bulk bar */
     .app-shell { grid-template-rows: 1fr; grid-template-areas: "main"; }
     .bs-top { display: none; }

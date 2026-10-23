@@ -213,6 +213,10 @@
     return "";
   }
 
+  // ---------- a column's list (your call, 23 Oct): the same records in the table, filtered to the stage ----------
+  const LIST = { leads: "customers?status=lead", visits: "customers?status=lead", pending: "jobs?status=pending", booked: "jobs?status=booked", progress: "jobs?status=in-progress", invoices: "invoices", lost: "jobs?status=declined" };
+  const viewInList = (s) => `<a class="pl-view" href="../index.html#${LIST[s.key]}" aria-label="${esc(`View ${s.label.toLowerCase()} in a list`)}" data-tip="View in list">${ic("list", 14, { optical: true })}</a>`;
+
   // ---------- drawing ----------
   const markOf = (s, size = "") => (s.kind === "job" ? `<span class="mark${size}" data-mark="${s.mark}" style="--_dot:${s.dot}" aria-hidden="true"></span>` : ic(s.icon, 14, { optical: true }));
   // Display settings (your call, 22 Oct), each remembered: the card's size, Comfortable (its next step a strip at its
@@ -297,7 +301,7 @@
     }).join("");
     const empty = `<p class="pl-empty">${filtered() ? "No matches" : "Nothing here"}</p>`;
     return `<section class="pl-col" id="col-${s.key}" data-stage="${s.key}" data-kind="${s.kind}" aria-labelledby="h-${s.key}">
-      <header class="pl-col-head"><h3 id="h-${s.key}">${markOf(s)}<span>${esc(s.label)}</span><span class="pl-n">${rows.length}</span></h3>${s.kind !== "person" && st.totals ? `<p class="pl-figure">${figure(s, rows)}</p>` : ""}</header>
+      <header class="pl-col-head"><h3 id="h-${s.key}"><span class="pl-lead">${markOf(s)}${viewInList(s)}</span><span>${esc(s.label)}</span><span class="pl-n">${rows.length}</span></h3>${s.kind !== "person" && st.totals ? `<p class="pl-figure">${figure(s, rows)}</p>` : ""}</header>
       <div class="pl-col-body" tabindex="-1">${groups || empty}</div></section>`;
   }
   const board = $("#board");

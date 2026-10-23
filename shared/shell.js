@@ -55,6 +55,8 @@ window.BolsterShell = (() => {
     bottom: [
       { id: "messages", label: "Messages", icon: "radio" },
       { id: "files", label: "Files", icon: "folder" },
+      // Help at the menu's foot, out of the top bar (your call, 23 Oct, D118): in sight on every screen, the rail too
+      { id: "help", label: "Help", icon: "circle-help" },
       { id: "settings", label: "Settings", icon: "settings", groups: [
         { label: "General", items: [
           { id: "company-settings", label: "Company settings", icon: "briefcase" },
@@ -114,7 +116,6 @@ window.BolsterShell = (() => {
       </div>
       <label class="top-bar-search">${chrome("search", 16)}<input type="search" placeholder="Search customers, jobs, invoices, files" aria-label="Search Bolster" enterkeyhint="search" autocomplete="off" spellcheck="false"><button class="top-bar-search-clear" type="button" aria-label="Clear search" data-tip="Clear">${chrome("xmark", 14)}</button><span class="top-bar-search-keys" aria-hidden="true"><kbd>⌘</kbd><kbd>K</kbd><kbd data-focused>esc</kbd></span></label>
       <div class="bs-top-actions">
-        <button class="bs-icon-btn" type="button" aria-label="Help" data-not-built="help" data-tip="Help">${chrome("circle-help", 18, { optical: true })}</button>
         <button class="bs-icon-btn bs-assistant" type="button" aria-label="Ask Bolton" data-not-built="assistant" data-tip="Ask Bolton"><img src="${ASSETS}bolton-head.svg" alt=""></button>
         <button class="bs-avatar" type="button" popovertarget="bs-user-menu" aria-haspopup="menu" aria-label="${esc(USER.name)}" data-tip="Your account"><span class="avatar" data-color="${USER.color}" aria-hidden="true">${USER.initials}</span></button>
         <div class="menu" id="bs-user-menu" popover role="menu" aria-label="Account">
@@ -429,12 +430,11 @@ window.BolsterShell = (() => {
       return `<a class="sidebar-item" ${sectionHref(s)} data-section="${s.id}"${s.id === cur ? ' aria-current="page" data-current' : ""}>${head}</a>`;
     };
     const extra = [...document.querySelectorAll("[data-more-entry]")].map((el) => `<button type="button" class="sidebar-item bs-extra" data-more-open="${el.id}">${menuIcon(el.dataset.moreIcon || "sliders", 18)}<span>${esc(el.dataset.moreEntry)}</span></button>`).join("");
-    // phones have no top bar (D88): its search, help, Bolton and your account are in the menu
+    // phones have no top bar (D88): its search, Bolton and your account are in the menu (Help is in its foot, D118)
     const search = `<button type="button" class="sidebar-item bs-phone" data-not-built="search">${menuIcon("search", 16)}<span>Search</span></button>`;
-    const you = `<button type="button" class="sidebar-item bs-phone" data-not-built="help">${menuIcon("circle-help", 18)}<span>Help</span></button>`
-      + `<button type="button" class="sidebar-item bs-phone" data-not-built="assistant"><img class="bs-bolton" src="${ASSETS}bolton-head.svg" alt=""><span>Ask Bolton</span></button>`
+    const you = `<button type="button" class="sidebar-item bs-phone" data-not-built="assistant"><img class="bs-bolton" src="${ASSETS}bolton-head.svg" alt=""><span>Ask Bolton</span></button>`
       + `<details class="bs-acc bs-phone" name="bs-nav"><summary class="sidebar-item"><span class="avatar" data-size="sm" data-color="${USER.color}" aria-hidden="true">${USER.initials}</span><span>${esc(USER.name)}</span>${more}</summary><div class="bs-acc-body">${[["profile", "Edit profile", "user-cog"], ["users", "Manage users", "users"], ["logout", "Log out", "log-out"]].map(([id, l, ico]) => `<a class="sidebar-item bs-sub" href="#" data-not-built="${id}">${menuIcon(ico, 14, { optical: true })}<span>${l}</span></a>`).join("")}</div></details>`;
-    // the foot (Messages, Files, Settings) stays put; everything above scrolls under it
+    // the foot (Messages, Files, Help, Settings) stays put; everything above scrolls under it
     return `<div class="bs-nav-main">${search}${NAV.main.map(row).join("")}${you}${extra}</div><div class="bs-nav-bottom">${NAV.bottom.map(row).join("")}<button type="button" class="sidebar-item bs-fold" data-collapse-sidebar>${foldIcon("in")}<span>Collapse menu</span></button></div>`;
   }
 
