@@ -578,10 +578,59 @@
   // of the two pages goes once it's decided). A card's graph is its slice's money, by when the jobs were made
   const estimatesGraphsConfig = { ...estimatesConfig, id: "jobs-graphs", graphs: { value: (s) => sum(s, (x) => x.total) } };
 
+  // ---------- sample tasks: [name, job, kind, hours, due (days from today, null for none), priority 0-3, who, done (days ago)] ----------
+  const TASKS = [
+    ["Hang drywall: ceilings", "Garage drywall", "labor", 6.5, -3, 3, "mr"],
+    ["Call the client about the change order", "Basement finish", "general", null, -2, 2, "hm"],
+    ["Labor for gypsum drywall - 5/8\" type X fire-rated board: garage ceiling and walls, two layers", "Fire-rated walls", "labor", 11.5, -1, 0, "pn"],
+    ["Tape and mud, level 4 finish", "Office build-out", "labor", 8, 0, 2, "mr"],
+    ["Confirm Monday's board delivery", "Office build-out", "general", null, 0, 0, null],
+    ["Spray foam the rim joists", "Spray foam", "labor", 4.2, 0, 1, "dc"],
+    ["Walk-through with the homeowner", "Bathroom remodel", "general", null, 1, 3, "hm"],
+    ["Install batt insulation: exterior walls", "Attic insulation", "labor", 5.5, 1, 0, "pn"],
+    ["Corner bead, metal", "Basement finish", "material", null, 2, 0, "dc"],
+    ["Frame basement partition walls", "Basement finish", "labor", 9, 2, 1, "mr"],
+    ["Sand and prime", "Kitchen drywall", "labor", 3.5, 3, 0, null],
+    ["Send photos of the finished ceiling", "Ceiling repair", "general", null, 3, 0, "hm"],
+    ["Skim coat the stairwell", "Skim coat", "labor", 7, 6, 2, "dc"],
+    ["Book the scaffold rental", "Office build-out", "general", null, 8, 1, null],
+    ["Install acoustic ceiling grid", "Soundproofing", "labor", 12, 11, 0, "pn"],
+    ["Patch the ceiling after electrical", "Water damage repair", "labor", 2.5, 15, 0, null],
+    ["Blown-in insulation, R-49", "Blown-in insulation", "material", null, 18, 0, null],
+    ["Remove popcorn texture: living room", "Popcorn ceiling removal", "labor", 6, null, 0, null],
+    ["Order more 1/2\" board", null, "general", null, null, 2, "hm"],
+    ["Check the moisture readings before taping", "Water damage repair", "general", null, null, 0, null],
+    ["Hang drywall: walls", "Kitchen drywall", "labor", 10, null, 0, null],
+    ["Crawl space vapour barrier", "Crawl space insulation", "labor", 4, null, 0, "pn"],
+    ["Fire caulk, intumescent", "Fire-rated walls", "material", null, null, 0, null],
+    ["Demolition: water-damaged drywall", "Water damage repair", "labor", 3, null, 1, null],
+    ["Mineral wool, 3 in.", "Soundproofing", "material", null, null, 0, null],
+    ["Prime and paint the garage", "Garage drywall", "labor", 5, null, 0, null],
+    ["Hang drywall: basement walls", "Basement finish", "labor", 14, -9, 0, "mr", 4],
+    ["Measure the attic for insulation", "Attic insulation", "general", null, -6, 0, "dc", 6],
+    ["Joint compound, all-purpose", "Kitchen drywall", "material", null, -4, 0, "pn", 3],
+    ["Texture match: hallway patch", "Ceiling repair", "labor", 1.5, -2, 2, "mr", 1],
+    ["Send the scope of work to the client", "Bathroom remodel", "general", null, null, 0, "hm", 2],
+  ];
+
+  // ---------- sample files (search finds them; no page lists them yet): [name, job, kind, added (days ago)] ----------
+  const FILES = [
+    ["Floor plan.pdf", "Garage drywall", "pdf", 3],
+    ["Change order 2.pdf", "Basement finish", "pdf", 2],
+    ["Ceiling before taping.jpg", "Office build-out", "photo", 1],
+    ["Moisture readings.xlsx", "Water damage repair", "sheet", 4],
+    ["Fire rating spec, type X board.pdf", "Fire-rated walls", "pdf", 9],
+    ["Stairwell, finished.jpg", "Skim coat", "photo", 12],
+    ["Signed contract.pdf", "Bathroom remodel", "pdf", 20],
+    ["Insulation take-off.xlsx", "Attic insulation", "sheet", 6],
+    ["Kitchen elevations.pdf", "Kitchen drywall", "pdf", 15],
+    ["Crawl space, vapour barrier.jpg", "Crawl space insulation", "photo", 8],
+  ].map(([name, job, kind, ago], i) => ({ id: `file-${i + 1}`, name, job, kind, added: daysAgo(ago) }));
+
   window.BDS_CONCEPT = {
     TODAY, fmt, esc, ageDays, attrIcons, actionIcons,
     // the parts recipe.js builds a list from a page description with
-    kit: { seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, thumb, person, main, PHOTOS, photoAt, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf, MIN_SAMPLE, SCHEDULE, UNSCHEDULED, SUBS },
+    kit: { TASKS, FILES, seeded, hash, initials, money, daysAgo, daysFrom, sum, avatar, thumb, person, main, PHOTOS, photoAt, OWNERS, CLIENTS, CITIES, STREETS, JOBS, SOURCES, VENDORS, CATALOG, emailOf, MIN_SAMPLE, SCHEDULE, UNSCHEDULED, SUBS },
     configs: { jobs: estimatesConfig, "jobs-graphs": estimatesGraphsConfig, invoices: invoicesConfig, customers: clientsConfig, catalog: itemsConfig },
   };
 })();

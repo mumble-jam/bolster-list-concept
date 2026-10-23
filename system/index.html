@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="bolster.css?v=1cb705f8">
-<link rel="stylesheet" href="specimens/specimen.css?v=1cb705f8">
+<link rel="stylesheet" href="bolster.css?v=3e782a62">
+<link rel="stylesheet" href="specimens/specimen.css?v=3e782a62">
 <style>
   .cat-grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
   .cat-card .card-body { display: grid; gap: var(--space-3); }
@@ -17,6 +17,9 @@
   .cat-card .card-header .badge { flex: none; }
   .cat-files { font-family: var(--font-mono); font-size: var(--text-xxs); color: var(--color-content-tertiary); }
 </style>
+<script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
+addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
+<script data-goatcounter="https://bolster-concept.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <header class="spec-header">
@@ -216,6 +219,11 @@
       <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../concepts/timeline/index.html">Links</a></h3><span class="badge" data-status="draft">Draft</span></header>
         <div class="card-body"><p class="text-secondary">Finish to start, elbow lines with an arrow, red and dashed when broken; drawn from a bar's end onto another; named in the summary.</p><p class="cat-files">D97, I21 · concepts/timeline/timeline.js</p></div></section>
     </div>
+    <h3 class="spec-subhead">From the shell</h3>
+    <div class="cat-grid">
+      <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../concepts/pipeline/index.html">Global search panel</a></h3><span class="badge" data-status="draft">Draft</span></header>
+        <div class="card-body"><p class="text-secondary">Under the top bar's field: type chips with counts; before typing, recent records on an outline card and Create as tiles; typing, a card per type, each row the type's icon on a tile, its name with the typed letters marked and its status badge or amount, See all per type, the words as a row; a type token in the field to narrow. Corners nested 16, 8, 4. The arrows move, Enter opens.</p><p class="cat-files">D119, I10 · concepts/shared/search.js, shell.css</p></div></section>
+    </div>
     <h3 class="spec-subhead">From the data list</h3>
     <div class="cat-grid">
       <section class="card cat-card"><header class="card-header"><h3><a class="card-link" href="../index.html#jobs-graphs">Summary cards with graphs</a></h3><span class="badge" data-status="draft">Draft</span></header>
@@ -266,7 +274,7 @@
     </div>
   </section>
 </main>
-<script src="../shared/icons.js?v=1cb705f8"></script>
-<script src="specimens/specimen.js?v=1cb705f8"></script>
+<script src="../shared/icons.js?v=3e782a62"></script>
+<script src="specimens/specimen.js?v=3e782a62"></script>
 </body>
 </html>

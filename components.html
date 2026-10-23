@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=1cb705f8">
-<link rel="stylesheet" href="data-list.css?v=1cb705f8">
+<link rel="stylesheet" href="system/bolster.css?v=3e782a62">
+<link rel="stylesheet" href="data-list.css?v=3e782a62">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -71,6 +71,9 @@
     .mark[data-level="mine"] { --_dot: var(--color-content-tertiary); }
   }
 </style>
+<script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
+addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
+<script data-goatcounter="https://bolster-concept.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <main class="inv">
@@ -108,7 +111,7 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=1cb705f8"></script>
+<script src="shared/icons.js?v=3e782a62"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -266,6 +269,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=1cb705f8"></script>
+<script src="system/specimens/specimen.js?v=3e782a62"></script>
 </body>
 </html>

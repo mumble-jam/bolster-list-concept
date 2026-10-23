@@ -14,40 +14,8 @@
 
   BolsterShell.mount({ current: "tasks", links: { tasks: "index.html", calendar: "../calendar/", pipeline: "../pipeline/", timeline: "../timeline/", "job-list": "../index.html#jobs", "vendor-orders": "../index.html?d=pages/list/vendor-orders.json", expenses: "../index.html?d=pages/list/expenses.json", "subs-and-vendors": "../index.html?d=pages/list/subs-and-vendors.json", "bid-requests": "../index.html?d=pages/list/bid-requests.json", invoices: "../index.html#invoices", "leads-and-customers": "../index.html#customers", catalog: "../index.html#catalog" } });
 
-  // ---------- sample tasks: [name, job, kind, hours, due (days from today, null for none), priority 0-3, who, done (days ago)] ----------
-  const RAW = [
-    ["Hang drywall: ceilings", "Garage drywall", "labor", 6.5, -3, 3, "mr"],
-    ["Call the client about the change order", "Basement finish", "general", null, -2, 2, "hm"],
-    ["Labor for gypsum drywall - 5/8\" type X fire-rated board: garage ceiling and walls, two layers", "Fire-rated walls", "labor", 11.5, -1, 0, "pn"],
-    ["Tape and mud, level 4 finish", "Office build-out", "labor", 8, 0, 2, "mr"],
-    ["Confirm Monday's board delivery", "Office build-out", "general", null, 0, 0, null],
-    ["Spray foam the rim joists", "Spray foam", "labor", 4.2, 0, 1, "dc"],
-    ["Walk-through with the homeowner", "Bathroom remodel", "general", null, 1, 3, "hm"],
-    ["Install batt insulation: exterior walls", "Attic insulation", "labor", 5.5, 1, 0, "pn"],
-    ["Corner bead, metal", "Basement finish", "material", null, 2, 0, "dc"],
-    ["Frame basement partition walls", "Basement finish", "labor", 9, 2, 1, "mr"],
-    ["Sand and prime", "Kitchen drywall", "labor", 3.5, 3, 0, null],
-    ["Send photos of the finished ceiling", "Ceiling repair", "general", null, 3, 0, "hm"],
-    ["Skim coat the stairwell", "Skim coat", "labor", 7, 6, 2, "dc"],
-    ["Book the scaffold rental", "Office build-out", "general", null, 8, 1, null],
-    ["Install acoustic ceiling grid", "Soundproofing", "labor", 12, 11, 0, "pn"],
-    ["Patch the ceiling after electrical", "Water damage repair", "labor", 2.5, 15, 0, null],
-    ["Blown-in insulation, R-49", "Blown-in insulation", "material", null, 18, 0, null],
-    ["Remove popcorn texture: living room", "Popcorn ceiling removal", "labor", 6, null, 0, null],
-    ["Order more 1/2\" board", null, "general", null, null, 2, "hm"],
-    ["Check the moisture readings before taping", "Water damage repair", "general", null, null, 0, null],
-    ["Hang drywall: walls", "Kitchen drywall", "labor", 10, null, 0, null],
-    ["Crawl space vapour barrier", "Crawl space insulation", "labor", 4, null, 0, "pn"],
-    ["Fire caulk, intumescent", "Fire-rated walls", "material", null, null, 0, null],
-    ["Demolition: water-damaged drywall", "Water damage repair", "labor", 3, null, 1, null],
-    ["Mineral wool, 3 in.", "Soundproofing", "material", null, null, 0, null],
-    ["Prime and paint the garage", "Garage drywall", "labor", 5, null, 0, null],
-    ["Hang drywall: basement walls", "Basement finish", "labor", 14, -9, 0, "mr", 4],
-    ["Measure the attic for insulation", "Attic insulation", "general", null, -6, 0, "dc", 6],
-    ["Joint compound, all-purpose", "Kitchen drywall", "material", null, -4, 0, "pn", 3],
-    ["Texture match: hallway patch", "Ceiling repair", "labor", 1.5, -2, 2, "mr", 1],
-    ["Send the scope of work to the client", "Bathroom remodel", "general", null, null, 0, "hm", 2],
-  ];
+  // the sample tasks are the concepts' (data.js, kit.TASKS), so search finds the same ones
+  const RAW = window.BDS_CONCEPT.kit.TASKS;
   const CREATED_BY = ["dc", "hm", "mr", "pn"];
   // a task can have several people on it (the product designer, 19 Oct): a few here have two
   const ALSO = { 0: "pn", 9: "dc", 12: "hm" };

@@ -214,13 +214,16 @@ window.BolsterShell = (() => {
     input.setAttribute("aria-keyshortcuts", mac ? "Meta+K /" : "Control+K /");
     addEventListener("keydown", (e) => {
       if ((e.metaKey || e.ctrlKey) && !e.altKey && e.key.toLowerCase() === "k") { e.preventDefault(); input.focus(); input.select(); }
-      else if (e.key === "/" && !e.metaKey && !e.ctrlKey && !e.target.closest?.("input, textarea, select, [contenteditable]")) { e.preventDefault(); input.focus(); }
+      // "/" is the page's own search where it has one (a list's): the page takes it first, and the top bar yields
+      else if (e.key === "/" && !e.defaultPrevented && !e.metaKey && !e.ctrlKey && !e.target.closest?.("input, textarea, select, [contenteditable]")) { e.preventDefault(); input.focus(); }
     });
+    const cleared = () => box.dispatchEvent(new Event("bs-search-cleared"));
     input.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); input.value ? (input.value = "") : input.blur(); }
-      if (e.key === "Enter" && input.value.trim()) toast("Concept only: search isn't wired up in these concepts.");
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); input.value ? ((input.value = ""), cleared()) : input.blur(); }
     });
-    box.querySelector(".top-bar-search-clear").addEventListener("click", (e) => { e.preventDefault(); input.value = ""; input.focus(); });
+    box.querySelector(".top-bar-search-clear").addEventListener("click", (e) => { e.preventDefault(); input.value = ""; cleared(); input.focus(); });
+    // what it finds: a panel under the field (search.js, D119), loaded beside the shell
+    document.head.append(Object.assign(document.createElement("script"), { src: `${SHARED}search.js`, onload: () => window.BolsterSearch?.attach({ box, input, toast, links: opts.links, ic: (n, s) => icon(n, s) }) }));
   }
 
   function rail() {
