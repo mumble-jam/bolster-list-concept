@@ -81,3 +81,25 @@
   .col-measure .data-table :is(th, td) { inline-size: auto; }
   .col-measure .data-table .cell { contain: none; overflow: visible; }
 }
+
+@layer concept {
+  /* ---------- ambient graphs on the cards (#jobs-graphs, a trial, Drafts): each figure over the last eight months, a
+     line in its status's colour over a wash of it that fades to nothing, in a strip along the card's foot, edge to
+     edge, under the words ---------- */
+  .slice-row[data-graphs] .slice { --_g: 2.5rem; position: relative; isolation: isolate; overflow: hidden; padding-block-end: calc(var(--space-2) + var(--_g)); }
+  .slice-row[data-graphs] :is(.insight-primary, .insight-secondary) { position: relative; }
+  .slice-graph { position: absolute; z-index: -1; inset-inline: 0; inset-block-end: 0; inline-size: 100%; max-inline-size: none; block-size: calc(var(--_g) + var(--space-1)); pointer-events: none; overflow: visible; }
+  /* in the insight card each part's strip runs to the card's edges: the first to the divider, the second from it */
+  /* (an svg doesn't stretch between two insets, and base.css caps it at its box: its width is set, uncapped) */
+  .insight-primary > .slice-graph, .insight-secondary > .slice-graph { inset-block-end: calc(-1 * (var(--space-2) + var(--_g))); }
+  .insight-primary > .slice-graph { inset-inline-start: calc(-1 * var(--space-4)); inline-size: calc(100% + var(--space-4) + var(--space-3)); }
+  .insight-secondary > .slice-graph { inset-inline-start: 0; inline-size: calc(100% + var(--space-4)); }
+  /* at the divider each fades out, rather than ending in a cut */
+  .insight-primary > .slice-graph { mask-image: linear-gradient(to right, #000 calc(100% - var(--space-6)), transparent); }
+  .insight-secondary > .slice-graph { mask-image: linear-gradient(to right, transparent, #000 var(--space-6)); }
+  .slice-graph .g-top { stop-color: var(--_c); stop-opacity: 0.18; }
+  .slice-graph .g-end { stop-color: var(--_c); stop-opacity: 0; }
+  .slice-graph .g-line { fill: none; stroke: var(--_c); stroke-width: 1.5; stroke-linecap: round; vector-effect: non-scaling-stroke; opacity: 0.85; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .slice-graph .g-top { stop-opacity: 0.26; } }
+  :root[data-theme="dark"] .slice-graph .g-top { stop-opacity: 0.26; }
+}

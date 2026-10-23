@@ -318,6 +318,32 @@
   const addable = () => cfg.filters.filter((f) => !f.hidden && f.key !== cfg.dateKey && !chipped().includes(f) && !(cardKeys().includes(f.key) && cardValue() && isSet(f.key, st.filters[f.key])))
     .sort((a, b) => !!b.pinned - !!a.pinned);
 
+  // ---------- ambient graphs (a trial, #jobs-graphs): a card's figure over the last eight months, behind it ----------
+  const GRAPH_N = 12, GRAPH_DAYS = 240;
+  function trend(rows, f) {
+    const key = cfg.dateKey, step = (GRAPH_DAYS / GRAPH_N) * 864e5, end = +TODAY + 864e5;
+    const raw = [...Array(GRAPH_N)].map((_, i) => { const a = end - (GRAPH_N - i) * step; return f(rows.filter((r) => +r[key] >= a && +r[key] < a + step)); });
+    // twenty days with nothing to say keep the last figure; then smoothed twice: a trend, a slow swell, not a count
+    let last = raw.find((x) => x != null) ?? 0;
+    let v = raw.map((x) => (x == null ? last : (last = x)));
+    const blur = (a) => a.map((x, i) => [-2, -1, 0, 1, 2].reduce((t, k, j) => t + (a[Math.min(a.length - 1, Math.max(0, i + k))]) * [1, 4, 6, 4, 1][j], 0) / 16);
+    return blur(blur(v));
+  }
+  function graph(values, color, id) {
+    // the line in the strip's top two thirds, so the wash under it has room to fade
+    const W = 100, H = 40, max = Math.max(...values), min = Math.min(...values), span = max - min || 1;
+    const pts = values.map((v, i) => [(i / (values.length - 1)) * W, H * 0.7 - ((v - min) / span) * (H * 0.62)]);
+    // a smooth line through the points: Catmull-Rom, as cubic Béziers
+    const f = (n) => n.toFixed(2);
+    let d = `M0,${f(pts[0][1])}`;
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[i - 1] || pts[i], p1 = pts[i], p2 = pts[i + 1], p3 = pts[i + 2] || p2;
+      d += ` C${f(p1[0] + (p2[0] - p0[0]) / 6)},${f(p1[1] + (p2[1] - p0[1]) / 6)} ${f(p2[0] - (p3[0] - p1[0]) / 6)},${f(p2[1] - (p3[1] - p1[1]) / 6)} ${f(p2[0])},${f(p2[1])}`;
+    }
+    return `<svg class="slice-graph" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true" style="--_c:${color}"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" class="g-top"/><stop offset="1" class="g-end"/></linearGradient></defs><path class="g-area" d="${d} L${W},${H} L0,${H} Z" fill="url(#${id})"/><path class="g-line" d="${d}"/></svg>`;
+  }
+  const NEUTRAL = "var(--color-content-tertiary)";
+
   function renderSlices() {
     const box = $("#summary");
     box.hidden = !cfg.metrics.length || st.mode === "empty" || st.mode === "error";
@@ -335,17 +361,19 @@
     const scope = rowsWhere({ except: cardKeys() });
     const picked = cardValue();
     const none = cardKeys().every((k) => !isSet(k, st.filters[k]));
-    const card = (value, label, status, count, big, on, empty) =>
-      `<button class="slice" type="button" data-metric="${value}" aria-pressed="${on}"${empty ? " data-empty" : ""}>
+    const g = cfg.graphs;
+    const card = (value, label, status, count, big, on, empty, rows) =>
+      `<button class="slice" type="button" data-metric="${value}" aria-pressed="${on}"${empty ? " data-empty" : ""}>${g ? graph(trend(rows, g.value), status ? status.dot : NEUTRAL, `g-${cfg.id}-${value || "all"}`) : ""}
         <span class="slice-head"><span class="slice-label">${status ? `<span class="${status.mark ? "mark" : "dot"}"${status.mark ? ` data-mark="${status.mark}"` : ""} style="--_dot:${status.dot}"></span>` : ""}${esc(label)}</span>${count != null ? `<span class="slice-count">${fmt.count(count)}</span>` : ""}</span>
         <span class="slice-value">${big}</span></button>`;
-    const all = card("", `All ${cfg.noun[1]}`, null, cfg.metrics[0].noCount ? null : scope.length, cfg.allCard ? cfg.allCard.big(scope) : fmt.count(scope.length), none, !scope.length);
+    const all = card("", `All ${cfg.noun[1]}`, null, cfg.metrics[0].noCount ? null : scope.length, cfg.allCard ? cfg.allCard.big(scope) : fmt.count(scope.length), none, !scope.length, scope);
     const cards = cfg.metrics.map((m) => {
       const slice = scope.filter((r) => cardMatch(m).includes(filterDef(cardKeyOf(m)).get(r)));
-      return card(m.value, m.title || m.label, cfg.statusMap?.[m.status || m.value], m.noCount ? null : slice.length, m.big(slice, scope), picked === m.value, !slice.length);
+      return card(m.value, m.title || m.label, cfg.statusMap?.[m.status || m.value], m.noCount ? null : slice.length, m.big(slice, scope), picked === m.value, !slice.length, slice);
     });
     row.style.setProperty("--_slices", cfg.metrics.length + 1);
     row.toggleAttribute("data-no-insight", !cfg.insight);
+    row.toggleAttribute("data-graphs", !!g);
     // on phones the insight leads: it's the overview, so it belongs in the first screen, not behind a swipe
     row.innerHTML = phoneMQ.matches ? insight(scope) + all + cards.join("") : all + cards.join("") + insight(scope);
   }
@@ -365,9 +393,10 @@
     const bar = !m.bar ? "" : parts.length
       ? `<div class="split-bar" role="img" aria-label="${esc(m.bar.map(([n, , what]) => `${typeof n === "number" && n % 1 ? fmt.money0(n) : fmt.count(n)} ${what}`).join(", "))}">${parts.map(([n, color]) => `<span style="flex:${n};background:${color}"></span>`).join("")}</div>`
       : `<div class="split-bar" data-empty aria-hidden="true"></div>`;
-    const more = (x.more || []).map((s) => `<div class="insight-secondary"><span class="slice-label">${esc(s.label)}</span><span class="insight-second-value">${s.value(scope)}</span><span class="insight-sub">${esc(s.sub(scope))}</span></div>`).join("");
+    const gi = cfg.graphs?.insight, gl = (i, color) => (gi?.[i] ? graph(trend(scope, gi[i]), color, `g-${cfg.id}-insight-${i}`) : "");
+    const more = (x.more || []).map((s, i) => `<div class="insight-secondary">${gl(i + 1, "var(--color-action-accent)")}<span class="slice-label">${esc(s.label)}</span><span class="insight-second-value">${s.value(scope)}</span><span class="insight-sub">${esc(s.sub(scope))}</span></div>`).join("");
     return `<div class="slice slice-insight" role="group" aria-labelledby="insight-label">
-      <div class="insight-primary">
+      <div class="insight-primary">${gl(0, cfg.statusMap?.booked?.dot || "var(--color-action-accent)")}
         <span class="slice-head"><span class="slice-label" id="insight-label">${esc(x.label)}</span><button type="button" class="info-button" data-info aria-label="How ${esc(x.label.toLowerCase())} is worked out" data-tip="How it's worked out" aria-haspopup="dialog" aria-expanded="false">${I.help}</button></span>
         <span class="insight-main"${m.empty ? " data-empty" : ""}><span class="slice-value">${m.value}</span>${m.counts ? `<span class="insight-counts">${esc(m.counts)}</span>` : ""}</span>
         ${bar}

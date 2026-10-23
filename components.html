@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=73ada150">
-<link rel="stylesheet" href="data-list.css?v=73ada150">
+<link rel="stylesheet" href="system/bolster.css?v=8aa53a7c">
+<link rel="stylesheet" href="data-list.css?v=8aa53a7c">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -77,7 +77,7 @@
   <header class="inv-head">
     <p class="text-caption"><a href="index.html">Jobs list concept</a></p>
     <h1>Components, and who decided them</h1>
-    <p>Every component the jobs list concept uses, marked by how much of it came from you. Built from your messages on 8 to 22 October and the commits behind them. Where you only reported a bug, that doesn't count as a design decision, so it's noted but the component stays my call.</p>
+    <p>Every component the jobs list concept uses, marked by how much of it came from you. Built from your messages on 8 to 23 October and the commits behind them. Where you only reported a bug, that doesn't count as a design decision, so it's noted but the component stays my call.</p>
   </header>
 
   <section class="inv-legend" aria-label="Levels">
@@ -108,7 +108,7 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=73ada150"></script>
+<script src="shared/icons.js?v=8aa53a7c"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -136,6 +136,7 @@ const C = [
   ["Status cards", "Status marks", "yours", "Shapes, not just colours: empty draft, half pending, solid booked, a slash for declined; then a set that makes room for In progress; In progress in blue (13 Oct).", "The quarter steps (dashed, quarter, half, three quarters), the 12/14px drawing and the other colours."],
   ["Status cards", "Money bar", "steered", "Asked for after the summary-card research (19 Oct): KPIs as a money bar on invoices; direction 1 of the Figma board picked, two halves; then dropped entirely, as it didn't work on phones (19 Oct, D68).", "The three directions and the pick, the hidden 30-day filter behind Paid, the drafts note, phones keeping the figures side by side."],
   ["Status cards", "Insight card", "steered", "Different from the other cards, between Jobber and Deel; the “2 of 4” version below five decided; you questioned a selected state for it; first on phones, so the overview is in the first screen (13 Oct).", "Win rate as the figure, the split bar, the second figure (average won job)."],
+  ["Status cards", "Ambient graphs (trying out)", "steered", "Asked for (23 Oct): each number with its own minimal, ambient-gradient graph in its card, first as a second job list to compare (D116).", "What each graph shows (its figure over eight months, smoothed), the strip under the number, the line and its fading wash in the status's colour, the insight card's two graphs meeting at the divider."],
   ["Status cards", "Info popovers", "steered", "Their copy follows your rule: the screen's own words, statuses drawn with their marks (D27).", "The ⓘ button and its popover."],
   ["Status cards", "Tactile cards", "steered", "Asked for (9 Oct), with sliders in the concept controls.", "Every value: the body, both shadows, hover, press and selected. Not tuned by you yet."],
 
@@ -265,6 +266,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=73ada150"></script>
+<script src="system/specimens/specimen.js?v=8aa53a7c"></script>
 </body>
 </html>
