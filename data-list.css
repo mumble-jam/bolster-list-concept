@@ -25,10 +25,10 @@
   .concept-controls:not([open]) { inline-size: auto; }
   /* toasts rise above the closed pill, so it never covers an Undo (on phones the pill isn't there) */
   @media (min-width: 768px) { body:has(.concept-controls:not([open])) .toast-region { inset-block-end: calc(var(--space-4) + 3rem); } }
-  .concept-controls summary { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); cursor: pointer; font-weight: var(--font-weight-medium); list-style: none; }
-  .concept-controls summary::-webkit-details-marker { display: none; }
-  .concept-controls summary::after { content: "▾"; margin-inline-start: auto; color: var(--color-content-secondary); }
-  .concept-controls:not([open]) summary::after { content: "▴"; }
+  .concept-controls > summary { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); cursor: pointer; font-weight: var(--font-weight-medium); list-style: none; }
+  .concept-controls > summary::-webkit-details-marker { display: none; }
+  .concept-controls > summary::after { content: "▾"; margin-inline-start: auto; color: var(--color-content-secondary); }
+  .concept-controls:not([open]) > summary::after { content: "▴"; }
   .concept-tag { padding: 0 var(--space-2); border-radius: var(--radius-full); background: var(--color-action-accent); color: var(--color-content-on-accent); font-size: var(--text-xxs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); }
   .concept-body { display: grid; gap: var(--space-3); padding: var(--space-1) var(--space-3) var(--space-3); }
   /* on phones there's no pill: the controls open from More (the shell lists them there) as a panel

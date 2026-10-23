@@ -696,12 +696,14 @@
     const col = el?.closest?.(".pl-col");
     return col ? { stage: col.dataset.stage } : null;
   }
-  // where it would land (the system's drop line, drop-line.css): the group the step puts it in under the grouping in
-  // use (its sub-status, its owner's, or the column's one run), at its place in that group's order, in the gap between
-  // two cards; under the head of a folded group (said in the hint), where a group
-  // not drawn would be; at the top of Lost's group, the latest first. None where a drop is refused
-  const dropLine = Object.assign(document.createElement("div"), { className: "drop-line" });
-  dropLine.setAttribute("aria-hidden", "true");
+  // where it would land: a slot the card's size opens there, the cards parting for it (your call, 23 Oct, D121; it was
+  // the system's drop line): in the group the step puts it in under the grouping in use (its sub-status, its owner's,
+  // or the column's one run), at its place in that group's order; under the head of a folded group (said in the hint),
+  // where a group not drawn would be; at the top of Lost's group, the latest first. None where a drop is refused. Its
+  // place comes from the order, not the pointer, so it only moves when where it would land does
+  const slot = Object.assign(document.createElement("div"), { className: "pl-slot" });
+  slot.setAttribute("aria-hidden", "true");
+  const calm = matchMedia("(prefers-reduced-motion: reduce)");
   // the record as the step would leave it: a move is today (at 0); a visit the dialog's default, tomorrow at 9
   function landingOf(r, step) {
     const now = { ...r, at: 0 };
@@ -717,40 +719,40 @@
     }
     return r; // reopen: where it was
   }
-  // draws the line; says the group's name if it's folded
+  // opens the slot; says the group's name if it's folded
   function showDropLine(r, step) {
     const to = landingOf(r, step), s = stageOf(to.stage), body = $(`#col-${to.stage} .pl-col-body`, board);
     const g = st.group === "none" ? "all" : st.group === "owner" ? `o-${to.owner}` : to.group, key = `${to.stage}/${g}`;
     if (!body) return hideDropLine();
-    const box = body.getBoundingClientRect(), pad = parseFloat(getComputedStyle(body).paddingInlineStart) || 0;
-    const rect = (el) => el.getBoundingClientRect(), sec = $(`[data-group="${key}"]`, body);
-    const half = (parseFloat(getComputedStyle($(".pl-cards", body) || body).rowGap) || 6) / 2, apart = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--space-2")) || 8) / 2;
-    let y, folded = "";
-    if (sec && $(".pl-cards", sec).hidden) { y = rect($(".pl-group-head", sec)).bottom + half; folded = st.group === "owner" ? (who(to.owner).me ? "You" : who(to.owner).name) : s.groups.find(([x]) => x === g)[1]; }
+    const sec = $(`[data-group="${key}"]`, body);
+    let parent, before, folded = "";
+    if (sec && $(".pl-cards", sec).hidden) { parent = sec; before = $(".pl-cards", sec); folded = st.group === "owner" ? (who(to.owner).me ? "You" : who(to.owner).name) : s.groups.find(([x]) => x === g)[1]; }
     else if (sec) {
-      const cards = $$(".pl-card", sec), n = cards.length;
-      const by = st.group === "status" ? order(key) : dated;
+      const cards = $$(".pl-card", sec), by = st.group === "status" ? order(key) : dated;
       const i = to.stage === "lost" ? 0 : cards.filter((c) => by(byId(c.dataset.id), to) <= 0).length;
-      y = i === 0 ? rect(cards[0]).top - half : i === n ? rect(cards[n - 1]).bottom + half : (rect(cards[i - 1]).bottom + rect(cards[i]).top) / 2;
+      parent = $(".pl-cards", sec); before = cards[i] || null;
     } else {
       // not drawn: before the next group that is, after the last before it, or where the column says it's empty
       const keys = groupKeys(s).map((x) => `${to.stage}/${x}`), at = keys.indexOf(key), drawn = (k) => $(`[data-group="${k}"]`, body);
       const next = keys.slice(at + 1).map(drawn).find(Boolean), prev = keys.slice(0, at).map(drawn).filter(Boolean).pop();
-      y = next ? rect(next).top - apart : prev ? rect(prev).bottom + apart : rect($(".pl-empty", body) || body).top;
+      parent = body; before = next || prev?.nextElementSibling || $(".pl-empty", body) || null;
     }
-    // never above the column's body, where its head would cover it
-    y = Math.max(y, box.top + 1);
-    if (dropLine.parentElement !== body) body.append(dropLine);
-    Object.assign(dropLine.style, { insetBlockStart: `${y - box.top - 1}px`, insetInlineStart: `${pad}px`, inlineSize: `${box.width - 2 * pad}px` });
+    if (before === slot) before = slot.nextElementSibling;
+    // opened only when where it lands changes, the cards easing apart for it
+    if (slot.parentElement !== parent || slot.nextElementSibling !== before) {
+      slot.style.setProperty("--_h", `${drag.h}px`);
+      parent.insertBefore(slot, before);
+      if (!calm.matches) slot.animate({ blockSize: ["0px", `${drag.h}px`], opacity: [0, 1] }, { duration: 160, easing: "cubic-bezier(0, 0, 0.2, 1)" });
+    }
     return folded;
   }
-  const hideDropLine = () => dropLine.remove();
+  const hideDropLine = () => slot.remove();
   document.addEventListener("pointerdown", (e) => {
     if (e.button !== 0 || e.pointerType === "touch" || phone.matches) return;
     const el = e.target.closest(".pl-card");
     if (!el || e.target.closest(".pl-next, .pl-quick")) return;
     const b = el.getBoundingClientRect();
-    drag = { id: el.dataset.id, x: e.clientX, y: e.clientY, dx: e.clientX - b.left, dy: e.clientY - b.top, w: b.width, started: false };
+    drag = { id: el.dataset.id, x: e.clientX, y: e.clientY, dx: e.clientX - b.left, dy: e.clientY - b.top, w: b.width, h: b.height, started: false };
   });
   document.addEventListener("pointermove", (e) => {
     if (!drag) return;

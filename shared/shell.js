@@ -699,19 +699,46 @@ window.BolsterShell = (() => {
     // the concept controls, on every page that has them: a new loading screen each press, or a slow one
     const cc = document.querySelector("#concept-controls .concept-body");
     if (cc) {
+      // one layout on every page (your ask, 23 Oct): what's the page's own, the theme, the menu and the loading screen,
+      // then the links. The page puts its own controls and links in; the shell sorts them and adds the rest
+      const own = [...cc.children], themeRow = own.find((el) => el.querySelector?.("[data-theme-toggle]"));
+      const hub = themeRow?.querySelector("a[href]");
+      const links = own.filter((el) => el.matches("a.button, button[data-open-dialog]"));
+      const fields = own.filter((el) => el !== themeRow && !links.includes(el));
+      const sec = (title, id) => `<section class="cc-sec"${id ? ` id="${id}"` : ""}><h3 class="cc-h">${title}</h3></section>`;
+      cc.innerHTML = (fields.length ? sec("This page", "cc-page") : "") + sec("Theme", "cc-theme") + sec("Menu and loading screen", "cc-shell") + `<nav class="cc-links" aria-label="About the concepts"></nav>`;
+      cc.querySelector("#cc-page")?.append(...fields);
+      // the links as rows, About first, All concepts last
+      const nav = cc.querySelector(".cc-links");
+      for (const el of [...links.sort((x, y) => y.matches("[data-open-dialog]") - x.matches("[data-open-dialog]")), hub].filter(Boolean)) {
+        el.className = "cc-link"; el.removeAttribute("data-variant"); el.removeAttribute("data-size");
+        el.insertAdjacentHTML("beforeend", icon("chevron-right", 12));
+        nav.append(el);
+      }
+      // the theme as three choices (specimen.js's button cycled through them)
+      let mode = "auto"; try { mode = localStorage.getItem("bds-theme") || "auto"; } catch {}
+      cc.querySelector("#cc-theme").insertAdjacentHTML("beforeend", `<div class="segmented" role="radiogroup" aria-label="Theme">${["auto", "light", "dark"].map((m) => `<label class="segmented-option"><input type="radio" name="cc-theme" value="${m}"${m === mode ? " checked" : ""}> ${m[0].toUpperCase() + m.slice(1)}</label>`).join("")}</div>`);
+      cc.querySelector("#cc-theme").addEventListener("change", (e) => {
+        const m = e.target.value, root = document.documentElement;
+        if (m === "auto") root.removeAttribute("data-theme"); else root.dataset.theme = m;
+        try { localStorage.setItem("bds-theme", m); } catch {}
+      });
+      const shellSec = cc.querySelector("#cc-shell");
       // and how its line comes in, how often a new one does, and which drawing: a change plays it again, the
       // controls left open under it to try the next (D90)
       const get = (k, d) => { try { return localStorage.getItem(`bolster-concepts:loader-${k}`) || d; } catch { return d; } };
       const WAYS = [["rise", "Rise, fading up"], ["roll", "Roll, like a ticker"], ["type", "Typed"], ["scramble", "Decoded"], ["wave", "Letter by letter"], ["blur", "Into focus"], ["none", "No animation"]];
       const every = get("every", "2.1");
-      cc.insertAdjacentHTML("afterbegin", `<div class="bs-cc-loader">
-        <div class="field" data-size="sm"><label class="field-label" for="cc-loader-text">Loading screen: how a line comes in</label>
+      shellSec.insertAdjacentHTML("beforeend", `<div class="bs-cc-loader">
+        <div class="cc-buttons"><button class="button" data-variant="secondary" data-size="sm" data-loading>Show the loader</button><button class="button" data-variant="secondary" data-size="sm" data-loading="slow">A slow load</button></div>
+        <details class="cc-more"><summary>How the loading screen looks</summary><div class="cc-more-body">
+        <div class="field" data-size="sm"><label class="field-label" for="cc-loader-text">How a line comes in</label>
           <div class="select"><select class="input" id="cc-loader-text" data-loader-set="text">${WAYS.map(([v, l]) => `<option value="${v}"${v === get("text", "rise") ? " selected" : ""}>${l}</option>`).join("")}</select></div></div>
         <div class="field" data-size="sm"><label class="field-label" for="cc-loader-every">A new line every <output for="cc-loader-every">${(+every).toFixed(1)} s</output></label>
           <input type="range" id="cc-loader-every" data-loader-set="every" min="1" max="4" step="0.1" value="${every}"></div>
         <div class="field" data-size="sm"><label class="field-label" for="cc-loader-drawing">Drawing</label>
           <div class="select"><select class="input" id="cc-loader-drawing" data-loader-set="drawing"><option value="any">Any, at random</option></select></div></div>
-        <div class="cluster"><button class="button" data-variant="secondary" data-size="sm" data-loading>Show a loading screen</button><button class="button" data-variant="secondary" data-size="sm" data-loading="slow">Show a slow load</button></div></div>`);
+        </div></details></div>`);
       // the drawings' names are Anna's (tape.js): listed once the controls first open
       cc.closest("details").addEventListener("toggle", () => fetchLoader().then(() => {
         const sel = cc.querySelector("#cc-loader-drawing");
@@ -720,7 +747,7 @@ window.BolsterShell = (() => {
         sel.insertAdjacentHTML("beforeend", window.BolsterLoader.SHORTLIST.map((id) => `<option value="${id}"${id === get("drawing", "any") ? " selected" : ""}>${esc(names[id] || id)}</option>`).join(""));
       }), { once: true });
       // the folded rail: its sections' pages in a popup beside it, or the menu over the page (D98), to compare
-      cc.insertAdjacentHTML("afterbegin", `<div class="field" data-size="sm"><label class="field-label" for="cc-rail">Folded menu, pointing at it</label>
+      shellSec.querySelector(".cc-h").insertAdjacentHTML("afterend", `<div class="field" data-size="sm"><label class="field-label" for="cc-rail">The folded menu, pointed at</label>
         <div class="select"><select class="input" id="cc-rail">${[["pop", "Pages pop out beside the rail"], ["menu", "The menu opens over the page"]].map(([v, l]) => `<option value="${v}"${v === document.documentElement.dataset.rail ? " selected" : ""}>${l}</option>`).join("")}</select></div></div>`);
       cc.querySelector("#cc-rail").addEventListener("change", (e) => {
         document.documentElement.dataset.rail = e.target.value;

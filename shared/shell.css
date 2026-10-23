@@ -296,8 +296,30 @@
   .bs-ch { display: inline-block; animation: bs-ch 460ms cubic-bezier(0.2, 0.8, 0, 1) calc(var(--i) * 18ms) both; }
   @keyframes bs-ch { from { opacity: 0; translate: 0 0.45em; filter: blur(2px); } }
   @media (prefers-reduced-motion: reduce) { .bs-ch, .bs-typing::after { animation: none; } }
-  .bs-cc-loader { display: grid; gap: var(--space-3); padding-block-end: var(--space-3); border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
+  /* ---------- the concept controls (tooling, not the design), one layout on every page (shell.js): the page's own,
+     the theme, the menu and the loading screen, each a section under a small heading, a hairline between; then the
+     links as rows ---------- */
+  .concept-body { gap: 0; padding-block-start: 0; }
+  .cc-sec { display: grid; gap: var(--space-3); padding-block: var(--space-3); }
+  .cc-sec + .cc-sec, .cc-links { border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
+  .cc-h { margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
+  .cc-sec .segmented { inline-size: 100%; }
+  .cc-sec .segmented-option { flex: 1; justify-content: center; }
+  .cc-sec > .button, .cc-sec .field > .button { justify-self: start; align-self: flex-start; inline-size: auto; }
+  .bs-cc-loader { display: grid; gap: var(--space-2); }
+  .cc-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }
+  .cc-more > summary { display: flex; align-items: center; gap: var(--space-1); inline-size: fit-content; padding-block: var(--space-1); color: var(--color-content-secondary); font-size: var(--text-xs); cursor: pointer; list-style: none; }
+  .cc-more > summary::-webkit-details-marker { display: none; }
+  .cc-more > summary::before { content: "▸"; font-size: 0.75em; }
+  .cc-more[open] > summary::before { content: "▾"; }
+  @media (hover: hover) { .cc-more > summary:hover { color: var(--color-content-primary); } }
+  .cc-more-body { display: grid; gap: var(--space-3); padding-block-start: var(--space-2); }
   .bs-cc-loader input[type="range"] { inline-size: 100%; margin: 0; accent-color: var(--color-control-on); }
+  .cc-links { display: grid; padding-block-start: var(--space-2); margin-inline: calc(-1 * var(--space-2)); }
+  .cc-link { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-block-size: var(--control-height-sm); padding: 0 var(--space-2); border: 0; border-radius: var(--radius-sm); background: none; color: var(--color-content-primary); font: inherit; text-align: start; text-decoration: none; cursor: pointer; }
+  .cc-link > svg { flex: none; color: var(--color-content-secondary); }
+  @media (hover: hover) { .cc-link:hover { background: var(--color-surface-hover-raised); } }
+  .cc-link:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
   /* a page in the slot draws no shell of its own (shell.js, ?embed=settings) */
   :root[data-embed] .app-shell { display: block; min-block-size: 100dvh; }
   :root[data-embed] .concept-controls { display: none; }

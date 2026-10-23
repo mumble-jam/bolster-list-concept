@@ -143,7 +143,10 @@
   .pl-view:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); }
   .pl-figure { flex: none; margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .pl-n { color: var(--color-content-tertiary); font-weight: var(--font-weight-regular); font-variant-numeric: tabular-nums; }
-  /* it holds the drop line while a card's dragged over it (drop-line.css) */
+  /* where a dragged card lands: a slot its size, the cards parted for it, in the accent's blue (your call, 23 Oct,
+     D121): dashed, as the held card's place is in its column's ink, so the two read as from and to; on the card's ground, a
+     touch of blue, so it reads as an empty card inside the column's blue while it's pointed at */
+  .pl-slot { block-size: var(--_h); box-sizing: border-box; border: var(--border-width-strong) dashed var(--color-action-accent); border-radius: var(--radius-md); background: color-mix(in oklab, var(--color-action-accent) 8%, var(--color-surface-default)); pointer-events: none; }
   .pl-col-body { position: relative; flex: 1; display: grid; grid-template-columns: minmax(0, 1fr); align-content: start; padding: 0 var(--_pad) var(--_pad); outline: 0; }
   .pl-empty { margin: 0; padding: var(--space-2) calc(var(--_in, var(--space-3)) - var(--_pad, 0px)); font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-tertiary); }
 
