@@ -668,7 +668,9 @@ window.BolsterShell = (() => {
     // no tab bar and no top bar on phones (D88): a floating menu button opens the same sidebar, and closes it
     shell.insertAdjacentHTML("beforeend", `<button class="bs-menu-fab" type="button" data-toggle-sidebar aria-label="Menu" aria-expanded="false" data-tip="Menu">${chrome("menu", 20)}${chrome("xmark", 20)}</button>`);
     document.body.insertAdjacentHTML("beforeend", settingsHtml());
-    try { if (localStorage.getItem(FOLD_KEY)) shell.setAttribute("data-sidebar-hidden", ""); } catch {}
+    // folded by default (your call, 23 Oct); opened, it stays open in this browser
+    let unfolded = false; try { unfolded = localStorage.getItem(FOLD_KEY) === "0"; } catch {}
+    if (!unfolded) shell.setAttribute("data-sidebar-hidden", "");
     // how the folded rail opens: a page may set it (the menu playground), else this browser's pick, else the popup
     const root = document.documentElement;
     if (!root.dataset.rail) { let m = null; try { m = localStorage.getItem(RAIL_KEY); } catch {} root.dataset.rail = m === "menu" ? "menu" : "pop"; }
@@ -789,7 +791,7 @@ window.BolsterShell = (() => {
         // swept the rail's labels away; pinning left the menu "over the page" and a stray pill flew as you left it)
         shell.setAttribute("data-menu-instant", "");
         const folded = shell.toggleAttribute("data-sidebar-hidden");
-        try { folded ? localStorage.setItem(FOLD_KEY, "1") : localStorage.removeItem(FOLD_KEY); } catch {}
+        try { localStorage.setItem(FOLD_KEY, folded ? "1" : "0"); } catch {}
         syncPin();
         if (popMode()) {
           // the rail as it is; focus to the button that undoes it, at the rail's foot or the logo's cell

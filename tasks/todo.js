@@ -172,11 +172,11 @@
     return `<li class="todo-row" data-id="${t.id}"${t.done ? " data-done" : ""}${st.sel.has(t.id) ? " data-selected" : ""}${st.openId === t.id ? " data-open" : ""}>
       <button type="button" class="todo-grip" data-grip="${t.id}" aria-label="Move ${esc(t.name)}: Alt and the arrow keys" data-tip="Drag to move">${ic("grip", 14)}</button>
       ${lead}
-      <button type="button" class="todo-prio" data-pick="prio" data-id="${t.id}" aria-haspopup="menu" aria-expanded="false" aria-label="Priority: ${PRIO[t.priority]}. Change" data-tip="${t.priority ? PRIO[t.priority] : "Set priority"}">${mark(t.priority)}</button>
       <div class="todo-main">
         <button type="button" class="todo-title" data-open-task="${t.id}">${esc(t.name)}</button>${st.group !== "job" && t.job ? `<a class="todo-job" href="../index.html#jobs" data-tip="Open ${esc(t.job)}">${esc(t.job)}</a>` : ""}
         <p class="todo-meta">${meta(t)}</p>
       </div>
+      <button type="button" class="todo-prio" data-pick="prio" data-id="${t.id}" aria-haspopup="menu" aria-expanded="false" aria-label="Priority: ${PRIO[t.priority]}. Change" data-tip="${t.priority ? PRIO[t.priority] : "Set priority"}">${mark(t.priority)}</button>
       <div class="todo-side">${sideHtml(t)}</div>
     </li>`;
   }
@@ -184,7 +184,7 @@
   function addHtml(g) {
     if (g.completed || g.late) return "";
     // selecting keeps the row where it is, switched off, so nothing under it moves (your call, 22 Oct)
-    if (st.adding !== g.key || st.selecting) return `<button type="button" class="todo-add" data-add="${esc(g.key)}"${st.selecting ? " disabled" : ""}>${ic("circle-plus", 14)}<span>Add task<span class="todo-add-hint">${esc(addHint(g))}</span></span></button>`;
+    if (st.adding !== g.key || st.selecting) return `<button type="button" class="todo-add" data-add="${esc(g.key)}"${st.selecting ? " disabled" : ""}><span class="todo-add-ring" aria-hidden="true"></span><span>Add task<span class="todo-add-hint">${esc(addHint(g))}</span></span></button>`;
     return `<form class="todo-add-form" data-add-form="${esc(g.key)}"><input type="checkbox" class="todo-check" disabled aria-hidden="true" tabindex="-1">
       <input class="input" data-size="sm" name="name" placeholder="Task name" aria-label="New task, ${esc(addHint(g))}" autocomplete="off"><p class="field-helper">Enter adds it, ${esc(addHint(g))}; Escape stops.</p></form>`;
   }
@@ -388,7 +388,7 @@
   function showLine(tg) {
     const card = tg.el.closest(".todo-group"), c = card.getBoundingClientRect(), r = tg.el.getBoundingClientRect();
     const row = tg.el.closest(".todo-row"), check = row ? $(".todo-check, .checkbox", row).getBoundingClientRect() : null;
-    const left = (check ? check.left : r.left + 24) - c.left - card.clientLeft, right = (row ? r.right : c.right - 8) - c.left - card.clientLeft;
+    const left = (check ? check.left : r.left + 12) - c.left - card.clientLeft, right = (row ? r.right : c.right - 8) - c.left - card.clientLeft;
     const y = (tg.where === "before" ? r.top : r.bottom) - c.top - card.clientTop;
     if (line.parentElement !== card) card.append(line);
     Object.assign(line.style, { insetBlockStart: `${y - 1}px`, insetInlineStart: `${left}px`, inlineSize: `${right - left}px` });

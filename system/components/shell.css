@@ -95,7 +95,8 @@
   :where(.top-bar-search) > :where(input)::-webkit-search-cancel-button { display: none; }
   /* the shortcut: small keycaps, each with a pressed lower edge; on the field's padding, not nested in its corner
      (D35 doesn't reach it), with a softer 4px corner of their own */
-  :where(.top-bar-search-keys) { display: flex; flex: none; gap: var(--space-0-5); pointer-events: none; }
+  /* 8 from the field's end, as from its top and bottom: clear of its corner (D35) */
+  :where(.top-bar-search-keys) { display: flex; flex: none; gap: var(--space-0-5); margin-inline-end: var(--space-0-5); pointer-events: none; }
   :where(.top-bar-search-keys) > kbd {
     display: inline-grid; place-items: center; min-inline-size: 1.25rem; block-size: 1.25rem; padding-inline: var(--space-1);
     border-radius: var(--radius-sm);
