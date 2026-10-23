@@ -112,7 +112,7 @@ window.BolsterShell = (() => {
         <button class="menu-item" role="menuitem" data-not-built="switch-company">${icon("arrow-left-right", 16)}Switch company</button>
         <button class="menu-item" role="menuitem" data-open-settings="company-settings">${icon("briefcase", 16)}Company settings</button>
       </div>
-      <button class="top-bar-search" type="button" data-not-built="search" data-tip="Search">${chrome("search", 16)}<span>Search customers, jobs, invoices, files…</span><kbd>⌘K</kbd></button>
+      <label class="top-bar-search">${chrome("search", 16)}<input type="search" placeholder="Search customers, jobs, invoices, files" aria-label="Search Bolster" enterkeyhint="search" autocomplete="off" spellcheck="false"><button class="top-bar-search-clear" type="button" aria-label="Clear search" data-tip="Clear">${chrome("xmark", 14)}</button><span class="top-bar-search-keys" aria-hidden="true"><kbd>⌘</kbd><kbd>K</kbd><kbd data-focused>esc</kbd></span></label>
       <div class="bs-top-actions">
         <button class="bs-icon-btn" type="button" aria-label="Help" data-not-built="help" data-tip="Help">${chrome("circle-help", 18, { optical: true })}</button>
         <button class="bs-icon-btn bs-assistant" type="button" aria-label="Ask Bolton" data-not-built="assistant" data-tip="Ask Bolton"><img src="${ASSETS}bolton-head.svg" alt=""></button>
@@ -202,6 +202,24 @@ window.BolsterShell = (() => {
     const b = shell?.querySelector(".bs-pin"); if (!b) return;
     const folded = shell.hasAttribute("data-sidebar-hidden"), label = folded ? "Keep menu open" : "Collapse menu";
     b.innerHTML = foldIcon(folded ? "out" : "in"); b.setAttribute("aria-label", label); b.dataset.tip = label;
+  }
+
+  // the top bar's search (D112): ⌘K (Ctrl+K off a Mac) or / from anywhere focuses it, its words chosen; Escape empties
+  // it, then leaves it; Clear empties it and stays. Nothing searches yet in these concepts: Enter says so
+  function searchField() {
+    const box = shell.querySelector(".top-bar-search"); if (!box) return;
+    const input = box.querySelector("input"), mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+    if (!mac) box.querySelector(".top-bar-search-keys kbd").textContent = "Ctrl";
+    input.setAttribute("aria-keyshortcuts", mac ? "Meta+K /" : "Control+K /");
+    addEventListener("keydown", (e) => {
+      if ((e.metaKey || e.ctrlKey) && !e.altKey && e.key.toLowerCase() === "k") { e.preventDefault(); input.focus(); input.select(); }
+      else if (e.key === "/" && !e.metaKey && !e.ctrlKey && !e.target.closest?.("input, textarea, select, [contenteditable]")) { e.preventDefault(); input.focus(); }
+    });
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); input.value ? (input.value = "") : input.blur(); }
+      if (e.key === "Enter" && input.value.trim()) toast("Concept only: search isn't wired up in these concepts.");
+    });
+    box.querySelector(".top-bar-search-clear").addEventListener("click", (e) => { e.preventDefault(); input.value = ""; input.focus(); });
   }
 
   function rail() {
@@ -668,6 +686,7 @@ window.BolsterShell = (() => {
       e.target.toggleAttribute("data-anim", e.newState === "open");
     }, true);
     railBehaviour();
+    searchField();
     logoMotion();
     canvas.start();
     let seen = false; try { seen = sessionStorage.getItem(LOADED_KEY) === "1"; sessionStorage.setItem(LOADED_KEY, "1"); } catch {}

@@ -78,7 +78,7 @@
   }
   .bs-company:focus-visible, .bs-icon-btn:focus-visible, .bs-avatar:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 0; }
   .bs-top-actions { display: flex; align-items: center; gap: var(--space-2); flex: none; }
-  .bs-top .top-bar-search svg { inline-size: 1rem; block-size: 1rem; flex: none; }
+  .bs-top .top-bar-search > svg { inline-size: 1rem; block-size: 1rem; flex: none; }
   .bs-hamburger { display: none; }
   #bs-company-menu, #bs-user-menu { color: var(--color-content-primary); }
 
