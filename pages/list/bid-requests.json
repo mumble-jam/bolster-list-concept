@@ -1,0 +1,384 @@
+{
+  "recipe": "list",
+  "schemaVersion": 1,
+  "nav": "bid-requests",
+  "noun": {
+    "one": "bid request",
+    "many": "bid requests"
+  },
+  "source": {
+    "product": "Bolster",
+    "page": "https://next.bolsterbuilt.com/100000678-LakesideDrywallInsulation/rfqs",
+    "date": "2026-10-23"
+  },
+  "columns": [
+    {
+      "key": "request",
+      "label": "Bid request",
+      "type": "name",
+      "priority": 1,
+      "title": "{trade}",
+      "leading": "none"
+    },
+    {
+      "key": "budget",
+      "label": "Budget",
+      "type": "money",
+      "priority": 2
+    },
+    {
+      "key": "status",
+      "label": "Status",
+      "type": "status",
+      "priority": 3
+    },
+    {
+      "key": "job",
+      "label": "Job",
+      "type": "record",
+      "priority": 4
+    },
+    {
+      "key": "due",
+      "label": "Due",
+      "type": "date",
+      "priority": 5
+    },
+    {
+      "key": "waitingOn",
+      "label": "Waiting on",
+      "type": "count",
+      "priority": 6,
+      "unit": "vendor"
+    },
+    {
+      "key": "items",
+      "label": "Items",
+      "type": "count",
+      "priority": 7,
+      "unit": "item"
+    },
+    {
+      "key": "vendors",
+      "label": "Vendors",
+      "type": "count",
+      "priority": 8,
+      "unit": "vendor"
+    },
+    {
+      "key": "trade",
+      "label": "Trade",
+      "type": "category",
+      "priority": 9,
+      "hidden": true
+    },
+    {
+      "key": "client",
+      "label": "Client",
+      "type": "record",
+      "priority": 9,
+      "hidden": true,
+      "party": "person"
+    },
+    {
+      "key": "bidsBack",
+      "label": "Bids back",
+      "type": "count",
+      "priority": 9,
+      "hidden": true,
+      "unit": "bid"
+    },
+    {
+      "key": "onFile",
+      "label": "Vendors on file",
+      "type": "count",
+      "priority": 9,
+      "hidden": true,
+      "unit": "vendor"
+    },
+    {
+      "key": "sent",
+      "label": "Sent",
+      "type": "date",
+      "priority": 9,
+      "hidden": true
+    }
+  ],
+  "status": {
+    "column": "status",
+    "values": [
+      {
+        "value": "not-sent",
+        "label": "Not sent",
+        "stage": "draft"
+      },
+      {
+        "value": "waiting",
+        "label": "Waiting",
+        "stage": "waiting",
+        "event": {
+          "what": "Sent to {vendors}",
+          "at": "sent"
+        }
+      },
+      {
+        "value": "bids-back",
+        "label": "Bids back",
+        "stage": "done",
+        "event": {
+          "what": "{bidsBack} back"
+        }
+      }
+    ]
+  },
+  "summary": {
+    "kind": "lifecycle",
+    "all": {
+      "agg": "sum",
+      "column": "budget"
+    },
+    "slices": [
+      {
+        "value": "not-sent",
+        "measure": {
+          "agg": "sum",
+          "column": "budget"
+        }
+      },
+      {
+        "value": "waiting",
+        "measure": {
+          "agg": "sum",
+          "column": "budget"
+        }
+      },
+      {
+        "value": "bids-back",
+        "measure": {
+          "agg": "sum",
+          "column": "budget"
+        },
+        "window": {
+          "days": 30
+        }
+      }
+    ]
+  },
+  "search": {
+    "columns": [
+      "job"
+    ],
+    "hint": "Search by job"
+  },
+  "dateRange": {
+    "column": "due"
+  },
+  "filters": [
+    {
+      "column": "status",
+      "pinned": true
+    },
+    {
+      "column": "job",
+      "pinned": true
+    },
+    {
+      "column": "trade"
+    },
+    {
+      "column": "budget"
+    }
+  ],
+  "sort": {
+    "column": "due",
+    "dir": "asc"
+  },
+  "group": {
+    "options": [
+      "status",
+      "trade",
+      "job"
+    ],
+    "default": null
+  },
+  "views": [
+    {
+      "id": "all",
+      "label": "All bid requests",
+      "icon": "list",
+      "filters": {}
+    }
+  ],
+  "rowClick": "peek",
+  "selection": {
+    "enabled": true,
+    "bulk": [
+      "Review & send",
+      "Remind vendors"
+    ]
+  },
+  "create": {
+    "label": "Create bid request"
+  },
+  "export": false,
+  "actions": {
+    "next": {
+      "byStatus": {
+        "not-sent": "Review & send",
+        "waiting": "Remind vendors"
+      }
+    }
+  },
+  "record": {
+    "openLabel": "Open bid request",
+    "fields": [
+      "due",
+      "waitingOn",
+      "items",
+      "vendors",
+      "trade",
+      "bidsBack",
+      "onFile",
+      "sent"
+    ],
+    "related": [
+      "job",
+      "client"
+    ]
+  },
+  "icons": {
+    "fields": {
+      "request": "text",
+      "budget": "dollar",
+      "status": "status",
+      "job": "briefcase",
+      "due": "calendar",
+      "waitingOn": "hashtag",
+      "items": "hashtag",
+      "vendors": "hashtag",
+      "trade": "tag",
+      "client": "users",
+      "bidsBack": "hashtag",
+      "onFile": "hashtag",
+      "sent": "calendar"
+    },
+    "actions": {
+      "Open": "sidebar-right",
+      "Review & send": "send",
+      "Remind vendors": "bell"
+    }
+  },
+  "assumptions": [
+    {
+      "field": "$",
+      "value": "built",
+      "why": "Built by build.mjs from system/model/bid-request.json and pages/list/bid-requests.intent.json. Edit those, not this file."
+    },
+    {
+      "field": "columns[key=request].title",
+      "value": "{trade}",
+      "why": "L-name-first: the model says people know one by trade and job, in that order; codes go to the second line."
+    },
+    {
+      "field": "columns[key=request].leading",
+      "value": "none",
+      "why": "L-slot: bid requests have no pictures, and are known by a trade, not a person or company."
+    },
+    {
+      "field": "columns[key=request].detail",
+      "value": "none",
+      "why": "L-name-first: job has its own column, so it isn't repeated on the second line; on a phone, where the columns go, the row's bottom line shows it."
+    },
+    {
+      "field": "columns",
+      "value": "Budget, Status, Job, Due, Waiting on, Items, Vendors shown; Trade, Client, Bids back, Vendors on file, Sent hidden",
+      "why": "L-priority: the key figure, the status, then what the intent says people look at, in order (lookAt); the model's other fields stay available, hidden."
+    },
+    {
+      "field": "summary",
+      "value": "lifecycle: Not sent, Waiting, Bids back (last 30 days)",
+      "why": "L-summary: the page's tasks move bid requests through 2 statuses, so the summary is the lifecycle; endings count the last 30 days; each adds up budget, the key figure, its count beside."
+    },
+    {
+      "field": "filters",
+      "value": "Status, Job pinned",
+      "why": "L-filters: the status (tasks are about statuses) and what tasks find rows by, pinned; kinds, people and the key figure after."
+    },
+    {
+      "field": "sort",
+      "value": "Due, oldest first",
+      "why": "L-sort: what the intent says people look for first."
+    },
+    {
+      "field": "rowClick",
+      "value": "peek",
+      "why": "L-row-click: peek, the system's default; the thing has no full-screen window of its own."
+    },
+    {
+      "field": "record.related",
+      "value": "Job, Client",
+      "why": "L-related: the records a bid request connects to in the model (the job's client through it)."
+    },
+    {
+      "field": "selection.bulk",
+      "value": "Review & send, Remind vendors",
+      "why": "The model's actions that work on several at once; the ones that can't be undone confirm, in red (L-risky)."
+    },
+    {
+      "field": "create.label",
+      "value": "Create bid request",
+      "why": "L-create: bid requests are made by the business."
+    },
+    {
+      "field": "actions.next.byStatus",
+      "value": "Review & send, Remind vendors",
+      "why": "L-next-step: the lifecycle's next step for each status; it leads the record and the ··· menu."
+    },
+    {
+      "field": "icons",
+      "value": "from the vocabulary",
+      "why": "L-icons: system/model/icons.json, by meaning, record, type, label or verb. Proposed, waiting for review: Review & send: send, Remind vendors: bell."
+    }
+  ],
+  "unresolved": [
+    {
+      "field": "lifecycle.bids-back.next",
+      "question": "When a trade's bids are all back, what do people do next?",
+      "options": [
+        "Pick a vendor and award the work",
+        "Turn the chosen bid into a vendor order",
+        "Nothing more here: it's done"
+      ],
+      "evidence": "No trade had its bids back, so the page never showed what follows."
+    },
+    {
+      "field": "workspace",
+      "question": "Where do people work on one bid request?",
+      "options": [
+        "In the job's bid workspace (its trades together)",
+        "In a window of its own, per trade",
+        "In the record beside the list"
+      ],
+      "default": "In the job's bid workspace (its trades together)",
+      "evidence": "Bolster opens a job's trades together in one workspace; Review & send opens a flow we couldn't open read-only."
+    }
+  ],
+  "dropped": [
+    {
+      "what": "The jobs list beside a job's workspace, and the three-step Send a job out for bids guide",
+      "why": "A list of bid requests by trade (your call, 23 Oct): a row opens its record, the job's other trades a filter away (L-row-click, L-filters)."
+    },
+    {
+      "what": "The vendors' avatars on each trade",
+      "why": "Vendors is a count here; who they are is in the record (L-types)."
+    },
+    {
+      "what": "The Refresh button and the search placeholder “Search jobs or vendors”",
+      "why": "dropsByDesign (I13, L-search)."
+    },
+    {
+      "what": "Add a custom trade",
+      "why": "It changes how a job's items are grouped, the job's business, not a bid request's."
+    }
+  ]
+}

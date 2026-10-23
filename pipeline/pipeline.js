@@ -10,7 +10,7 @@
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const say = (t) => { $("#live").textContent = t; };
 
-  BolsterShell.mount({ current: "pipeline", links: { pipeline: "index.html", calendar: "../calendar/", timeline: "../timeline/", tasks: "../tasks/", "job-list": "../index.html#jobs", "vendor-orders": "../index.html?d=pages/list/vendor-orders.json", expenses: "../index.html?d=pages/list/expenses.json", "subs-and-vendors": "../index.html?d=pages/list/subs-and-vendors.json", invoices: "../index.html#invoices", "leads-and-customers": "../index.html#customers", catalog: "../index.html#catalog" } });
+  BolsterShell.mount({ current: "pipeline", links: { pipeline: "index.html", calendar: "../calendar/", timeline: "../timeline/", tasks: "../tasks/", "job-list": "../index.html#jobs", "vendor-orders": "../index.html?d=pages/list/vendor-orders.json", expenses: "../index.html?d=pages/list/expenses.json", "subs-and-vendors": "../index.html?d=pages/list/subs-and-vendors.json", "bid-requests": "../index.html?d=pages/list/bid-requests.json", invoices: "../index.html#invoices", "leads-and-customers": "../index.html#customers", catalog: "../index.html#catalog" } });
 
   // ---------- days: offsets from today; ISO only where a date field needs one ----------
   const DAY = 864e5;

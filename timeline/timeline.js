@@ -10,7 +10,7 @@
   const say = (t) => { $("#live").textContent = t; };
   const toast = (message, undo) => BolsterShell.toast(message, { undo });
 
-  BolsterShell.mount({ current: "timeline", links: { timeline: "index.html", calendar: "../calendar/", pipeline: "../pipeline/", tasks: "../tasks/", "job-list": "../index.html#jobs", "vendor-orders": "../index.html?d=pages/list/vendor-orders.json", expenses: "../index.html?d=pages/list/expenses.json", "subs-and-vendors": "../index.html?d=pages/list/subs-and-vendors.json", invoices: "../index.html#invoices", "leads-and-customers": "../index.html#customers", catalog: "../index.html#catalog" } });
+  BolsterShell.mount({ current: "timeline", links: { timeline: "index.html", calendar: "../calendar/", pipeline: "../pipeline/", tasks: "../tasks/", "job-list": "../index.html#jobs", "vendor-orders": "../index.html?d=pages/list/vendor-orders.json", expenses: "../index.html?d=pages/list/expenses.json", "subs-and-vendors": "../index.html?d=pages/list/subs-and-vendors.json", "bid-requests": "../index.html?d=pages/list/bid-requests.json", invoices: "../index.html#invoices", "leads-and-customers": "../index.html#customers", catalog: "../index.html#catalog" } });
 
   // ---------- days: offsets from today (0 today, -3 three days ago) ----------
   const DAY = 864e5;

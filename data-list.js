@@ -1270,7 +1270,7 @@
   const VENDOR_ORDERS = `${BUILT}vendor-orders.json`;
   BolsterShell.mount({
     current: "job-list",
-    links: { "vendor-orders": VENDOR_ORDERS, expenses: `${BUILT}expenses.json`, "subs-and-vendors": `${BUILT}subs-and-vendors.json`, ...Object.fromEntries(Object.values(configs).map((c) => [c.nav, `#${c.id}`])), tasks: TODO, ...(CALENDAR ? { calendar: CALENDAR } : {}), pipeline: PIPELINE, timeline: TIMELINE },
+    links: { "vendor-orders": VENDOR_ORDERS, expenses: `${BUILT}expenses.json`, "subs-and-vendors": `${BUILT}subs-and-vendors.json`, "bid-requests": `${BUILT}bid-requests.json`, ...Object.fromEntries(Object.values(configs).map((c) => [c.nav, `#${c.id}`])), tasks: TODO, ...(CALENDAR ? { calendar: CALENDAR } : {}), pipeline: PIPELINE, timeline: TIMELINE },
   });
 
   // ---------- events ----------
