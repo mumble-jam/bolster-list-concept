@@ -167,6 +167,10 @@
   :where(.app-content[data-width="wide"]) { max-inline-size: var(--content-max-width-wide); }
   :where(.app-content[data-width="reading"]) { max-inline-size: var(--content-max-width-reading); }
   :where(.app-content[data-width="full"]) { max-inline-size: none; }
+  /* focused: one column of work (Tasks), its titles near their dates and people (D106), centred (your call, 23 Oct);
+     the page grows by the record while it's open, the two centred together */
+  :where(.app-content[data-width="focused"]) { max-inline-size: var(--content-max-width-focused); }
+  :where(.app-content[data-width="focused"]:has(> .list-split[data-open])) { max-inline-size: calc(var(--content-max-width-focused) + var(--_record-w, 0px) + var(--space-4)); }
 
   /* ---------- page header ---------- */
   :where(.page-header) {

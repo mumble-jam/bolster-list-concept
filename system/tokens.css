@@ -403,6 +403,7 @@
     --content-max-width: 80rem;        /* 1280 */
     --content-max-width-wide: 93.75rem;/* 1500: dashboards */
     --content-max-width-reading: 48rem;/* 768: forms, documents */
+    --content-max-width-focused: 63rem;/* 1008: one column of work to do (Tasks): a 960 column, its titles 45–75 characters, D106 */
 
     /* ---------- Shape ---------- */
     --radius-2xs: 1px;      /* toggle knob */

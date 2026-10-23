@@ -208,8 +208,15 @@ window.BolsterShell = (() => {
     const item = (s) => s.id === "settings"
       ? `<button class="rail-item" type="button" data-open-settings data-section="${s.id}">${menuIcon(s.icon)}<span class="rail-label">${esc(s.label)}</span></button>`
       : `<a class="rail-item" ${sectionHref(s)} data-section="${s.id}">${menuIcon(s.icon)}<span class="rail-label">${esc(s.label)}</span>${s.items ? `<span class="bs-rail-more" aria-hidden="true">${menuIcon("chevron-right", 12)}</span>` : ""}</a>`; // a chevron where a section has pages (D88)
-    return `<nav class="rail" aria-label="Main">${NAV.main.map(item).join("")}<span class="rail-spacer"></span>${NAV.bottom.map(item).join("")}</nav>`;
+    // folded, the menu opens again from the rail's foot (your call, 23 Oct, as it was before D92); the menu over the page
+    // (data-rail="menu") opens it from the logo's cell instead
+    return `<nav class="rail" aria-label="Main">${NAV.main.map(item).join("")}<span class="rail-spacer"></span>${NAV.bottom.map(item).join("")}<hr class="rail-separator bs-fold"><button class="rail-item bs-fold" type="button" data-collapse-sidebar aria-label="Expand menu">${foldIcon("out")}<span class="rail-label">Expand menu</span></button></nav>`;
   }
+  // How the folded rail opens (your call, 23 Oct): "pop" (the default), a section's pages in a popup beside it as you
+  // point at it, the rail staying as it is, as Shopify's; "menu", the menu itself over the page (D98). Concept controls
+  // switch it; the menu playground is the menu's
+  const RAIL_KEY = "bolster-concepts:rail";
+  const popMode = () => document.documentElement.dataset.rail !== "menu";
 
   // The rail widens over the page on hover, after a short pause so passing the mouse across it
   // doesn't flash it open; keyboard focus opens it straight away. Pinned, it stays wide.
@@ -222,6 +229,7 @@ window.BolsterShell = (() => {
     const hidden = () => shell.hasAttribute("data-sidebar-hidden") && desktop.matches;
     let timer;
     const expand = (on, delay = 0, pointer = false) => {
+      if (on && popMode()) return; // the rail stays as it is: its sections' pages pop out beside it (fly, below)
       clearTimeout(timer);
       timer = setTimeout(() => {
         rail.toggleAttribute("data-expanded", on);
@@ -250,6 +258,81 @@ window.BolsterShell = (() => {
     rail.addEventListener("click", (e) => { if (e.target.closest(".rail-item")) expand(false); });
     // a page picked in the menu over the page closes it; a section's accordion keeps it open
     side?.addEventListener("click", (e) => { if (shell.hasAttribute("data-menu-over") && e.target.closest("a[href]")) expand(false); });
+
+    // Folded (pop): a section's pages open beside the rail as you point at it (your call, 23 Oct; the popup of D88,
+    // back): a navigation popup, not an action menu, the menu's own dark a step lifted. It hangs off the section's row
+    // by a notch (the row stays lit), names the section, and lists its pages with their icons in their groups, the
+    // page you're on in the menu's pill; pointing away from both, Escape or a choice closes it. A section without
+    // pages says its name in a tooltip. By the keyboard it opens as its row takes focus, and Tab goes on into it: it's
+    // placed right after the row
+    const flyout = document.createElement("nav");
+    flyout.className = "bs-navpop"; flyout.setAttribute("popover", "manual");
+    let flyTimer, flyFor = null, lit = null;
+    const wide = matchMedia("(min-width: 768px)");
+    const railOnly = () => popMode() && wide.matches && (!desktop.matches || shell.hasAttribute("data-sidebar-hidden"));
+    const light = (item) => { lit?.removeAttribute("data-flying"); lit = item; item?.setAttribute("data-flying", ""); };
+    const close = () => { clearTimeout(flyTimer); if (flyout.matches(":popover-open")) flyout.hidePopover(); flyFor = null; light(null); };
+    const groups = (items) => items.reduce((g, x) => (x === "-" ? g.push([]) : g.at(-1).push(x), g), [[]]).filter((g) => g.length);
+    // a row without pages (Dashboard, Settings, Expand menu) gets the same popup with its name alone, in place of a
+    // tooltip (your ask, 23 Oct): a label, so the pointer passes through it and screen readers have the row's own name
+    const fly = (item, delay = 0) => {
+      clearTimeout(flyTimer);
+      flyTimer = setTimeout(() => {
+        const s = item && sectionOf(item.dataset.section), label = s?.label || item?.getAttribute("aria-label");
+        if (!label || !railOnly()) return close();
+        const solo = !s?.items, key = s?.id || label;
+        if (flyFor !== key) {
+          flyout.toggleAttribute("data-solo", solo);
+          solo ? flyout.setAttribute("aria-hidden", "true") : flyout.removeAttribute("aria-hidden");
+          flyout.setAttribute("aria-label", label);
+          flyout.innerHTML = `<p class="bs-navpop-title">${esc(label)}</p>${solo ? "" : groups(s.items).map((g) => `<div class="bs-navpop-group">${g.map((x) =>
+            `<a class="bs-navpop-link" ${linkAttrs(x.id)}${x.id === opts.current ? ' aria-current="page"' : ""}>${menuIcon(x.icon, 16)}<span>${esc(x.label)}</span></a>`).join("")}</div>`).join("")}`;
+          flyFor = key;
+        }
+        if (flyout.previousElementSibling !== item) item.after(flyout); // next in the tab order
+        light(item);
+        if (!flyout.matches(":popover-open")) flyout.showPopover();
+        // beside the rail, its name level with the row's icon, the notch on that line; kept on screen (the notch
+        // stays on the row)
+        const r = item.getBoundingClientRect(), t = flyout.querySelector(".bs-navpop-title"), mid = r.top + r.height / 2;
+        const top = Math.round(Math.max(8, Math.min(mid - (t.offsetTop + t.offsetHeight / 2), innerHeight - flyout.offsetHeight - 8)));
+        flyout.style.left = `${Math.round(rail.getBoundingClientRect().right + 8)}px`;
+        flyout.style.top = `${top}px`;
+        flyout.style.setProperty("--_notch", `${Math.round(mid - top)}px`);
+      }, delay);
+    };
+    addEventListener("bs-rail-mode", close);
+    rail.addEventListener("pointerover", (e) => {
+      if (e.pointerType !== "mouse" || !railOnly()) return;
+      const item = e.target.closest(".rail-item");
+      if (item && !flyout.contains(item)) fly(item, flyout.matches(":popover-open") ? 0 : 60); // near at once (your call, 23 Oct)
+    });
+    rail.addEventListener("pointerleave", (e) => { if (railOnly() && !flyout.contains(e.relatedTarget)) fly(null, 80); });
+    flyout.addEventListener("pointerenter", () => clearTimeout(flyTimer));
+    flyout.addEventListener("pointerleave", (e) => { if (!rail.contains(e.relatedTarget) || flyout.contains(e.relatedTarget)) fly(null, 80); });
+    flyout.addEventListener("click", (e) => { if (e.target.closest("a")) close(); });
+    let shut = null; // a row whose popup Escape closed: focus back on it doesn't open it again
+    rail.addEventListener("focusin", (e) => {
+      if (!railOnly() || flyout.contains(e.target)) return;
+      const item = e.target.closest(".rail-item");
+      if (item === shut) return;
+      shut = null;
+      if (item?.matches(":focus-visible")) fly(item); else if (item) close();
+    });
+    rail.addEventListener("focusout", (e) => { if (railOnly() && !rail.contains(e.relatedTarget)) close(); });
+    // in it: arrows move between its pages; Escape or ArrowLeft back to its row
+    flyout.addEventListener("keydown", (e) => {
+      const links = [...flyout.querySelectorAll("a")], i = links.indexOf(document.activeElement);
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); links[(i + (e.key === "ArrowDown" ? 1 : -1) + links.length) % links.length]?.focus(); }
+      if (e.key === "Escape" || e.key === "ArrowLeft") { e.preventDefault(); const back = lit; close(); shut = back; back?.focus(); }
+    });
+    rail.addEventListener("keydown", (e) => {
+      if (!railOnly() || flyout.contains(e.target)) return;
+      if (e.key === "ArrowRight") { e.preventDefault(); const item = e.target.closest(".rail-item"); shut = null; if (flyout.matches(":popover-open") && lit === item) flyout.querySelector("a")?.focus(); else if (item) { fly(item); setTimeout(() => flyout.querySelector("a")?.focus()); } } // a name alone has nothing to go into
+      if (e.key === "Escape") { shut = e.target.closest(".rail-item"); close(); }
+    });
+    addEventListener("resize", close);
+    new MutationObserver(close).observe(shell, { attributes: true, attributeFilter: ["data-sidebar-hidden"] });
     // Over the page, the open section's pages unfold with the menu and fold away as it closes (your note, 22 Oct: its
     // icons jumped), so what's left at the rail's width as it shuts is the sections alone, where the rail has its icons.
     // Its own motion (--acc-*), after --menu-acc-lag; the section you leave open is the one that opens next time
@@ -570,6 +653,9 @@ window.BolsterShell = (() => {
     shell.insertAdjacentHTML("beforeend", `<button class="bs-menu-fab" type="button" data-toggle-sidebar aria-label="Menu" aria-expanded="false" data-tip="Menu">${chrome("menu", 20)}${chrome("xmark", 20)}</button>`);
     document.body.insertAdjacentHTML("beforeend", settingsHtml());
     try { if (localStorage.getItem(FOLD_KEY)) shell.setAttribute("data-sidebar-hidden", ""); } catch {}
+    // how the folded rail opens: a page may set it (the menu playground), else this browser's pick, else the popup
+    const root = document.documentElement;
+    if (!root.dataset.rail) { let m = null; try { m = localStorage.getItem(RAIL_KEY); } catch {} root.dataset.rail = m === "menu" ? "menu" : "pop"; }
     syncPin();
     hydrateIcons();
     setCurrent(opts.current);
@@ -611,6 +697,14 @@ window.BolsterShell = (() => {
         const names = Object.fromEntries(window.BolsterTape.OPTIONS);
         sel.insertAdjacentHTML("beforeend", window.BolsterLoader.SHORTLIST.map((id) => `<option value="${id}"${id === get("drawing", "any") ? " selected" : ""}>${esc(names[id] || id)}</option>`).join(""));
       }), { once: true });
+      // the folded rail: its sections' pages in a popup beside it, or the menu over the page (D98), to compare
+      cc.insertAdjacentHTML("afterbegin", `<div class="field" data-size="sm"><label class="field-label" for="cc-rail">Folded menu, pointing at it</label>
+        <div class="select"><select class="input" id="cc-rail">${[["pop", "Pages pop out beside the rail"], ["menu", "The menu opens over the page"]].map(([v, l]) => `<option value="${v}"${v === document.documentElement.dataset.rail ? " selected" : ""}>${l}</option>`).join("")}</select></div></div>`);
+      cc.querySelector("#cc-rail").addEventListener("change", (e) => {
+        document.documentElement.dataset.rail = e.target.value;
+        try { localStorage.setItem(RAIL_KEY, e.target.value); } catch {}
+        dispatchEvent(new Event("bs-rail-mode"));
+      });
       cc.addEventListener("click", (e) => { const b = e.target.closest("[data-loading]"); if (b) loading({ slow: b.dataset.loading === "slow" }); });
       cc.addEventListener("input", (e) => { if (e.target.id === "cc-loader-every") cc.querySelector("output[for=cc-loader-every]").textContent = `${(+e.target.value).toFixed(1)} s`; });
       cc.addEventListener("change", (e) => {
@@ -680,8 +774,13 @@ window.BolsterShell = (() => {
         const folded = shell.toggleAttribute("data-sidebar-hidden");
         try { folded ? localStorage.setItem(FOLD_KEY, "1") : localStorage.removeItem(FOLD_KEY); } catch {}
         syncPin();
-        shell.querySelector(".rail")?.toggleAttribute("data-expanded", folded);
-        shell.toggleAttribute("data-menu-over", folded && e.detail > 0); // by the keyboard, the rail's own labels (I9)
+        if (popMode()) {
+          // the rail as it is; focus to the button that undoes it, at the rail's foot or the logo's cell
+          if (e.detail === 0) requestAnimationFrame(() => shell.querySelector(folded ? ".rail .bs-fold.rail-item" : ".bs-pin")?.focus({ preventScroll: true }));
+        } else {
+          shell.querySelector(".rail")?.toggleAttribute("data-expanded", folded);
+          shell.toggleAttribute("data-menu-over", folded && e.detail > 0); // by the keyboard, the rail's own labels (I9)
+        }
         requestAnimationFrame(() => requestAnimationFrame(() => shell.removeAttribute("data-menu-instant")));
         return;
       }

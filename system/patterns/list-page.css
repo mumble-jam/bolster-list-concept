@@ -69,7 +69,8 @@
      marked; the record is a card that sticks under the bars and scrolls on its own */
   .list-split { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); align-items: start; }
   @media (min-width: 1280px) {
-    .list-page { --_record-w: 24rem; }
+    /* the record's width, known to the page header too (a focused page's header grows by it, shell.css) */
+    :is(.list-page, .app-main:has(> .list-page)) { --_record-w: 24rem; }
     .list-split[data-open] { grid-template-columns: minmax(0, 1fr) var(--_record-w); }
     .list-split[data-open] .data-table :is(th, td):is(:not([data-m], .data-table-select, .row-actions), [data-m="flags"]) { display: none; }
     /* the bulk bar stays over the list, clear of the record: centred on the list's column (a bar a little
@@ -80,7 +81,7 @@
   }
   /* below 1440 the list keeps only name, status and amount beside the record */
   @media (min-width: 1280px) and (max-width: 1439px) {
-    .list-page { --_record-w: 22rem; }
+    :is(.list-page, .app-main:has(> .list-page)) { --_record-w: 22rem; }
     .list-split[data-open] .data-table :is(th, td)[data-m="sub"] { display: none; }
   }
 

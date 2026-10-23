@@ -65,7 +65,7 @@
   let nextId = tasks.length + 1;
 
   // ---------- state ----------
-  const st = { group: "when", q: "", filters: { kind: ["general", "labor"] }, selecting: false, sel: new Set(), fresh: new Set(), completedOpen: false, adding: null, openId: null };
+  const st = { group: "when", q: "", filters: {}, selecting: false, sel: new Set(), fresh: new Set(), completedOpen: false, adding: null, openId: null };
 
   // ---------- when ----------
   const dayDiff = (d) => Math.round((new Date(d).setHours(0, 0, 0, 0) - new Date(TODAY).setHours(0, 0, 0, 0)) / 864e5);
@@ -94,7 +94,7 @@
   const status = (t) => (t.done ? "Completed" : isLate(t) ? "Overdue" : "To do");
 
   // ---------- filters: Bolster's own (its Filter & sort panel, read 19 Oct), picked as on the table card ----------
-  // Show (the kinds of task, material items off when the page opens, as Bolster does), Priority, Assignee and
+  // Show (the kinds of task; nothing narrowed when the page opens, your call, 23 Oct: Bolster hides material items), Priority, Assignee and
   // a period of due dates; each set one is a chip. Its Show completed tasks isn't carried: Completed is always
   // the last group, folded (T-done)
   const isoDay = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
