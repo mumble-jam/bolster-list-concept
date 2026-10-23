@@ -318,7 +318,7 @@
   const addable = () => cfg.filters.filter((f) => !f.hidden && f.key !== cfg.dateKey && !chipped().includes(f) && !(cardKeys().includes(f.key) && cardValue() && isSet(f.key, st.filters[f.key])))
     .sort((a, b) => !!b.pinned - !!a.pinned);
 
-  // ---------- ambient graphs (a trial, #jobs-graphs): a card's figure over the last eight months, behind it ----------
+  // ---------- ambient graphs (a trial, #jobs-graphs): a card's figure over the last eight months, shown when pointed at ----------
   const GRAPH_N = 12, GRAPH_DAYS = 240;
   function trend(rows, f) {
     const key = cfg.dateKey, step = (GRAPH_DAYS / GRAPH_N) * 864e5, end = +TODAY + 864e5;
@@ -393,10 +393,9 @@
     const bar = !m.bar ? "" : parts.length
       ? `<div class="split-bar" role="img" aria-label="${esc(m.bar.map(([n, , what]) => `${typeof n === "number" && n % 1 ? fmt.money0(n) : fmt.count(n)} ${what}`).join(", "))}">${parts.map(([n, color]) => `<span style="flex:${n};background:${color}"></span>`).join("")}</div>`
       : `<div class="split-bar" data-empty aria-hidden="true"></div>`;
-    const gi = cfg.graphs?.insight, gl = (i, color) => (gi?.[i] ? graph(trend(scope, gi[i]), color, `g-${cfg.id}-insight-${i}`) : "");
-    const more = (x.more || []).map((s, i) => `<div class="insight-secondary">${gl(i + 1, "var(--color-action-accent)")}<span class="slice-label">${esc(s.label)}</span><span class="insight-second-value">${s.value(scope)}</span><span class="insight-sub">${esc(s.sub(scope))}</span></div>`).join("");
+    const more = (x.more || []).map((s) => `<div class="insight-secondary"><span class="slice-label">${esc(s.label)}</span><span class="insight-second-value">${s.value(scope)}</span><span class="insight-sub">${esc(s.sub(scope))}</span></div>`).join("");
     return `<div class="slice slice-insight" role="group" aria-labelledby="insight-label">
-      <div class="insight-primary">${gl(0, cfg.statusMap?.booked?.dot || "var(--color-action-accent)")}
+      <div class="insight-primary">
         <span class="slice-head"><span class="slice-label" id="insight-label">${esc(x.label)}</span><button type="button" class="info-button" data-info aria-label="How ${esc(x.label.toLowerCase())} is worked out" data-tip="How it's worked out" aria-haspopup="dialog" aria-expanded="false">${I.help}</button></span>
         <span class="insight-main"${m.empty ? " data-empty" : ""}><span class="slice-value">${m.value}</span>${m.counts ? `<span class="insight-counts">${esc(m.counts)}</span>` : ""}</span>
         ${bar}

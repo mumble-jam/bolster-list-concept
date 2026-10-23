@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=8aa53a7c">
-<link rel="stylesheet" href="data-list.css?v=8aa53a7c">
+<link rel="stylesheet" href="system/bolster.css?v=efd099b8">
+<link rel="stylesheet" href="data-list.css?v=efd099b8">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -108,7 +108,7 @@
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=8aa53a7c"></script>
+<script src="shared/icons.js?v=efd099b8"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -136,7 +136,7 @@ const C = [
   ["Status cards", "Status marks", "yours", "Shapes, not just colours: empty draft, half pending, solid booked, a slash for declined; then a set that makes room for In progress; In progress in blue (13 Oct).", "The quarter steps (dashed, quarter, half, three quarters), the 12/14px drawing and the other colours."],
   ["Status cards", "Money bar", "steered", "Asked for after the summary-card research (19 Oct): KPIs as a money bar on invoices; direction 1 of the Figma board picked, two halves; then dropped entirely, as it didn't work on phones (19 Oct, D68).", "The three directions and the pick, the hidden 30-day filter behind Paid, the drafts note, phones keeping the figures side by side."],
   ["Status cards", "Insight card", "steered", "Different from the other cards, between Jobber and Deel; the “2 of 4” version below five decided; you questioned a selected state for it; first on phones, so the overview is in the first screen (13 Oct).", "Win rate as the figure, the split bar, the second figure (average won job)."],
-  ["Status cards", "Ambient graphs (trying out)", "steered", "Asked for (23 Oct): each number with its own minimal, ambient-gradient graph in its card, first as a second job list to compare (D116).", "What each graph shows (its figure over eight months, smoothed), the strip under the number, the line and its fading wash in the status's colour, the insight card's two graphs meeting at the divider."],
+  ["Status cards", "Ambient graphs (trying out)", "steered", "Asked for (23 Oct): each number with its own minimal, ambient-gradient graph in its card, first as a second job list to compare (D116); then only on hover, and none in the insight card (23 Oct).", "What each graph shows (its money over eight months, smoothed), the line and its fading wash in the status's colour behind the card's lower part, the halo that lets the line pass behind the words."],
   ["Status cards", "Info popovers", "steered", "Their copy follows your rule: the screen's own words, statuses drawn with their marks (D27).", "The ⓘ button and its popover."],
   ["Status cards", "Tactile cards", "steered", "Asked for (9 Oct), with sliders in the concept controls.", "Every value: the body, both shadows, hover, press and selected. Not tuned by you yet."],
 
@@ -266,6 +266,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=8aa53a7c"></script>
+<script src="system/specimens/specimen.js?v=efd099b8"></script>
 </body>
 </html>

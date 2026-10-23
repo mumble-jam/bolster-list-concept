@@ -83,20 +83,18 @@
 }
 
 @layer concept {
-  /* ---------- ambient graphs on the cards (#jobs-graphs, a trial, Drafts): each figure over the last eight months, a
-     line in its status's colour over a wash of it that fades to nothing, in a strip along the card's foot, edge to
-     edge, under the words ---------- */
-  .slice-row[data-graphs] .slice { --_g: 2.5rem; position: relative; isolation: isolate; overflow: hidden; padding-block-end: calc(var(--space-2) + var(--_g)); }
-  .slice-row[data-graphs] :is(.insight-primary, .insight-secondary) { position: relative; }
-  .slice-graph { position: absolute; z-index: -1; inset-inline: 0; inset-block-end: 0; inline-size: 100%; max-inline-size: none; block-size: calc(var(--_g) + var(--space-1)); pointer-events: none; overflow: visible; }
-  /* in the insight card each part's strip runs to the card's edges: the first to the divider, the second from it */
-  /* (an svg doesn't stretch between two insets, and base.css caps it at its box: its width is set, uncapped) */
-  .insight-primary > .slice-graph, .insight-secondary > .slice-graph { inset-block-end: calc(-1 * (var(--space-2) + var(--_g))); }
-  .insight-primary > .slice-graph { inset-inline-start: calc(-1 * var(--space-4)); inline-size: calc(100% + var(--space-4) + var(--space-3)); }
-  .insight-secondary > .slice-graph { inset-inline-start: 0; inline-size: calc(100% + var(--space-4)); }
-  /* at the divider each fades out, rather than ending in a cut */
-  .insight-primary > .slice-graph { mask-image: linear-gradient(to right, #000 calc(100% - var(--space-6)), transparent); }
-  .insight-secondary > .slice-graph { mask-image: linear-gradient(to right, transparent, #000 var(--space-6)); }
+  /* ---------- ambient graphs on the cards (#jobs-graphs, a trial, Drafts): a status card's figure over the last eight
+     months, a line in its status's colour over a wash of it that fades to nothing, behind the card's lower part. Shown
+     only while the card is pointed at or focused (your call, 23 Oct), so at rest the cards are as before; none in the
+     insight card. Touch screens never show them ---------- */
+  .slice-row[data-graphs] .slice { position: relative; isolation: isolate; overflow: hidden; }
+  .slice-graph { position: absolute; z-index: -1; inset-inline: 0; inset-block-end: 0; inline-size: 100%; max-inline-size: none; block-size: 70%; pointer-events: none; overflow: visible; opacity: 0; transition: opacity var(--duration-medium) var(--ease-out); }
+  @media (hover: hover) { .slice:hover > .slice-graph { opacity: 1; } }
+  .slice:focus-visible > .slice-graph { opacity: 1; }
+  /* the line passes behind the words: they keep a halo of the card's own colour, so it breaks around them */
+  .slice-row[data-graphs] .slice { --_halo: var(--color-surface-default); }
+  .slice-row[data-graphs] .slice[aria-pressed="true"] { --_halo: var(--color-surface-selected); }
+  .slice-row[data-graphs] .slice :is(.slice-value, .slice-head) { text-shadow: 0 0 1px var(--_halo), 0 0 3px var(--_halo), 0 0 6px var(--_halo); }
   .slice-graph .g-top { stop-color: var(--_c); stop-opacity: 0.18; }
   .slice-graph .g-end { stop-color: var(--_c); stop-opacity: 0; }
   .slice-graph .g-line { fill: none; stroke: var(--_c); stroke-width: 1.5; stroke-linecap: round; vector-effect: non-scaling-stroke; opacity: 0.85; }

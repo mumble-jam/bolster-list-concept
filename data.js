@@ -574,11 +574,9 @@
     Delete: "trash", Download: "download", "Download proposal (PDF)": "file-pdf", "Download scope of work (Excel)": "file-excel", "Change status": "status",
   };
 
-  // the job list again, each card with its figure drawn over the last eight months behind it (a trial: one of the
-  // two pages goes once it's decided). A card's graph is its slice's figure per fortnight, by when the jobs were made
-  const wonRate = (s) => { const b = s.filter((x) => WON.has(x.status)).length, n = b + s.filter((x) => x.status === "declined").length; return n ? b / n : null; };
-  const avgWon = (s) => { const b = s.filter((x) => WON.has(x.status)); return b.length ? sum(b, (x) => x.total) / b.length : null; };
-  const estimatesGraphsConfig = { ...estimatesConfig, id: "jobs-graphs", graphs: { value: (s) => sum(s, (x) => x.total), insight: [wonRate, avgWon] } };
+  // the job list again, each status card showing its figure over the last eight months when pointed at (a trial: one
+  // of the two pages goes once it's decided). A card's graph is its slice's money, by when the jobs were made
+  const estimatesGraphsConfig = { ...estimatesConfig, id: "jobs-graphs", graphs: { value: (s) => sum(s, (x) => x.total) } };
 
   window.BDS_CONCEPT = {
     TODAY, fmt, esc, ageDays, attrIcons, actionIcons,
