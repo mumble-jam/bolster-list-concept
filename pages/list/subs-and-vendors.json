@@ -1,0 +1,384 @@
+{
+  "recipe": "list",
+  "schemaVersion": 1,
+  "nav": "subs-and-vendors",
+  "noun": {
+    "one": "vendor",
+    "many": "vendors"
+  },
+  "source": {
+    "product": "Bolster",
+    "page": "https://next.bolsterbuilt.com/100000678-LakesideDrywallInsulation/vendors",
+    "date": "2026-10-16"
+  },
+  "columns": [
+    {
+      "key": "name",
+      "label": "Vendor",
+      "type": "name",
+      "priority": 1,
+      "title": "{name}",
+      "leading": "avatar",
+      "avatarFrom": "name"
+    },
+    {
+      "key": "status",
+      "label": "Status",
+      "type": "status",
+      "priority": 3
+    },
+    {
+      "key": "trade",
+      "label": "Type of work",
+      "type": "category",
+      "priority": 4
+    },
+    {
+      "key": "compliance",
+      "label": "Compliance",
+      "type": "flags",
+      "priority": 5,
+      "values": [
+        {
+          "value": "coi-missing",
+          "label": "COI missing"
+        },
+        {
+          "value": "licence-missing",
+          "label": "Licence missing"
+        },
+        {
+          "value": "wc-missing",
+          "label": "WC missing"
+        }
+      ]
+    },
+    {
+      "key": "provides",
+      "label": "Provides",
+      "type": "kinds",
+      "priority": 6,
+      "values": [
+        {
+          "value": "labor",
+          "label": "Labor",
+          "icon": "hard-hat"
+        },
+        {
+          "value": "materials",
+          "label": "Materials",
+          "icon": "box"
+        }
+      ]
+    },
+    {
+      "key": "crewSize",
+      "label": "Crew size",
+      "type": "number",
+      "priority": 7
+    },
+    {
+      "key": "contact",
+      "label": "Contact",
+      "type": "contact",
+      "priority": 9,
+      "hidden": true
+    },
+    {
+      "key": "address",
+      "label": "Address",
+      "type": "address",
+      "priority": 9,
+      "hidden": true
+    },
+    {
+      "key": "created",
+      "label": "Created",
+      "type": "date",
+      "priority": 9,
+      "hidden": true
+    }
+  ],
+  "status": {
+    "column": "status",
+    "values": [
+      {
+        "value": "active",
+        "label": "Active",
+        "stage": "won",
+        "event": {
+          "what": "Added as a vendor",
+          "at": "created"
+        }
+      },
+      {
+        "value": "inactive",
+        "label": "Inactive",
+        "stage": "neutral",
+        "event": {
+          "what": "Made inactive"
+        }
+      }
+    ]
+  },
+  "summary": {
+    "kind": "kpis",
+    "all": {
+      "agg": "count"
+    },
+    "slices": [
+      {
+        "label": "Missing documents",
+        "filter": {
+          "column": "compliance",
+          "any": true
+        },
+        "measure": {
+          "agg": "count"
+        }
+      }
+    ]
+  },
+  "search": {
+    "columns": [
+      "name"
+    ],
+    "hint": "Search by vendor"
+  },
+  "dateRange": {
+    "column": "created"
+  },
+  "filters": [
+    {
+      "column": "status",
+      "pinned": true
+    },
+    {
+      "column": "trade",
+      "pinned": true
+    },
+    {
+      "column": "compliance"
+    },
+    {
+      "column": "provides"
+    }
+  ],
+  "sort": {
+    "column": "name",
+    "dir": "asc"
+  },
+  "group": {
+    "options": [
+      "status",
+      "trade"
+    ],
+    "default": null
+  },
+  "views": [
+    {
+      "id": "default",
+      "label": "Active vendors",
+      "icon": "list",
+      "filters": {
+        "status": [
+          "active"
+        ]
+      }
+    },
+    {
+      "id": "all",
+      "label": "All vendors",
+      "icon": "list",
+      "filters": {}
+    }
+  ],
+  "rowClick": "open",
+  "selection": {
+    "enabled": false
+  },
+  "create": {
+    "label": "Add vendor"
+  },
+  "export": false,
+  "actions": {
+    "byStatus": {
+      "active": {
+        "primary": [
+          "Create a vendor order",
+          "Request a bid",
+          "Make inactive"
+        ],
+        "more": []
+      }
+    }
+  },
+  "record": {
+    "openLabel": "Open vendor",
+    "fields": [
+      "trade",
+      "compliance",
+      "provides",
+      "crewSize",
+      "contact",
+      "address",
+      "created"
+    ],
+    "has": [
+      {
+        "label": "Vendor orders",
+        "thing": "vendor-order",
+        "via": "vendor"
+      },
+      {
+        "label": "Bills and expenses",
+        "thing": "expense",
+        "via": "vendor"
+      },
+      {
+        "label": "Bid requests",
+        "thing": "bid-request",
+        "via": "vendor"
+      },
+      {
+        "label": "Jobs",
+        "thing": "job",
+        "via": "vendor orders' job"
+      }
+    ]
+  },
+  "icons": {
+    "fields": {
+      "name": "text",
+      "status": "status",
+      "trade": "tag",
+      "compliance": "triangle-exclamation",
+      "provides": "toolbox",
+      "crewSize": "hashtag",
+      "contact": "contact",
+      "address": "location",
+      "created": "calendar"
+    },
+    "actions": {
+      "Open": "sidebar-right",
+      "Create a vendor order": "file-plus",
+      "Request a bid": "send",
+      "Make inactive": "archive"
+    }
+  },
+  "assumptions": [
+    {
+      "field": "$",
+      "value": "built",
+      "why": "Built by build.mjs from system/model/vendor.json and pages/list/subs-and-vendors.intent.json. Edit those, not this file."
+    },
+    {
+      "field": "columns[key=name].title",
+      "value": "{name}",
+      "why": "L-name-first: the model says people know one by vendor, in that order; codes go to the second line."
+    },
+    {
+      "field": "columns[key=name].leading",
+      "value": "avatar",
+      "why": "L-slot: a vendor is a company."
+    },
+    {
+      "field": "columns",
+      "value": "Status, Type of work, Compliance, Provides, Crew size shown; Contact, Address, Created hidden",
+      "why": "L-priority: the key figure, the status, then what the intent says people look at, in order (lookAt); the model's other fields stay available, hidden."
+    },
+    {
+      "field": "summary",
+      "value": "KPIs: Missing documents",
+      "why": "L-summary: KPIs, the default: what the intent's tasks act on."
+    },
+    {
+      "field": "filters",
+      "value": "Status, Type of work pinned",
+      "why": "L-filters: the status (tasks are about statuses) and what tasks find rows by, pinned; kinds, people and the key figure after."
+    },
+    {
+      "field": "sort",
+      "value": "Vendor, A–Z",
+      "why": "L-sort: what the intent says people look for first."
+    },
+    {
+      "field": "views",
+      "value": "Active vendors first",
+      "why": "L-summary: the source opens filtered, so the page opens on that view; it's never a card."
+    },
+    {
+      "field": "rowClick",
+      "value": "open",
+      "why": "L-row-click: the vendor has its own full-screen window (Edit); Quick look in the ··· menu."
+    },
+    {
+      "field": "create.label",
+      "value": "Add vendor",
+      "why": "L-create: vendors are added to a list the business keeps."
+    },
+    {
+      "field": "actions.byStatus",
+      "value": "per status, from the model",
+      "why": "Up to three steps in the record, most used first (the model's order); files, links to related records and the rest under More; what can't be undone last, in red (L-risky)."
+    },
+    {
+      "field": "record.has",
+      "value": "Vendor orders, Bills and expenses, Bid requests, Jobs",
+      "why": "L-related: what points at a vendor in the model, linked from its record with a count."
+    },
+    {
+      "field": "icons",
+      "value": "from the vocabulary",
+      "why": "L-icons: system/model/icons.json, by meaning, record, type, label or verb. Proposed, waiting for review: Request a bid: send, Make inactive: archive."
+    }
+  ],
+  "unresolved": [
+    {
+      "field": "actions",
+      "question": "Can people ask a vendor for its missing compliance documents from Bolster?",
+      "options": [
+        "Yes, from the vendor's record",
+        "No, that happens outside Bolster"
+      ],
+      "default": "No, that happens outside Bolster",
+      "evidence": "The product designer wasn't sure (16 Oct)."
+    },
+    {
+      "field": "actions.byStatus.inactive",
+      "question": "What can people do with an inactive vendor?",
+      "options": [
+        "Make it active again",
+        "Nothing until it's made active"
+      ],
+      "default": "Nothing until it's made active",
+      "evidence": "Make inactive was confirmed; its way back wasn't asked."
+    }
+  ],
+  "dropped": [
+    {
+      "what": "Edit as an action of its own",
+      "why": "L-row-click: the work happens in the vendor's record, so a row opens it, and its details are edited there."
+    },
+    {
+      "what": "The Id and Name columns, which repeat the vendor's name",
+      "why": "One place per row (L-name-first): the name leads the row once."
+    },
+    {
+      "what": "The Next step column, empty on every row",
+      "why": "L-next-step: steps come from the model's lifecycle; none are known yet."
+    },
+    {
+      "what": "A second sort arrow (Name, after Vendor)",
+      "why": "dropsByDesign: one sort at a time."
+    },
+    {
+      "what": "Most of the 118 columns in Columns and filters",
+      "why": "Bolster's account internals (passwords, Stripe and HubSpot fields, trial dates), not things people look up on a vendor; the ones that mean something to a person are in the model."
+    },
+    {
+      "what": "The refresh button, “Search this table…” and the icon-only +",
+      "why": "dropsByDesign (I13, L-search, L-create)."
+    }
+  ]
+}

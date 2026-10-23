@@ -1,0 +1,457 @@
+{
+  "recipe": "list",
+  "schemaVersion": 1,
+  "nav": "expenses",
+  "noun": {
+    "one": "expense",
+    "many": "expenses"
+  },
+  "source": {
+    "product": "Bolster",
+    "page": "https://next.bolsterbuilt.com/100000678-LakesideDrywallInsulation/expenses",
+    "date": "2026-10-15"
+  },
+  "columns": [
+    {
+      "key": "expense",
+      "label": "Expense",
+      "type": "name",
+      "priority": 1,
+      "title": "{vendor}",
+      "leading": "none",
+      "detail": "{ref}"
+    },
+    {
+      "key": "total",
+      "label": "Total",
+      "type": "money",
+      "priority": 2
+    },
+    {
+      "key": "status",
+      "label": "Status",
+      "type": "status",
+      "priority": 3
+    },
+    {
+      "key": "job",
+      "label": "Job",
+      "type": "record",
+      "priority": 4
+    },
+    {
+      "key": "type",
+      "label": "Type",
+      "type": "category",
+      "priority": 5,
+      "values": [
+        {
+          "value": "bill",
+          "label": "Bill"
+        },
+        {
+          "value": "expense",
+          "label": "Expense"
+        }
+      ]
+    },
+    {
+      "key": "waiver",
+      "label": "Waiver",
+      "type": "category",
+      "priority": 6,
+      "values": [
+        {
+          "value": "none",
+          "label": "None"
+        }
+      ]
+    },
+    {
+      "key": "created",
+      "label": "Date created",
+      "type": "date",
+      "priority": 7
+    },
+    {
+      "key": "vendor",
+      "label": "Vendor",
+      "type": "record",
+      "priority": 9,
+      "hidden": true,
+      "party": "company"
+    },
+    {
+      "key": "client",
+      "label": "Client",
+      "type": "record",
+      "priority": 9,
+      "hidden": true,
+      "party": "person"
+    },
+    {
+      "key": "source",
+      "label": "Submitted by",
+      "type": "category",
+      "priority": 9,
+      "hidden": true,
+      "values": [
+        {
+          "value": "your-team",
+          "label": "Your team"
+        },
+        {
+          "value": "vendor",
+          "label": "Vendor"
+        }
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "key": "ref",
+      "label": "Ref or order number",
+      "type": "id",
+      "format": "#1"
+    }
+  ],
+  "status": {
+    "column": "status",
+    "values": [
+      {
+        "value": "unpaid",
+        "label": "Unpaid",
+        "stage": "waiting",
+        "event": {
+          "what": "{type} from {vendor} added",
+          "at": "created"
+        }
+      },
+      {
+        "value": "paid",
+        "label": "Paid",
+        "stage": "done",
+        "event": {
+          "what": "Marked as paid"
+        }
+      }
+    ]
+  },
+  "summary": {
+    "kind": "kpis",
+    "all": {
+      "agg": "sum",
+      "column": "total"
+    },
+    "slices": [
+      {
+        "value": "unpaid",
+        "measure": {
+          "agg": "sum",
+          "column": "total"
+        }
+      },
+      {
+        "label": "Submitted by vendors",
+        "filter": {
+          "column": "source",
+          "values": [
+            "Vendor"
+          ]
+        },
+        "measure": {
+          "agg": "sum",
+          "column": "total"
+        }
+      }
+    ]
+  },
+  "search": {
+    "columns": [
+      "vendor",
+      "ref",
+      "job"
+    ],
+    "hint": "Search by vendor, ref or order number or job"
+  },
+  "dateRange": {
+    "column": "created"
+  },
+  "filters": [
+    {
+      "column": "status",
+      "pinned": true
+    },
+    {
+      "column": "job",
+      "pinned": true
+    },
+    {
+      "column": "vendor",
+      "pinned": true
+    },
+    {
+      "column": "source"
+    },
+    {
+      "column": "type"
+    },
+    {
+      "column": "waiver"
+    },
+    {
+      "column": "total"
+    }
+  ],
+  "sort": {
+    "column": "created",
+    "dir": "desc"
+  },
+  "group": {
+    "options": [
+      "status",
+      "type",
+      "waiver",
+      "source",
+      "job",
+      "vendor"
+    ],
+    "default": null
+  },
+  "views": [
+    {
+      "id": "all",
+      "label": "All expenses",
+      "icon": "list",
+      "filters": {}
+    }
+  ],
+  "rowClick": "peek",
+  "selection": {
+    "enabled": false
+  },
+  "create": {
+    "label": "Add expense"
+  },
+  "export": false,
+  "actions": {
+    "next": {
+      "byStatus": {
+        "unpaid": "Mark as paid"
+      }
+    }
+  },
+  "record": {
+    "openLabel": "Open expense",
+    "document": "Bill or receipt",
+    "fields": [
+      "type",
+      "waiver",
+      "created",
+      "source"
+    ],
+    "related": [
+      "vendor",
+      "job",
+      "client"
+    ]
+  },
+  "icons": {
+    "fields": {
+      "expense": "text",
+      "total": "dollar",
+      "status": "status",
+      "job": "briefcase",
+      "type": "tag",
+      "waiver": "tag",
+      "created": "calendar",
+      "vendor": "store",
+      "client": "users",
+      "source": "signpost",
+      "ref": "text"
+    },
+    "actions": {
+      "Open": "sidebar-right",
+      "Mark as paid": "credit-card"
+    }
+  },
+  "assumptions": [
+    {
+      "field": "$",
+      "value": "built",
+      "why": "Built by build.mjs from system/model/expense.json and pages/list/expenses.intent.json. Edit those, not this file."
+    },
+    {
+      "field": "columns[key=expense].title",
+      "value": "{vendor}",
+      "why": "L-name-first: the model says people know one by vendor, ref or order number and job, in that order; codes go to the second line."
+    },
+    {
+      "field": "columns[key=expense].leading",
+      "value": "none",
+      "why": "L-slot: expenses are named after their vendor, a company, but aren't one: the name already says who."
+    },
+    {
+      "field": "columns[key=expense].detail",
+      "value": "{ref}",
+      "why": "L-name-first: job has its own column, so it isn't repeated on the second line; on a phone, where the columns go, the row's bottom line shows it."
+    },
+    {
+      "field": "columns",
+      "value": "Total, Status, Job, Type, Waiver, Date created shown; Vendor, Client, Submitted by hidden",
+      "why": "L-priority: the key figure, the status, then what the intent says people look at, in order (lookAt); the model's other fields stay available, hidden."
+    },
+    {
+      "field": "summary",
+      "value": "KPIs: Unpaid, Submitted by vendors",
+      "why": "L-summary: KPIs, the default: what the intent's tasks act on; each adds up total, the key figure, its count beside."
+    },
+    {
+      "field": "filters",
+      "value": "Status, Job, Vendor pinned",
+      "why": "L-filters: the status (tasks are about statuses) and what tasks find rows by, pinned; kinds, people and the key figure after."
+    },
+    {
+      "field": "sort",
+      "value": "Date created, newest first",
+      "why": "L-sort: the main date, newest first."
+    },
+    {
+      "field": "rowClick",
+      "value": "peek",
+      "why": "L-row-click: peek, the system's default; the thing has no full-screen window of its own."
+    },
+    {
+      "field": "record.related",
+      "value": "Vendor, Job, Client",
+      "why": "L-related: the records an expense connects to in the model (the job's client through it)."
+    },
+    {
+      "field": "create.label",
+      "value": "Add expense",
+      "why": "L-create: expenses are added to a list the business keeps."
+    },
+    {
+      "field": "actions.next.byStatus",
+      "value": "Mark as paid",
+      "why": "L-next-step: the lifecycle's next step for each status; it leads the record and the ··· menu."
+    },
+    {
+      "field": "icons",
+      "value": "from the vocabulary",
+      "why": "L-icons: system/model/icons.json, by meaning, record, type, label or verb."
+    }
+  ],
+  "unresolved": [
+    {
+      "field": "fields[key=ref]",
+      "question": "Whose number is “Ref or order #”?",
+      "options": [
+        "The vendor's own number for the bill",
+        "The number of the vendor order it pays",
+        "Either, depending on the row"
+      ],
+      "default": "Either, depending on the row",
+      "evidence": "#1 and #2 on the two rows; adding a bill loads vendor orders and bid requests, so one can point to an order."
+    },
+    {
+      "field": "fields[key=type]",
+      "question": "What are the kinds in the Type column called?",
+      "options": [
+        "Bill and Expense",
+        "Bill and Receipt"
+      ],
+      "default": "Bill and Expense",
+      "evidence": "An icon only (file-invoice on both rows); the title says Bills & Expenses, adding one says “Upload a receipt or bill”."
+    },
+    {
+      "field": "fields[key=waiver]",
+      "question": "What can Waiver say besides None?",
+      "options": [
+        "Requested and Received",
+        "Conditional and Unconditional",
+        "Only None for now"
+      ],
+      "default": "Only None for now",
+      "evidence": "None on every row."
+    },
+    {
+      "field": "fields[key=variance]",
+      "question": "What does the hidden Variance column hold?",
+      "options": [
+        "The bill's total minus the vendor order it pays",
+        "Something people don't need on this list"
+      ],
+      "default": "Something people don't need on this list",
+      "evidence": "A hidden column, never seen filled."
+    },
+    {
+      "field": "actions",
+      "question": "Besides marking paid, what can people do to an expense?",
+      "options": [
+        "Edit",
+        "Delete",
+        "Download the bill or receipt",
+        "Duplicate"
+      ],
+      "multiple": true,
+      "evidence": "Only Mark paid was seen; row menus weren't explored."
+    },
+    {
+      "field": "selection.bulk",
+      "question": "How are expenses marked paid?",
+      "options": [
+        "Several at once, from the bulk bar",
+        "One at a time"
+      ],
+      "default": "One at a time",
+      "evidence": "The bulk bar wasn't explored."
+    },
+    {
+      "field": "lifecycle[unpaid].next",
+      "question": "Which words for the step that pays one?",
+      "options": [
+        "“Mark as paid” everywhere, as on vendor orders",
+        "“Mark paid” everywhere, as on this page"
+      ],
+      "default": "“Mark as paid” everywhere, as on vendor orders",
+      "evidence": "Bolster says Mark paid here and Mark as paid on vendor orders."
+    },
+    {
+      "field": "workspace",
+      "question": "Does a bill or expense have its own full-screen window, opened by Edit or something like it?",
+      "options": [
+        "Yes, a full-screen window of its own",
+        "No, it has no full-screen window"
+      ],
+      "default": "No, it has no full-screen window",
+      "evidence": "Not seen: opening one in Bolster could save. If it has one, a row opens it (L-row-click)."
+    }
+  ],
+  "dropped": [
+    {
+      "what": "The Type column drawn as an icon alone",
+      "why": "L-types: a category reads as its word; icons show where the system asks for them."
+    },
+    {
+      "what": "The Next step column of Mark paid buttons",
+      "why": "L-next-step: the step is in the model's lifecycle and leads each unpaid expense's record and ··· menu."
+    },
+    {
+      "what": "The client's initials and the job's own total in the Job column",
+      "why": "The job's, not the expense's: the client is a related record, the job's total belongs to the job."
+    },
+    {
+      "what": "The Paid card",
+      "why": "L-summary: an ending, with nothing left to do; Paid is a filter away."
+    },
+    {
+      "what": "The hidden Id column",
+      "why": "Read as Bolster's own record number: people know an expense by its vendor and ref. Say if it's something people use."
+    },
+    {
+      "what": "The refresh button, “Search this table…” and the icon-only +",
+      "why": "dropsByDesign (I13, L-search, L-create)."
+    }
+  ]
+}

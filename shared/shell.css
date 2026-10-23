@@ -216,9 +216,12 @@
     .rail-item[data-flying] .bs-rail-more { translate: 2px 0; color: var(--color-content-on-chrome); }
     /* the folded menu opens again from the rail's foot (your call, 23 Oct), after a rule; with the menu over the page,
        from the logo's cell (D92) */
-    .rail .bs-fold > svg { block-size: 1rem; }
-    :root[data-rail="menu"] .rail .bs-fold { display: none; }
-    @media (max-width: 1023px) { .rail .bs-fold { display: none; } }
+    .rail .bs-fold > svg, .bs-sidebar .bs-fold > svg { block-size: 1rem; }
+    /* and folds from its own foot, under Settings, a step quieter (your call, 23 Oct); the logo's cell keeps its button
+       only for the menu over the page */
+    .bs-sidebar button.bs-fold { margin-block-start: var(--space-2); color: var(--_ink-3); }
+    :root[data-rail="menu"] :is(.rail, .bs-sidebar) .bs-fold, :root:not([data-rail="menu"]) .bs-pin { display: none; }
+    @media (max-width: 1023px) { :is(.rail, .bs-sidebar) .bs-fold { display: none; } }
     /* the shape moving between the rail's square and the page's pill (D98): behind the rows, the real ones hidden while it moves */
     .bs-morph { position: absolute; inset: 0 auto auto 0; z-index: 0; border-radius: var(--radius-md); pointer-events: none; }
     .bs-morph[hidden] { display: none; }

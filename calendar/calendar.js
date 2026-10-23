@@ -10,7 +10,7 @@
   const toast = (message, undo) => BolsterShell.toast(message, { undo });
   const say = (t) => { $("#live").textContent = t; };
 
-  BolsterShell.mount({ current: "calendar", links: { calendar: "index.html", tasks: "../tasks/", pipeline: "../pipeline/", timeline: "../timeline/", "job-list": "../index.html#jobs", "vendor-orders": "../index.html?d=pages/list/vendor-orders.json", invoices: "../index.html#invoices", "leads-and-customers": "../index.html#customers", catalog: "../index.html#catalog" } });
+  BolsterShell.mount({ current: "calendar", links: { calendar: "index.html", tasks: "../tasks/", pipeline: "../pipeline/", timeline: "../timeline/", "job-list": "../index.html#jobs", "vendor-orders": "../index.html?d=pages/list/vendor-orders.json", expenses: "../index.html?d=pages/list/expenses.json", "subs-and-vendors": "../index.html?d=pages/list/subs-and-vendors.json", invoices: "../index.html#invoices", "leads-and-customers": "../index.html#customers", catalog: "../index.html#catalog" } });
 
   // ---------- days: ISO dates, read at noon so a clock change never moves one ----------
   const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;

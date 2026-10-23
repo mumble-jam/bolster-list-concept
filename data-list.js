@@ -1266,10 +1266,11 @@
   const TIMELINE = "timeline/";
   // vendor orders, the page built from its model and intent (pages/list), drawn by recipe.js; once it's
   // loaded it's one of the lists here, and its own link (#description) takes over
-  const VENDOR_ORDERS = "index.html?d=pages/list/vendor-orders.json";
+  const BUILT = "index.html?d=pages/list/";
+  const VENDOR_ORDERS = `${BUILT}vendor-orders.json`;
   BolsterShell.mount({
     current: "job-list",
-    links: { "vendor-orders": VENDOR_ORDERS, ...Object.fromEntries(Object.values(configs).map((c) => [c.nav, `#${c.id}`])), tasks: TODO, ...(CALENDAR ? { calendar: CALENDAR } : {}), pipeline: PIPELINE, timeline: TIMELINE },
+    links: { "vendor-orders": VENDOR_ORDERS, expenses: `${BUILT}expenses.json`, "subs-and-vendors": `${BUILT}subs-and-vendors.json`, ...Object.fromEntries(Object.values(configs).map((c) => [c.nav, `#${c.id}`])), tasks: TODO, ...(CALENDAR ? { calendar: CALENDAR } : {}), pipeline: PIPELINE, timeline: TIMELINE },
   });
 
   // ---------- events ----------

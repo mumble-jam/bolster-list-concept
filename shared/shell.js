@@ -208,8 +208,8 @@ window.BolsterShell = (() => {
     const item = (s) => s.id === "settings"
       ? `<button class="rail-item" type="button" data-open-settings data-section="${s.id}">${menuIcon(s.icon)}<span class="rail-label">${esc(s.label)}</span></button>`
       : `<a class="rail-item" ${sectionHref(s)} data-section="${s.id}">${menuIcon(s.icon)}<span class="rail-label">${esc(s.label)}</span>${s.items ? `<span class="bs-rail-more" aria-hidden="true">${menuIcon("chevron-right", 12)}</span>` : ""}</a>`; // a chevron where a section has pages (D88)
-    // folded, the menu opens again from the rail's foot (your call, 23 Oct, as it was before D92); the menu over the page
-    // (data-rail="menu") opens it from the logo's cell instead
+    // folded, the menu opens again from the rail's foot, and folds from its own (your calls, 23 Oct, as before D92); the
+    // menu over the page (data-rail="menu") does both from the logo's cell instead
     return `<nav class="rail" aria-label="Main">${NAV.main.map(item).join("")}<span class="rail-spacer"></span>${NAV.bottom.map(item).join("")}<hr class="rail-separator bs-fold"><button class="rail-item bs-fold" type="button" data-collapse-sidebar aria-label="Expand menu">${foldIcon("out")}<span class="rail-label">Expand menu</span></button></nav>`;
   }
   // How the folded rail opens (your call, 23 Oct): "pop" (the default), a section's pages in a popup beside it as you
@@ -417,7 +417,7 @@ window.BolsterShell = (() => {
       + `<button type="button" class="sidebar-item bs-phone" data-not-built="assistant"><img class="bs-bolton" src="${ASSETS}bolton-head.svg" alt=""><span>Ask Bolton</span></button>`
       + `<details class="bs-acc bs-phone" name="bs-nav"><summary class="sidebar-item"><span class="avatar" data-size="sm" data-color="${USER.color}" aria-hidden="true">${USER.initials}</span><span>${esc(USER.name)}</span>${more}</summary><div class="bs-acc-body">${[["profile", "Edit profile", "user-cog"], ["users", "Manage users", "users"], ["logout", "Log out", "log-out"]].map(([id, l, ico]) => `<a class="sidebar-item bs-sub" href="#" data-not-built="${id}">${menuIcon(ico, 14, { optical: true })}<span>${l}</span></a>`).join("")}</div></details>`;
     // the foot (Messages, Files, Settings) stays put; everything above scrolls under it
-    return `<div class="bs-nav-main">${search}${NAV.main.map(row).join("")}${you}${extra}</div><div class="bs-nav-bottom">${NAV.bottom.map(row).join("")}</div>`;
+    return `<div class="bs-nav-main">${search}${NAV.main.map(row).join("")}${you}${extra}</div><div class="bs-nav-bottom">${NAV.bottom.map(row).join("")}<button type="button" class="sidebar-item bs-fold" data-collapse-sidebar>${foldIcon("in")}<span>Collapse menu</span></button></div>`;
   }
 
   // Settings, a full-screen window with its own navigation (D88), as the job's workspace is
@@ -774,7 +774,7 @@ window.BolsterShell = (() => {
         syncPin();
         if (popMode()) {
           // the rail as it is; focus to the button that undoes it, at the rail's foot or the logo's cell
-          if (e.detail === 0) requestAnimationFrame(() => shell.querySelector(folded ? ".rail .bs-fold.rail-item" : ".bs-pin")?.focus({ preventScroll: true }));
+          if (e.detail === 0) requestAnimationFrame(() => shell.querySelector(folded ? ".rail .bs-fold.rail-item" : ".bs-sidebar button.bs-fold")?.focus({ preventScroll: true }));
         } else {
           shell.querySelector(".rail")?.toggleAttribute("data-expanded", folded);
           shell.toggleAttribute("data-menu-over", folded && e.detail > 0); // by the keyboard, the rail's own labels (I9)
