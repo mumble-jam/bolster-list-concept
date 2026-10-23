@@ -401,16 +401,14 @@ window.BolsterShell = (() => {
     const cur = sectionOf(opts.current)?.id;
     let n = 0; // each page's place in its section, for the stagger as it opens
     // a section's pages with their icons (the folded menu's popup has the same), a step smaller than the section's
-    // a page built in these concepts says so at its row's end, quietly (your ask, 22 Oct); not the one you're on
-    const built = (id) => (opts.links[id] && id !== opts.current ? `<span class="badge bs-built">Try it</span>` : "");
-    const page = (x) => `<a class="sidebar-item bs-sub" style="--i:${n++}" ${linkAttrs(x.id)} data-item="${x.id}"${x.id === opts.current ? ' aria-current="page"' : ""}>${menuIcon(x.icon, 14, { optical: true })}<span>${esc(x.label)}</span>${built(x.id)}</a>`;
+    const page = (x) => `<a class="sidebar-item bs-sub" style="--i:${n++}" ${linkAttrs(x.id)} data-item="${x.id}"${x.id === opts.current ? ' aria-current="page"' : ""}>${menuIcon(x.icon, 14, { optical: true })}<span>${esc(x.label)}</span></a>`;
     // a section with pages says so at its row's end, as the rail does (your ask, 22 Oct): pointing right shut, down open
     const more = `<span class="bs-acc-more" aria-hidden="true">${menuIcon("chevron-down", 12)}</span>`;
     const row = (s) => {
       const head = `${menuIcon(s.icon, 16)}<span>${esc(s.label)}</span>`; // the rail's size, pinned or folded (D93)
       if (s.id === "settings") return `<button type="button" class="sidebar-item" data-open-settings>${head}</button>`;
       if (s.items) { n = 0; return `<details class="bs-acc" name="bs-nav"${s.id === cur ? " open" : ""}><summary class="sidebar-item"${s.id === cur ? " data-current" : ""}>${head}${more}</summary><div class="bs-acc-body">${s.items.map((x) => (x === "-" ? `<span class="bs-gap" aria-hidden="true"></span>` : page(x))).join("")}</div></details>`; }
-      return `<a class="sidebar-item" ${sectionHref(s)} data-section="${s.id}"${s.id === cur ? ' aria-current="page" data-current' : ""}>${head}${built(s.id)}</a>`;
+      return `<a class="sidebar-item" ${sectionHref(s)} data-section="${s.id}"${s.id === cur ? ' aria-current="page" data-current' : ""}>${head}</a>`;
     };
     const extra = [...document.querySelectorAll("[data-more-entry]")].map((el) => `<button type="button" class="sidebar-item bs-extra" data-more-open="${el.id}">${menuIcon(el.dataset.moreIcon || "sliders", 18)}<span>${esc(el.dataset.moreEntry)}</span></button>`).join("");
     // phones have no top bar (D88): its search, help, Bolton and your account are in the menu

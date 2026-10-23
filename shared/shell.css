@@ -151,10 +151,6 @@
     /* the section you're in: its name and icon lit, a touch heavier */
     .bs-sidebar .sidebar-item[data-current] { color: var(--_ink); font-weight: var(--font-weight-medium); }
     .bs-sidebar .sidebar-item[data-current] > svg { color: var(--_ink); }
-    /* a page built in these concepts: the badge in the logo's yellow, faint on the dark menu, so it marks without
-       calling (your ask, 22 Oct); it fades with the labels as the menu folds (it's one of the row's spans). Its row's name keeps one line */
-    .bs-sidebar .sidebar-item:has(> .bs-built) > span:not(.bs-built) { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .bs-sidebar .bs-built { --_bg: color-mix(in oklab, var(--color-action-brand) 12%, transparent); --_fg: color-mix(in oklab, var(--color-action-brand) 80%, var(--color-content-on-chrome)); flex: none; margin-inline-start: auto; block-size: 1.125rem; font-weight: var(--font-weight-regular); box-shadow: inset 0 0 0 1px color-mix(in oklab, var(--color-action-brand) 18%, transparent); }
     /* the section you're in, folded: its row holds the pill, as its page's is folded away in it (your note, 22 Oct) */
     .bs-sidebar .bs-acc > summary[data-current] { position: relative; isolation: isolate; }
     .bs-sidebar .bs-acc > summary[data-current]::before {
