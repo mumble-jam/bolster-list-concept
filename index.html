@@ -10,9 +10,9 @@
 <link rel="apple-touch-icon" href="shared/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=7c7f1f2f">
-<link rel="stylesheet" href="shared/shell.css?v=7c7f1f2f">
-<link rel="stylesheet" href="data-list.css?v=7c7f1f2f">
+<link rel="stylesheet" href="system/bolster.css?v=14c2cfa4">
+<link rel="stylesheet" href="shared/shell.css?v=14c2cfa4">
+<link rel="stylesheet" href="data-list.css?v=14c2cfa4">
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
 <script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
@@ -153,23 +153,18 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
 <details class="concept-controls" id="concept-controls" data-more-entry="Concept controls" data-more-icon="sliders">
   <summary><span class="concept-tag">Concept</span> Controls</summary>
   <div class="concept-body">
-    <div class="field" data-size="sm"><label class="field-label" for="cc-state">State</label>
-      <div class="select"><select class="input" id="cc-state">
-        <option value="ready">Ready</option>
-        <option value="loading">Loading</option>
-        <option value="empty">Empty (no records yet)</option>
-        <option value="error">Error</option>
-      </select></div>
-      <p class="field-helper">"No results" shows up when filters exclude everything.</p></div>
-    <div class="field" data-size="sm">
-      <label class="choice"><input type="checkbox" role="switch" class="toggle" id="cc-grid"> Grid on the page</label>
-      <button class="button" data-variant="secondary" data-size="sm" data-tune="net" hidden>Tune the grid</button></div>
-    <div class="field" data-size="sm">
-      <label class="choice"><input type="checkbox" role="switch" class="toggle" id="cc-cards"> Tactile cards</label>
-      <button class="button" data-variant="secondary" data-size="sm" data-tune="cards" hidden>Tune the cards</button></div>
-    <div class="field" data-size="sm">
-      <label class="choice"><input type="checkbox" role="switch" class="toggle" id="cc-recipe"> Lists built from page descriptions</label>
-      <p class="field-helper">The same four lists, drawn from system/recipes/list/concept/*.json by recipe.js instead of the hand-written data.js.</p></div>
+    <div class="cc-field"><span class="cc-label" id="cc-state-l">State</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="cc-state-l">
+        <label class="segmented-option"><input type="radio" name="cc-state" value="ready" checked> Ready</label>
+        <label class="segmented-option"><input type="radio" name="cc-state" value="loading"> Loading</label>
+        <label class="segmented-option"><input type="radio" name="cc-state" value="empty"> Empty</label>
+        <label class="segmented-option"><input type="radio" name="cc-state" value="error"> Error</label>
+      </div>
+      <p class="cc-help">Empty: no records yet. “No results” shows when the filters leave nothing.</p></div>
+    <div class="cc-row"><label for="cc-grid">Grid on the page</label><button class="button" data-variant="ghost" data-size="sm" data-tune="net" aria-label="Tune the grid" hidden>Tune</button><input type="checkbox" role="switch" class="toggle" id="cc-grid"></div>
+    <div class="cc-row"><label for="cc-cards">Tactile cards</label><button class="button" data-variant="ghost" data-size="sm" data-tune="cards" aria-label="Tune the cards" hidden>Tune</button><input type="checkbox" role="switch" class="toggle" id="cc-cards"></div>
+    <div class="cc-field"><div class="cc-row"><label for="cc-recipe">Built from page descriptions</label><input type="checkbox" role="switch" class="toggle" id="cc-recipe"></div>
+      <p class="cc-help">The four lists drawn by recipe.js from their descriptions (system/recipes/list/concept), not from data.js.</p></div>
     <button class="button" data-variant="secondary" data-size="sm" data-open-dialog="notes">About this concept</button>
     <a class="button" data-variant="secondary" data-size="sm" href="system/index.html">The design system (back office)</a>
     <a class="button" data-variant="secondary" data-size="sm" href="components.html">Components, and who decided them</a>
@@ -180,11 +175,11 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
 </details>
 
 <div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
-<script src="shared/icons.js?v=7c7f1f2f"></script>
-<script src="shared/shell.js?v=7c7f1f2f"></script>
-<script src="system/specimens/specimen.js?v=7c7f1f2f"></script>
-<script src="data.js?v=7c7f1f2f"></script>
-<script src="recipe.js?v=7c7f1f2f"></script>
+<script src="shared/icons.js?v=14c2cfa4"></script>
+<script src="shared/shell.js?v=14c2cfa4"></script>
+<script src="system/specimens/specimen.js?v=14c2cfa4"></script>
+<script src="data.js?v=14c2cfa4"></script>
+<script src="recipe.js?v=14c2cfa4"></script>
 <script>
   // ?from=description builds the four lists from their page descriptions; ?d=<path> adds one more list
   // from any description. Either way data-list.js starts once the descriptions are compiled.

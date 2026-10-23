@@ -297,14 +297,22 @@
   @keyframes bs-ch { from { opacity: 0; translate: 0 0.45em; filter: blur(2px); } }
   @media (prefers-reduced-motion: reduce) { .bs-ch, .bs-typing::after { animation: none; } }
   /* ---------- the concept controls (tooling, not the design), one layout on every page (shell.js): the page's own,
-     the theme, the menu and the loading screen, each a section under a small heading, a hairline between; then the
+     the theme, the loading screen, each a section under a small heading, a hairline between; then the
      links as rows ---------- */
   .concept-body { gap: 0; padding-block-start: 0; }
-  .cc-sec { display: grid; gap: var(--space-3); padding-block: var(--space-3); }
+  .cc-sec { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); padding-block: var(--space-3); }
   .cc-sec + .cc-sec, .cc-links { border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
   .cc-h { margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
   .cc-sec .segmented { inline-size: 100%; }
-  .cc-sec .segmented-option { flex: 1; justify-content: center; }
+  /* a page's own controls: a labelled choice above its help, or a row with its switch at the end (and Tune beside it) */
+  .cc-field { display: grid; gap: var(--space-2); }
+  .cc-label { font-weight: var(--font-weight-medium); }
+  .cc-help { margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  .cc-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; column-gap: var(--space-2); min-block-size: var(--control-height-sm); }
+  .cc-row > label { cursor: pointer; }
+  .cc-row > .toggle { grid-column: 3; }
+  .cc-row > .button[hidden] { display: none; }
+  .cc-sec .segmented-option { flex: 1 1 0; min-inline-size: 0; justify-content: center; padding-inline: var(--space-1); }
   .cc-sec > .button, .cc-sec .field > .button { justify-self: start; align-self: flex-start; inline-size: auto; }
   .bs-cc-loader { display: grid; gap: var(--space-2); }
   .cc-buttons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2); }

@@ -234,9 +234,9 @@ window.BolsterShell = (() => {
     // menu over the page (data-rail="menu") does both from the logo's cell instead
     return `<nav class="rail" aria-label="Main">${NAV.main.map(item).join("")}<span class="rail-spacer"></span>${NAV.bottom.map(item).join("")}<hr class="rail-separator bs-fold"><button class="rail-item bs-fold" type="button" data-collapse-sidebar aria-label="Expand menu">${foldIcon("out")}<span class="rail-label">Expand menu</span></button></nav>`;
   }
-  // How the folded rail opens (your call, 23 Oct): "pop" (the default), a section's pages in a popup beside it as you
-  // point at it, the rail staying as it is, as Shopify's; "menu", the menu itself over the page (D98). Concept controls
-  // switch it; the menu playground is the menu's
+  // How the folded rail opens (your call, 23 Oct): "pop", a section's pages in a popup beside it as you point at it, the
+  // rail staying as it is, as Shopify's. "menu", the menu itself over the page (D98), is the menu playground's alone now
+  // (its switch in the concept controls is gone, your call, 23 Oct); the key held a browser's old pick and is cleared
   const RAIL_KEY = "bolster-concepts:rail";
   const popMode = () => document.documentElement.dataset.rail !== "menu";
 
@@ -676,7 +676,9 @@ window.BolsterShell = (() => {
     if (!unfolded) shell.setAttribute("data-sidebar-hidden", "");
     // how the folded rail opens: a page may set it (the menu playground), else this browser's pick, else the popup
     const root = document.documentElement;
-    if (!root.dataset.rail) { let m = null; try { m = localStorage.getItem(RAIL_KEY); } catch {} root.dataset.rail = m === "menu" ? "menu" : "pop"; }
+    // the popup beside the rail (D107); the menu over the page (D98) only where a page asks for it (the menu playground)
+    if (!root.dataset.rail) root.dataset.rail = "pop";
+    try { localStorage.removeItem(RAIL_KEY); } catch {}
     syncPin();
     hydrateIcons();
     setCurrent(opts.current);
@@ -699,14 +701,14 @@ window.BolsterShell = (() => {
     // the concept controls, on every page that has them: a new loading screen each press, or a slow one
     const cc = document.querySelector("#concept-controls .concept-body");
     if (cc) {
-      // one layout on every page (your ask, 23 Oct): what's the page's own, the theme, the menu and the loading screen,
+      // one layout on every page (your ask, 23 Oct): what's the page's own, the theme, the loading screen,
       // then the links. The page puts its own controls and links in; the shell sorts them and adds the rest
       const own = [...cc.children], themeRow = own.find((el) => el.querySelector?.("[data-theme-toggle]"));
       const hub = themeRow?.querySelector("a[href]");
       const links = own.filter((el) => el.matches("a.button, button[data-open-dialog]"));
       const fields = own.filter((el) => el !== themeRow && !links.includes(el));
       const sec = (title, id) => `<section class="cc-sec"${id ? ` id="${id}"` : ""}><h3 class="cc-h">${title}</h3></section>`;
-      cc.innerHTML = (fields.length ? sec("This page", "cc-page") : "") + sec("Theme", "cc-theme") + sec("Menu and loading screen", "cc-shell") + `<nav class="cc-links" aria-label="About the concepts"></nav>`;
+      cc.innerHTML = (fields.length ? sec("This page", "cc-page") : "") + sec("Theme", "cc-theme") + sec("Loading screen", "cc-shell") + `<nav class="cc-links" aria-label="About the concepts"></nav>`;
       cc.querySelector("#cc-page")?.append(...fields);
       // the links as rows, About first, All concepts last
       const nav = cc.querySelector(".cc-links");
@@ -746,14 +748,6 @@ window.BolsterShell = (() => {
         const names = Object.fromEntries(window.BolsterTape.OPTIONS);
         sel.insertAdjacentHTML("beforeend", window.BolsterLoader.SHORTLIST.map((id) => `<option value="${id}"${id === get("drawing", "any") ? " selected" : ""}>${esc(names[id] || id)}</option>`).join(""));
       }), { once: true });
-      // the folded rail: its sections' pages in a popup beside it, or the menu over the page (D98), to compare
-      shellSec.querySelector(".cc-h").insertAdjacentHTML("afterend", `<div class="field" data-size="sm"><label class="field-label" for="cc-rail">The folded menu, pointed at</label>
-        <div class="select"><select class="input" id="cc-rail">${[["pop", "Pages pop out beside the rail"], ["menu", "The menu opens over the page"]].map(([v, l]) => `<option value="${v}"${v === document.documentElement.dataset.rail ? " selected" : ""}>${l}</option>`).join("")}</select></div></div>`);
-      cc.querySelector("#cc-rail").addEventListener("change", (e) => {
-        document.documentElement.dataset.rail = e.target.value;
-        try { localStorage.setItem(RAIL_KEY, e.target.value); } catch {}
-        dispatchEvent(new Event("bs-rail-mode"));
-      });
       cc.addEventListener("click", (e) => { const b = e.target.closest("[data-loading]"); if (b) loading({ slow: b.dataset.loading === "slow" }); });
       cc.addEventListener("input", (e) => { if (e.target.id === "cc-loader-every") cc.querySelector("output[for=cc-loader-every]").textContent = `${(+e.target.value).toFixed(1)} s`; });
       cc.addEventListener("change", (e) => {

@@ -268,7 +268,7 @@
     rn.hidden = !cfg.fromDescription;
     if (cfg.fromDescription) rn.innerHTML = `<b>Built from a page description.</b> ${cfg.notes.length ? cfg.notes.map(esc).join(" ") : "Everything in it is drawn."}`;
     BolsterShell.setCurrent(cfg.nav);
-    $("#cc-state").value = st.mode;
+    const mode = $(`input[name="cc-state"][value="${st.mode}"]`); if (mode) mode.checked = true;
   }
 
   function renderToolbar() {
@@ -1436,7 +1436,7 @@
       $("#select-page")?.focus({ preventScroll: true });
       return;
     }
-    if (t.id === "cc-state") { st.mode = t.value; st.selected.clear(); st.picking = false; render(); }
+    if (t.name === "cc-state") { st.mode = t.value; st.selected.clear(); st.picking = false; render(); }
     if (t.id === "cc-grid") {
       if (t.checked) delete document.documentElement.dataset.grid; else document.documentElement.dataset.grid = "off";
       $('[data-tune="net"]').hidden = !t.checked;

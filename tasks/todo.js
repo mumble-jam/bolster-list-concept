@@ -634,15 +634,10 @@
   BolsterShell.searchButton(bar, { onClear: () => { st.q = ""; render(); } });
   addEventListener("resize", () => popFor && place());
 
-  // trying out: the toolbar on the page instead of a card (on by default, remembered per browser)
-  (() => {
-    const box = $("#cc-bar"), root = document.documentElement;
-    let on = true;
-    try { on = localStorage.getItem("todo-bar") !== "card"; } catch {}
-    const show = () => { box.checked = on; on ? root.setAttribute("data-todo-bar", "surface") : root.removeAttribute("data-todo-bar"); on ? bar.setAttribute("data-search", "button") : bar.removeAttribute("data-search"); };
-    box.addEventListener("change", () => { on = box.checked; try { localStorage.setItem("todo-bar", on ? "surface" : "card"); } catch {} show(); });
-    show();
-  })();
+  // the toolbar on the page, not on a card, its search an icon (settled, your call, 23 Oct: the switch is gone)
+  document.documentElement.setAttribute("data-todo-bar", "surface");
+  bar.setAttribute("data-search", "button");
+  try { localStorage.removeItem("todo-bar"); } catch {}
 
   // what sticks and what hides as you scroll is the shell's, as on the list (BolsterShell.scrolling): this
   // page says where its groups start, and that a lifted task or a focused toolbar counts as in use
