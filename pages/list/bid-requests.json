@@ -209,7 +209,7 @@
       "filters": {}
     }
   ],
-  "rowClick": "peek",
+  "rowClick": "open",
   "selection": {
     "enabled": true,
     "bulk": [
@@ -311,8 +311,8 @@
     },
     {
       "field": "rowClick",
-      "value": "peek",
-      "why": "L-row-click: peek, the system's default; the thing has no full-screen window of its own."
+      "value": "open",
+      "why": "L-row-click: the bid request has its own full-screen window (The job's bid workspace, its trades together); Quick look in the ··· menu."
     },
     {
       "field": "record.related",
@@ -338,29 +338,6 @@
       "field": "icons",
       "value": "from the vocabulary",
       "why": "L-icons: system/model/icons.json, by meaning, record, type, label or verb. Proposed, waiting for review: Review & send: send, Remind vendors: bell."
-    }
-  ],
-  "unresolved": [
-    {
-      "field": "lifecycle.bids-back.next",
-      "question": "When a trade's bids are all back, what do people do next?",
-      "options": [
-        "Pick a vendor and award the work",
-        "Turn the chosen bid into a vendor order",
-        "Nothing more here: it's done"
-      ],
-      "evidence": "No trade had its bids back, so the page never showed what follows."
-    },
-    {
-      "field": "workspace",
-      "question": "Where do people work on one bid request?",
-      "options": [
-        "In the job's bid workspace (its trades together)",
-        "In a window of its own, per trade",
-        "In the record beside the list"
-      ],
-      "default": "In the job's bid workspace (its trades together)",
-      "evidence": "Bolster opens a job's trades together in one workspace; Review & send opens a flow we couldn't open read-only."
     }
   ],
   "dropped": [
