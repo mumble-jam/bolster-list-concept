@@ -117,6 +117,7 @@
   }
   const save = () => keep("tl-filters", JSON.stringify({ jobs: st.jobs, filters: st.filters }));
   const filtered = () => !!st.jobs || FILTERS.some((f) => st.filters[f.key]);
+  const narrowed = () => filtered() || !st.completed || !st.links;
   const stageFiltered = () => FILTERS.some((f) => !f.job && st.filters[f.key]);
   // what passes, all but one filter when an option counts what it would show (except)
   const jobPass = (j, except) => (st.completed || j.status !== "Completed") && (except === "jobs" || !st.jobs || st.jobs.includes(j.name))
@@ -140,7 +141,7 @@
     const shown = shownJobs(), all = shown.length ? shown : jobsOf();
     const a = Math.min(0, ...all.map((j) => j.start)), b = Math.max(28, ...all.map((j) => j.end));
     R0 = weekStart(a - 14); N = weekStart(b + 35) - R0;
-    const scroller = $(".tl-scroll"), cardW = scroller?.clientWidth || $("#tl").clientWidth || 1000;
+    const cardW = $("#tl").clientWidth || 1000;
     narrow = cardW < 1000; GRID = narrow ? 300 : 400;
     const room = cardW - GRID; // clientWidth is inside the border already
     dw = st.scale === "fit" ? Math.max(3, room / N) : DW[st.scale];
@@ -272,9 +273,9 @@
   // ---------- drawing ----------
   const tl = $("#tl");
   function render() {
-    const sc = $(".tl-scroll"), keepDay = sc ? R0 + sc.scrollLeft / dw : null, keepTop = sc?.scrollTop || 0;
+    const sc = xs(), keepDay = sc ? R0 + sc.scrollLeft / dw : null;
     // the day in the middle of the view, kept there when the scale changes (your call, 22 Oct: it went back to today)
-    const mid = sc ? R0 + (sc.scrollLeft + (sc.clientWidth - GRID) / 2) / dw : null;
+    const mid = sc ? R0 + (sc.scrollLeft + sc.clientWidth / 2) / dw : null;
     range();
     if (!shownJobs().length) {
       tl.dataset.view = "empty";
@@ -285,59 +286,73 @@
       tl.dataset.view = "chart";
       tl.innerHTML = `<div class="tl-scroll" data-tier="${tier()}"${narrow ? " data-narrow" : ""} style="--_day:${dw}px;--_grid:${GRID}px;--_w:${N * dw}px;--_wk:${7 * dw}px;--_off0:${(5 - dow(R0) + 7) % 7}">
         <div class="tl-head"><div class="tl-corner"><span>Name</span><span class="tl-start">Start</span><span class="tl-days">Days</span></div>${scaleHtml()}</div>
-        <div class="tl-body" style="height:${list.length * ROW}px"><div class="tl-grid-bg" aria-hidden="true">${monthLines()}</div>${groupsHtml(list)}<div class="tl-overlay" aria-hidden="true">${linksSvg(list)}<i class="tl-today" style="left:${X(0) + dw / 2}px"></i></div></div></div>`;
-      const s2 = $(".tl-scroll");
-      s2.style.setProperty("--_head", `${s2.querySelector(".tl-head").offsetHeight}px`);
-      s2.scrollTop = keepTop;
-      if (moved.scale === "keep" && mid != null) s2.scrollLeft = (mid - R0) * dw - (s2.clientWidth - GRID) / 2;
+        <div class="tl-body" style="height:${list.length * ROW}px"><div class="tl-grid-bg" aria-hidden="true">${monthLines()}</div><div class="tl-overlay" aria-hidden="true">${linksSvg(list)}<i class="tl-today" style="left:${X(0) + dw / 2}px"></i></div>${groupsHtml(list)}</div>
+        <div class="tl-x" tabindex="-1" aria-hidden="true"><i style="width:${N * dw}px"></i></div></div>`;
+      $(".tl-scroll").style.setProperty("--_head", `${$(".tl-head").offsetHeight}px`);
+      months = $$(".tl-scale-top > span").map((m) => ({ b: m.firstElementChild, l: m.offsetLeft, w: m.offsetWidth, bw: m.firstElementChild.offsetWidth, at: 0 }));
+      const s2 = xs();
+      if (moved.scale === "keep" && mid != null) s2.scrollLeft = (mid - R0) * dw - s2.clientWidth / 2;
       else if (keepDay != null && !moved.scale) s2.scrollLeft = (keepDay - R0) * dw;
       else goToday(false);
       moved.scale = false;
+      along();
     }
     BolsterShell.hydrateIcons(tl);
     // the toolbar reads back its values
-    const showText = [st.completed ? null : "Active jobs", st.links ? null : "no links"].filter(Boolean).join(", ") || "Everything";
-    $("#show-text").textContent = showText; $("#pick-show").setAttribute("aria-label", `Show: ${showText}`);
     $$("#scales input").forEach((r) => (r.checked = r.value === st.scale));
     renderFilters();
     const un = `Unscheduled, ${unscheduled.length ? `${unscheduled.length} ${unscheduled.length === 1 ? "job" : "jobs"}` : "none"}`;
     $("#tray-toggle").setAttribute("aria-label", un); $("#tray-toggle").dataset.tip = un;
-    period(); fit();
+    period();
   }
-  // the toolbar's Jobs reads back its value; Add filter's are chips (the shell's), with the count and Clear all
-  // (L-filters). A chip's × (or Clear in its picker) leaves focus on the next chip; Clear all takes Jobs too
+  // everything that narrows is under the filter button (your ask, 25 Oct): which jobs, what's shown, and Add filter's;
+  // each one set is a chip (the shell's), with the count and Clear all (L-filters): Jobs, Hiding (finished jobs, links),
+  // then the filters. A chip's × (or Clear in its picker) leaves focus on the next chip; Clear all takes them all
+  const showAll = () => { st.completed = st.links = true; keep("tl-completed", "on"); keep("tl-links", "on"); };
   const filterChips = BolsterShell.filterChips({
-    onRemove: (k) => { delete st.filters[k]; save(); if (pop.matches(":popover-open")) pop.hidePopover(); render(); return filtered() ? $("[data-chip]") || $("[data-clear-all]") : null; },
-    onClear: () => { st.jobs = null; st.filters = {}; save(); if (pop.matches(":popover-open")) pop.hidePopover(); render(); say("Filters cleared"); return $("#pick-jobs"); },
+    onRemove: (k) => { if (k === "jobs") st.jobs = null; else if (k === "show") showAll(); else delete st.filters[k]; save(); if (pop.matches(":popover-open")) pop.hidePopover(); render(); return narrowed() ? $("[data-chip]") || $("[data-clear-all]") : null; },
+    onClear: () => { st.jobs = null; st.filters = {}; showAll(); save(); if (pop.matches(":popover-open")) pop.hidePopover(); render(); say("Filters cleared"); return null; },
   });
   function renderFilters() {
-    const jt = !st.jobs ? "All jobs" : st.jobs.length === 1 ? st.jobs[0] : `${st.jobs.length} jobs`;
-    $("#jobs-text").textContent = jt; $("#pick-jobs").setAttribute("aria-label", `Jobs: ${jt}`);
     const text = (f, v) => v.map((x) => f.groups().flatMap(([, o]) => o).find((o) => o.value === x)?.label.replace(" (you)", "") ?? x).join(", ");
-    filterChips.render(FILTERS.filter((f) => st.filters[f.key]).map((f) => ({ key: f.key, label: f.label, text: text(f, st.filters[f.key]) })), { full: FILTERS.every((f) => st.filters[f.key]), clear: filtered() });
+    const hidden = [st.completed ? null : "Finished jobs", st.links ? null : "Links"].filter(Boolean);
+    filterChips.render([
+      ...(st.jobs ? [{ key: "jobs", label: "Jobs", text: st.jobs.join(", ") }] : []),
+      ...(hidden.length ? [{ key: "show", label: "Hiding", text: hidden.join(", ").replace(", L", ", l") }] : []),
+      ...FILTERS.filter((f) => st.filters[f.key]).map((f) => ({ key: f.key, label: f.label, text: text(f, st.filters[f.key]) })),
+    ], { clear: narrowed() });
     // how much is left: jobs, and stages once a stage's filter is set
     const all = jobsOf().filter((j) => st.completed || j.status !== "Completed"), shown = shownJobs();
     const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
     $("#result-count").innerHTML = `<strong>${shown.length}</strong> of ${plural(all.length, "job", "jobs")}${stageFiltered() ? `, <strong>${shown.reduce((n, j) => n + j.shown.length, 0)}</strong> of ${plural(all.reduce((n, j) => n + j.stages.length, 0), "stage", "stages")}` : ""}`;
-    $("#list-chips").hidden = !filtered();
+    $("#list-chips").hidden = !narrowed();
   }
   const moved = { scale: true };
+  // along the days the chart moves itself (D127): its scrollbar, pinned to the window's foot, is where it is; the scale,
+  // the tracks and the rest follow it by --_x, and a month's name stays in view beside the grid while its days pass
+  const xs = () => $(".tl-x");
+  let months = [];
+  function along() {
+    const sc = xs(); if (!sc) return;
+    const v = sc.scrollLeft;
+    $(".tl-scroll").style.setProperty("--_x", `${v}px`);
+    for (const m of months) {
+      const at = Math.round(Math.max(0, Math.min(v + 8 - m.l, m.w - m.bw)));
+      if (at !== m.at) { m.at = at; m.b.style.translate = at ? `${at}px 0` : ""; }
+    }
+    period();
+  }
   function period() {
-    const sc = $(".tl-scroll");
+    const sc = xs();
     if (!sc) { const js = shownJobs(); $("#period").textContent = js.length ? periodOf(Math.min(...js.map((j) => j.start)), Math.max(...js.map((j) => j.end))) : ""; return; }
-    const a = R0 + Math.floor(sc.scrollLeft / dw), b = Math.min(R0 + N - 1, R0 + Math.floor((sc.scrollLeft + sc.clientWidth - GRID) / dw));
+    const a = R0 + Math.floor(sc.scrollLeft / dw), b = Math.min(R0 + N - 1, R0 + Math.floor((sc.scrollLeft + sc.clientWidth) / dw));
     $("#period").textContent = periodOf(a, b);
   }
   // today a quarter of the way in
   function goToday(smooth = true) {
-    const sc = $(".tl-scroll"); if (!sc) return;
-    const left = Math.max(0, X(0) - (sc.clientWidth - GRID) * 0.25);
+    const sc = xs(); if (!sc) return;
+    const left = Math.max(0, X(0) - sc.clientWidth * 0.25);
     sc.scrollTo({ left, behavior: smooth && !matchMedia("(prefers-reduced-motion: reduce)").matches ? "smooth" : "auto" });
-  }
-  // the chart fills the screen to its foot and scrolls both ways inside, the grid and the scale staying put
-  function fit() {
-    const sc = $(".tl-scroll"); if (!sc) return;
-    sc.style.maxBlockSize = `${Math.max(320, innerHeight - sc.getBoundingClientRect().top - scrollY - 24)}px`;
   }
 
   // ---------- changes, every one with Undo ----------
@@ -450,7 +465,12 @@
         const list = all.filter((j) => j.status === status);
         return list.length ? `<div class="pop-section">${title}</div>${list.map(opt).join("")}` : ""; }).join("")}<p class="tl-find-none" hidden>No job or client by that name.</p></div>`;
   }
-  const addHtml = () => BolsterShell.filterChips.menu(FILTERS.filter((f) => !st.filters[f.key]), { section: "Filter by" });
+  // the filter button's menu: what's shown, ticked at once, then the filters not set (Jobs first)
+  const addHtml = () => {
+    const tick = (key, label, icon) => `<button type="button" class="menu-item" role="menuitemcheckbox" aria-checked="${st[key]}" data-show-toggle="${key}"><span class="menu-icon">${ic(icon, 14)}</span>${label}</button>`;
+    const filters = BolsterShell.filterChips.menu([...(st.jobs ? [] : [{ key: "jobs", label: "Jobs", icon: "briefcase" }]), ...FILTERS.filter((f) => !st.filters[f.key])], { section: "Filter by" });
+    return `<div class="pop-body"><div class="pop-section">Show</div>${tick("completed", "Finished jobs", "circle-check")}${tick("links", "Links between stages", "link")}</div>${filters}`;
+  };
   // a filter's options, each with how many it would show among what the other filters let through (jobs for the
   // owner, stages for the rest)
   function filterHtml(key) {
@@ -462,10 +482,10 @@
   // a pick redraws the popover where it is, keeping the focus and what's typed in Find
   function refill() {
     if (!popFor) return;
-    const a = document.activeElement, key = pop.contains(a) ? a.dataset.opt ?? a.dataset.jobPick : null, find = $("[data-opt-find]", pop)?.value;
+    const a = document.activeElement, key = pop.contains(a) ? a.dataset.opt ?? a.dataset.jobPick ?? a.dataset.showToggle ?? a.dataset.show : null, find = $("[data-opt-find]", pop)?.value;
     pop.innerHTML = popFor.fill(); BolsterShell.hydrateIcons(pop);
     if (find) { $("[data-opt-find]", pop).value = find; findIn(find); }
-    if (key != null) $(`[data-opt="${CSS.escape(key)}"], [data-job-pick="${CSS.escape(key)}"]`, pop)?.focus({ preventScroll: true });
+    if (key != null) $(`[data-opt="${CSS.escape(key)}"], [data-job-pick="${CSS.escape(key)}"], [data-show-toggle="${CSS.escape(key)}"], [data-show="${CSS.escape(key)}"]`, pop)?.focus({ preventScroll: true });
     popFor.from = filterChips.anchor(popFor.from, popFor.key);
     BolsterShell.placePopover(pop, popFor.from, { start: popFor.kind === "filter" && !!popFor.from.closest(".chip") });
   }
@@ -540,8 +560,8 @@
     ghost.innerHTML = text;
     ghost.style.translate = `${Math.min(e.clientX + 14, innerWidth - ghost.offsetWidth - 8)}px ${e.clientY + 14}px`;
     // near the chart's edges, it scrolls
-    const sc = $(".tl-scroll"), r = sc.getBoundingClientRect();
-    if (e.clientX > r.right - 40) sc.scrollLeft += 12; else if (e.clientX < r.left + GRID + 40) sc.scrollLeft -= 12;
+    const sc = xs(), r = sc.getBoundingClientRect();
+    if (e.clientX > r.right - 40) sc.scrollLeft += 12; else if (e.clientX < r.left + 40) sc.scrollLeft -= 12;
   });
   function endDrag() {
     $$("[data-link-over]").forEach((x) => x.removeAttribute("data-link-over"));
@@ -583,23 +603,24 @@
     if ((el = q("[data-open]"))) { const s = byId(el.dataset.open), bar = q(".tl-row")?.querySelector(".tl-bar, .tl-milestone"), sr = $(".tl-scroll").getBoundingClientRect(), br = bar?.getBoundingClientRect();
       const from = br && br.right > sr.left + GRID && br.left < sr.right ? bar : el; /* its bar scrolled away: at its name */ return openPop("summary", from, () => stageHtml(s), { label: s.name, start: true }); }
     if ((el = q("[data-open-job]"))) { const name = el.dataset.openJob; return openPop("summary", el, () => jobHtml(name), { label: name, start: true }); }
-    if ((el = q("#pick-show"))) return openPop("show", el, showHtml, { label: "Show" });
-    if ((el = q("#pick-jobs"))) return openPop("jobs", el, jobsHtml, { label: "Jobs" });
-    if ((el = q("#add-filter"))) return openPop("add", el, addHtml, { label: "Add a filter" });
+    if ((el = q("#add-filter"))) return openPop("add", el, addHtml, { label: "Filters" });
+    if ((el = q("[data-show-toggle]"))) { const k = el.dataset.showToggle; st[k] = !st[k]; keep(`tl-${k}`, st[k] ? "on" : "off"); render(); return refill(); }
+    if ((el = q('[data-add-filter="jobs"], [data-chip="jobs"]'))) { const from = el.matches("[data-chip]") ? el : $("#add-filter"); openPop("jobs", from, jobsHtml, { label: "Jobs", start: from !== $("#add-filter") }); if (popFor) popFor.key = "jobs"; return; }
+    if ((el = q('[data-chip="show"]'))) { openPop("show", el, showHtml, { label: "Show", start: true }); if (popFor) popFor.key = "show"; return; }
     if ((el = q("[data-add-filter]"))) return openFilter(el.dataset.addFilter, $("#add-filter"));
     if ((el = q("[data-chip]"))) return openFilter(el.dataset.chip, el);
     if (q("[data-clear-jobs]")) { st.jobs = null; save(); render(); refill(); return $("[data-opt-find]", pop)?.focus({ preventScroll: true }); }
     if ((el = q("#tray-toggle")) || (el = q("#create"))) return openPop("tray", el, trayHtml, { label: "Unscheduled" });
     if ((el = q("[data-schedule]"))) { const u = unscheduled.find((x) => x.id === el.dataset.schedule), from = popFor?.from || $("#tray-toggle"); return openPop("schedule", from, () => scheduleHtml(u), { label: `Schedule ${u.job}` }); }
     if (q("#go-today")) return goToday();
-    if ((el = q("#go-prev, #go-next"))) { const sc = $(".tl-scroll"); if (sc) sc.scrollBy({ left: (el.id === "go-next" ? 1 : -1) * (sc.clientWidth - GRID) * 0.8, behavior: "smooth" }); return; }
+    if ((el = q("#go-prev, #go-next"))) { const sc = xs(); if (sc) sc.scrollBy({ left: (el.id === "go-next" ? 1 : -1) * sc.clientWidth * 0.8, behavior: "smooth" }); return; }
   });
   document.addEventListener("change", (e) => {
     const sh = e.target.closest("[data-show]");
     const jp = e.target.closest("[data-job-pick]"), op = e.target.closest("[data-opt]");
     if (jp) { const set = new Set(st.jobs || []); jp.checked ? set.add(jp.dataset.jobPick) : set.delete(jp.dataset.jobPick); st.jobs = set.size ? [...set] : null; save(); render(); return refill(); }
     if (op && popFor?.key) { const k = popFor.key, set = new Set(st.filters[k] || []); op.checked ? set.add(op.dataset.opt) : set.delete(op.dataset.opt); if (set.size) st.filters[k] = [...set]; else delete st.filters[k]; save(); render(); return refill(); }
-    if (sh) { st[sh.dataset.show] = sh.checked; keep(`tl-${sh.dataset.show}`, sh.checked ? "on" : "off"); render(); popFor.from = $("#pick-show"); popFor.from.setAttribute("aria-expanded", "true"); return; }
+    if (sh) { st[sh.dataset.show] = sh.checked; keep(`tl-${sh.dataset.show}`, sh.checked ? "on" : "off"); render(); return refill(); }
   });
   document.addEventListener("input", (e) => { if (e.target.matches("#pop [data-opt-find]")) findIn(e.target.value); });
   $("#scales").addEventListener("change", (e) => { st.scale = e.target.value; keep("tl-scale", st.scale); moved.scale = "keep"; render(); });
@@ -617,9 +638,25 @@
   const outline = (e, on) => { const b = e.target.closest?.(".tl-bracket[data-outline]"); if (!b) return; b.closest(".tl-group")?.querySelector(`.tl-outline[data-for="${CSS.escape(b.dataset.outline)}"]`)?.toggleAttribute("data-on", on); b.toggleAttribute("data-on", on); };
   tl.addEventListener("pointerover", (e) => outline(e, true));
   tl.addEventListener("pointerout", (e) => outline(e, false));
-  document.addEventListener("scroll", (e) => { if (e.target.classList?.contains("tl-scroll")) period(); }, { capture: true, passive: true });
+  document.addEventListener("scroll", (e) => { if (e.target.classList?.contains("tl-x")) along(); }, { capture: true, passive: true });
+  // sideways over the chart: a trackpad's swipe, a tilted wheel, or the wheel with Shift (Windows' way) moves the days;
+  // straight down is the page's
+  tl.addEventListener("wheel", (e) => {
+    const sc = xs(); if (!sc || e.ctrlKey) return;
+    const dx = e.deltaX || (e.shiftKey ? e.deltaY : 0);
+    if (!dx || (!e.shiftKey && Math.abs(dx) <= Math.abs(e.deltaY))) return;
+    e.preventDefault();
+    sc.scrollLeft += dx * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? sc.clientWidth : 1);
+  }, { passive: false });
+  // a finger across the chart (tablets) moves the days; up and down the page scrolls (touch-action: pan-y)
+  let pan = null;
+  tl.addEventListener("pointerdown", (e) => { if (e.pointerType === "touch" && xs()) pan = { id: e.pointerId, x: e.clientX, left: xs().scrollLeft, moved: false }; });
+  addEventListener("pointermove", (e) => { if (!pan || e.pointerId !== pan.id) return; const d = e.clientX - pan.x; if (Math.abs(d) > 6) pan.moved = true; if (pan.moved) xs().scrollLeft = pan.left - d; });
+  const endPan = (e) => { if (!pan || e.pointerId !== pan.id) return; if (pan.moved) { swallow = true; setTimeout(() => (swallow = false), 0); } pan = null; };
+  addEventListener("pointerup", endPan);
+  addEventListener("pointercancel", endPan);
   phone.addEventListener("change", () => { moved.scale = true; render(); });
-  addEventListener("resize", () => { fit(); if (st.scale === "fit") { moved.scale = "keep"; render(); } if (popFor) BolsterShell.placePopover(pop, popFor.from); });
+  addEventListener("resize", () => { if (st.scale === "fit") { moved.scale = "keep"; render(); } if (popFor) BolsterShell.placePopover(pop, popFor.from); });
   BolsterShell.scrolling({ into: (top) => tl.getBoundingClientRect().top < top, busy: () => !!drag?.started });
   render();
 })();

@@ -1,5 +1,5 @@
-/* Timeline concept: every job's plan on a line of days (TL-rules). A grid of the work beside its bars, one scroll both
-   ways inside the card, the grid and the scale staying put; brackets for jobs and phases, bars for stages, a diamond
+/* Timeline concept: every job's plan on a line of days (TL-rules). A grid of the work beside its bars, the page scrolling
+   it down and the chart moving itself along the days (D127), the grid and the scale staying put; brackets for jobs and phases, bars for stages, a diamond
    for a milestone, links as elbow lines, today a line. The calendar's toolbar, popover and job colours (calendar.css);
    what's new lives here until it settles. */
 
@@ -7,22 +7,31 @@
 
 @layer components {
   .tl-page { --tl-row: 36px; --cal-off: color-mix(in srgb, var(--color-surface-sunken) 30%, var(--color-surface-default)); }
-  .tl-card { display: block; padding: 0; overflow: hidden; border-color: var(--color-line-card); }
-  /* one scroll for both parts: the grid sticks to the left, the scale to the top */
-  .tl-scroll { position: relative; overflow: auto; overscroll-behavior: contain; }
+  .tl-card { display: block; padding: 0; overflow: clip; border-color: var(--color-line-card); }
+  /* down, the page scrolls it, as every page (your ask, 25 Oct; D127): the scale and a job's row stick to the page under
+     the bars (--_stick, sliding with them as they hide), the card clipping what's beyond its sides but not a scroller, so
+     they can. Along the days the chart moves itself, by --_x from its scrollbar (.tl-x), pinned to the window's foot: the
+     scale, the shading, the tracks, the links and the outlines slide under the grid, which stays */
+  .tl-scroll { --_stick: var(--list-head-top, 0px); position: relative; touch-action: pan-y pinch-zoom; transition: --_stick 300ms var(--ease-out); }
+  :root[data-chrome-hidden] .tl-scroll { --_stick: 0px; }
+  @media (prefers-reduced-motion: reduce) { .tl-scroll { transition: none; } }
+  .tl-scale, .tl-grid-bg, .tl-track, .tl-overlay, .tl-outline { translate: calc(0px - var(--_x, 0px)) 0; }
+  .tl-x { position: sticky; inset-block-end: 0; z-index: 8; margin-inline-start: var(--_grid); overflow: auto hidden; overscroll-behavior-x: contain; background: var(--color-surface-default); }
+  .tl-x > i { display: block; block-size: 1px; }
+  :root:has(.tl-scroll) { scroll-padding-block: calc(var(--list-head-top, 0px) + var(--_head, 3.3rem) + 36px + var(--space-2)) var(--space-6); }
   /* a narrow card: the grid keeps the name and the length; the start is on the bar and in the summary */
   .tl-scroll[data-narrow] .tl-start { display: none; }
   .tl-scroll[data-narrow] .tl-corner { grid-template-columns: minmax(0, 1fr) 3rem; }
   .tl-scroll[data-narrow] .tl-cells { grid-template-columns: 1.25rem minmax(0, 1fr) 3rem; }
 
   /* ---------- the head: the grid's column names, then the scale ---------- */
-  .tl-head { position: sticky; inset-block-start: 0; z-index: 7; display: flex; inline-size: calc(var(--_grid) + var(--_w)); background: var(--color-surface-default); border-block-end: var(--border-width-default) solid var(--color-line-default); }
-  .tl-corner { position: sticky; inset-inline-start: 0; z-index: 7; flex: none; inline-size: var(--_grid); display: grid; grid-template-columns: minmax(0, 1fr) 3.5rem 3rem; align-items: end; gap: var(--space-2); padding: 0 var(--space-3) calc((1.625rem - var(--leading-xs)) / 2) calc(var(--space-2) * 2 + 1.25rem); background: var(--color-surface-default); border-inline-end: var(--border-width-default) solid var(--color-line-default); font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
+  .tl-head { position: sticky; inset-block-start: var(--_stick); z-index: 7; display: flex; inline-size: calc(var(--_grid) + var(--_w)); background: var(--color-surface-default); border-block-end: var(--border-width-default) solid var(--color-line-default); }
+  .tl-corner { position: relative; z-index: 7; flex: none; inline-size: var(--_grid); display: grid; grid-template-columns: minmax(0, 1fr) 3.5rem 3rem; align-items: end; gap: var(--space-2); padding: 0 var(--space-3) calc((1.625rem - var(--leading-xs)) / 2) calc(var(--space-2) * 2 + 1.25rem); background: var(--color-surface-default); border-inline-end: var(--border-width-default) solid var(--color-line-default); font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
   .tl-scale { position: relative; flex: none; block-size: 3.25rem; }
   .tl-scale-top > span, .tl-scale-bottom > span { position: absolute; display: flex; align-items: center; overflow: hidden; white-space: nowrap; font-size: var(--text-xs); line-height: var(--leading-xs); }
-  /* a month's name stays in view beside the grid while its days scroll under it */
+  /* a month's name stays in view beside the grid while its days pass under it (its translate, timeline.js) */
   .tl-scale-top > span { inset-block-start: 0; block-size: 1.625rem; overflow: visible; font-weight: var(--font-weight-medium); color: var(--color-content-primary); border-inline-start: var(--border-width-default) solid var(--color-line-subtle); }
-  .tl-scale-top b { position: sticky; inset-inline-start: calc(var(--_grid) + var(--space-2)); padding-inline: var(--space-2); font-weight: inherit; }
+  .tl-scale-top b { padding-inline: var(--space-2); font-weight: inherit; }
   .tl-scale-bottom > span { inset-block-start: 1.625rem; block-size: 1.625rem; justify-content: center; gap: 3px; color: var(--color-content-secondary); font-variant-numeric: tabular-nums; }
   .tl-scale-bottom[data-tier="weeks"] > span, .tl-scale-bottom[data-tier="months"] > span { justify-content: flex-start; padding-inline-start: var(--space-1); border-inline-start: var(--border-width-default) solid var(--color-line-subtle); }
   .tl-scale-bottom small { font-size: 0.625rem; color: var(--color-content-tertiary); }
@@ -39,7 +48,7 @@
   .tl-mline { position: absolute; inset-block: 0; inline-size: var(--border-width-default); background: var(--color-line-subtle); }
   .tl-row { position: absolute; inset-inline-start: 0; display: flex; inline-size: 100%; block-size: var(--tl-row); }
   .tl-cells {
-    position: sticky; inset-inline-start: 0; z-index: 5; flex: none; inline-size: var(--_grid); block-size: 100%;
+    position: relative; z-index: 5; flex: none; inline-size: var(--_grid); block-size: 100%;
     display: grid; grid-template-columns: 1.25rem minmax(0, 1fr) 3.5rem 3rem; align-items: center; gap: var(--space-2);
     padding-inline: calc(var(--space-2) + var(--_lvl) * var(--space-4)) var(--space-3);
     background: var(--color-surface-default); border-inline-end: var(--border-width-default) solid var(--color-line-default); border-block-end: var(--border-width-default) solid var(--color-line-subtle);
@@ -56,9 +65,8 @@
      job's rows a group as tall as they are, the job's row in its flow. Over its stages' rows (their names at 5), under the
      head (7); today's line drawn on it too, as the band covers the one behind. A focused row clears the two */
   .tl-group { position: absolute; inset-inline-start: 0; inline-size: 100%; }
-  .tl-row[data-type="job"] { position: sticky; inset-block-start: var(--_head, 3.3rem); z-index: 6; }
+  .tl-row[data-type="job"] { position: sticky; inset-block-start: calc(var(--_stick) + var(--_head, 3.3rem)); z-index: 6; }
   .tl-row[data-type="job"] .tl-today { position: absolute; inset-block: 0; z-index: 2; }
-  .tl-scroll { scroll-padding-block-start: calc(var(--_head, 3.3rem) + var(--tl-row)); }
   .tl-fold { display: grid; place-items: center; inline-size: 1.25rem; block-size: 1.25rem; padding: 0; border: 0; border-radius: var(--radius-sm); background: none; color: var(--color-content-tertiary); cursor: pointer; }
   .tl-fold svg { transition: rotate var(--duration-fast, 120ms) var(--ease-out); }
   .tl-fold[aria-expanded="false"] svg { rotate: -90deg; }
@@ -115,8 +123,8 @@
   .tl-item-bar { position: absolute; inset-block-start: 15px; z-index: 3; block-size: 6px; border-radius: var(--radius-full); background: var(--color-status-pending-dot); opacity: 0.7; }
   .tl-item-bar[data-kind="materials"] { background: var(--color-status-active-dot); }
 
-  /* ---------- over the bars: the links and today ---------- */
-  .tl-overlay { position: absolute; inset-block: 0; inset-inline-start: var(--_grid); inline-size: var(--_w); z-index: 2; pointer-events: none; }
+  /* ---------- under the bars: the links and today, drawn before the rows (each track a layer of its own as it slides) ---------- */
+  .tl-overlay { position: absolute; inset-block: 0; inset-inline-start: var(--_grid); inline-size: var(--_w); pointer-events: none; }
   .tl-links { position: absolute; inset: 0; overflow: visible; }
   .tl-links path { fill: none; stroke: var(--color-content-tertiary); stroke-width: 1.5; }
   .tl-links path[data-broken] { stroke: var(--color-feedback-danger-accent); stroke-dasharray: 4 3; }
