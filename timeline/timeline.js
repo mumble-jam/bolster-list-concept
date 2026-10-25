@@ -304,21 +304,22 @@
     $("#tray-toggle").setAttribute("aria-label", un); $("#tray-toggle").dataset.tip = un;
     period(); fit();
   }
-  // the toolbar's Jobs reads back its value; Add filter's are chips, with the count and Clear all (L-filters)
+  // the toolbar's Jobs reads back its value; Add filter's are chips (the shell's), with the count and Clear all
+  // (L-filters). A chip's × (or Clear in its picker) leaves focus on the next chip; Clear all takes Jobs too
+  const filterChips = BolsterShell.filterChips({
+    onRemove: (k) => { delete st.filters[k]; save(); if (pop.matches(":popover-open")) pop.hidePopover(); render(); return filtered() ? $("[data-chip]") || $("[data-clear-all]") : null; },
+    onClear: () => { st.jobs = null; st.filters = {}; save(); if (pop.matches(":popover-open")) pop.hidePopover(); render(); say("Filters cleared"); return $("#pick-jobs"); },
+  });
   function renderFilters() {
     const jt = !st.jobs ? "All jobs" : st.jobs.length === 1 ? st.jobs[0] : `${st.jobs.length} jobs`;
     $("#jobs-text").textContent = jt; $("#pick-jobs").setAttribute("aria-label", `Jobs: ${jt}`);
     const text = (f, v) => v.map((x) => f.groups().flatMap(([, o]) => o).find((o) => o.value === x)?.label.replace(" (you)", "") ?? x).join(", ");
-    const chips = FILTERS.filter((f) => st.filters[f.key]).map((f) => { const t = text(f, st.filters[f.key]);
-      return `<span class="chip" data-active><button type="button" class="chip-main" data-chip="${f.key}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(`${f.label}: ${t}. Change filter`)}"><span class="chip-field">${esc(f.label)}:</span><span class="chip-value">${esc(t)}</span></button><button type="button" class="chip-remove" data-remove="${f.key}" aria-label="${esc(`Remove ${f.label.toLowerCase()} filter`)}" data-tip="Remove filter">${ic("xmark", 14)}</button></span>`; });
-    if (filtered()) chips.push(`<button type="button" class="button clear-all" data-variant="ghost" data-size="sm" data-clear-all>Clear all</button>`);
-    $("#filters").innerHTML = chips.join("");
+    filterChips.render(FILTERS.filter((f) => st.filters[f.key]).map((f) => ({ key: f.key, label: f.label, text: text(f, st.filters[f.key]) })), { full: FILTERS.every((f) => st.filters[f.key]), clear: filtered() });
     // how much is left: jobs, and stages once a stage's filter is set
     const all = jobsOf().filter((j) => st.completed || j.status !== "Completed"), shown = shownJobs();
     const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`;
     $("#result-count").innerHTML = `<strong>${shown.length}</strong> of ${plural(all.length, "job", "jobs")}${stageFiltered() ? `, <strong>${shown.reduce((n, j) => n + j.shown.length, 0)}</strong> of ${plural(all.reduce((n, j) => n + j.stages.length, 0), "stage", "stages")}` : ""}`;
     $("#list-chips").hidden = !filtered();
-    $("#add-filter").disabled = FILTERS.every((f) => st.filters[f.key]);
   }
   const moved = { scale: true };
   function period() {
@@ -449,7 +450,7 @@
         const list = all.filter((j) => j.status === status);
         return list.length ? `<div class="pop-section">${title}</div>${list.map(opt).join("")}` : ""; }).join("")}<p class="tl-find-none" hidden>No job or client by that name.</p></div>`;
   }
-  const addHtml = () => `<div class="pop-body"><div class="pop-section">Filter by</div>${FILTERS.filter((f) => !st.filters[f.key]).map((f) => `<button type="button" class="menu-item" role="menuitem" data-add-filter="${f.key}"><span class="menu-icon">${ic(f.icon, 14)}</span>${esc(f.label)}</button>`).join("")}</div>`;
+  const addHtml = () => BolsterShell.filterChips.menu(FILTERS.filter((f) => !st.filters[f.key]), { section: "Filter by" });
   // a filter's options, each with how many it would show among what the other filters let through (jobs for the
   // owner, stages for the rest)
   function filterHtml(key) {
@@ -465,9 +466,7 @@
     pop.innerHTML = popFor.fill(); BolsterShell.hydrateIcons(pop);
     if (find) { $("[data-opt-find]", pop).value = find; findIn(find); }
     if (key != null) $(`[data-opt="${CSS.escape(key)}"], [data-job-pick="${CSS.escape(key)}"]`, pop)?.focus({ preventScroll: true });
-    // a chip drawn again is a new element: the popover stays at the new one
-    if (!popFor.from?.isConnected) popFor.from = (popFor.key && $(`[data-chip="${popFor.key}"]`)) || $("#add-filter");
-    popFor.from.setAttribute("aria-expanded", "true");
+    popFor.from = filterChips.anchor(popFor.from, popFor.key);
     BolsterShell.placePopover(pop, popFor.from, { start: popFor.kind === "filter" && !!popFor.from.closest(".chip") });
   }
   function findIn(text) {
@@ -589,8 +588,6 @@
     if ((el = q("#add-filter"))) return openPop("add", el, addHtml, { label: "Add a filter" });
     if ((el = q("[data-add-filter]"))) return openFilter(el.dataset.addFilter, $("#add-filter"));
     if ((el = q("[data-chip]"))) return openFilter(el.dataset.chip, el);
-    if ((el = q("[data-remove]"))) { const k = el.dataset.remove; delete st.filters[k]; save(); if (pop.matches(":popover-open")) pop.hidePopover(); render(); return (filtered() ? $("[data-chip]") || $("[data-clear-all]") : $("#add-filter"))?.focus({ preventScroll: true, focusVisible: byKey }); }
-    if (q("[data-clear-all]")) { st.jobs = null; st.filters = {}; save(); if (pop.matches(":popover-open")) pop.hidePopover(); render(); say("Filters cleared"); return $("#pick-jobs").focus({ preventScroll: true, focusVisible: byKey }); }
     if (q("[data-clear-jobs]")) { st.jobs = null; save(); render(); refill(); return $("[data-opt-find]", pop)?.focus({ preventScroll: true }); }
     if ((el = q("#tray-toggle")) || (el = q("#create"))) return openPop("tray", el, trayHtml, { label: "Unscheduled" });
     if ((el = q("[data-schedule]"))) { const u = unscheduled.find((x) => x.id === el.dataset.schedule), from = popFor?.from || $("#tray-toggle"); return openPop("schedule", from, () => scheduleHtml(u), { label: `Schedule ${u.job}` }); }

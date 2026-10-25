@@ -243,6 +243,8 @@
     /* Brand is the yellow call to action ("Preview and send"). */
     --color-action-brand: var(--color-level-yellow);
     --color-action-brand-hover: var(--color-yellow-600);
+    /* the brand action on the inverse surface (a toast's Undo): the yellow on the dark toast, its darkest shade on the light one in dark (D-new) */
+    --color-action-brand-on-inverse: light-dark(var(--color-level-yellow), var(--color-yellow-950));
     /* Accent is blue: selection, links, the selected filter card. */
     --color-action-accent: light-dark(var(--color-blue-print-600), var(--color-blue-print-500));
     --color-action-accent-hover: light-dark(var(--color-blue-print-700), var(--color-blue-print-600));

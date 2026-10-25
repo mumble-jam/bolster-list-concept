@@ -278,13 +278,12 @@
       if (!isSet(f.key, val)) {
         return `<span class="chip"><button type="button" class="chip-main" data-filter="${f.key}" aria-haspopup="dialog" aria-expanded="false">${I.plus}${esc(f.label)}</button></span>`;
       }
-      const text = chipText(f, val);
-      return `<span class="chip" data-active><button type="button" class="chip-main" data-filter="${f.key}" aria-haspopup="dialog" aria-expanded="false" aria-label="${esc(f.label)}: ${esc(text)}. Change filter"><span class="chip-field">${esc(f.label)}:</span><span class="chip-value">${esc(text)}</span></button><button type="button" class="chip-remove" data-remove="${f.key}" aria-label="Remove ${esc(f.label.toLowerCase())} filter" data-tip="Remove filter">${I.x}</button></span>`;
+      return BolsterShell.filterChips.chip({ key: f.key, label: f.label, text: chipText(f, val) }, { attr: "filter" });
     });
     // a search becomes a chip like any filter; click it to edit the words again
     const terms = st.terms.map((t, i) => `<span class="chip" data-active data-term><button type="button" class="chip-main" data-edit-term="${i}" aria-label="Search: ${esc(t)}. Edit"><span class="chip-field">Search:</span><span class="chip-value">“${esc(t)}”</span></button><button type="button" class="chip-remove" data-remove-term="${i}" aria-label="Remove search ${esc(t)}" data-tip="Remove search">${I.x}</button></span>`);
     chips.unshift(...terms);
-    if (active().length || st.terms.length) chips.push(`<button type="button" class="button clear-all" data-variant="ghost" data-size="sm" data-clear-all>Clear all</button>`);
+    if (active().length || st.terms.length) chips.push(BolsterShell.filterChips.clearAll());
     $("#filters").innerHTML = chips.join("");
     $("#add-filter").disabled = st.mode !== "ready" || !addable().length;
 
@@ -569,8 +568,8 @@
     `<div class="state"><span class="state-icon">${icon}</span><h3>${title}</h3><p>${text}</p><div class="state-actions">${actions}</div></div>`;
 
   // ---------- floating bar: count first, select all, actions, the risky one last, clear ----------
-  // a menu row that opens its own menu (drills in on phones)
-  const sub = (name, label, icon, value, items, cls = "") => `<div class="submenu-row${cls}"><button type="button" class="menu-item submenu-trigger" role="menuitem" data-sub="${name}" data-focus-key="sub-${name}" aria-haspopup="menu" aria-expanded="false" aria-controls="pop-sub-${name}">${mi(icon)}<span class="submenu-label">${label}</span><span class="submenu-value">${esc(value)}</span>${I.chevR}</button><div class="pop submenu" id="pop-sub-${name}" popover role="menu" aria-label="${label}"><button type="button" class="menu-item submenu-back" data-sub-back="${name}" aria-label="Back"><span class="submenu-back-to">${I.chevL}Back</span><span class="submenu-label">${label}</span><span></span></button>${items}</div></div>`;
+  // a menu row that opens its own menu (drills in on phones), the shell's
+  const sub = (...a) => nest.row(...a);
   // risky actions sit apart, last, and confirm (L-risky); red is for what can't be undone: Delete,
   // Void, and whatever a page description marks tone danger (Cancel order). Archive can be undone, so
   // it confirms and sits apart, but isn't red
@@ -735,6 +734,8 @@
 
   // ---------- shared popover ----------
   const pop = $("#pop");
+  // nested menus (the display menu's settings, a row's status menus): the shell's
+  const nest = BolsterShell.nestedMenus(pop);
   // phones: every menu and filter popover is a bottom sheet; nested menus open inside it
   const sheetMQ = matchMedia("(max-width: 767px)");
   const sheet = () => sheetMQ.matches;
@@ -793,90 +794,14 @@
   function refreshPop() {
     if (!pop.matches(":popover-open")) return;
     const focusSel = document.activeElement && pop.contains(document.activeElement) && document.activeElement.dataset.focusKey;
-    const subOpen = openSubName();
+    const subOpen = nest.openName();
     fillPop();
-    markDrill();
+    nest.markDrill();
     place();
-    if (subOpen) openSub(subOpen);
+    if (subOpen) nest.open(subOpen);
     if (focusSel) pop.querySelector(`[data-focus-key="${focusSel}"]`)?.focus({ preventScroll: true });
   }
-  // nested menus: popovers inside the display menu, so opening one keeps the menu open. Each sits
-  // beside the menu, on the side with room, its first item level with its row.
-  const subOf = (name) => $(`#pop-sub-${name}`);
-  const triggerOf = (name) => $(`[data-sub="${name}"]`);
-  const openSubName = () => $(".submenu:popover-open", pop)?.id.replace("pop-sub-", "") || null;
-  function placeSub() {
-    const name = openSubName();
-    if (!name) return;
-    const sub = subOf(name), tr = triggerOf(name);
-    const m = pop.getBoundingClientRect(), r = tr.getBoundingClientRect(), w = sub.offsetWidth, h = sub.offsetHeight;
-    const gap = 4, pad = parseFloat(getComputedStyle(sub).paddingBlockStart) || 0;
-    let left = m.right + gap + w <= innerWidth - 12 ? m.right + gap : m.left - gap - w >= 12 ? m.left - gap - w : null;
-    let top = r.top - pad;
-    if (left == null) { // phones: no room beside it, so below the row, or above it near the bottom
-      left = Math.max(12, r.right - w);
-      top = r.bottom + gap + h <= innerHeight - 12 ? r.bottom + gap : r.top - gap - h;
-    }
-    top = Math.max(12, Math.min(top, innerHeight - h - 12));
-    sub.style.left = `${left}px`;
-    sub.style.top = `${top}px`;
-  }
-  function openSub(name, { focus = false } = {}) {
-    const sub = subOf(name);
-    if (!sub) return;
-    if (sheet()) { // in the sheet: drill in, with a back row on top
-      drillSheet(() => { pop.dataset.drill = name; markDrill(); });
-      pop.scrollTop = 0;
-      if (focus) ($("[aria-checked=true]", sub) || $("[role^=menuitem]", sub))?.focus({ preventScroll: true });
-      return;
-    }
-    const other = openSubName();
-    if (other && other !== name) subOf(other).hidePopover();
-    if (!sub.matches(":popover-open")) sub.showPopover();
-    placeSub();
-    if (focus) ($("[aria-checked=true]", sub) || $("[role^=menuitem]", sub))?.focus({ preventScroll: true });
-  }
-  // the nested menu a phone's sheet has drilled into (kept when the sheet's contents are redrawn)
-  function markDrill() {
-    $$(".submenu[data-drilled]", pop).forEach((s) => s.removeAttribute("data-drilled"));
-    if (pop.dataset.drill) subOf(pop.dataset.drill)?.setAttribute("data-drilled", "");
-  }
-  // the sheet's height eases to what it holds now, rather than snapping, and the new rows fade in
-  function drillSheet(change) {
-    const from = pop.getBoundingClientRect().height;
-    change();
-    if (!pop.matches(":popover-open") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const to = pop.getBoundingClientRect().height;
-    if (Math.abs(to - from) < 1) return;
-    const ease = getComputedStyle(document.documentElement).getPropertyValue("--ease-out") || "ease-out";
-    pop.style.overflow = "hidden";
-    const done = () => (pop.style.overflow = "");
-    pop.animate([{ blockSize: `${from}px` }, { blockSize: `${to}px` }], { duration: 200, easing: ease }).finished.then(done, done);
-    $(".pop-body", pop)?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: ease });
-  }
-  function closeSub(name) {
-    drillSheet(() => { if (pop.dataset.drill === name) delete pop.dataset.drill; markDrill(); });
-    const sub = subOf(name);
-    if (sub?.matches(":popover-open")) sub.hidePopover();
-    triggerOf(name)?.focus({ preventScroll: true });
-  }
-  pop.addEventListener("toggle", (e) => {
-    if (e.target === pop && e.newState === "closed" && !pop.matches(":popover-open")) return hostPop();
-    if (!e.target.matches?.(".submenu") || !e.target.isConnected) return;
-    const open = e.newState === "open", tr = triggerOf(e.target.id.replace("pop-sub-", ""));
-    tr?.setAttribute("aria-expanded", open);
-    if (!open && e.target.contains(document.activeElement)) tr?.focus({ preventScroll: true });
-  }, true);
-  pop.addEventListener("scroll", placeSub, { passive: true });
-  // pointer: hovering a row opens its menu, hovering a row without one closes it
-  let subTimer;
-  pop.addEventListener("pointerover", (e) => {
-    if (e.pointerType !== "mouse" || e.target.closest(".submenu")) return clearTimeout(subTimer);
-    const name = e.target.closest("[data-sub]")?.dataset.sub || null;
-    if (name === openSubName()) return clearTimeout(subTimer);
-    clearTimeout(subTimer);
-    subTimer = setTimeout(() => (name ? openSub(name) : openSubName() && subOf(openSubName()).hidePopover()), name ? 120 : 200);
-  });
+  pop.addEventListener("toggle", (e) => { if (e.target === pop && e.newState === "closed" && !pop.matches(":popover-open")) hostPop(); });
 
   pop.addEventListener("beforetoggle", (e) => {
     if (e.target !== pop || e.newState !== "closed" || !popFor) return;
@@ -893,9 +818,9 @@
     popFor = null;
     if (dropped) setTimeout(() => { renderToolbar(); $("#add-filter").focus({ preventScroll: true }); });
   });
-  addEventListener("resize", () => popFor && (place(), placeSub()));
+  addEventListener("resize", () => popFor && (place(), nest.place()));
   sheetMQ.addEventListener("change", () => { if (pop.matches(":popover-open")) pop.hidePopover(); });
-  addEventListener("scroll", () => popFor && (place(), placeSub()), { passive: true });
+  addEventListener("scroll", () => popFor && (place(), nest.place()), { passive: true });
 
   // ---------- the date range picker (D37, I14) ----------
   // presets apply at once; a span built from days or typed dates waits for Apply. dp is the draft while
@@ -1100,7 +1025,7 @@
         pop.innerHTML = `${head}<form data-range><div class="range">${box("range-min", "Minimum", v.min)}${box("range-max", "Maximum", v.max)}</div><div class="pop-foot"><button class="button" data-size="sm">Apply</button></div></form>`;
       }
     } else if (p.kind === "add") {
-      pop.innerHTML = `<div class="pop-body"><div class="pop-section">Filter by</div>${addable().map((f) => `<button type="button" class="menu-item" role="menuitem" data-add="${f.key}">${mi(attrIcon(f.key))}${esc(f.label)}</button>`).join("")}</div>`;
+      pop.innerHTML = BolsterShell.filterChips.menu(addable().map((f) => ({ key: f.key, label: f.label, icon: attrIcon(f.key) && `m-${attrIcon(f.key)}` })), { section: "Filter by" });
     } else if (p.kind === "info") {
       pop.innerHTML = `<div class="pop-note"><h3>${esc(cfg.insight.label)}</h3><p>${terms(cfg.insight.info)}</p></div>`;
     } else if (p.kind === "view") {
@@ -1313,13 +1238,10 @@
       $(`[data-metric="${v}"]`)?.focus({ preventScroll: true });
       return;
     }
-    // a click always opens (hover may already have); clicking anywhere else closes it
-    if ((el = q("[data-sub-back]"))) return closeSub(el.dataset.subBack);
-    if ((el = q("[data-sub]"))) return openSub(el.dataset.sub, { focus: e.detail === 0 });
-    if ((el = q("[data-group-pick]"))) { const v = el.dataset.groupPick || null; closeSub("group"); return set(() => { st.group = v; st.collapsed = new Set(); }, { keepSelection: true }); }
-    if ((el = q("[data-sort-pick]"))) { const key = el.dataset.sortPick; closeSub("sort"); return set(() => { st.sort = { key, dir: st.sort.dir }; }, { keepSelection: true }); }
-    if ((el = q("[data-dir-pick]"))) { const dir = el.dataset.dirPick; closeSub("sort"); return set(() => { st.sort = { ...st.sort, dir }; }, { keepSelection: true }); }
-    if ((el = q("[data-density-pick]"))) { st.density = el.dataset.densityPick; closeSub("density"); return render(); }
+    if ((el = q("[data-group-pick]"))) { const v = el.dataset.groupPick || null; nest.close("group"); return set(() => { st.group = v; st.collapsed = new Set(); }, { keepSelection: true }); }
+    if ((el = q("[data-sort-pick]"))) { const key = el.dataset.sortPick; nest.close("sort"); return set(() => { st.sort = { key, dir: st.sort.dir }; }, { keepSelection: true }); }
+    if ((el = q("[data-dir-pick]"))) { const dir = el.dataset.dirPick; nest.close("sort"); return set(() => { st.sort = { ...st.sort, dir }; }, { keepSelection: true }); }
+    if ((el = q("[data-density-pick]"))) { st.density = el.dataset.densityPick; nest.close("density"); return render(); }
     // columns: several can change, so the menu stays open
     if ((el = q("[data-col-toggle]"))) { const k = el.dataset.colToggle; st.hidden = st.hidden.includes(k) ? st.hidden.filter((x) => x !== k) : [...st.hidden, k]; return render(); }
     if (q("[data-info]")) return openPop("info");
@@ -1352,8 +1274,8 @@
     }
     if (q("#add-filter")) return openPop("add");
     if (q("#date-range")) return openPop("filter", cfg.dateKey);
-    if ((el = q("[data-add]"))) {
-      const key = el.dataset.add;
+    if ((el = q("[data-add-filter]"))) {
+      const key = el.dataset.addFilter;
       st.added.push(key);
       lastClose = { id: null, t: 0 };
       pop.hidePopover();
@@ -1479,21 +1401,6 @@
     if ($("#list-toolbar").hidden) return;
     e.preventDefault();
     $("#search").focus({ preventScroll: true });
-  });
-
-  // menus inside the shared popover: arrow keys between items
-  pop.addEventListener("keydown", (e) => {
-    const trigger = e.target.closest?.("[data-sub]");
-    if (trigger && (e.key === "ArrowRight" || e.key === "Enter" || e.key === " ")) { e.preventDefault(); return openSub(trigger.dataset.sub, { focus: true }); }
-    const box = e.target.closest?.("[popover]") || pop;
-    if (box.matches(".submenu") && e.key === "ArrowLeft") { e.preventDefault(); return sheet() ? closeSub(box.id.replace("pop-sub-", "")) : box.hidePopover(); }
-    const items = $$("[role^=menuitem]", box).filter((el) => el.closest("[popover]") === box);
-    if (!items.length) return;
-    const i = items.indexOf(document.activeElement);
-    const next = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: items.length - 1 }[e.key];
-    if (next === undefined) return;
-    e.preventDefault();
-    items[(next + items.length) % items.length].focus();
   });
 
   // rows keep coming as the footer nears the screen; the button stays for keyboards and short lists

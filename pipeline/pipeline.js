@@ -334,11 +334,11 @@
     chips();
     fit();
   }
-  // People, once set, as a chip on the row under the bar, then Clear all; Add filter has nothing left to add then
+  // People, once set, as a chip on the row under the bar (the shell's), then Clear all; Add filter has nothing left to add then
+  const filterChips = BolsterShell.filterChips({ onRemove: () => { st.people = null; render(); }, onClear: () => { st.people = null; render(); } });
   function chips() {
     const text = st.people && OWNERS.filter((o) => st.people.has(o.id)).map((o) => (o.me ? "You" : o.name.split(" ")[0])).join(", ");
-    $("#filters").innerHTML = text ? `<span class="chip" data-active><button type="button" class="chip-main" data-chip="people" aria-haspopup="dialog" aria-expanded="false" aria-label="People: ${esc(text)}. Change filter"><span class="chip-field">People:</span><span class="chip-value">${esc(text)}</span></button><button type="button" class="chip-remove" data-remove="people" aria-label="Remove people filter" data-tip="Remove filter">${ic("xmark", 14)}</button></span><button type="button" class="button clear-all" data-variant="ghost" data-size="sm" data-clear-all>Clear all</button>` : "";
-    $("#add-filter").disabled = !!st.people;
+    filterChips.render(text ? [{ key: "people", label: "People", text }] : [], { full: !!st.people });
   }
   const phone = matchMedia("(max-width: 767px)");
   // each column's head comes down its column under the toolbar (pipeline.css): how far it may go (the column's height
@@ -512,7 +512,7 @@
   const moveTo = (r, to) => { const g = canDrop(r, to); if (g.ok) run(g.step, r); };
 
   // ---------- the summary, the pickers: one shared popover ----------
-  const pop = $("#pop");
+  const pop = $("#pop"), nest = BolsterShell.nestedMenus(pop);
   let popFor = null, byKey = false;
   function openPop(kind, from, fill, { start = false, label } = {}) {
     if (pop.matches(":popover-open") && popFor?.from === from && popFor.kind === kind) { pop.hidePopover(); return; }
@@ -550,7 +550,7 @@
       if (r.bottom < head.bottom || r.top > innerHeight || r.right < b.left || r.left > b.right) return pop.hidePopover();
     }
     BolsterShell.placePopover(pop, a, { start: popFor.start });
-    placeSub();
+    nest.place();
   }
   const closeBtn = () => `<button type="button" class="button cal-pop-close" data-variant="ghost" data-size="sm" data-icon-only data-close-pop aria-label="Close" data-tip="Close">${ic("xmark", 16, { optical: true })}</button>`;
   const dd = (term, html) => `<dt>${term}</dt><dd>${html}</dd>`;
@@ -577,7 +577,7 @@
   // ---------- Display settings (the lists', your call, 22 Oct): rows that read their value and open a nested menu ----------
   // Columns, then Column totals beside it (both the columns' own), the card's size and details, Group by last, so the
   // folding under the rule sits by the grouping it folds
-  const sub = (name, label, icon, value, items) => `<div class="submenu-row"><button type="button" class="menu-item submenu-trigger" role="menuitem" data-sub="${name}" data-key="sub-${name}" aria-haspopup="menu" aria-expanded="false" aria-controls="pop-sub-${name}"><span class="menu-icon">${ic(`m-${icon}`, 14)}</span><span class="submenu-label">${label}</span><span class="submenu-value">${esc(value)}</span>${ic("chevron-right", 12)}</button><div class="pop submenu" id="pop-sub-${name}" popover role="menu" aria-label="${label}"><button type="button" class="menu-item submenu-back" data-sub-back="${name}" aria-label="Back"><span class="submenu-back-to">${ic("chevron-left", 14)}Back</span><span class="submenu-label">${label}</span><span></span></button>${items}</div></div>`;
+  const sub = nest.row;
   // an item, as the lists': its icon, its name, a check by what's chosen (in the menu itself, menu.css draws the check)
   const opt = (role, on, attrs, label, icon = "", tick = true) => `<button type="button" class="menu-item" role="${role}" aria-checked="${on}" ${attrs}>${icon ? `<span class="menu-icon">${icon}</span>` : ""}<span class="submenu-label">${esc(label)}</span>${on && tick ? ic("check", 14) : ""}</button>`;
   const count = (n, of) => (n === of ? "All" : `${n} of ${of}`);
@@ -585,7 +585,7 @@
   // Columns: every stage in the board's order, by kind, then Lost; each with its mark. The last one shown stays
   function colItems() {
     const last = COLS.filter(showing).length === 1;
-    const item = (x) => opt("menuitemcheckbox", showing(x.key), `data-col-toggle="${x.key}" data-key="col-${x.key}"${showing(x.key) && last ? ' aria-disabled="true" data-tip="The board keeps one column"' : ""}`, x.label, markOf(x));
+    const item = (x) => opt("menuitemcheckbox", showing(x.key), `data-col-toggle="${x.key}" data-focus-key="col-${x.key}"${showing(x.key) && last ? ' aria-disabled="true" data-tip="The board keeps one column"' : ""}`, x.label, markOf(x));
     const kind = (k, name) => `<div class="pop-section">${name}</div>${STAGES.filter((x) => x.kind === k).map(item).join("")}`;
     return `${kind("person", "People")}${kind("job", "Jobs")}${kind("invoice", "Invoices")}<hr>${item(LOST)}`;
   }
@@ -593,13 +593,13 @@
   const toggles = () => $$("[data-fold]", board);
   function displayHtml() {
     const ts = toggles(), canFold = ts.some((t) => t.getAttribute("aria-expanded") === "true"), canOpen = ts.some((t) => t.getAttribute("aria-expanded") === "false");
-    const act = (k, label, icon, on) => `<button type="button" class="menu-item" role="menuitem" data-fold-all="${k}" data-key="${k}"${on ? "" : " disabled"}><span class="menu-icon">${ic(`m-${icon}`, 14)}</span><span class="submenu-label">${label}</span></button>`;
+    const act = (k, label, icon, on) => `<button type="button" class="menu-item" role="menuitem" data-fold-all="${k}" data-focus-key="${k}"${on ? "" : " disabled"}><span class="menu-icon">${ic(`m-${icon}`, 14)}</span><span class="submenu-label">${label}</span></button>`;
     return `<div class="pop-body">
       ${sub("cols", "Columns", "columns-3", count(COLS.filter(showing).length, COLS.length), colItems())}
-      ${opt("menuitemcheckbox", st.totals, 'data-totals data-key="totals"', "Column totals", ic("m-calculator", 14), false)}
-      ${sub("size", "Card size", "line-height", SIZES.find(([v]) => v === st.size)[1], SIZES.map(([v, l]) => opt("menuitemradio", st.size === v, `data-size-pick="${v}" data-key="size-${v}"`, l)).join(""))}
-      ${sub("details", "Card details", "eye", count(st.details.size, DETAILS.length), DETAILS.map(([k, l, i]) => opt("menuitemcheckbox", st.details.has(k), `data-detail="${k}" data-key="det-${k}"`, l, ic(`m-${i}`, 14))).join(""))}
-      ${sub("group", "Group by", "layers", GROUPS.find(([v]) => v === st.group)[1], GROUPS.map(([v, l, i]) => opt("menuitemradio", st.group === v, `data-group-pick="${v}" data-key="grp-${v}"`, l, ic(`m-${i}`, 14))).join(""))}
+      ${opt("menuitemcheckbox", st.totals, 'data-totals data-focus-key="totals"', "Column totals", ic("m-calculator", 14), false)}
+      ${sub("size", "Card size", "line-height", SIZES.find(([v]) => v === st.size)[1], SIZES.map(([v, l]) => opt("menuitemradio", st.size === v, `data-size-pick="${v}" data-focus-key="size-${v}"`, l)).join(""))}
+      ${sub("details", "Card details", "eye", count(st.details.size, DETAILS.length), DETAILS.map(([k, l, i]) => opt("menuitemcheckbox", st.details.has(k), `data-detail="${k}" data-focus-key="det-${k}"`, l, ic(`m-${i}`, 14))).join(""))}
+      ${sub("group", "Group by", "layers", GROUPS.find(([v]) => v === st.group)[1], GROUPS.map(([v, l, i]) => opt("menuitemradio", st.group === v, `data-group-pick="${v}" data-focus-key="grp-${v}"`, l, ic(`m-${i}`, 14))).join(""))}
       <hr>${act("fold", "Fold all groups", "chevron-right", canFold)}${act("unfold", "Unfold all groups", "chevron-down", canOpen)}
     </div>`;
   }
@@ -616,9 +616,9 @@
     $$(".submenu-value", pop).forEach((v, i) => (v.textContent = $$(".submenu-value", t)[i].textContent));
     const fresh = $$(":scope > .pop-body > .menu-item", t);
     $$(":scope > .pop-body > .menu-item", pop).forEach((x, i) => x.replaceWith(fresh[i]));
-    const to = $(`[data-key="${key}"]`, pop);
-    (to && !to.disabled ? to : $("[data-fold-all]:not(:disabled)", pop) || triggerOf("group"))?.focus({ preventScroll: true });
-    placeSub();
+    const to = $(`[data-focus-key="${key}"]`, pop);
+    (to && !to.disabled ? to : $("[data-fold-all]:not(:disabled)", pop) || $('[data-sub="group"]', pop))?.focus({ preventScroll: true });
+    nest.place();
   }
   // a column shown or hidden; one brought back comes into view, and on phones the tab follows what's left
   function toggleCol(key) {
@@ -627,62 +627,6 @@
     if (c && !phone.matches) sideways(board, c);
     if (phone.matches) { show(st.tab); tabs(); }
   }
-  // the nested menu: a popover in the menu, beside it on the side with room, its first item level with its row; on
-  // phones the sheet drills into it, a back row on top (popover.css). As the lists' (data-list.js)
-  const menuOf = (name) => $(`#pop-sub-${name}`, pop), triggerOf = (name) => $(`[data-sub="${name}"]`, pop);
-  const openSubName = () => $(".submenu:popover-open", pop)?.id.replace("pop-sub-", "") || null;
-  function placeSub() {
-    const name = openSubName();
-    if (!name) return;
-    const el = menuOf(name), m = pop.getBoundingClientRect(), r = triggerOf(name).getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight, gap = 4;
-    let left = m.right + gap + w <= innerWidth - 12 ? m.right + gap : m.left - gap - w >= 12 ? m.left - gap - w : null;
-    let top = r.top - (parseFloat(getComputedStyle(el).paddingBlockStart) || 0);
-    if (left == null) { left = Math.max(12, r.right - w); top = r.bottom + gap + h <= innerHeight - 12 ? r.bottom + gap : r.top - gap - h; }
-    Object.assign(el.style, { left: `${left}px`, top: `${Math.max(12, Math.min(top, innerHeight - h - 12))}px` });
-  }
-  const firstItem = (el) => $("[aria-checked=true]", el) || $("[role^=menuitem]", el);
-  function openSub(name, { focus = false } = {}) {
-    const el = menuOf(name);
-    if (!el) return;
-    if (phone.matches) { pop.dataset.drill = name; el.setAttribute("data-drilled", ""); pop.scrollTop = 0; if (focus) firstItem(el)?.focus({ preventScroll: true }); return; }
-    if (!el.matches(":popover-open")) el.showPopover();
-    placeSub();
-    if (focus) firstItem(el)?.focus({ preventScroll: true });
-  }
-  function closeSub(name) {
-    delete pop.dataset.drill; menuOf(name)?.removeAttribute("data-drilled");
-    if (menuOf(name)?.matches(":popover-open")) menuOf(name).hidePopover();
-    triggerOf(name)?.focus({ preventScroll: true });
-  }
-  // its row says it's open; closed (Escape, ArrowLeft), focus goes back to its row
-  pop.addEventListener("toggle", (e) => {
-    if (!e.target.matches?.(".submenu") || !e.target.isConnected) return;
-    const tr = triggerOf(e.target.id.replace("pop-sub-", ""));
-    tr?.setAttribute("aria-expanded", e.newState === "open");
-    if (e.newState === "closed" && e.target.contains(document.activeElement)) tr?.focus({ preventScroll: true });
-  }, true);
-  pop.addEventListener("scroll", placeSub, { passive: true });
-  // a mouse over a row opens its menu, over a row without one closes it
-  let subTimer;
-  pop.addEventListener("pointerover", (e) => {
-    if (e.pointerType !== "mouse" || phone.matches || e.target.closest(".submenu")) return clearTimeout(subTimer);
-    const name = e.target.closest("[data-sub]")?.dataset.sub || null;
-    if (name === openSubName()) return clearTimeout(subTimer);
-    clearTimeout(subTimer);
-    subTimer = setTimeout(() => (name ? openSub(name) : openSubName() && menuOf(openSubName()).hidePopover()), name ? 120 : 200);
-  });
-  // keys: arrows between a menu's items, Right, Enter or Space into a nested one, Left back out (Escape closes it)
-  pop.addEventListener("keydown", (e) => {
-    const trigger = e.target.closest?.("[data-sub]");
-    if (trigger && ["ArrowRight", "Enter", " "].includes(e.key)) { e.preventDefault(); return openSub(trigger.dataset.sub, { focus: true }); }
-    const box = e.target.closest?.("[popover]") || pop;
-    if (box.matches(".submenu") && e.key === "ArrowLeft") { e.preventDefault(); return phone.matches ? closeSub(box.id.replace("pop-sub-", "")) : box.hidePopover(); }
-    const items = $$("[role^=menuitem]", box).filter((el) => el.closest("[popover]") === box && !el.disabled && el.checkVisibility());
-    const i = items.indexOf(document.activeElement), next = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: items.length - 1 }[e.key];
-    if (!items.length || next === undefined) return;
-    e.preventDefault();
-    items[(next + items.length) % items.length].focus();
-  });
 
   // ---------- dragging: onto a stage, or onto Lost (its column if it's shown, else Mark as lost at the foot) (P-move) ----------
   // Mouse and pen only: on touch a press scrolls, and phones move cards from the summary (P-phone).
@@ -833,10 +777,7 @@
     }
     if ((el = q("[data-tab]"))) { st.tab = el.dataset.tab; show(st.tab); return tabs(); }
     if ((el = q("#add-filter, [data-chip]"))) return pickPeople(el);
-    if (q("[data-remove], [data-clear-all]")) { st.people = null; render(); return $("#add-filter").focus({ preventScroll: true }); }
     if ((el = q("#view-options"))) { openPop("display", el, displayHtml, { label: "Display settings" }); pop.setAttribute("role", "menu"); return; }
-    if ((el = q("[data-sub-back]"))) return closeSub(el.dataset.subBack);
-    if ((el = q("[data-sub]"))) return openSub(el.dataset.sub, { focus: e.detail === 0 });
     if ((el = q("[data-col-toggle]"))) return el.getAttribute("aria-disabled") === "true" ? undefined : toggleCol(el.dataset.colToggle);
     if ((el = q("[data-totals]"))) return setDisplay(() => (st.totals = !st.totals), "totals");
     if ((el = q("[data-size-pick]"))) return setDisplay(() => (st.size = el.dataset.sizePick), `size-${el.dataset.sizePick}`);
@@ -858,11 +799,7 @@
   // a pick applies at once; the picker stays on its chip, or where it is if its chip has gone
   function picked(k) {
     render();
-    if (popFor.from?.isConnected) return popFor.from.setAttribute("aria-expanded", "true");
-    const chip = $(`[data-chip="${k}"]`);
-    if (!chip) return;
-    popFor.from = chip; chip.setAttribute("aria-expanded", "true");
-    BolsterShell.placePopover(pop, chip, { start: true });
+    popFor.from = filterChips.anchor(popFor.from, k);
   }
   document.addEventListener("change", (e) => {
     const p = e.target.closest("[data-person-pick]");
@@ -906,7 +843,7 @@
   board.addEventListener("scrollend", () => { if (steering) steered(); });
 
   phone.addEventListener("change", render);
-  addEventListener("resize", () => { fit(); if (popFor) { BolsterShell.placePopover(pop, popFor.from, { start: popFor.start }); placeSub(); } });
+  addEventListener("resize", () => { fit(); if (popFor) { BolsterShell.placePopover(pop, popFor.from, { start: popFor.start }); nest.place(); } });
   // what hides and sticks as you scroll is the shell's: this page says where the board starts, and that a drag is in use
   BolsterShell.scrolling({ into: (top) => board.getBoundingClientRect().top < top, toolbar: phone.matches ? null : $(".pl-toolbar"), busy: () => !!drag?.started, onScroll: follow });
   render();

@@ -1,7 +1,7 @@
 // Global search (D119): direction A of the search research (Figma, "Search · research", 09 A), a panel under the top
-// bar's field. Before typing: the type chips, the records you opened last and a few ways to create. Typing turns it into
-// results grouped by type, always in one order (customers, jobs, invoices, files, tasks), three each with See all, the
-// typed letters marked; the words themselves as a row; Create actions found by their words too. A type chip narrows it
+// bar's field. Before typing: the type chips and the records you opened last. Typing turns it into results grouped by
+// type, always in one order (customers, jobs, invoices, files, tasks), three each with See all, the typed letters
+// marked; the words themselves as a row. Search finds, it doesn't create (D123). A type chip narrows it
 // and shows in the field as a token. The field is a combobox: focus stays in it, the arrows move through the options
 // (aria-activedescendant), Enter opens the one in focus. shell.js attaches it to the top bar's field.
 (() => {
@@ -17,12 +17,6 @@
     { key: "invoices", label: "Invoices", one: "Invoice", icon: "file-invoice", list: "invoices" },
     { key: "files", label: "Files", one: "File", icon: "file", list: null },
     { key: "tasks", label: "Tasks", one: "Task", icon: "square-check", list: "tasks" },
-  ];
-  const ACTIONS = [
-    { label: "Create job", words: "create new job estimate quote" },
-    { label: "Create invoice", words: "create new invoice bill" },
-    { label: "Add customer", words: "add new customer client lead" },
-    { label: "Create task", words: "create new task to-do todo" },
   ];
   const ACROSS = 3, ALONE = 8;
 
@@ -99,15 +93,12 @@
       const row = (r, sub) => opt("bs-sp-row", `<span class="bs-sp-icon" data-type="${r.type}" aria-hidden="true">${ic(TYPES.find((t) => t.key === r.type).icon, 16)}</span><span class="bs-sp-text"><span class="bs-sp-title">${mark(r.title, ws)}</span><span class="bs-sp-sub">${sub ?? mark(r.sub, ws)}</span></span>${r.meta ? `<span class="bs-sp-meta">${r.meta}</span>` : ""}`, () => go(linkTo(r.type, r.q), TYPES.find((t) => t.key === r.type).label));
       // a group: an outline card in the panel, its name and See all at its head
       const card = (key, label, rows, more = "") => `<section class="bs-sp-card" role="group" aria-labelledby="bs-sp-h-${key}"><div class="bs-sp-head"><span id="bs-sp-h-${key}">${label}</span>${more}</div>${rows}</section>`;
-      // Create: tiles side by side, the next thing to make
-      const acts = (list) => list.length ? `<div class="bs-sp-create" role="group" aria-labelledby="bs-sp-h-create"><div class="bs-sp-head"><span id="bs-sp-h-create">Create</span></div><div class="bs-sp-tiles">${list.map((a) => opt("bs-sp-tile", `<span class="bs-sp-icon" aria-hidden="true">${ic("circle-plus", 16)}</span><span class="bs-sp-title">${mark(a.label, ws)}</span>`, () => go(null, a.label))).join("")}</div></div>` : "";
       const counts = {};
       let html = "";
       if (!ws.length) {
-        // before typing: what you opened last, then a few ways to create
+        // before typing: what you opened last
         const rec = RECENT.filter(([t]) => !scope || t === scope).map(([t, i, when]) => { const r = records[t][i]; return row(r, `${TYPES.find((x) => x.key === t).one} · ${esc(when)}`); });
-        html = (rec.length ? card("recent", "Recent", rec.join("")) : "")
-          + (scope ? "" : acts(ACTIONS.slice(0, 3)));
+        html = rec.length ? card("recent", "Recent", rec.join("")) : "";
       } else {
         let total = 0;
         for (const t of TYPES) {
@@ -121,7 +112,6 @@
           html += card(t.key, t.label, rows, more);
         }
         const n = scope ? counts[scope] : total;
-        const found = ACTIONS.filter((a) => ws.every((w) => `${a.label} ${a.words}`.toLowerCase().split(/\s+/).some((x) => x.startsWith(w))));
         if (!n) {
           const where = scope ? TYPES.find((t) => t.key === scope).label.toLowerCase() : "customers, jobs, invoices, files or tasks";
           html += `<div class="bs-sp-none"><p class="bs-sp-none-title">No ${esc(where)} match “${esc(q)}”</p><p>Try a name, an address, or an invoice or phone number.</p>${scope && total ? `<button type="button" class="button" data-variant="secondary" data-size="sm" data-sp-everything>Search everything: ${total} found</button>` : ""}</div>`;
@@ -129,7 +119,6 @@
           // the words themselves: Enter on this row is the only one that searches (a results page comes later, C)
           html += `<div class="bs-sp-words">${opt("bs-sp-row", `<span class="bs-sp-icon" aria-hidden="true">${ic("search", 16)}</span><span class="bs-sp-text"><span class="bs-sp-title">See all ${n} result${n === 1 ? "" : "s"} for “${esc(q)}”</span></span>`, () => { close(); toast("Concept only: a page of all the results comes later."); })}</div>`;
         }
-        html += acts(scope ? [] : found);
       }
       types.innerHTML = [{ key: null, label: "All" }, ...TYPES].map((t) => {
         const c = !ws.length ? null : t.key ? counts[t.key] : Object.values(counts).reduce((a, b) => a + b, 0);

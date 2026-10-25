@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=14c2cfa4">
-<link rel="stylesheet" href="data-list.css?v=14c2cfa4">
+<link rel="stylesheet" href="system/bolster.css?v=312ff92c">
+<link rel="stylesheet" href="data-list.css?v=312ff92c">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -80,7 +80,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
   <header class="inv-head">
     <p class="text-caption"><a href="index.html">Jobs list concept</a></p>
     <h1>Components, and who decided them</h1>
-    <p>Every component the jobs list concept uses, marked by how much of it came from you. Built from your messages on 8 to 23 October and the commits behind them. Where you only reported a bug, that doesn't count as a design decision, so it's noted but the component stays my call.</p>
+    <p>Every component the jobs list concept uses, marked by how much of it came from you. Built from your messages on 8 to 25 October and the commits behind them. Where you only reported a bug, that doesn't count as a design decision, so it's noted but the component stays my call.</p>
   </header>
 
   <section class="inv-legend" aria-label="Levels">
@@ -111,7 +111,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=14c2cfa4"></script>
+<script src="shared/icons.js?v=312ff92c"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -181,7 +181,7 @@ const C = [
 
   ["Feedback and states", "Loading", "mine", "Never discussed.", "Skeleton rows and cards."],
   ["Feedback and states", "Empty, no results, error", "mine", "Never discussed.", "Wording, icons and actions for each state."],
-  ["Feedback and states", "Toasts", "mine", "Never discussed.", "What confirms an action, and how it dismisses."],
+  ["Feedback and states", "Toasts", "mine", "You reported Undo failing contrast in dark (25 Oct, D125).", "What confirms an action, and how it dismisses; Undo in the yellow's darkest shade on the light toast in dark."],
 
   ["Trying out", "Canvas grid", "yours", "Mike's grid around the pointer, light and dark; cells from the page header, from the top-right corner; your tuned values; on by default.", "The way it trails and fades, and keeping it cheap to run."],
 
@@ -269,6 +269,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=14c2cfa4"></script>
+<script src="system/specimens/specimen.js?v=312ff92c"></script>
 </body>
 </html>

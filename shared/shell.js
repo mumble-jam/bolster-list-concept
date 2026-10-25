@@ -889,5 +889,138 @@ window.BolsterShell = (() => {
     return { open, close };
   }
 
-  return { mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling, week, canvas, settingsNav, closeSettings, loading, logo, searchButton };
+  // ---------- nested menus (menu.css .submenu): a menu's row that reads its value and opens a menu of its own. On a
+  // desktop it's a popover beside its menu, on the side with room, its first item level with its row; a mouse over a
+  // row opens it, over a row without one closes it; Right, Enter or Space go in, Left comes back out (Escape closes
+  // it). On phones the sheet drills into it, a back row on top (popover.css). The page draws its rows with row() and
+  // keeps the nested menu open as it redraws (open(openName()), markDrill()); the rest is here (D105, I20).
+  //   const nest = BolsterShell.nestedMenus(pop);  nest.row(name, label, icon, value, itemsHtml)
+  function nestedMenus(pop) {
+    const $ = (s) => pop.querySelector(s);
+    const menuOf = (name) => $(`#pop-sub-${name}`), triggerOf = (name) => $(`[data-sub="${name}"]`);
+    const openName = () => $(".submenu:popover-open")?.id.replace("pop-sub-", "") || null;
+    const firstItem = (el) => el.querySelector("[aria-checked=true]") || el.querySelector("[role^=menuitem]");
+    const row = (name, label, ic, value, items, cls = "") => `<div class="submenu-row${cls}"><button type="button" class="menu-item submenu-trigger" role="menuitem" data-sub="${name}" data-focus-key="sub-${name}" aria-haspopup="menu" aria-expanded="false" aria-controls="pop-sub-${name}"><span class="menu-icon">${icon(`m-${ic}`, 14)}</span><span class="submenu-label">${label}</span><span class="submenu-value">${esc(value)}</span>${icon("chevron-right", 12)}</button><div class="pop submenu" id="pop-sub-${name}" popover role="menu" aria-label="${label}"><button type="button" class="menu-item submenu-back" data-sub-back="${name}" aria-label="Back"><span class="submenu-back-to">${icon("chevron-left", 14)}Back</span><span class="submenu-label">${label}</span><span></span></button>${items}</div></div>`;
+    function place() {
+      const name = openName();
+      if (!name) return;
+      const el = menuOf(name), m = pop.getBoundingClientRect(), r = triggerOf(name).getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight, gap = 4;
+      let left = m.right + gap + w <= innerWidth - 12 ? m.right + gap : m.left - gap - w >= 12 ? m.left - gap - w : null;
+      let top = r.top - (parseFloat(getComputedStyle(el).paddingBlockStart) || 0);
+      if (left == null) { left = Math.max(12, r.right - w); top = r.bottom + gap + h <= innerHeight - 12 ? r.bottom + gap : r.top - gap - h; } // no room beside it: below its row, or above it near the bottom
+      Object.assign(el.style, { left: `${left}px`, top: `${Math.max(12, Math.min(top, innerHeight - h - 12))}px` });
+    }
+    // the nested menu a phone's sheet has drilled into (kept when the sheet's contents are drawn again)
+    function markDrill() {
+      pop.querySelectorAll(".submenu[data-drilled]").forEach((s) => s.removeAttribute("data-drilled"));
+      if (pop.dataset.drill) menuOf(pop.dataset.drill)?.setAttribute("data-drilled", "");
+    }
+    // the sheet's height eases to what it holds now, rather than snapping, and the new rows fade in
+    function drill(change) {
+      const from = pop.getBoundingClientRect().height;
+      change();
+      if (!pop.matches(":popover-open") || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const to = pop.getBoundingClientRect().height;
+      if (Math.abs(to - from) < 1) return;
+      const ease = getComputedStyle(document.documentElement).getPropertyValue("--ease-out") || "ease-out";
+      pop.style.overflow = "hidden";
+      const done = () => (pop.style.overflow = "");
+      pop.animate([{ blockSize: `${from}px` }, { blockSize: `${to}px` }], { duration: 200, easing: ease }).finished.then(done, done);
+      $(".pop-body")?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: ease });
+    }
+    function open(name, { focus = false } = {}) {
+      const el = menuOf(name);
+      if (!el) return;
+      if (phoneWidth.matches) {
+        drill(() => { pop.dataset.drill = name; markDrill(); });
+        pop.scrollTop = 0;
+      } else {
+        const other = openName();
+        if (other && other !== name) menuOf(other).hidePopover();
+        if (!el.matches(":popover-open")) el.showPopover();
+        place();
+      }
+      if (focus) firstItem(el)?.focus({ preventScroll: true });
+    }
+    function close(name) {
+      drill(() => { if (pop.dataset.drill === name) delete pop.dataset.drill; markDrill(); });
+      if (menuOf(name)?.matches(":popover-open")) menuOf(name).hidePopover();
+      triggerOf(name)?.focus({ preventScroll: true });
+    }
+    pop.addEventListener("click", (e) => {
+      const back = e.target.closest("[data-sub-back]"), tr = !back && e.target.closest("[data-sub]");
+      if (back) close(back.dataset.subBack);
+      else if (tr) open(tr.dataset.sub, { focus: e.detail === 0 }); // a click always opens (a mouse may have already)
+    });
+    // its row says it's open; closed (Escape, Left), focus goes back to its row
+    pop.addEventListener("toggle", (e) => {
+      if (!e.target.matches?.(".submenu") || !e.target.isConnected) return;
+      const tr = triggerOf(e.target.id.replace("pop-sub-", ""));
+      tr?.setAttribute("aria-expanded", e.newState === "open");
+      if (e.newState === "closed" && e.target.contains(document.activeElement)) tr?.focus({ preventScroll: true });
+    }, true);
+    pop.addEventListener("scroll", place, { passive: true });
+    let timer;
+    pop.addEventListener("pointerover", (e) => {
+      if (e.pointerType !== "mouse" || phoneWidth.matches || e.target.closest(".submenu")) return clearTimeout(timer);
+      const name = e.target.closest("[data-sub]")?.dataset.sub || null;
+      clearTimeout(timer);
+      if (name === openName()) return;
+      timer = setTimeout(() => (name ? open(name) : openName() && menuOf(openName()).hidePopover()), name ? 120 : 200);
+    });
+    // keys, in any menu in the popover: arrows between its items, then in and out of the nested ones
+    pop.addEventListener("keydown", (e) => {
+      const trigger = e.target.closest?.("[data-sub]");
+      if (trigger && ["ArrowRight", "Enter", " "].includes(e.key)) { e.preventDefault(); return open(trigger.dataset.sub, { focus: true }); }
+      const box = e.target.closest?.("[popover]") || pop;
+      if (box.matches(".submenu") && e.key === "ArrowLeft") { e.preventDefault(); return phoneWidth.matches ? close(box.id.replace("pop-sub-", "")) : box.hidePopover(); }
+      const items = [...box.querySelectorAll("[role^=menuitem]")].filter((el) => el.closest("[popover]") === box && !el.disabled && el.checkVisibility());
+      const i = items.indexOf(document.activeElement), next = { ArrowDown: i + 1, ArrowUp: i - 1, Home: 0, End: items.length - 1 }[e.key];
+      if (!items.length || next === undefined) return;
+      e.preventDefault();
+      items[(next + items.length) % items.length].focus();
+    });
+    return { row, open, close, place, openName, markDrill };
+  }
+
+  // ---------- filter chips (chip.css), under the toolbar: each filter that's set is a chip that opens its picker and
+  // has its ×; Clear all after them; Add filter is disabled once there's nothing left to add. Its × and Clear all
+  // change the page (onRemove, onClear) and focus Add filter, or what they return. A picker open on a chip stays on
+  // it as the chips are drawn again (anchor); with its chip gone (its last value off), it stays where it is (L-filters)
+  //   const chips = BolsterShell.filterChips({ onRemove: (key) => …, onClear: () => … });
+  //   chips.render([{ key, label, text }], { full });  popFor.from = chips.anchor(popFor.from, key)
+  // edge: "chip" lines a chip's picker up with the chip's outer edge (Tasks), else with its button, 1px in
+  function chip({ key, label, text }, { attr = "chip", haspopup = "dialog" } = {}) {
+    return `<span class="chip" data-active><button type="button" class="chip-main" data-${attr}="${key}" aria-haspopup="${haspopup}" aria-expanded="false" aria-label="${esc(label)}: ${esc(text)}. Change filter"><span class="chip-field">${esc(label)}:</span><span class="chip-value">${esc(text)}</span></button><button type="button" class="chip-remove" data-remove="${key}" aria-label="Remove ${esc(label.toLowerCase())} filter" data-tip="Remove filter">${icon("xmark", 14)}</button></span>`;
+  }
+  const clearAll = () => `<button type="button" class="button clear-all" data-variant="ghost" data-size="sm" data-clear-all>Clear all</button>`;
+  // Add filter's menu: what's left to add, each with its icon
+  const filterMenu = (items, { section } = {}) => `<div class="pop-body">${section ? `<div class="pop-section">${section}</div>` : ""}${items.map((f) => `<button type="button" class="menu-item" role="menuitem" data-add-filter="${f.key}">${f.icon ? `<span class="menu-icon">${icon(f.icon, 14)}</span>` : ""}${esc(f.label)}</button>`).join("")}</div>`;
+  function filterChips({ onRemove, onClear, edge, box = "#filters", add = "#add-filter", pop = "#pop" } = {}) {
+    const el = (x) => (typeof x === "string" ? document.querySelector(x) : x);
+    const after = (to, e) => (to || el(add))?.focus({ preventScroll: true, focusVisible: e.detail === 0 });
+    document.addEventListener("click", (e) => {
+      const x = e.target.closest("[data-remove]");
+      if (x) return after(onRemove(x.dataset.remove), e);
+      if (e.target.closest("[data-clear-all]")) after(onClear(), e);
+    });
+    return {
+      render(chips, { full = false, clear = chips.length > 0 } = {}) {
+        el(box).innerHTML = chips.map((c) => chip(c)).join("") + (clear ? clearAll() : "");
+        el(add).disabled = full;
+      },
+      anchor(from, key) {
+        if (!from?.isConnected) {
+          const at = key != null && el(box).querySelector(`[data-chip="${CSS.escape(key)}"]`);
+          from = at || el(add);
+          if (at) placePopover(el(pop), edge === "chip" ? at.closest(".chip") : at, { start: true });
+        }
+        from?.setAttribute("aria-expanded", "true");
+        return from;
+      },
+    };
+  }
+  Object.assign(filterChips, { chip, clearAll, menu: filterMenu });
+
+  return { mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling, week, canvas, settingsNav, closeSettings, loading, logo, searchButton, nestedMenus, filterChips };
 })();

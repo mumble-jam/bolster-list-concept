@@ -60,7 +60,7 @@
     font-weight: var(--font-weight-medium);
     cursor: pointer;
   }
-  :where(.toast-action) { color: var(--color-action-brand); }
+  :where(.toast-action) { color: var(--color-action-brand-on-inverse); }
   :where(.toast-close) { display: inline-grid; place-items: center; inline-size: var(--control-height-sm); padding: 0; opacity: 0.8; }
   @media (hover: hover) { :where(.toast-action:hover, .toast-close:hover) { background: var(--color-surface-inverse-hover); } }
   @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }

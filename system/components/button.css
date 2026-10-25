@@ -63,7 +63,7 @@
     --_bg: var(--color-action-brand);
     --_fg: var(--color-content-on-brand);
     --_bg-hover: var(--color-surface-inverse);
-    --_fg-hover: var(--color-action-brand);
+    --_fg-hover: var(--color-action-brand-on-inverse);
     --_border-hover: transparent;
     --_bg-active: var(--color-surface-inverse-active);
   }

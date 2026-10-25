@@ -81,12 +81,10 @@
   const filterText = (f, v) => f.period ? (v.from && v.to ? `${dayOf(v.from)} – ${dayOf(v.to)}` : v.from ? `from ${dayOf(v.from)}` : `until ${dayOf(v.to)}`)
     : v.map((x) => f.options().find((o) => o.value === x)?.label.replace(" (you)", "") ?? x).join(", ");
   const filtered = () => Object.keys(st.filters).length > 0;
+  // the chips are the shell's
+  const filterChips = BolsterShell.filterChips({ onRemove: (k) => { delete st.filters[k]; render(); }, onClear: () => { st.filters = {}; render(); }, edge: "chip" });
   function renderToolbar() {
-    const chips = FILTERS.filter((f) => st.filters[f.key] != null).map((f) => { const text = filterText(f, st.filters[f.key]);
-      return `<span class="chip" data-active><button type="button" class="chip-main" data-chip="${f.key}" aria-haspopup="menu" aria-expanded="false" aria-label="${esc(f.label)}: ${esc(text)}. Change filter"><span class="chip-field">${esc(f.label)}:</span><span class="chip-value">${esc(text)}</span></button><button type="button" class="chip-remove" data-remove="${f.key}" aria-label="Remove ${esc(f.label.toLowerCase())} filter" data-tip="Remove filter">${ic("xmark", 14)}</button></span>`; });
-    if (chips.length) chips.push(`<button type="button" class="button clear-all" data-variant="ghost" data-size="sm" data-clear-all>Clear all</button>`);
-    $("#filters").innerHTML = chips.join("");
-    $("#add-filter").disabled = FILTERS.every((f) => st.filters[f.key] != null);
+    filterChips.render(FILTERS.filter((f) => st.filters[f.key] != null).map((f) => ({ key: f.key, label: f.label, text: filterText(f, st.filters[f.key]) })), { full: FILTERS.every((f) => st.filters[f.key] != null) });
   }
 
   // ---------- which tasks, in which groups ----------
@@ -251,7 +249,7 @@
         return `<label class="option"><input type="checkbox" class="checkbox" data-assign="${p.id}"${n && n === ts.length ? " checked" : ""}${n && n < ts.length ? " data-mixed" : ""}><span class="option-label"><span class="menu-icon">${avatar(p, "sm")}</span>${esc(p.me ? "Assign to me" : p.name)}</span></label>`; }).join("")}</div>`;
       $$("[data-mixed]", pop).forEach((b) => (b.indeterminate = true));
     } else if (popFor.kind === "add") {
-      pop.innerHTML = `<div class="pop-body">${FILTERS.filter((f) => st.filters[f.key] == null).map((f) => `<button type="button" class="menu-item" role="menuitem" data-add-filter="${f.key}"><span class="menu-icon">${ic(`m-${f.icon}`, 14)}</span><span>${esc(f.label)}</span></button>`).join("")}</div>`;
+      pop.innerHTML = BolsterShell.filterChips.menu(FILTERS.filter((f) => st.filters[f.key] == null).map((f) => ({ ...f, icon: `m-${f.icon}` })));
     } else if (popFor.kind === "filter") {
       const f = filterDef(popFor.id), v = st.filters[f.key];
       pop.setAttribute("role", "dialog");
@@ -565,9 +563,7 @@
     // ticking a value applies it at once; none, or all of them, is no filter
     const fo = e.target.closest("[data-filter-opt]");
     if (fo && popFor) { const k = popFor.id, set = new Set(st.filters[k] || []); fo.checked ? set.add(fo.dataset.filterOpt) : set.delete(fo.dataset.filterOpt);
-      const order = filterDef(k).options().map((o) => o.value), vals = order.filter((x) => set.has(x)); vals.length && vals.length < order.length ? (st.filters[k] = vals) : delete st.filters[k]; render(); if (popFor.from && !popFor.from.isConnected) popFor.from = $(`[data-chip="${k}"]`) || $("#add-filter");
-      // its chip gone (the last value off), it stays where it is rather than jump to Add filter
-      if (popFor.from.closest(".chip")) place(); else popFor.from.setAttribute("aria-expanded", "true"); return; }
+      const order = filterDef(k).options().map((o) => o.value), vals = order.filter((x) => set.has(x)); vals.length && vals.length < order.length ? (st.filters[k] = vals) : delete st.filters[k]; render(); popFor.from = filterChips.anchor(popFor.from, k); return; }
     const s = e.target.closest("[data-select]");
     if (s) { s.checked ? st.sel.add(s.dataset.select) : st.sel.delete(s.dataset.select); s.closest(".todo-row").toggleAttribute("data-selected", s.checked); renderBulk(); return; }
   });
@@ -580,8 +576,6 @@
     if ((el = q("[data-add-filter]"))) { const k = el.dataset.addFilter, from = $("#add-filter"); pop.hidePopover(); return openPick("filter", from, { id: k }); }
     if ((el = q("[data-chip]"))) return openPick("filter", el, { id: el.dataset.chip });
 
-    if ((el = q("[data-remove]"))) { delete st.filters[el.dataset.remove]; render(); return $("#add-filter").focus({ preventScroll: true }); }
-    if (q("[data-clear-all]")) { st.filters = {}; render(); return $("#add-filter").focus({ preventScroll: true }); }
     if ((el = q("#view-options"))) return openPick("display", el);
     if ((el = q("[data-group-by]"))) { st.group = el.dataset.groupBy; st.adding = null; pop.hidePopover(); render(); return; }
     if ((el = q("[data-bulk]"))) { if (el.dataset.bulk === "complete") { const ids = [...st.sel]; st.sel.clear(); setDone(ids, true); return renderBulk(); } return openPick(el.dataset.bulk, el, { bulk: true }); }
