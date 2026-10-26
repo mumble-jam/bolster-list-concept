@@ -56,8 +56,9 @@
   .cal-card { display: block; padding: 0; overflow: hidden; border-color: var(--color-line-card); }
   .cal-card[data-view="week"], .cal-card[data-view="day"] { overflow: clip; }
   /* the calendar fills the screen down to its bottom edge, as Google Calendar does: Month's weeks and Crew's
-     people share the height (each at its least, past that the page scrolls), Week and Day's hours stretch
-     to what's left */
+     people share the height, Week and Day's hours stretch to what's left; each at its least (an hour 3rem tall),
+     and past that the page scrolls, never the card (D128): Week and Day's weekdays and all-day row stick under
+     the bars */
   @media (min-width: 768px) {
     .cal-page { grid-template-rows: auto minmax(0, 1fr); align-content: stretch; }
     .cal-split { align-items: stretch; }
@@ -69,8 +70,8 @@
     .cal-card[data-view="month"] .cal-week { flex: 1 1 0; min-block-size: calc(1.75rem + 5 * (var(--_lane) + var(--_gap)) + var(--_pb)); }
     .cal-desk > .cal-crew { flex: 1; display: flex; flex-direction: column; }
     .cal-desk > .cal-time { flex: 1; display: flex; flex-direction: column; min-block-size: 0; }
-    .cal-desk > .cal-time > .cal-hours { flex: 1 1 0; max-block-size: none; container-type: size; }
-    /* the hours stretch to the height they're given, never shorter than 3rem (past that they scroll) */
+    .cal-desk > .cal-time > .cal-hours { flex: 1 0 auto; min-block-size: calc(3rem * var(--_span-h)); container-type: size; }
+    /* the hours stretch to the height they're given, never shorter than 3rem (past that the page scrolls) */
     .cal-desk > .cal-time > .cal-hours > * { --_hour: max(3rem, 100cqh / var(--_span-h)); }
   }
 
@@ -159,7 +160,9 @@
   .cal-allday .cal-day:first-child { border-inline-start: var(--border-width-default) solid var(--color-line-subtle); }
   .cal-allday .cal-week .cal-date { display: none; }
   .cal-gutter-label { padding-inline: var(--space-2); font-size: var(--text-xxs, 0.6875rem); line-height: 1; color: var(--color-content-tertiary); text-align: end; font-variant-numeric: tabular-nums; }
-  .cal-hours { position: relative; display: grid; grid-template-columns: var(--_cols); max-block-size: calc(100dvh - 15rem); min-block-size: 20rem; overflow-y: auto; }
+  .cal-hours { position: relative; display: grid; grid-template-columns: var(--_cols); }
+  /* the weekdays and the all-day row, stuck to the page under the bars as the hours scroll under them (D128) */
+  .cal-time-head { position: sticky; inset-block-start: var(--page-top, 0px); z-index: 4; background: var(--color-surface-default); }
   .cal-gutter { position: relative; block-size: calc(var(--_hour) * var(--_span-h)); }
   .cal-gutter .cal-gutter-label { position: absolute; inset-inline: 0; translate: 0 -50%; }
   .cal-col { position: relative; block-size: calc(var(--_hour) * var(--_span-h)); border-inline-start: var(--border-width-default) solid var(--color-line-subtle);

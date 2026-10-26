@@ -62,7 +62,23 @@
   }
   @media (min-width: 768px) and (max-width: 1023px) { :root[data-chrome-hidden] .rail { inset-block-start: 0; block-size: 100dvh; } }
   :root { scroll-padding-block-start: calc(var(--list-head-top, 0px) + var(--space-2)); }
-  @media (prefers-reduced-motion: reduce) { .top-bar, .bottom-bar, .list-toolbar, .list-panel .data-table thead, .rail, .sidebar, .bs-logo, [data-float], [data-float]::before, [data-float] .float-label { transition: none; } }
+  /* the page is the one scroller down (D128): a card never scrolls on its own. What sticks to the page (the table's
+     header, the timeline's scale, the calendar's weekdays) sits at --page-top, under the bars, and slides up with them
+     as they hide; a part that's wider than the screen scrolls sideways only, and keeps its scrollbar at the window's
+     foot (.page-hscroll), so a mouse always has it in reach: drawn by hand, so it shows on a Mac too, where
+     scrollbars hide; on the canvas, so nothing shows through it */
+  @property --page-top { syntax: "<length>"; inherits: true; initial-value: 0px; }
+  .list-page { --page-top: var(--list-head-top, 0px); transition: --page-top 300ms var(--ease-out); }
+  :root[data-chrome-hidden] .list-page { --page-top: 0px; }
+  .page-hscroll { position: sticky; inset-block-end: 0; z-index: 3; overflow-x: auto; overflow-y: hidden; padding-block: var(--space-1); background: var(--color-surface-canvas); }
+  .page-hscroll[hidden] { display: none; }
+  .page-hscroll > * { display: block; block-size: 1px; }
+  .page-hscroll::-webkit-scrollbar { block-size: 10px; }
+  .page-hscroll::-webkit-scrollbar-track { border-radius: var(--radius-full); background: var(--color-surface-sunken); }
+  .page-hscroll::-webkit-scrollbar-thumb { border-radius: var(--radius-full); background: var(--color-line-strong); }
+  .page-hscroll::-webkit-scrollbar-thumb:hover { background: var(--color-content-tertiary); }
+  @supports not selector(::-webkit-scrollbar) { .page-hscroll { scrollbar-color: var(--color-line-strong) var(--color-surface-sunken); } }
+  @media (prefers-reduced-motion: reduce) { .list-page, .top-bar, .bottom-bar, .list-toolbar, .list-panel .data-table thead, .rail, .sidebar, .bs-logo, [data-float], [data-float]::before, [data-float] .float-label { transition: none; } }
 
   /* ---------- the record: beside the list from 1280 up, a side sheet below that ----------
      As in Mercury: the list keeps its title, status and amount columns and the opened row stays

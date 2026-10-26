@@ -9,15 +9,12 @@
   .tl-page { --tl-row: 36px; --cal-off: color-mix(in srgb, var(--color-surface-sunken) 30%, var(--color-surface-default)); }
   .tl-card { display: block; padding: 0; overflow: clip; border-color: var(--color-line-card); }
   /* down, the page scrolls it, as every page (your ask, 25 Oct; D127): the scale and a job's row stick to the page under
-     the bars (--_stick, sliding with them as they hide), the card clipping what's beyond its sides but not a scroller, so
-     they can. Along the days the chart moves itself, by --_x from its scrollbar (.tl-x), pinned to the window's foot: the
+     the bars (--page-top, sliding with them as they hide; D128), the card clipping what's beyond its sides but not a scroller, so
+     they can. Along the days the chart moves itself, by --_x from its scrollbar (.tl-x, the page's .page-hscroll), pinned to the window's foot: the
      scale, the shading, the tracks, the links and the outlines slide under the grid, which stays */
-  .tl-scroll { --_stick: var(--list-head-top, 0px); position: relative; touch-action: pan-y pinch-zoom; transition: --_stick 300ms var(--ease-out); }
-  :root[data-chrome-hidden] .tl-scroll { --_stick: 0px; }
-  @media (prefers-reduced-motion: reduce) { .tl-scroll { transition: none; } }
+  .tl-scroll { position: relative; touch-action: pan-y pinch-zoom; }
   .tl-scale, .tl-grid-bg, .tl-track, .tl-overlay, .tl-outline { translate: calc(0px - var(--_x, 0px)) 0; }
-  .tl-x { position: sticky; inset-block-end: 0; z-index: 8; margin-inline-start: var(--_grid); overflow: auto hidden; overscroll-behavior-x: contain; background: var(--color-surface-default); }
-  .tl-x > i { display: block; block-size: 1px; }
+  .tl-x { z-index: 8; margin-inline-start: var(--_grid); overscroll-behavior-x: contain; background: var(--color-surface-default); }
   :root:has(.tl-scroll) { scroll-padding-block: calc(var(--list-head-top, 0px) + var(--_head, 3.3rem) + 36px + var(--space-2)) var(--space-6); }
   /* a narrow card: the grid keeps the name and the length; the start is on the bar and in the summary */
   .tl-scroll[data-narrow] .tl-start { display: none; }
@@ -25,7 +22,7 @@
   .tl-scroll[data-narrow] .tl-cells { grid-template-columns: 1.25rem minmax(0, 1fr) 3rem; }
 
   /* ---------- the head: the grid's column names, then the scale ---------- */
-  .tl-head { position: sticky; inset-block-start: var(--_stick); z-index: 7; display: flex; inline-size: calc(var(--_grid) + var(--_w)); background: var(--color-surface-default); border-block-end: var(--border-width-default) solid var(--color-line-default); }
+  .tl-head { position: sticky; inset-block-start: var(--page-top); z-index: 7; display: flex; inline-size: calc(var(--_grid) + var(--_w)); background: var(--color-surface-default); border-block-end: var(--border-width-default) solid var(--color-line-default); }
   .tl-corner { position: relative; z-index: 7; flex: none; inline-size: var(--_grid); display: grid; grid-template-columns: minmax(0, 1fr) 3.5rem 3rem; align-items: end; gap: var(--space-2); padding: 0 var(--space-3) calc((1.625rem - var(--leading-xs)) / 2) calc(var(--space-2) * 2 + 1.25rem); background: var(--color-surface-default); border-inline-end: var(--border-width-default) solid var(--color-line-default); font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
   .tl-scale { position: relative; flex: none; block-size: 3.25rem; }
   .tl-scale-top > span, .tl-scale-bottom > span { position: absolute; display: flex; align-items: center; overflow: hidden; white-space: nowrap; font-size: var(--text-xs); line-height: var(--leading-xs); }
@@ -65,7 +62,7 @@
      job's rows a group as tall as they are, the job's row in its flow. Over its stages' rows (their names at 5), under the
      head (7); today's line drawn on it too, as the band covers the one behind. A focused row clears the two */
   .tl-group { position: absolute; inset-inline-start: 0; inline-size: 100%; }
-  .tl-row[data-type="job"] { position: sticky; inset-block-start: calc(var(--_stick) + var(--_head, 3.3rem)); z-index: 6; }
+  .tl-row[data-type="job"] { position: sticky; inset-block-start: calc(var(--page-top) + var(--_head, 3.3rem)); z-index: 6; }
   .tl-row[data-type="job"] .tl-today { position: absolute; inset-block: 0; z-index: 2; }
   .tl-fold { display: grid; place-items: center; inline-size: 1.25rem; block-size: 1.25rem; padding: 0; border: 0; border-radius: var(--radius-sm); background: none; color: var(--color-content-tertiary); cursor: pointer; }
   .tl-fold svg { transition: rotate var(--duration-fast, 120ms) var(--ease-out); }

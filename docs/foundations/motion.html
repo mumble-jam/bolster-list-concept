@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Motion · Bolster design system</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Motion says that something happened and where it went. Today the system has two durations, two curves and one rule for reduced motion; a fuller set, named by what moves, is proposed from the motion research and being tried in the motion lab.">
+<link rel="icon" href="../../shared/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../../system/bolster.css?v=d8edba0e">
+<link rel="stylesheet" href="../assets/site.css?v=d8edba0e">
+<script>try{const t=localStorage.getItem("bds-theme");if(t&&t!=="auto")document.documentElement.dataset.theme=t}catch{}</script>
+<script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
+addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
+<script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body class="doc">
+<a class="doc-skip" href="#main">Skip to content</a>
+<aside class="doc-nav" id="doc-nav" aria-label="Documentation">
+  <div class="doc-nav-head">
+    <a class="doc-brand" href="../index.html"><svg class="doc-mark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="62 10 381 491"><path d="M62 10h381v258H330v233H62z" fill="#FBFF00"/><path d="M150 92h214v78H233v271h-83z" fill="#1C1A1B"/></svg>
+<span class="doc-brand-text"><b>Bolster</b><span>Design system</span></span></a>
+    <button type="button" class="doc-nav-close" data-nav-close aria-label="Close menu" data-tip="Close"><i data-icon="xmark" data-size="16"></i></button>
+  </div>
+  <button type="button" class="doc-search-open" data-search-open><i data-icon="search" data-size="14"></i><span>Search</span><kbd>⌘K</kbd></button>
+  <nav class="doc-nav-body" aria-label="Pages"><div class="doc-nav-sec"><p class="doc-nav-label">Overview</p><ul role="list"><li><a class="doc-nav-item" href="../index.html"><span>Introduction</span></a></li><li><a class="doc-nav-item" href="../principles.html"><span>Principles</span></a></li><li><a class="doc-nav-item" href="../getting-started.html"><span>Getting started</span></a></li><li><a class="doc-nav-item" href="../architecture.html"><span>Architecture</span></a></li></ul></div><div class="doc-nav-sec"><p class="doc-nav-label">Foundations</p><ul role="list"><li><a class="doc-nav-item" href="color.html"><span>Colour</span></a></li><li><a class="doc-nav-item" href="typography.html"><span>Typography</span></a></li><li><a class="doc-nav-item" href="spacing.html"><span>Spacing and layout</span></a></li><li><a class="doc-nav-item" href="shape.html"><span>Shape</span></a></li><li><a class="doc-nav-item" href="elevation.html"><span>Elevation and layers</span></a></li><li><a class="doc-nav-item" href="motion.html" aria-current="page"><span>Motion</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="iconography.html"><span>Iconography</span></a></li><li><a class="doc-nav-item" href="accessibility.html"><span>Accessibility</span></a></li><li><a class="doc-nav-item" href="content.html"><span>Content</span><span class="doc-nav-dot" data-doc-status="partial" data-tip="Needs work"></span></a></li><li><a class="doc-nav-item" href="brand.html"><span>Brand</span><span class="doc-nav-dot" data-doc-status="partial" data-tip="Needs work"></span></a></li><li class="doc-nav-group">Not built yet</li><li><a class="doc-nav-item" href="../backlog/data-viz.html" data-planned><span>Data visualisation</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li></ul></div><div class="doc-nav-sec"><p class="doc-nav-label">Components</p><ul role="list"><li><a class="doc-nav-item" href="../components/index.html"><span>Overview</span></a></li><li class="doc-nav-group">Actions</li><li><a class="doc-nav-item" href="../components/button.html"><span>Button</span></a></li><li><a class="doc-nav-item" href="../components/segmented-control.html"><span>Segmented control</span></a></li><li><a class="doc-nav-item" href="../components/menu.html"><span>Menu</span></a></li><li class="doc-nav-group">Inputs</li><li><a class="doc-nav-item" href="../components/field.html"><span>Field</span></a></li><li><a class="doc-nav-item" href="../components/search-field.html"><span>Search field</span></a></li><li><a class="doc-nav-item" href="../components/chip.html"><span>Filter chip</span></a></li><li><a class="doc-nav-item" href="../components/choice.html"><span>Checkbox, radio, toggle</span></a></li><li><a class="doc-nav-item" href="../components/calendar.html"><span>Calendar and date range</span></a></li><li class="doc-nav-group">Display</li><li><a class="doc-nav-item" href="../components/badge.html"><span>Badge</span></a></li><li><a class="doc-nav-item" href="../components/avatar.html"><span>Avatar</span></a></li><li><a class="doc-nav-item" href="../components/thumbnail.html"><span>Thumbnail</span></a></li><li><a class="doc-nav-item" href="../components/card.html"><span>Card</span></a></li><li><a class="doc-nav-item" href="../components/data-table.html"><span>Data table</span></a></li><li><a class="doc-nav-item" href="../components/summary-cards.html"><span>Summary cards</span></a></li><li><a class="doc-nav-item" href="../components/tooltip.html"><span>Tooltip</span></a></li><li class="doc-nav-group">Feedback</li><li><a class="doc-nav-item" href="../components/toast.html"><span>Toast</span></a></li><li><a class="doc-nav-item" href="../components/states.html"><span>Empty, loading and error</span><span class="doc-nav-dot" data-doc-status="partial" data-tip="Needs work"></span></a></li><li><a class="doc-nav-item" href="../components/loader.html"><span>Loading screen</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li class="doc-nav-group">Overlays</li><li><a class="doc-nav-item" href="../components/popover.html"><span>Popover</span></a></li><li><a class="doc-nav-item" href="../components/dialog.html"><span>Dialog</span></a></li><li><a class="doc-nav-item" href="../components/record.html"><span>Record panel</span></a></li><li class="doc-nav-group">Navigation</li><li><a class="doc-nav-item" href="../components/app-shell.html"><span>App shell</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="../components/tabs.html"><span>Tabs</span></a></li><li><a class="doc-nav-item" href="../components/toolbar.html"><span>Toolbar</span></a></li><li><a class="doc-nav-item" href="../components/floating-bar.html"><span>Floating bar</span></a></li><li class="doc-nav-group">Not built yet</li><li><a class="doc-nav-item" href="../backlog/split-button.html" data-planned><span>Split button</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/combobox.html" data-planned><span>Combobox</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/tag-input.html" data-planned><span>Tag input</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/number-input.html" data-planned><span>Number and quantity</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/time-field.html" data-planned><span>Time field</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/file-upload.html" data-planned><span>File upload</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/address-field.html" data-planned><span>Address field</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/rich-text.html" data-planned><span>Rich text editor</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/signature.html" data-planned><span>Signature</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/progress.html" data-planned><span>Progress</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/chart.html" data-planned><span>Charts</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/inline-alert.html" data-planned><span>Inline alert</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/accordion.html" data-planned><span>Accordion</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/breadcrumbs.html" data-planned><span>Breadcrumbs</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/stepper.html" data-planned><span>Stepper</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/notifications.html" data-planned><span>Notifications</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li></ul></div><div class="doc-nav-sec"><p class="doc-nav-label">Patterns</p><ul role="list"><li><a class="doc-nav-item" href="../patterns/index.html"><span>Overview</span></a></li><li><a class="doc-nav-item" href="../patterns/page-scrolling.html"><span>Page scrolling</span><span class="doc-nav-dot" data-doc-status="partial" data-tip="Needs work"></span></a></li><li><a class="doc-nav-item" href="../patterns/opening-records.html"><span>Opening a record</span></a></li><li><a class="doc-nav-item" href="../patterns/filtering.html"><span>Filtering and search</span></a></li><li><a class="doc-nav-item" href="../patterns/bulk-actions.html"><span>Bulk actions</span></a></li><li><a class="doc-nav-item" href="../patterns/picking-dates.html"><span>Picking dates</span></a></li><li><a class="doc-nav-item" href="../patterns/nested-menus.html"><span>Nested menus</span></a></li><li><a class="doc-nav-item" href="../patterns/feedback.html"><span>Feedback and undo</span></a></li><li><a class="doc-nav-item" href="../patterns/focus.html"><span>Focus and keyboard</span></a></li><li><a class="doc-nav-item" href="../patterns/navigation.html"><span>Navigation at each width</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="../patterns/global-search.html"><span>Global search</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="../patterns/drag-and-drop.html"><span>Drag and drop</span><span class="doc-nav-dot" data-doc-status="draft" data-tip="Draft"></span></a></li><li class="doc-nav-group">Not built yet</li><li><a class="doc-nav-item" href="../backlog/forms.html" data-planned><span>Forms and validation</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/permissions.html" data-planned><span>Permissions and read-only</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/errors.html" data-planned><span>Errors and offline</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/onboarding.html" data-planned><span>First use and onboarding</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/export.html" data-planned><span>Export and print</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li></ul></div><div class="doc-nav-sec"><p class="doc-nav-label">Page types</p><ul role="list"><li><a class="doc-nav-item" href="../page-types/index.html"><span>Overview</span></a></li><li><a class="doc-nav-item" href="../page-types/list.html"><span>List page</span></a></li><li><a class="doc-nav-item" href="../page-types/todo.html"><span>To-do</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="../page-types/calendar.html"><span>Calendar</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="../page-types/pipeline.html"><span>Pipeline</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="../page-types/timeline.html"><span>Timeline</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="../page-types/estimate.html"><span>Estimate</span><span class="doc-nav-dot" data-doc-status="draft" data-tip="Draft"></span></a></li><li class="doc-nav-group">Not built yet</li><li><a class="doc-nav-item" href="../backlog/home.html" data-planned><span>Home and getting started</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/dashboard.html" data-planned><span>Dashboard</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/job-workspace.html" data-planned><span>Job workspace</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/settings.html" data-planned><span>Settings</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/document.html" data-planned><span>Document and presentation</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/messaging.html" data-planned><span>Messaging</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/files.html" data-planned><span>Files</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/reports.html" data-planned><span>Reports</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/wizard.html" data-planned><span>Wizard and import</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/field-app.html" data-planned><span>Field app</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/client-portal.html" data-planned><span>Client and vendor portal</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/auth.html" data-planned><span>Sign in</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li></ul></div><div class="doc-nav-sec"><p class="doc-nav-label">Resources</p><ul role="list"><li><a class="doc-nav-item" href="../resources/backlog.html"><span>Backlog</span></a></li><li><a class="doc-nav-item" href="../resources/tokens.html"><span>Token reference</span></a></li><li><a class="doc-nav-item" href="../resources/decisions.html"><span>Decision log</span></a></li><li><a class="doc-nav-item" href="../resources/interactions.html"><span>Interaction contracts</span></a></li><li><a class="doc-nav-item" href="../resources/glossary.html"><span>Glossary</span></a></li><li><a class="doc-nav-item" href="../resources/contributing.html"><span>Contributing</span></a></li><li class="doc-nav-group">Not built yet</li><li><a class="doc-nav-item" href="../backlog/recipes.html" data-planned><span>Recipes for other page types</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/tokens-export.html" data-planned><span>Tokens for other tools</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/releases.html" data-planned><span>Versions and changelog</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li></ul></div></nav>
+  <div class="doc-nav-foot">
+    <div class="doc-theme" role="radiogroup" aria-label="Theme"><label><input type="radio" name="doc-theme" value="auto" checked><span>Auto</span></label><label><input type="radio" name="doc-theme" value="light"><span>Light</span></label><label><input type="radio" name="doc-theme" value="dark"><span>Dark</span></label></div>
+    <span class="doc-version">v0.1.0 · Status quo, October 2026</span>
+  </div>
+</aside>
+<div class="doc-scrim" data-nav-close></div>
+<div class="doc-page">
+  <header class="doc-topbar">
+    <button type="button" class="doc-topbar-btn" data-nav-open aria-label="Menu" aria-controls="doc-nav" data-tip="Menu"><i data-icon="menu" data-size="16"></i></button>
+    <a class="doc-brand" href="../index.html"><svg class="doc-mark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="62 10 381 491"><path d="M62 10h381v258H330v233H62z" fill="#FBFF00"/><path d="M150 92h214v78H233v271h-83z" fill="#1C1A1B"/></svg>
+<span class="doc-brand-text"><b>Bolster</b><span>Design system</span></span></a>
+    <button type="button" class="doc-topbar-btn" data-search-open aria-label="Search" data-tip="Search"><i data-icon="search" data-size="16"></i></button>
+  </header>
+  <main id="main" class="doc-main" tabindex="-1">
+    <header class="doc-head">
+      <p class="doc-eyebrow">Foundations</p>
+      <h1>Motion</h1>
+      <p class="doc-lead">Motion says that something happened and where it went. Today the system has two durations, two curves and one rule for reduced motion; a fuller set, named by what moves, is proposed from the motion research and being tried in the motion lab.</p>
+      <div class="doc-meta"><span class="badge doc-status" data-doc-status="trying" data-tone="info">Trying out</span><span class="doc-meta-files"><code>tokens.css</code><code>base.css</code><code>docs/motion-research.md</code><code>concepts/motion-lab/index.html</code></span><span class="doc-meta-date">Updated 2026-10-25</span></div>
+    </header>
+    <div class="doc-body">
+      <article class="doc-content">
+<p>Motion in Bolster is short and functional: a menu drops from its button, a dialog settles into place, a checkbox's tick grows in. It confirms that an action registered and shows where something came from. It never decorates and never makes anyone wait.</p>
+
+<div class="doc-callout" data-tone="info"><p>This page has two halves. <strong>Current</strong> is what <code>system/tokens.css</code> and the components use today (D10). <strong>Proposed</strong> is the set the motion research recommends (D124, I22): it's trying out in the <span class="doc-unpublished">motion lab</span> and isn't in the tokens yet. Build with the current tokens.</p></div>
+
+<h2 id="current-durations">Current: durations</h2>
+<p>Two durations cover almost everything. Fast is for things that change in place; medium is for things that arrive.</p>
+<div class="doc-table-wrap"><table class="doc-table doc-tokens" data-kind="motion"><thead><tr><th>Token</th><th>Value</th><th>Use</th></tr></thead><tbody><tr><td><code class="doc-tok" data-copy-text="var(--duration-instant)" tabindex="0" data-tip="Copy">--duration-instant</code></td><td><code>0ms</code></td><td class="doc-note"></td></tr><tr><td><code class="doc-tok" data-copy-text="var(--duration-fast)" tabindex="0" data-tip="Copy">--duration-fast</code></td><td><code>120ms</code></td><td class="doc-note"></td></tr><tr><td><code class="doc-tok" data-copy-text="var(--duration-medium)" tabindex="0" data-tip="Copy">--duration-medium</code></td><td><code>240ms</code></td><td class="doc-note"></td></tr></tbody></table></div>
+<ul>
+  <li><strong>Fast, 120ms:</strong> hovers, colour changes, a tick or a radio's dot, a toggle's knob, a menu opening, a tooltip fading in.</li>
+  <li><strong>Medium, 240ms:</strong> a dialog, a picker sheet, the side peek of a record, a toast arriving, the bulk bar rising.</li>
+  <li><strong>Instant, 0ms:</strong> for anything that shouldn't move, written as a token so it reads as a choice.</li>
+</ul>
+<p>A few components set their own timing where the two didn't fit: a button's press lands in 30ms and its release eases back in 150ms; a record panel's position and height ease over 300ms; a skeleton's shimmer loops every 1.4s.</p>
+
+<h2 id="current-curves">Current: curves</h2>
+<div class="doc-table-wrap"><table class="doc-table doc-tokens" data-kind="motion"><thead><tr><th>Token</th><th>Value</th><th>Use</th></tr></thead><tbody><tr><td><code class="doc-tok" data-copy-text="var(--ease-standard)" tabindex="0" data-tip="Copy">--ease-standard</code></td><td><code>cubic-bezier(0.4, 0, 0.2, 1)</code></td><td class="doc-note"></td></tr><tr><td><code class="doc-tok" data-copy-text="var(--ease-out)" tabindex="0" data-tip="Copy">--ease-out</code></td><td><code>cubic-bezier(0, 0, 0.2, 1)</code></td><td class="doc-note"></td></tr></tbody></table></div>
+<ul>
+  <li><strong>Ease out</strong> for things arriving: dialogs, menus, sheets, toasts, a tick growing in. They start quickly and settle.</li>
+  <li><strong>Standard</strong> for things that change where they are: colour, background, a toggle's knob sliding across.</li>
+</ul>
+
+<h2 id="current-what-moves">Current: what moves</h2>
+<div class="doc-table-wrap"><table class="doc-table">
+  <thead><tr><th>What</th><th>How it moves</th><th>Timing</th></tr></thead>
+  <tbody>
+    <tr><th scope="row"><a href="../components/menu.html">Menu</a></th><td>Fades in and drops 4px from its button (I3)</td><td>fast, ease out</td></tr>
+    <tr><th scope="row"><a href="../components/tooltip.html">Tooltip</a></th><td>Fades in after a short wait under a pointer, at once on keyboard focus (I4)</td><td>fast, ease out</td></tr>
+    <tr><th scope="row"><a href="../components/dialog.html">Dialog</a></th><td>The backdrop fades; the panel fades and grows from 0.97 (I1). On a phone, a picker sheet slides up from the bottom</td><td>medium, ease out</td></tr>
+    <tr><th scope="row"><a href="../components/record.html">Record</a></th><td>The side peek slides in 24px as it fades</td><td>medium, ease out</td></tr>
+    <tr><th scope="row"><a href="../components/toast.html">Toast</a></th><td>Fades in, rising 8px</td><td>medium, ease out</td></tr>
+    <tr><th scope="row"><a href="../components/floating-bar.html">Bulk bar</a></th><td>Fades in, rising 8px</td><td>medium, ease out</td></tr>
+    <tr><th scope="row"><a href="../components/choice.html">Checkbox, radio, toggle</a></th><td>The tick and dot grow from nothing; the knob slides; the fill changes colour</td><td>fast</td></tr>
+    <tr><th scope="row"><a href="../components/button.html">Button</a></th><td>Lifts 1px when pointed at, sinks at once when pressed, eases back on release</td><td>30ms press, 150ms release</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="current-reduced-motion">Current: reduced motion</h2>
+<p>When someone asks their system for reduced motion (<code>prefers-reduced-motion: reduce</code>), <code>base.css</code> turns motion off everywhere: every transition and animation finishes at once, and smooth scrolling stops. Skeletons don't shimmer. A component adds its own rule only where something would still be out of place without its transition: a button stops lifting, and a summary card stops lifting.</p>
+<p>One component, the bulk bar, already writes a reduced-motion fade of its own, the way the proposal below would have it. The global rule overrides it today.</p>
+
+<h2 id="current-rules">Current: rules</h2>
+<ul>
+  <li><strong>Use the tokens.</strong> A transition names a duration and a curve token, never a number, unless it's one of the component timings above.</li>
+  <li><strong>Name the properties.</strong> <code>transition: opacity …, transform …</code>, never <code>transition: all</code>, so nothing animates by accident.</li>
+  <li><strong>Animate opacity and transform</strong> where you can: they don't make the page lay out again, so they stay smooth on a phone.</li>
+  <li><strong>Use the platform.</strong> Dialogs and menus animate in and out of the top layer with <code>@starting-style</code> and <code>allow-discrete</code>; no script decides when they're visible.</li>
+</ul>
+<div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>.menu {
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity var(--duration-fast) var(--ease-out),
+    transform var(--duration-fast) var(--ease-out),
+    overlay var(--duration-fast) allow-discrete,
+    display var(--duration-fast) allow-discrete;
+}
+.menu:popover-open { opacity: 1; transform: none; }
+@starting-style { .menu:popover-open { opacity: 0; transform: translateY(-4px); } }</code></pre></div>
+
+<h2 id="proposed-tokens-by-what-moves">Proposed: tokens by what moves</h2>
+<div class="doc-callout" data-tone="warning"><p>Proposed, trying out (D124). These come from the <span class="doc-unpublished">motion research</span>, which compares what Material 3, Carbon, Fluent, Atlassian, Primer, Polaris and others agree on. They aren't in <code>tokens.css</code> until they're approved.</p></div>
+<p>Instead of fast and medium, durations are named for what moves, and each size has a quicker exit than its entrance: leaving is quicker than arriving, so a dismissed thing never holds anyone up.</p>
+<div class="doc-table-wrap"><table class="doc-table">
+  <thead><tr><th>Token</th><th>Value</th><th>For</th></tr></thead>
+  <tbody>
+    <tr><th scope="row"><code>--duration-instant</code></th><td><code>0ms</code></td><td>Focus rings, anything the keyboard did, movement under reduced motion</td></tr>
+    <tr><th scope="row"><code>--duration-feedback</code></th><td><code>100ms</code></td><td>Hover, a press's release, colour and state changes</td></tr>
+    <tr><th scope="row"><code>--duration-small-in</code></th><td><code>150ms</code></td><td>Tooltips, menus, popovers, a tick</td></tr>
+    <tr><th scope="row"><code>--duration-small-out</code></th><td><code>100ms</code></td><td>The same, leaving</td></tr>
+    <tr><th scope="row"><code>--duration-move</code></th><td><code>200ms</code></td><td>Indicators, rows making room, reordering, expand and collapse</td></tr>
+    <tr><th scope="row"><code>--duration-medium-in</code></th><td><code>250ms</code></td><td>Dialogs, toasts, the bulk bar</td></tr>
+    <tr><th scope="row"><code>--duration-medium-out</code></th><td><code>150ms</code></td><td>The same, leaving</td></tr>
+    <tr><th scope="row"><code>--duration-large-in</code></th><td><code>350ms</code></td><td>Bottom sheets, side panels</td></tr>
+    <tr><th scope="row"><code>--duration-large-out</code></th><td><code>250ms</code></td><td>The same, leaving</td></tr>
+    <tr><th scope="row"><code>--duration-emphasis</code></th><td><code>700ms</code></td><td>A highlight that fades: a card just dropped, a new row</td></tr>
+    <tr><th scope="row"><code>--duration-shimmer</code></th><td><code>2000ms</code></td><td>One sweep of a skeleton's loop</td></tr>
+  </tbody>
+</table></div>
+<div class="doc-table-wrap"><table class="doc-table">
+  <thead><tr><th>Token</th><th>Value</th><th>For</th></tr></thead>
+  <tbody>
+    <tr><th scope="row"><code>--ease-enter</code></th><td><code>cubic-bezier(0.23, 1, 0.32, 1)</code></td><td>Arriving: decelerates into place</td></tr>
+    <tr><th scope="row"><code>--ease-exit</code></th><td><code>cubic-bezier(0.3, 0, 1, 1)</code></td><td>Leaving: accelerates away</td></tr>
+    <tr><th scope="row"><code>--ease-move</code></th><td><code>cubic-bezier(0.2, 0, 0, 1)</code></td><td>Moving on the page, with both ends on screen</td></tr>
+    <tr><th scope="row"><code>--ease-spring</code></th><td>a <code>linear()</code> spring, bounce 0.15</td><td>What a hand lets go of: a dropped card, a sheet springing back</td></tr>
+    <tr><th scope="row"><code>--ease-linear</code></th><td><code>linear</code></td><td>Loops, progress, a fade on its own</td></tr>
+  </tbody>
+</table></div>
+<h3 id="from-today-s-tokens">From today's tokens</h3>
+<div class="doc-table-wrap"><table class="doc-table">
+  <thead><tr><th>Today</th><th>Becomes</th></tr></thead>
+  <tbody>
+    <tr><th scope="row"><code>--duration-fast</code> 120</th><td><code>--duration-feedback</code> 100 and <code>--duration-small-in</code> 150</td></tr>
+    <tr><th scope="row"><code>--duration-medium</code> 240</th><td><code>--duration-medium-in</code> 250, with <code>--duration-medium-out</code> 150 for exits</td></tr>
+    <tr><th scope="row"><code>--ease-standard</code></th><td><code>--ease-move</code></td></tr>
+    <tr><th scope="row"><code>--ease-out</code></th><td><code>--ease-enter</code></td></tr>
+  </tbody>
+</table></div>
+<p>The old names would stay as aliases while components move over, so nothing breaks on the day the tokens land.</p>
+<p>Still open in the proposal: whether exits use the accelerating curve or the same ease-out as entrances; whether a tooltip waits 300ms (proposed) or 150ms (as the CSS tooltip does now); whether a press shrinks as well as sinks.</p>
+
+<h2 id="proposed-how-motion-behaves">Proposed: how motion behaves</h2>
+<p>The research also proposes contracts for how motion behaves, whatever its timing (I22, trying out). The lab's playgrounds implement them.</p>
+<ul>
+  <li><strong>Interruptible.</strong> A motion turned around halfway, such as a dialog closed while it opens, goes back from where it is, never from its end.</li>
+  <li><strong>Focus never waits.</strong> Focus is in a dialog, a menu or a sheet the moment it opens; arrowing through tabs doesn't queue behind the indicator.</li>
+  <li><strong>From where it came.</strong> Menus and popovers grow from the corner at their button, from 0.96, never from nothing; sheets from the bottom; content slides only the way someone went.</li>
+  <li><strong>Waits are motion too.</strong> A tooltip waits 300ms, then the next one shows at once for 300ms after. A loader shows after 300ms and stays at least 300ms, so it never blinks. A toast stays 5s, 10s with an action, paused while pointed at or focused; errors stay.</li>
+  <li><strong>By hand.</strong> A dragged card or sheet follows the pointer exactly. A sheet closes when pulled past a quarter of its height or flicked, else springs back. Escape puts a dragged card back.</li>
+  <li><strong>Never animated:</strong> focus rings, and anything started from a keyboard shortcut.</li>
+</ul>
+
+<h2 id="proposed-reduced-motion">Proposed: reduced motion</h2>
+<p>The research proposes less motion, not none, as Apple's platforms do: movement, scaling, tilting, blur and loops go; fades and colour changes stay, at most 150ms; and what someone moves by hand still follows their hand. A dialog would fade in without growing; a sheet would fade in without sliding.</p>
+<p>This replaces today's switch-off in <code>base.css</code> if it's approved. Until then the two disagree, and only one of them can stay.</p>
+
+<h2 id="the-motion-lab">The motion lab</h2>
+<p>The <span class="doc-unpublished">motion lab</span> has a playground for each of the system's core animations, each with the current values and a "Bolster proposed" preset that uses the tokens above. Its Copy CSS names the tokens and says when a value isn't one.</p>
+<ul>
+  <li><span class="doc-unpublished">Hover and press</span></li>
+  <li><span class="doc-unpublished">Switch and checkbox</span></li>
+  <li><span class="doc-unpublished">Menu and popover</span></li>
+  <li><span class="doc-unpublished">Tooltip</span></li>
+  <li><span class="doc-unpublished">Dialog</span></li>
+  <li><span class="doc-unpublished">Bottom sheet</span></li>
+  <li><span class="doc-unpublished">Toast</span></li>
+  <li><span class="doc-unpublished">Expand and collapse</span></li>
+  <li><span class="doc-unpublished">List rows</span></li>
+  <li><span class="doc-unpublished">Tabs and segmented control</span></li>
+  <li><span class="doc-unpublished">Loading</span></li>
+  <li><span class="doc-unpublished">Drag and drop</span></li>
+</ul>
+<h2 id="whats-still-open">What's still open</h2><ul class="doc-gaps" role="list"><li>The motion tokens (<a class="doc-ref" href="../resources/decisions.html#d124">D124</a>) are in the motion lab, not yet in tokens.css; the system still has two durations and two curves.</li><li>Reduced motion turns everything off (<a class="doc-ref" href="../resources/decisions.html#d10">D10</a>); the research proposes fades instead (<a class="doc-ref" href="../resources/interactions.html#i22">I22</a>). One of the two has to go.</li><li>Components set their own timings instead of the tokens: the button's 30ms press and 150ms release, the summary card's 150ms, the record panel's and the table header's 300ms (past <a class="doc-ref" href="../resources/decisions.html#d10">D10</a>'s 240ms ceiling), the table's 200ms, the skeleton's 1.4s loop.</li><li>Two tooltip waits: the CSS-only tooltip waits 150ms (<a class="doc-ref" href="../resources/interactions.html#i4">I4</a>), tooltip.js 300ms (<a class="doc-ref" href="../resources/decisions.html#d52">D52</a>).</li></ul><p class="doc-more"><a href="../resources/backlog.html#motion">All of it in the backlog</a></p><h2 id="decisions-and-contracts">Decisions and contracts</h2><ul class="doc-refs" role="list"><li><a class="doc-ref-card" href="../resources/decisions.html#d10"><span class="doc-ref-id">D10</span><span class="doc-ref-title">Motion</span><span class="badge" data-tone="success">Decided</span></a></li><li><a class="doc-ref-card" href="../resources/decisions.html#d124"><span class="doc-ref-id">D124</span><span class="doc-ref-title">Motion tokens, from the motion research</span><span class="badge" data-tone="info">Trying out</span></a></li><li><a class="doc-ref-card" href="../resources/interactions.html#i1"><span class="doc-ref-id">I1</span><span class="doc-ref-title">Dialog (modal)</span></a></li><li><a class="doc-ref-card" href="../resources/interactions.html#i3"><span class="doc-ref-id">I3</span><span class="doc-ref-title">Menu</span></a></li><li><a class="doc-ref-card" href="../resources/interactions.html#i4"><span class="doc-ref-id">I4</span><span class="doc-ref-title">Tooltip</span></a></li><li><a class="doc-ref-card" href="../resources/interactions.html#i22"><span class="doc-ref-id">I22</span><span class="doc-ref-title">Motion (proposed)</span></a></li></ul>
+      </article>
+      <nav class="doc-toc" aria-label="On this page"><p>On this page</p><ul role="list"><li><a href="#current-durations">Current: durations</a></li><li><a href="#current-curves">Current: curves</a></li><li><a href="#current-what-moves">Current: what moves</a></li><li><a href="#current-reduced-motion">Current: reduced motion</a></li><li><a href="#current-rules">Current: rules</a></li><li><a href="#proposed-tokens-by-what-moves">Proposed: tokens by what moves</a></li><li><a href="#proposed-how-motion-behaves">Proposed: how motion behaves</a></li><li><a href="#proposed-reduced-motion">Proposed: reduced motion</a></li><li><a href="#the-motion-lab">The motion lab</a></li><li><a href="#whats-still-open">What's still open</a></li><li><a href="#decisions-and-contracts">Decisions and contracts</a></li></ul></nav>
+    </div>
+    <nav class="doc-pager" aria-label="Previous and next"><a class="doc-pager-link" data-dir="prev" href="elevation.html"><span>Previous</span><b>Elevation and layers</b></a><a class="doc-pager-link" data-dir="next" href="iconography.html"><span>Next</span><b>Iconography</b></a></nav>
+  </main>
+  <footer class="doc-foot"><span>Bolster design system · Status quo, October 2026</span><span>Built 2026-10-26 from <code>system/</code> and <code>docs/</code></span></footer>
+</div>
+<dialog class="doc-search" aria-label="Search the documentation" closedby="any">
+  <label class="doc-search-field"><i data-icon="search" data-size="16"></i><input type="search" placeholder="Search components, tokens, decisions" aria-label="Search" aria-controls="doc-search-results" autocomplete="off"><kbd>Esc</kbd></label>
+  <ul class="doc-search-results" id="doc-search-results" role="listbox" aria-label="Results"></ul>
+</dialog>
+<script>window.DOC_ROOT="../"</script>
+<script src="../../shared/icons.js?v=d8edba0e"></script>
+<script src="../../system/components/tooltip.js?v=d8edba0e"></script>
+<script src="../assets/search-index.js?v=d8edba0e"></script>
+<script src="../assets/site.js?v=d8edba0e"></script>
+</body>
+</html>

@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glossary · Bolster design system</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="The words Bolster and this system use, and what each means here: the trade's records, the statuses they move through, and the system's own terms.">
+<link rel="icon" href="../../shared/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../../system/bolster.css?v=d8edba0e">
+<link rel="stylesheet" href="../assets/site.css?v=d8edba0e">
+<script>try{const t=localStorage.getItem("bds-theme");if(t&&t!=="auto")document.documentElement.dataset.theme=t}catch{}</script>
+<script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
+addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
+<script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body class="doc">
+<a class="doc-skip" href="#main">Skip to content</a>
+<aside class="doc-nav" id="doc-nav" aria-label="Documentation">
+  <div class="doc-nav-head">
+    <a class="doc-brand" href="../index.html"><svg class="doc-mark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="62 10 381 491"><path d="M62 10h381v258H330v233H62z" fill="#FBFF00"/><path d="M150 92h214v78H233v271h-83z" fill="#1C1A1B"/></svg>
+<span class="doc-brand-text"><b>Bolster</b><span>Design system</span></span></a>
+    <button type="button" class="doc-nav-close" data-nav-close aria-label="Close menu" data-tip="Close"><i data-icon="xmark" data-size="16"></i></button>
+  </div>
+  <button type="button" class="doc-search-open" data-search-open><i data-icon="search" data-size="14"></i><span>Search</span><kbd>⌘K</kbd></button>
+  <nav class="doc-nav-body" aria-label="Pages"><div class="doc-nav-sec"><p class="doc-nav-label">Overview</p><ul role="list"><li><a class="doc-nav-item" href="../index.html"><span>Introduction</span></a></li><li><a class="doc-nav-item" href="../principles.html"><span>Principles</span></a></li><li><a class="doc-nav-item" href="../getting-started.html"><span>Getting started</span></a></li><li><a class="doc-nav-item" href="../architecture.html"><span>Architecture</span></a></li></ul></div><div class="doc-nav-sec"><p class="doc-nav-label">Foundations</p><ul role="list"><li><a class="doc-nav-item" href="../foundations/color.html"><span>Colour</span></a></li><li><a class="doc-nav-item" href="../foundations/typography.html"><span>Typography</span></a></li><li><a class="doc-nav-item" href="../foundations/spacing.html"><span>Spacing and layout</span></a></li><li><a class="doc-nav-item" href="../foundations/shape.html"><span>Shape</span></a></li><li><a class="doc-nav-item" href="../foundations/elevation.html"><span>Elevation and layers</span></a></li><li><a class="doc-nav-item" href="../foundations/motion.html"><span>Motion</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="../foundations/iconography.html"><span>Iconography</span></a></li><li><a class="doc-nav-item" href="../foundations/accessibility.html"><span>Accessibility</span></a></li><li><a class="doc-nav-item" href="../foundations/content.html"><span>Content</span><span class="doc-nav-dot" data-doc-status="partial" data-tip="Needs work"></span></a></li><li><a class="doc-nav-item" href="../foundations/brand.html"><span>Brand</span><span class="doc-nav-dot" data-doc-status="partial" data-tip="Needs work"></span></a></li><li class="doc-nav-group">Not built yet</li><li><a class="doc-nav-item" href="../backlog/data-viz.html" data-planned><span>Data visualisation</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li></ul></div><div class="doc-nav-sec"><p class="doc-nav-label">Components</p><ul role="list"><li><a class="doc-nav-item" href="../components/index.html"><span>Overview</span></a></li><li class="doc-nav-group">Actions</li><li><a class="doc-nav-item" href="../components/button.html"><span>Button</span></a></li><li><a class="doc-nav-item" href="../components/segmented-control.html"><span>Segmented control</span></a></li><li><a class="doc-nav-item" href="../components/menu.html"><span>Menu</span></a></li><li class="doc-nav-group">Inputs</li><li><a class="doc-nav-item" href="../components/field.html"><span>Field</span></a></li><li><a class="doc-nav-item" href="../components/search-field.html"><span>Search field</span></a></li><li><a class="doc-nav-item" href="../components/chip.html"><span>Filter chip</span></a></li><li><a class="doc-nav-item" href="../components/choice.html"><span>Checkbox, radio, toggle</span></a></li><li><a class="doc-nav-item" href="../components/calendar.html"><span>Calendar and date range</span></a></li><li class="doc-nav-group">Display</li><li><a class="doc-nav-item" href="../components/badge.html"><span>Badge</span></a></li><li><a class="doc-nav-item" href="../components/avatar.html"><span>Avatar</span></a></li><li><a class="doc-nav-item" href="../components/thumbnail.html"><span>Thumbnail</span></a></li><li><a class="doc-nav-item" href="../components/card.html"><span>Card</span></a></li><li><a class="doc-nav-item" href="../components/data-table.html"><span>Data table</span></a></li><li><a class="doc-nav-item" href="../components/summary-cards.html"><span>Summary cards</span></a></li><li><a class="doc-nav-item" href="../components/tooltip.html"><span>Tooltip</span></a></li><li class="doc-nav-group">Feedback</li><li><a class="doc-nav-item" href="../components/toast.html"><span>Toast</span></a></li><li><a class="doc-nav-item" href="../components/states.html"><span>Empty, loading and error</span><span class="doc-nav-dot" data-doc-status="partial" data-tip="Needs work"></span></a></li><li><a class="doc-nav-item" href="../components/loader.html"><span>Loading screen</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li class="doc-nav-group">Overlays</li><li><a class="doc-nav-item" href="../components/popover.html"><span>Popover</span></a></li><li><a class="doc-nav-item" href="../components/dialog.html"><span>Dialog</span></a></li><li><a class="doc-nav-item" href="../components/record.html"><span>Record panel</span></a></li><li class="doc-nav-group">Navigation</li><li><a class="doc-nav-item" href="../components/app-shell.html"><span>App shell</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="../components/tabs.html"><span>Tabs</span></a></li><li><a class="doc-nav-item" href="../components/toolbar.html"><span>Toolbar</span></a></li><li><a class="doc-nav-item" href="../components/floating-bar.html"><span>Floating bar</span></a></li><li class="doc-nav-group">Not built yet</li><li><a class="doc-nav-item" href="../backlog/split-button.html" data-planned><span>Split button</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/combobox.html" data-planned><span>Combobox</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/tag-input.html" data-planned><span>Tag input</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/number-input.html" data-planned><span>Number and quantity</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/time-field.html" data-planned><span>Time field</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/file-upload.html" data-planned><span>File upload</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/address-field.html" data-planned><span>Address field</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/rich-text.html" data-planned><span>Rich text editor</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/signature.html" data-planned><span>Signature</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/progress.html" data-planned><span>Progress</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/chart.html" data-planned><span>Charts</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/inline-alert.html" data-planned><span>Inline alert</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/accordion.html" data-planned><span>Accordion</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/breadcrumbs.html" data-planned><span>Breadcrumbs</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/stepper.html" data-planned><span>Stepper</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/notifications.html" data-planned><span>Notifications</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li></ul></div><div class="doc-nav-sec"><p class="doc-nav-label">Patterns</p><ul role="list"><li><a class="doc-nav-item" href="../patterns/index.html"><span>Overview</span></a></li><li><a class="doc-nav-item" href="../patterns/page-scrolling.html"><span>Page scrolling</span><span class="doc-nav-dot" data-doc-status="partial" data-tip="Needs work"></span></a></li><li><a class="doc-nav-item" href="../patterns/opening-records.html"><span>Opening a record</span></a></li><li><a class="doc-nav-item" href="../patterns/filtering.html"><span>Filtering and search</span></a></li><li><a class="doc-nav-item" href="../patterns/bulk-actions.html"><span>Bulk actions</span></a></li><li><a class="doc-nav-item" href="../patterns/picking-dates.html"><span>Picking dates</span></a></li><li><a class="doc-nav-item" href="../patterns/nested-menus.html"><span>Nested menus</span></a></li><li><a class="doc-nav-item" href="../patterns/feedback.html"><span>Feedback and undo</span></a></li><li><a class="doc-nav-item" href="../patterns/focus.html"><span>Focus and keyboard</span></a></li><li><a class="doc-nav-item" href="../patterns/navigation.html"><span>Navigation at each width</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="../patterns/global-search.html"><span>Global search</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="../patterns/drag-and-drop.html"><span>Drag and drop</span><span class="doc-nav-dot" data-doc-status="draft" data-tip="Draft"></span></a></li><li class="doc-nav-group">Not built yet</li><li><a class="doc-nav-item" href="../backlog/forms.html" data-planned><span>Forms and validation</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/permissions.html" data-planned><span>Permissions and read-only</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/errors.html" data-planned><span>Errors and offline</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/onboarding.html" data-planned><span>First use and onboarding</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/export.html" data-planned><span>Export and print</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li></ul></div><div class="doc-nav-sec"><p class="doc-nav-label">Page types</p><ul role="list"><li><a class="doc-nav-item" href="../page-types/index.html"><span>Overview</span></a></li><li><a class="doc-nav-item" href="../page-types/list.html"><span>List page</span></a></li><li><a class="doc-nav-item" href="../page-types/todo.html"><span>To-do</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="../page-types/calendar.html"><span>Calendar</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="../page-types/pipeline.html"><span>Pipeline</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="../page-types/timeline.html"><span>Timeline</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="../page-types/estimate.html"><span>Estimate</span><span class="doc-nav-dot" data-doc-status="draft" data-tip="Draft"></span></a></li><li class="doc-nav-group">Not built yet</li><li><a class="doc-nav-item" href="../backlog/home.html" data-planned><span>Home and getting started</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/dashboard.html" data-planned><span>Dashboard</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/job-workspace.html" data-planned><span>Job workspace</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/settings.html" data-planned><span>Settings</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/document.html" data-planned><span>Document and presentation</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/messaging.html" data-planned><span>Messaging</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/files.html" data-planned><span>Files</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/reports.html" data-planned><span>Reports</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/wizard.html" data-planned><span>Wizard and import</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/field-app.html" data-planned><span>Field app</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/client-portal.html" data-planned><span>Client and vendor portal</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/auth.html" data-planned><span>Sign in</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li></ul></div><div class="doc-nav-sec"><p class="doc-nav-label">Resources</p><ul role="list"><li><a class="doc-nav-item" href="backlog.html"><span>Backlog</span></a></li><li><a class="doc-nav-item" href="tokens.html"><span>Token reference</span></a></li><li><a class="doc-nav-item" href="decisions.html"><span>Decision log</span></a></li><li><a class="doc-nav-item" href="interactions.html"><span>Interaction contracts</span></a></li><li><a class="doc-nav-item" href="glossary.html" aria-current="page"><span>Glossary</span></a></li><li><a class="doc-nav-item" href="contributing.html"><span>Contributing</span></a></li><li class="doc-nav-group">Not built yet</li><li><a class="doc-nav-item" href="../backlog/recipes.html" data-planned><span>Recipes for other page types</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/tokens-export.html" data-planned><span>Tokens for other tools</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="../backlog/releases.html" data-planned><span>Versions and changelog</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li></ul></div></nav>
+  <div class="doc-nav-foot">
+    <div class="doc-theme" role="radiogroup" aria-label="Theme"><label><input type="radio" name="doc-theme" value="auto" checked><span>Auto</span></label><label><input type="radio" name="doc-theme" value="light"><span>Light</span></label><label><input type="radio" name="doc-theme" value="dark"><span>Dark</span></label></div>
+    <span class="doc-version">v0.1.0 · Status quo, October 2026</span>
+  </div>
+</aside>
+<div class="doc-scrim" data-nav-close></div>
+<div class="doc-page">
+  <header class="doc-topbar">
+    <button type="button" class="doc-topbar-btn" data-nav-open aria-label="Menu" aria-controls="doc-nav" data-tip="Menu"><i data-icon="menu" data-size="16"></i></button>
+    <a class="doc-brand" href="../index.html"><svg class="doc-mark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="62 10 381 491"><path d="M62 10h381v258H330v233H62z" fill="#FBFF00"/><path d="M150 92h214v78H233v271h-83z" fill="#1C1A1B"/></svg>
+<span class="doc-brand-text"><b>Bolster</b><span>Design system</span></span></a>
+    <button type="button" class="doc-topbar-btn" data-search-open aria-label="Search" data-tip="Search"><i data-icon="search" data-size="16"></i></button>
+  </header>
+  <main id="main" class="doc-main" tabindex="-1">
+    <header class="doc-head">
+      <p class="doc-eyebrow">Resources</p>
+      <h1>Glossary</h1>
+      <p class="doc-lead">The words Bolster and this system use, and what each means here: the trade's records, the statuses they move through, and the system's own terms.</p>
+      
+    </header>
+    <div class="doc-body">
+      <article class="doc-content">
+<p>Bolster's words come first: the system uses the product's names for things, in the product's case, and explanations on screen use the screen's own words (D27). Where a word means one thing in Bolster and another in the system (a catalog, a stage), both are here.</p>
+
+<h2 id="the-trade">The trade</h2>
+<dl class="doc-glossary">
+  <dt>Appointment</dt>
+  <dd>A sales appointment: a visit or a call booked with a customer, at a time, with someone from the team. Its type sets its length (an estimate visit, a measure, a project consultation). One of the calendar's two kinds of booking; the other is an event.</dd>
+  <dt>Assembly</dt>
+  <dd>A part of an estimate that holds items, labour and selections, nested to any depth, with its category (“Roofing – Shingle”). Its cost and price add up what's in it.</dd>
+  <dt>AutoCost</dt>
+  <dd>Bolster's tag on an item whose price is kept up to date from the supplier.</dd>
+  <dt>Bid request (RFQ)</dt>
+  <dd>One trade of a job (its budget items grouped by trade: plumbing fixtures and rough-in under Plumbing) sent to vendors to price. Reviewed and sent, then waiting while the vendors price each item through a link, until their bids are back. Bolster's address for them is <code>~/rfqs</code>.</dd>
+  <dt>Catalog</dt>
+  <dd>The company's items (Bolster's Items, <code>~/items</code>): what it sells and buys, each with its photo, category and vendor. Not to be confused with the system's catalog, below.</dd>
+  <dt>Crew</dt>
+  <dd>The company's own people doing the work, as against subcontractors. The calendar's Crew view lays out each person's week; the timeline's Done by tells our crew from subcontractors.</dd>
+  <dt>Customer, client</dt>
+  <dd>The person or household the work is for. Bolster's lists say customer (Customers: Lead, Active, Past); its jobs and documents say client. A lead is a customer with no job yet.</dd>
+  <dt>Estimate</dt>
+  <dd>What a job will cost: a tree of assemblies, items, labour and selections, priced with markup and tax up to the job's total. Creating a job makes a draft estimate; sent to the client, it's the proposal.</dd>
+  <dt>Event</dt>
+  <dd>On the calendar, a booking that isn't a sales appointment: a title, a time or all day, whose calendar it's on, guests, a location.</dd>
+  <dt>Expense</dt>
+  <dd>Money a job costs that the business pays out: a vendor's bill or a receipt for something bought, added by the team or submitted by the vendor, unpaid until someone marks it paid.</dd>
+  <dt>Invoice</dt>
+  <dd>What the client is asked to pay: a record of its own, with its own window. A progress invoice while the job is underway; the final one once the work is done.</dd>
+  <dt>Item</dt>
+  <dd>Something the company sells or buys: in the catalog, and as a line of an estimate.</dd>
+  <dt>Job</dt>
+  <dd>Bolster's centre: the work for a client, with its estimate, schedule, money, files and people. A job opens into its workspace.</dd>
+  <dt>Labor and materials</dt>
+  <dd>The two kinds of thing an order, an item or a line holds, defined once for every page (<code>system/model/kinds.json</code>): a hard hat for labour, a box for materials, named together in that order. Bolster's labels spell it “Labor”.</dd>
+  <dt>Lead</dt>
+  <dd>A customer's record before there's a job: a person and what they asked for. On the pipeline, Leads and Appointments hold people; every stage after them holds jobs.</dd>
+  <dt>Lost</dt>
+  <dd>On the pipeline, a lead, an appointment or a pending job marked lost with a reason: price, timing, went with someone else, no reply, not a fit. It can be reopened where it was.</dd>
+  <dt>Milestone</dt>
+  <dd>On the timeline, a date with no length, such as an inspection, drawn as a diamond.</dd>
+  <dt>Phase</dt>
+  <dd>A part of a job's plan that groups its stages: a job has phases, a phase has stages. On the calendar, a phase is a bar across its days.</dd>
+  <dt>Pipeline</dt>
+  <dd>Bolster's board (Jobs → Pipeline) from the first enquiry to the paid invoice: people, then jobs, then invoices, each stage a column.</dd>
+  <dt>Presentation</dt>
+  <dd>What the client sees: a proposal or an invoice as a long centred document, with a cover, a summary and sections, the decision in a bar that stays on screen. The same layout serves the public links clients open. Its look follows the company's presentation themes.</dd>
+  <dt>Proposal</dt>
+  <dd>The estimate as it goes to the client to approve. Bolster names the estimate's editor Proposal (<code>~/estimate/:id</code>); the job's Proposal presentation is what the client opens.</dd>
+  <dt>Selection</dt>
+  <dd>A choice on an estimate (a shingle's style and colour). The estimator makes some, marked with a lock; the customer makes the rest when they open the proposal.</dd>
+  <dt>Stage (pipeline)</dt>
+  <dd>A column of the pipeline: Leads, Appointments, Pending, Booked, In progress, Getting paid, and Lost.</dd>
+  <dt>Stage (timeline)</dt>
+  <dd>A dated piece of a job's work, under a phase, measured in working days. It can wait for another stage of the same job (a link, finish to start); its labour and materials fold under it.</dd>
+  <dt>Sub, subcontractor</dt>
+  <dd>A vendor who brings labour to a job, as against a supplier of materials. Bolster's page for them is Subs &amp; vendors.</dd>
+  <dt>Task</dt>
+  <dd>A piece of work someone on the team has to do: one they wrote themselves, or a job's labour or material item turned into a task, with a due date, a priority and someone to do it, open until it's ticked off.</dd>
+  <dt>Trade</dt>
+  <dd>A kind of work: plumbing, roofing, insulation. A job's budget items are grouped by trade, and a vendor has the trades it works in.</dd>
+  <dt>Unscheduled</dt>
+  <dd>Jobs with no dates yet. They wait beside the calendar and the timeline, to be given a start.</dd>
+  <dt>Vendor</dt>
+  <dd>A company the business pays for work on its jobs: a subcontractor who brings labour, a supplier of materials, or both. Kept with how to reach it and the documents a job needs from it (insurance, licence, workers' comp); active while the business uses it.</dd>
+  <dt>Vendor order</dt>
+  <dd>An order the business places with a vendor for a job's labour, materials or both: written, sent, approved by the vendor, then paid once their invoice is in.</dd>
+</dl>
+
+<h2 id="statuses">Statuses</h2>
+<p>A status is where a record is in its life. The model lists a thing's statuses in order, each with the step that moves it on. Jobs' statuses have their own shapes, filling a quarter at a time as the job moves on; every other list shows a status by its colour alone (D49).</p>
+<dl class="doc-glossary">
+  <dt><span class="badge" data-status="draft" data-mark="dashed">Draft</span></dt>
+  <dd>A job whose estimate hasn't been sent; an invoice not sent yet.</dd>
+  <dt><span class="badge" data-status="pending" data-mark="quarter">Pending</span></dt>
+  <dd>A job whose estimate is sent, awaiting the client's reply.</dd>
+  <dt><span class="badge" data-status="booked" data-mark="half">Booked</span></dt>
+  <dd>A job the client approved, work not started. Booked is won.</dd>
+  <dt><span class="badge" data-status="in-progress" data-mark="three">In progress</span></dt>
+  <dd>A job whose work is underway.</dd>
+  <dt><span class="badge" data-tone="danger" data-mark="slash">Declined</span></dt>
+  <dd>A job the client said no to. With Booked and In progress, it makes the jobs that are decided.</dd>
+  <dt><span class="badge" data-status="lead">Lead</span></dt>
+  <dd>A customer with no job yet.</dd>
+  <dt><span class="badge" data-status="active">Active</span></dt>
+  <dd>A customer with open jobs; a vendor the business uses.</dd>
+  <dt><span class="badge" data-tone="neutral">Past</span></dt>
+  <dd>A customer from past work, with no open jobs.</dd>
+  <dt><span class="badge" data-status="outstanding">Outstanding</span></dt>
+  <dd>An invoice sent and not yet paid, not yet past its due date.</dd>
+  <dt><span class="badge" data-tone="danger">Overdue</span></dt>
+  <dd>Past its due date and not done: an invoice not paid, a task not completed. Nobody sets it; it's worked out from the date (D70).</dd>
+  <dt><span class="badge" data-tone="success">Paid</span></dt>
+  <dd>An invoice, an expense or a vendor order that's settled. An ending.</dd>
+  <dt>Not sent, Awaiting approval, Approved</dt>
+  <dd>A vendor order's way to Paid: written, sent to the vendor, approved by them. Declined (by the vendor) and Cancelled are its other endings.</dd>
+  <dt>Not sent, Waiting, Bids back</dt>
+  <dd>A bid request's statuses: not out yet, out with vendors, every bid back.</dd>
+  <dt>To do, Completed</dt>
+  <dd>A task's statuses; Overdue sits between them when its due date passes.</dd>
+  <dt>Stage (of a status)</dt>
+  <dd>What kind of point in a life a status is: new, draft, waiting, won, underway, done, lost, late or neutral. The stage picks the status's colour, so the same stage looks the same on every list (L-status-stage).</dd>
+  <dt>Ending</dt>
+  <dd>A status where a record's life stops: Paid, Declined, Cancelled, Past. A summary counts endings for the last 30 days (D67).</dd>
+  <dt>Status tokens</dt>
+  <dd>The colours for the job statuses (<code>--color-status-{lead, draft, pending, booked, in-progress, active, outstanding}-…</code>), each a surface, content, dot and, where the shape carries it, a mark, all passing contrast in both themes (D12).</dd>
+</dl>
+
+<h2 id="the-system">The system</h2>
+<dl class="doc-glossary">
+  <dt>Canvas</dt>
+  <dd>The page's own surface, paper in light, with a faint grid behind every page (D81). Cards sit on it.</dd>
+  <dt>Catalog (the system's)</dt>
+  <dd><code>system/index.html</code>, the back office: a card per component with its live preview, the drafts, links to every specimen.</dd>
+  <dt>Component</dt>
+  <dd>A part pages are built from (a button, a chip, the record), as one CSS file in <code>system/components/</code> with classes and data attributes for its variants.</dd>
+  <dt>Concept</dt>
+  <dd>A whole page built in <code>concepts/</code> from the system, with made-up data, to try a page type out. What settles in it moves into the system.</dd>
+  <dt>D-entry</dt>
+  <dd>A decision in <code>docs/decisions.md</code>, numbered (D12) and marked decided, trying out, proposed, superseded or dropped, with its reason. Every token and component decision has one.</dd>
+  <dt>Draft</dt>
+  <dd>A part built in a concept and working there, waiting for the product designer's approval before it moves into the system. Not to be confused with the Draft status.</dd>
+  <dt>I-entry</dt>
+  <dd>An interaction contract in <code>docs/interactions.md</code> (I6): how a thing behaves, to the key and the focus, at every width.</dd>
+  <dt>Intent</dt>
+  <dd>What one page is for, in a short file (<code>pages/list/&lt;nav&gt;.intent.json</code>): who comes, what they do there, the key figure, what they look at after the name. Written as needs, never as layout.</dd>
+  <dt>Kinds</dt>
+  <dd>Ideas that recur across things, defined once with their words and icons: labor and materials.</dd>
+  <dt>Model</dt>
+  <dd>What exists, with nothing about pages (<code>system/model/&lt;thing&gt;.json</code>): a thing's noun, how people name one, its fields, its lifecycle, its actions, whether it has its own window, each with its evidence. One per thing, shared by every page that shows it.</dd>
+  <dt>Next step</dt>
+  <dd>The action that moves a record on from its status (Send, Mark approved, Record payment), from its model's lifecycle. On a list it leads the record and the row's ··· menu, never a button on the row (D43); on the pipeline it's on the card.</dd>
+  <dt>Page description</dt>
+  <dd>What a built page is, as data (<code>pages/list/&lt;nav&gt;.json</code>): its columns, statuses, summary, filters, actions, what a click does. Written by the builder from the model and the intent, never edited.</dd>
+  <dt>Page type</dt>
+  <dd>A kind of page (a list, a board, a calendar) arranged from components and patterns, so every page of that kind is built the same way.</dd>
+  <dt>Pattern</dt>
+  <dd>How several components behave together across pages: filtering, bulk actions, opening records, page scrolling.</dd>
+  <dt>Quick look</dt>
+  <dd>The record beside the list, for a thing that has its own window: the row opens the window, and Quick look is in the row's ··· menu (D69).</dd>
+  <dt>Recipe</dt>
+  <dd>The rules a page type is built by, written once (<code>system/recipes/list/</code>): the rules, the description's schema, the builder and the checker. Lists have one.</dd>
+  <dt>Record</dt>
+  <dd>One row's details, opened from the list: beside it from 1280 wide, a side sheet below. Status, amount, activity, two actions and More, the fields.</dd>
+  <dt>Rule</dt>
+  <dd>One line of a recipe, named L-something (L-row-click, L-summary), with its reason, its sources and what enforces it.</dd>
+  <dt>Shell</dt>
+  <dd>The frame every page sits in: the dark top bar, the rail and menu, the tab bar on phones. What it does is defined once and inherited by every page.</dd>
+  <dt>Specimen</dt>
+  <dd>A static page in <code>system/specimens/</code> showing one component in every variant and state.</dd>
+  <dt>Status quo</dt>
+  <dd>What the system is today, to build on until it changes: warm in light, cool in dark, the list page in the system (D33).</dd>
+  <dt>Summary card</dt>
+  <dd>A card above a list: a KPI (a figure that says how the list is doing) or a status of its lifecycle. A card that's a slice of rows filters the list when picked.</dd>
+  <dt>Survey</dt>
+  <dd>A built page's open questions as a form, each starting on what the page assumes until someone answers (D64).</dd>
+  <dt>Token</dt>
+  <dd>A named value in <code>system/tokens.css</code>, as a CSS custom property, light and dark. Primitives are the raw ramps (<code>--blue-600</code>); semantic tokens say what a value is for (<code>--color-action-primary</code>) and are the only ones components use.</dd>
+  <dt>Work queue</dt>
+  <dd>A summary card standing for rows someone has to act on (Not sent, Unpaid, Missing documents). D66 made every card one; D67 replaced that with two kinds of summary, KPIs and the lifecycle.</dd>
+  <dt>Workspace</dt>
+  <dd>A thing's own full-screen window, opened from a row or by Edit: the job's, with its own navigation, a vendor's, a job's bid workspace. Where people work on the thing (I7).</dd>
+</dl>
+
+      </article>
+      <nav class="doc-toc" aria-label="On this page"><p>On this page</p><ul role="list"><li><a href="#the-trade">The trade</a></li><li><a href="#statuses">Statuses</a></li><li><a href="#the-system">The system</a></li></ul></nav>
+    </div>
+    <nav class="doc-pager" aria-label="Previous and next"><a class="doc-pager-link" data-dir="prev" href="interactions.html"><span>Previous</span><b>Interaction contracts</b></a><a class="doc-pager-link" data-dir="next" href="contributing.html"><span>Next</span><b>Contributing</b></a></nav>
+  </main>
+  <footer class="doc-foot"><span>Bolster design system · Status quo, October 2026</span><span>Built 2026-10-26 from <code>system/</code> and <code>docs/</code></span></footer>
+</div>
+<dialog class="doc-search" aria-label="Search the documentation" closedby="any">
+  <label class="doc-search-field"><i data-icon="search" data-size="16"></i><input type="search" placeholder="Search components, tokens, decisions" aria-label="Search" aria-controls="doc-search-results" autocomplete="off"><kbd>Esc</kbd></label>
+  <ul class="doc-search-results" id="doc-search-results" role="listbox" aria-label="Results"></ul>
+</dialog>
+<script>window.DOC_ROOT="../"</script>
+<script src="../../shared/icons.js?v=d8edba0e"></script>
+<script src="../../system/components/tooltip.js?v=d8edba0e"></script>
+<script src="../assets/search-index.js?v=d8edba0e"></script>
+<script src="../assets/site.js?v=d8edba0e"></script>
+</body>
+</html>

@@ -287,7 +287,7 @@
       tl.innerHTML = `<div class="tl-scroll" data-tier="${tier()}"${narrow ? " data-narrow" : ""} style="--_day:${dw}px;--_grid:${GRID}px;--_w:${N * dw}px;--_wk:${7 * dw}px;--_off0:${(5 - dow(R0) + 7) % 7}">
         <div class="tl-head"><div class="tl-corner"><span>Name</span><span class="tl-start">Start</span><span class="tl-days">Days</span></div>${scaleHtml()}</div>
         <div class="tl-body" style="height:${list.length * ROW}px"><div class="tl-grid-bg" aria-hidden="true">${monthLines()}</div><div class="tl-overlay" aria-hidden="true">${linksSvg(list)}<i class="tl-today" style="left:${X(0) + dw / 2}px"></i></div>${groupsHtml(list)}</div>
-        <div class="tl-x" tabindex="-1" aria-hidden="true"><i style="width:${N * dw}px"></i></div></div>`;
+        <div class="tl-x page-hscroll" tabindex="-1" aria-hidden="true"><i style="width:${N * dw}px"></i></div></div>`;
       $(".tl-scroll").style.setProperty("--_head", `${$(".tl-head").offsetHeight}px`);
       months = $$(".tl-scale-top > span").map((m) => ({ b: m.firstElementChild, l: m.offsetLeft, w: m.offsetWidth, bw: m.firstElementChild.offsetWidth, at: 0 }));
       const s2 = xs();

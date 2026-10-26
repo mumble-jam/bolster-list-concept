@@ -234,8 +234,8 @@
       const now = d === T ? `<span class="cal-now" style="--_top:calc(var(--_hour) * ${(nowMin - H0 * 60) / 60})" aria-hidden="true"></span>` : "";
       cols += `<div class="cal-col" data-col="${d}"${isOff(d) ? " data-off" : ""}>${blocks}${now}</div>`;
     }
-    return `<div class="cal-time" style="--_n:${n}">${weekdayHead(start, n, "<div></div>")}
-      <div class="cal-allday"><span class="cal-gutter-label">All day</span>${alldayRow({ start, n, spans: spansIn(start, end), things: (d) => dayThings(d, (it) => it.allDay) })}</div>
+    return `<div class="cal-time" style="--_n:${n}"><div class="cal-time-head">${weekdayHead(start, n, "<div></div>")}
+      <div class="cal-allday"><span class="cal-gutter-label">All day</span>${alldayRow({ start, n, spans: spansIn(start, end), things: (d) => dayThings(d, (it) => it.allDay) })}</div></div>
       <div class="cal-hours" style="--_span-h:${H1 - H0}"><div class="cal-gutter" aria-hidden="true">${gutter}</div>${cols}</div></div>`;
   }
 
@@ -295,7 +295,7 @@
     return a.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   };
   function render() {
-    const cal = $("#cal"), hoursTop = $(".cal-hours", cal)?.scrollTop || 0, again = cal.contains(popFor?.from) && finder(popFor.from);
+    const cal = $("#cal"), again = cal.contains(popFor?.from) && finder(popFor.from);
     cal.dataset.view = phone.matches ? "agenda" : st.view;
     cal.innerHTML = phone.matches ? phoneHtml() : `<div class="cal-desk">${st.view === "month" ? monthHtml() : st.view === "week" ? timeHtml(7) : st.view === "day" ? timeHtml(1) : crewHtml()}</div>`;
     // an open popover keeps its opener, drawn again (the new card its draft); gone, the popover closes
@@ -315,7 +315,6 @@
     renderTray();
     $("#go-today").setAttribute("aria-label", `Today, ${f.long(T)}`);
     if (cal.dataset.view === "month") fitMonth();
-    const hours = $(".cal-hours", cal); if (hours) hours.scrollTop = hoursTop;
   }
   function renderTray() {
     $("#tray-list").innerHTML = tray.length ? tray.map((u) => `<li><button type="button" class="cal-tray-item" data-tray="${u.id}" aria-haspopup="dialog"><b>${esc(u.job)}</b><span>${esc(u.phase)} · ${u.days} ${u.days === 1 ? "day" : "days"} · ${esc(u.client)}</span></button></li>`).join("")

@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started · Bolster design system</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="How to find your way around the system as a designer, and how to bring it into a page or a prototype as a developer.">
+<link rel="icon" href="../shared/assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../system/bolster.css?v=d8edba0e">
+<link rel="stylesheet" href="assets/site.css?v=d8edba0e">
+<script>try{const t=localStorage.getItem("bds-theme");if(t&&t!=="auto")document.documentElement.dataset.theme=t}catch{}</script>
+<script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
+addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
+<script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body class="doc">
+<a class="doc-skip" href="#main">Skip to content</a>
+<aside class="doc-nav" id="doc-nav" aria-label="Documentation">
+  <div class="doc-nav-head">
+    <a class="doc-brand" href="index.html"><svg class="doc-mark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="62 10 381 491"><path d="M62 10h381v258H330v233H62z" fill="#FBFF00"/><path d="M150 92h214v78H233v271h-83z" fill="#1C1A1B"/></svg>
+<span class="doc-brand-text"><b>Bolster</b><span>Design system</span></span></a>
+    <button type="button" class="doc-nav-close" data-nav-close aria-label="Close menu" data-tip="Close"><i data-icon="xmark" data-size="16"></i></button>
+  </div>
+  <button type="button" class="doc-search-open" data-search-open><i data-icon="search" data-size="14"></i><span>Search</span><kbd>⌘K</kbd></button>
+  <nav class="doc-nav-body" aria-label="Pages"><div class="doc-nav-sec"><p class="doc-nav-label">Overview</p><ul role="list"><li><a class="doc-nav-item" href="index.html"><span>Introduction</span></a></li><li><a class="doc-nav-item" href="principles.html"><span>Principles</span></a></li><li><a class="doc-nav-item" href="getting-started.html" aria-current="page"><span>Getting started</span></a></li><li><a class="doc-nav-item" href="architecture.html"><span>Architecture</span></a></li></ul></div><div class="doc-nav-sec"><p class="doc-nav-label">Foundations</p><ul role="list"><li><a class="doc-nav-item" href="foundations/color.html"><span>Colour</span></a></li><li><a class="doc-nav-item" href="foundations/typography.html"><span>Typography</span></a></li><li><a class="doc-nav-item" href="foundations/spacing.html"><span>Spacing and layout</span></a></li><li><a class="doc-nav-item" href="foundations/shape.html"><span>Shape</span></a></li><li><a class="doc-nav-item" href="foundations/elevation.html"><span>Elevation and layers</span></a></li><li><a class="doc-nav-item" href="foundations/motion.html"><span>Motion</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="foundations/iconography.html"><span>Iconography</span></a></li><li><a class="doc-nav-item" href="foundations/accessibility.html"><span>Accessibility</span></a></li><li><a class="doc-nav-item" href="foundations/content.html"><span>Content</span><span class="doc-nav-dot" data-doc-status="partial" data-tip="Needs work"></span></a></li><li><a class="doc-nav-item" href="foundations/brand.html"><span>Brand</span><span class="doc-nav-dot" data-doc-status="partial" data-tip="Needs work"></span></a></li><li class="doc-nav-group">Not built yet</li><li><a class="doc-nav-item" href="backlog/data-viz.html" data-planned><span>Data visualisation</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li></ul></div><div class="doc-nav-sec"><p class="doc-nav-label">Components</p><ul role="list"><li><a class="doc-nav-item" href="components/index.html"><span>Overview</span></a></li><li class="doc-nav-group">Actions</li><li><a class="doc-nav-item" href="components/button.html"><span>Button</span></a></li><li><a class="doc-nav-item" href="components/segmented-control.html"><span>Segmented control</span></a></li><li><a class="doc-nav-item" href="components/menu.html"><span>Menu</span></a></li><li class="doc-nav-group">Inputs</li><li><a class="doc-nav-item" href="components/field.html"><span>Field</span></a></li><li><a class="doc-nav-item" href="components/search-field.html"><span>Search field</span></a></li><li><a class="doc-nav-item" href="components/chip.html"><span>Filter chip</span></a></li><li><a class="doc-nav-item" href="components/choice.html"><span>Checkbox, radio, toggle</span></a></li><li><a class="doc-nav-item" href="components/calendar.html"><span>Calendar and date range</span></a></li><li class="doc-nav-group">Display</li><li><a class="doc-nav-item" href="components/badge.html"><span>Badge</span></a></li><li><a class="doc-nav-item" href="components/avatar.html"><span>Avatar</span></a></li><li><a class="doc-nav-item" href="components/thumbnail.html"><span>Thumbnail</span></a></li><li><a class="doc-nav-item" href="components/card.html"><span>Card</span></a></li><li><a class="doc-nav-item" href="components/data-table.html"><span>Data table</span></a></li><li><a class="doc-nav-item" href="components/summary-cards.html"><span>Summary cards</span></a></li><li><a class="doc-nav-item" href="components/tooltip.html"><span>Tooltip</span></a></li><li class="doc-nav-group">Feedback</li><li><a class="doc-nav-item" href="components/toast.html"><span>Toast</span></a></li><li><a class="doc-nav-item" href="components/states.html"><span>Empty, loading and error</span><span class="doc-nav-dot" data-doc-status="partial" data-tip="Needs work"></span></a></li><li><a class="doc-nav-item" href="components/loader.html"><span>Loading screen</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li class="doc-nav-group">Overlays</li><li><a class="doc-nav-item" href="components/popover.html"><span>Popover</span></a></li><li><a class="doc-nav-item" href="components/dialog.html"><span>Dialog</span></a></li><li><a class="doc-nav-item" href="components/record.html"><span>Record panel</span></a></li><li class="doc-nav-group">Navigation</li><li><a class="doc-nav-item" href="components/app-shell.html"><span>App shell</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="components/tabs.html"><span>Tabs</span></a></li><li><a class="doc-nav-item" href="components/toolbar.html"><span>Toolbar</span></a></li><li><a class="doc-nav-item" href="components/floating-bar.html"><span>Floating bar</span></a></li><li class="doc-nav-group">Not built yet</li><li><a class="doc-nav-item" href="backlog/split-button.html" data-planned><span>Split button</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/combobox.html" data-planned><span>Combobox</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/tag-input.html" data-planned><span>Tag input</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/number-input.html" data-planned><span>Number and quantity</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/time-field.html" data-planned><span>Time field</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/file-upload.html" data-planned><span>File upload</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/address-field.html" data-planned><span>Address field</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/rich-text.html" data-planned><span>Rich text editor</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/signature.html" data-planned><span>Signature</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/progress.html" data-planned><span>Progress</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/chart.html" data-planned><span>Charts</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/inline-alert.html" data-planned><span>Inline alert</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/accordion.html" data-planned><span>Accordion</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/breadcrumbs.html" data-planned><span>Breadcrumbs</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/stepper.html" data-planned><span>Stepper</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/notifications.html" data-planned><span>Notifications</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li></ul></div><div class="doc-nav-sec"><p class="doc-nav-label">Patterns</p><ul role="list"><li><a class="doc-nav-item" href="patterns/index.html"><span>Overview</span></a></li><li><a class="doc-nav-item" href="patterns/page-scrolling.html"><span>Page scrolling</span><span class="doc-nav-dot" data-doc-status="partial" data-tip="Needs work"></span></a></li><li><a class="doc-nav-item" href="patterns/opening-records.html"><span>Opening a record</span></a></li><li><a class="doc-nav-item" href="patterns/filtering.html"><span>Filtering and search</span></a></li><li><a class="doc-nav-item" href="patterns/bulk-actions.html"><span>Bulk actions</span></a></li><li><a class="doc-nav-item" href="patterns/picking-dates.html"><span>Picking dates</span></a></li><li><a class="doc-nav-item" href="patterns/nested-menus.html"><span>Nested menus</span></a></li><li><a class="doc-nav-item" href="patterns/feedback.html"><span>Feedback and undo</span></a></li><li><a class="doc-nav-item" href="patterns/focus.html"><span>Focus and keyboard</span></a></li><li><a class="doc-nav-item" href="patterns/navigation.html"><span>Navigation at each width</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="patterns/global-search.html"><span>Global search</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="patterns/drag-and-drop.html"><span>Drag and drop</span><span class="doc-nav-dot" data-doc-status="draft" data-tip="Draft"></span></a></li><li class="doc-nav-group">Not built yet</li><li><a class="doc-nav-item" href="backlog/forms.html" data-planned><span>Forms and validation</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/permissions.html" data-planned><span>Permissions and read-only</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/errors.html" data-planned><span>Errors and offline</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/onboarding.html" data-planned><span>First use and onboarding</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/export.html" data-planned><span>Export and print</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li></ul></div><div class="doc-nav-sec"><p class="doc-nav-label">Page types</p><ul role="list"><li><a class="doc-nav-item" href="page-types/index.html"><span>Overview</span></a></li><li><a class="doc-nav-item" href="page-types/list.html"><span>List page</span></a></li><li><a class="doc-nav-item" href="page-types/todo.html"><span>To-do</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="page-types/calendar.html"><span>Calendar</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="page-types/pipeline.html"><span>Pipeline</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="page-types/timeline.html"><span>Timeline</span><span class="doc-nav-dot" data-doc-status="trying" data-tip="Trying out"></span></a></li><li><a class="doc-nav-item" href="page-types/estimate.html"><span>Estimate</span><span class="doc-nav-dot" data-doc-status="draft" data-tip="Draft"></span></a></li><li class="doc-nav-group">Not built yet</li><li><a class="doc-nav-item" href="backlog/home.html" data-planned><span>Home and getting started</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/dashboard.html" data-planned><span>Dashboard</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/job-workspace.html" data-planned><span>Job workspace</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/settings.html" data-planned><span>Settings</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/document.html" data-planned><span>Document and presentation</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/messaging.html" data-planned><span>Messaging</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/files.html" data-planned><span>Files</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/reports.html" data-planned><span>Reports</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/wizard.html" data-planned><span>Wizard and import</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/field-app.html" data-planned><span>Field app</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/client-portal.html" data-planned><span>Client and vendor portal</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/auth.html" data-planned><span>Sign in</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li></ul></div><div class="doc-nav-sec"><p class="doc-nav-label">Resources</p><ul role="list"><li><a class="doc-nav-item" href="resources/backlog.html"><span>Backlog</span></a></li><li><a class="doc-nav-item" href="resources/tokens.html"><span>Token reference</span></a></li><li><a class="doc-nav-item" href="resources/decisions.html"><span>Decision log</span></a></li><li><a class="doc-nav-item" href="resources/interactions.html"><span>Interaction contracts</span></a></li><li><a class="doc-nav-item" href="resources/glossary.html"><span>Glossary</span></a></li><li><a class="doc-nav-item" href="resources/contributing.html"><span>Contributing</span></a></li><li class="doc-nav-group">Not built yet</li><li><a class="doc-nav-item" href="backlog/recipes.html" data-planned><span>Recipes for other page types</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/tokens-export.html" data-planned><span>Tokens for other tools</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li><li><a class="doc-nav-item" href="backlog/releases.html" data-planned><span>Versions and changelog</span><span class="doc-nav-dot" data-doc-status="missing" data-tip="Not built yet"></span></a></li></ul></div></nav>
+  <div class="doc-nav-foot">
+    <div class="doc-theme" role="radiogroup" aria-label="Theme"><label><input type="radio" name="doc-theme" value="auto" checked><span>Auto</span></label><label><input type="radio" name="doc-theme" value="light"><span>Light</span></label><label><input type="radio" name="doc-theme" value="dark"><span>Dark</span></label></div>
+    <span class="doc-version">v0.1.0 · Status quo, October 2026</span>
+  </div>
+</aside>
+<div class="doc-scrim" data-nav-close></div>
+<div class="doc-page">
+  <header class="doc-topbar">
+    <button type="button" class="doc-topbar-btn" data-nav-open aria-label="Menu" aria-controls="doc-nav" data-tip="Menu"><i data-icon="menu" data-size="16"></i></button>
+    <a class="doc-brand" href="index.html"><svg class="doc-mark" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="62 10 381 491"><path d="M62 10h381v258H330v233H62z" fill="#FBFF00"/><path d="M150 92h214v78H233v271h-83z" fill="#1C1A1B"/></svg>
+<span class="doc-brand-text"><b>Bolster</b><span>Design system</span></span></a>
+    <button type="button" class="doc-topbar-btn" data-search-open aria-label="Search" data-tip="Search"><i data-icon="search" data-size="16"></i></button>
+  </header>
+  <main id="main" class="doc-main" tabindex="-1">
+    <header class="doc-head">
+      <p class="doc-eyebrow">Overview</p>
+      <h1>Getting started</h1>
+      <p class="doc-lead">How to find your way around the system as a designer, and how to bring it into a page or a prototype as a developer.</p>
+      <div class="doc-meta"><span class="doc-meta-files"><code>bolster.css</code><code>tokens.css</code><code>base.css</code><code>components/tooltip.js</code></span><span class="doc-meta-date">Updated 2026-10-20</span></div>
+    </header>
+    <div class="doc-body">
+      <article class="doc-content">
+<p>The system is plain CSS: tokens, element defaults and one file per component, with this site, a catalog of live specimens and a set of concept pages built on top. Designers start with what each part is for. Developers start with one stylesheet.</p>
+
+<h2 id="for-designers">For designers</h2>
+<h3 id="reading-this-site">Reading this site</h3>
+<ul>
+  <li><strong><a href="principles.html">Principles</a></strong> and <strong>Foundations</strong> (<a href="foundations/color.html">colour</a>, <a href="foundations/typography.html">type</a>, <a href="foundations/spacing.html">space</a> and the rest) say why things look and work the way they do. Read them first.</li>
+  <li><strong><a href="components/index.html">Components</a></strong> have one page each: when to use the component and what to use instead, its anatomy, variants, sizes and states, do's and don'ts, the words, accessibility, the markup and the tokens it uses.</li>
+  <li><strong><a href="patterns/index.html">Patterns</a></strong> describe how parts behave together: scrolling, opening records, filtering, bulk actions. <strong><a href="page-types/index.html">Page types</a></strong> show them put together: the list, the to-do, the calendar, the pipeline and the timeline.</li>
+  <li>Every component, pattern and page type carries a status badge (stable, needs work, trying out, draft, not built yet) and ends with what's still open. The <a href="resources/backlog.html">backlog</a> gathers everything open in one place. <a href="architecture.html#from-concept-to-system">How things move from concept to system</a> explains the statuses.</li>
+</ul>
+
+<h3 id="the-catalog-and-the-concepts">The catalog and the concepts</h3>
+<ul>
+  <li><strong>The <a href="../system/index.html">catalog</a></strong> (<code>system/index.html</code>) links one specimen page per component, with every variant and state drawn live by the system's own CSS, in light and dark. Its <a href="../system/index.html#drafts">Drafts</a> section lists the parts built in a concept that are waiting for the product designer's approval.</li>
+  <li><strong>The <span class="doc-unpublished">concepts</span></strong> (<code>concepts/index.html</code>) are whole pages, one page type at a time, built from the system with made-up sample data inside a Bolster-style app shell. Each one's “About this concept” dialog says what it settles and what's still open. Nothing in a concept talks to Bolster.</li>
+</ul>
+
+<h3 id="decisions-and-what-counts-as-the-spec">Decisions, and what counts as the spec</h3>
+<ul>
+  <li>Every value and behaviour has a numbered decision with its reason in the <a href="resources/decisions.html">decision log</a> (D-entries). How things behave is written as contracts in <a href="resources/interactions.html">interaction contracts</a> (I-entries). When you wonder why something is the way it is, search for it there.</li>
+  <li>Figma and screenshots are reference, not spec. The design system wins over Figma and screenshots. Figma's research boards record what was looked at and tried. Where a frame and the system disagree, the system is right until a decision changes it.</li>
+  <li>To change the system, propose the change with its reason. It lands as a decision, with its specimen and this site updated in the same pass. See <a href="resources/contributing.html">Contributing</a>.</li>
+</ul>
+
+<h2 id="for-developers">For developers</h2>
+<h3 id="install">Install</h3>
+<p>The package is <code>bolster-ds</code>. Install it from a local clone, or from the private repository if you have access.</p>
+<div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code># from a local clone
+npm i ../path/to/Bolster
+
+# from GitHub (needs access to mumble-jam/bolster-ds)
+npm i github:mumble-jam/bolster-ds</code></pre></div>
+
+<h3 id="import">Import</h3>
+<p><code>system/bolster.css</code> imports everything: tokens, base, every component and the list page pattern. You can also import single files, as long as tokens and base come with them. Components read semantic tokens, and base sets which surface a thing sits on, which buttons and toolbars read.</p>
+<div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>// everything
+import "bolster-ds/system/bolster.css";
+
+// or file by file
+import "bolster-ds/system/tokens.css";
+import "bolster-ds/system/base.css";
+import "bolster-ds/system/components/button.css";
+import "bolster-ds/system/components/badge.css";</code></pre></div>
+<p>Without a bundler, link the same file: <code>&lt;link rel="stylesheet" href="…/system/bolster.css?v=d8edba0e"&gt;</code>. Every file declares the layer order before anything else, so the order holds whatever order the files arrive in:</p>
+<div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>@layer tokens, base, components, utilities;</code></pre></div>
+
+<h3 id="markup">Markup</h3>
+<ul>
+  <li>A component is a class. Its variants, sizes and tones are data attributes, such as <code>data-variant</code>, <code>data-size</code> and <code>data-tone</code>. Each component's page lists its attributes.</li>
+  <li>Component rules are wrapped in <code>:where()</code>, so they have no specificity (the list page's newer parts are still being moved over; see <a href="architecture.html#cascade-layers-and-specificity">Architecture</a>). One class of your own overrides them, and you never need <code>!important</code>. If a variant is missing, it's added to the system rather than overridden on a page.</li>
+  <li><code>data-state="hover|active|focus"</code> holds a state still for specimens and these docs. It isn't for product markup.</li>
+  <li>Your own CSS uses semantic tokens only (<code>--color-content-secondary</code>, not <code>--color-pitch-black-700</code>) and none of Tailwind's stock colours. The same rule holds inside <code>system/components/</code>, where a primitive is a bug.</li>
+</ul>
+<div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>&lt;button class="button" data-variant="secondary" data-size="sm"&gt;Customize&lt;/button&gt;
+&lt;span class="badge" data-status="booked"&gt;Booked&lt;/span&gt;
+
+.job-meta {
+  color: var(--color-content-secondary);
+  gap: var(--space-2);
+}</code></pre></div>
+
+<h3 id="theming">Theming</h3>
+<p>Every semantic colour is written once with <code>light-dark()</code>. The page follows the operating system's setting by default. <code>data-theme</code> on <code>&lt;html&gt;</code> forces one theme. Shadows can't use <code>light-dark()</code>, so tokens.css deepens them in dark with an override. The app shell's chrome (the top bar and the menu) stays dark in both themes.</p>
+<div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>/* tokens.css */
+--color-surface-canvas: light-dark(var(--color-cement-200), var(--color-pitch-black-950));
+
+&lt;html&gt;                    &lt;!-- follows the OS --&gt;
+&lt;html data-theme="light"&gt; &lt;!-- always light --&gt;
+&lt;html data-theme="dark"&gt;  &lt;!-- always dark --&gt;</code></pre></div>
+
+<h3 id="fonts">Fonts</h3>
+<p>The interface font, Cera Pro, is licensed, so the package doesn't ship it. base.css looks for a locally installed copy. Your app declares its own <code>@font-face</code> for the three weights the system uses (400, 500 and 700; there is no 600). Until it does, text falls back to Inter where it's installed, then the system font. Titles use Space Grotesk, from Google Fonts.</p>
+<div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>/* your app: point at your licensed files */
+@font-face { font-family: "Cera Pro"; src: url("/fonts/CeraPro-Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Cera Pro"; src: url("/fonts/CeraPro-Medium.woff2") format("woff2"); font-weight: 500; font-display: swap; }
+@font-face { font-family: "Cera Pro"; src: url("/fonts/CeraPro-Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+
+&lt;link rel="preconnect" href="https://fonts.googleapis.com"&gt;
+&lt;link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&amp;display=swap"&gt;</code></pre></div>
+
+<h3 id="icons">Icons</h3>
+<p>Icons are Font Awesome 6 Pro, the set Bolster licenses. The system's CSS doesn't depend on any icon set: components size whatever <code>svg</code> they hold. The concepts draw icons from <code>concepts/shared/icons.js</code>, a subset generated from the Pro packages. It's licensed to Bolster, so keep it inside Bolster's projects.</p>
+<ul>
+  <li><code>window.BolsterIcons(name, size, { optical })</code> returns an icon as an SVG string, <code>size</code> pixels tall. Pages usually shorten it to <code>ic</code>. With <code>optical: true</code>, an icon keeps its own size inside a control's icon box, so icons side by side match in ink and line (see <a href="foundations/iconography.html">Iconography</a>).</li>
+  <li>Icons in the page are Regular. The app shell's chrome draws Light copies under <code>l-&lt;name&gt;</code>. A page never picks the weight.</li>
+  <li>Which icon means what is decided in <code>system/model/icons.json</code>, one icon per meaning.</li>
+</ul>
+<div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>&lt;script src="concepts/shared/icons.js?v=d8edba0e"&gt;&lt;/script&gt;
+&lt;script&gt;
+  const ic = (name, size = 16, o) =&gt; window.BolsterIcons(name, size, o);
+  refresh.innerHTML = ic("refresh-cw", 16);
+&lt;/script&gt;</code></pre></div>
+
+<h3 id="tooltips">Tooltips</h3>
+<p>Every icon without a label has a tooltip. Put <code>data-tip</code> on the icon or its control, and load <code>system/components/tooltip.js</code> once per page. It draws a single tooltip in the top layer, so no card or table clips it. The tooltip appears after a short pause under a mouse and at once on keyboard focus. The element keeps its own name in <code>aria-label</code>, and screen readers don't read the tooltip. Touch screens have no hover, so never put the only copy of something important in a tooltip.</p>
+<div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>&lt;script src="…/system/components/tooltip.js?v=d8edba0e"&gt;&lt;/script&gt;
+
+&lt;button class="button" data-variant="ghost" data-icon-only aria-label="Refresh" data-tip="Refresh"&gt;…svg…&lt;/button&gt;
+&lt;span data-tip="Labor and materials"&gt;…svg…&lt;/span&gt;</code></pre></div>
+
+<h3 id="in-the-react-prototype">In the React prototype</h3>
+<p>The semantic tokens use the same names as the React prototype's <code>theme.css</code>, so the prototype and this CSS read the same variables. The breakpoints are Tailwind's (640, 768, 1024, 1280), so the prototype's utilities keep working beside the components. Import the stylesheet once at the app's entry and write the same classes and attributes in JSX.</p>
+<div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>// main.tsx
+import "bolster-ds/system/bolster.css";
+
+// a component
+&lt;button className="button" data-variant="brand"&gt;Preview and send&lt;/button&gt;</code></pre></div>
+
+<h2 id="running-it-locally">Running it locally</h2>
+<p>From a clone of the repository, install the dev dependencies (Playwright and axe, for the checks), then serve the repository:</p>
+<div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>npm install
+npm run serve        # http://localhost:4178</code></pre></div>
+<ul>
+  <li><a href="http://localhost:4178/site/index.html">localhost:4178/site/</a>: this site. After changing its sources, the tokens, the decisions or the inventory, rebuild it with <code>node scripts/build-site.mjs</code>.</li>
+  <li><a href="http://localhost:4178/system/index.html">localhost:4178/system/</a>: the catalog of specimens.</li>
+  <li><a href="http://localhost:4178/concepts/index.html">localhost:4178/concepts/</a>: the concepts hub.</li>
+</ul>
+<p>Before a change lands, the checks run: <code>npm run contrast</code> after any token change, then <code>npm run pages</code>, <code>npm run test:visual</code> and <code>npm run test:a11y</code>, plus the three browser checks for corners, icons and tooltips. What each one does, and when to run it, is in <a href="resources/contributing.html#the-checks">Contributing: the checks</a>.</p>
+<h2 id="decisions-and-contracts">Decisions and contracts</h2><ul class="doc-refs" role="list"><li><a class="doc-ref-card" href="resources/decisions.html#d1"><span class="doc-ref-id">D1</span><span class="doc-ref-title">Token structure follows the prototype</span><span class="badge" data-tone="success">Decided</span></a></li><li><a class="doc-ref-card" href="resources/decisions.html#d14"><span class="doc-ref-id">D14</span><span class="doc-ref-title">Dark theme</span><span class="badge" data-tone="warning">Proposed</span></a></li><li><a class="doc-ref-card" href="resources/decisions.html#d19"><span class="doc-ref-id">D19</span><span class="doc-ref-title">No Tailwind default palette</span><span class="badge" data-tone="success">Decided</span></a></li><li><a class="doc-ref-card" href="resources/decisions.html#d20"><span class="doc-ref-id">D20</span><span class="doc-ref-title">Delivery: plain CSS, layered, low specificity</span><span class="badge" data-tone="success">Decided</span></a></li><li><a class="doc-ref-card" href="resources/decisions.html#d23"><span class="doc-ref-id">D23</span><span class="doc-ref-title">Icons: Font Awesome 6 Pro</span><span class="badge" data-tone="success">Decided</span></a></li><li><a class="doc-ref-card" href="resources/decisions.html#d52"><span class="doc-ref-id">D52</span><span class="doc-ref-title">Every icon without a label has a tooltip</span><span class="badge" data-tone="success">Decided</span></a></li><li><a class="doc-ref-card" href="resources/decisions.html#d84"><span class="doc-ref-id">D84</span><span class="doc-ref-title">Icons in the page are Regular; the app shell's are Light</span><span class="badge" data-tone="success">Decided</span></a></li></ul>
+      </article>
+      <nav class="doc-toc" aria-label="On this page"><p>On this page</p><ul role="list"><li><a href="#for-designers">For designers</a></li><li><a href="#for-developers">For developers</a></li><li><a href="#running-it-locally">Running it locally</a></li><li><a href="#decisions-and-contracts">Decisions and contracts</a></li></ul></nav>
+    </div>
+    <nav class="doc-pager" aria-label="Previous and next"><a class="doc-pager-link" data-dir="prev" href="principles.html"><span>Previous</span><b>Principles</b></a><a class="doc-pager-link" data-dir="next" href="architecture.html"><span>Next</span><b>How the system is built</b></a></nav>
+  </main>
+  <footer class="doc-foot"><span>Bolster design system · Status quo, October 2026</span><span>Built 2026-10-26 from <code>system/</code> and <code>docs/</code></span></footer>
+</div>
+<dialog class="doc-search" aria-label="Search the documentation" closedby="any">
+  <label class="doc-search-field"><i data-icon="search" data-size="16"></i><input type="search" placeholder="Search components, tokens, decisions" aria-label="Search" aria-controls="doc-search-results" autocomplete="off"><kbd>Esc</kbd></label>
+  <ul class="doc-search-results" id="doc-search-results" role="listbox" aria-label="Results"></ul>
+</dialog>
+<script>window.DOC_ROOT=""</script>
+<script src="../shared/icons.js?v=d8edba0e"></script>
+<script src="../system/components/tooltip.js?v=d8edba0e"></script>
+<script src="assets/search-index.js?v=d8edba0e"></script>
+<script src="assets/site.js?v=d8edba0e"></script>
+</body>
+</html>

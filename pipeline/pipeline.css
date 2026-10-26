@@ -53,22 +53,12 @@
     .pl-board[data-scrolled] { --_fade-s: var(--space-8); }
     .pl-board[data-more] { --_fade-e: var(--space-8); }
     .pl-board:is([data-more], [data-scrolled]) { mask-image: linear-gradient(to right, transparent, #000 var(--_fade-s), #000 calc(100% - var(--_fade-e)), transparent); }
-    /* its own scrollbar hidden: the one at the window's foot stands for it (.pl-hscroll) */
+    /* its own scrollbar hidden: the one at the window's foot stands for it (.page-hscroll) */
     .pl-board { scrollbar-width: none; }
   }
-  /* the board's scrollbar at the window's foot, for a mouse with no sideways scroll: on the canvas, so no card shows
-     through it; drawn by hand, so it shows on a Mac too, where scrollbars hide. Gone while a card's dragged, so the
-     Mark as lost bar has the foot */
-  .pl-hscroll { position: sticky; inset-block-end: 0; z-index: 3; overflow-x: auto; overflow-y: hidden; padding-block: var(--space-1); background: var(--color-surface-canvas); }
-  .pl-hscroll[hidden] { display: none; }
-  /* while dragging it keeps its room, so the page doesn't move under the card */
-  :root[data-pl-dragging] .pl-hscroll { visibility: hidden; }
-  .pl-hscroll > div { block-size: 1px; }
-  .pl-hscroll::-webkit-scrollbar { block-size: 10px; }
-  .pl-hscroll::-webkit-scrollbar-track { border-radius: var(--radius-full); background: var(--color-surface-sunken); }
-  .pl-hscroll::-webkit-scrollbar-thumb { border-radius: var(--radius-full); background: var(--color-line-strong); }
-  .pl-hscroll::-webkit-scrollbar-thumb:hover { background: var(--color-content-tertiary); }
-  @supports not selector(::-webkit-scrollbar) { .pl-hscroll { scrollbar-color: var(--color-line-strong) var(--color-surface-sunken); } }
+  /* the board's scrollbar is the page's, at the window's foot (.page-hscroll, list-page.css; D128). Gone while a card's
+     dragged, so the Mark as lost bar has the foot; it keeps its room, so the page doesn't move under the card */
+  :root[data-pl-dragging] .page-hscroll { visibility: hidden; }
   /* each kind's name over its columns, quietly: a word and its mark, in line with the columns' names */
   .pl-kind { display: flex; align-items: center; gap: var(--space-1-5, 6px); margin: 0; padding-inline-start: calc(var(--inset-card) + var(--border-width-default) + var(--space-3)); font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-tertiary); white-space: nowrap; }
   .pl-kind svg { flex: none; inline-size: 14px; }
