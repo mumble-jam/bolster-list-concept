@@ -29,6 +29,8 @@
   .skeleton[data-shape="check"] { inline-size: var(--space-4); block-size: var(--space-4); }
   /* a first load holds the skeleton's space before it's worth showing (the first 300 ms: loading.js's reserve) */
   [data-wait] .skeleton { visibility: hidden; }
+  /* a few bars standing in for a block (a record's activity): spaced as lines of text */
+  .skeleton-stack { display: grid; gap: var(--space-3); inline-size: 100%; }
   /* a slow load says so in words, over the skeleton, which stays */
   .loading-note { display: flex; align-items: center; gap: var(--space-2); margin: 0; padding: var(--space-3) var(--space-4); font-size: var(--text-sm); color: var(--color-content-secondary); }
   @media (prefers-reduced-motion: no-preference) {

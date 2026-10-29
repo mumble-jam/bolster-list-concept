@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../../system/bolster.css?v=fda98cbd">
-<link rel="stylesheet" href="../assets/site.css?v=fda98cbd">
+<link rel="stylesheet" href="../../system/bolster.css?v=9364c94b">
+<link rel="stylesheet" href="../assets/site.css?v=9364c94b">
 <script>try{const t=localStorage.getItem("bds-theme");if(t&&t!=="auto")document.documentElement.dataset.theme=t}catch{}</script>
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
@@ -112,6 +112,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
     <tr><th scope="row">A list's rows</th><td>The table's header</td><td>About eight rows of bars, the select box as a square</td></tr>
     <tr><th scope="row">The summary cards</th><td>Each card, at its size</td><td>A bar for the label, a taller one for the figure (<code>data-shape="figure"</code>)</td></tr>
     <tr><th scope="row">The record</th><td>The name and status, from the row</td><td>A few rows of label and value bars, not an exact copy</td></tr>
+    <tr><th scope="row">More rows</th><td>The rows already there</td><td>Four rows of bars at the end; on a failure, the error and Try again in the list's foot</td></tr>
     <tr><th scope="row">A page's first load</th><td>The title, the toolbar, Create, the filter buttons</td><td>The cards' and the table's skeletons; the count says “Loading…”</td></tr>
   </tbody>
 </table></div>
@@ -168,6 +169,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
     <tr><th scope="row"><code>.state</code></th><td>An empty or no-results state: <code>.state-icon</code>, an <code>h3</code>, a <code>p</code>, <code>.state-actions</code></td></tr>
     <tr><th scope="row"><code>.banner</code></th><td>The error banner: an icon, a <code>p</code>, a small secondary button; <code>role="alert"</code></td></tr>
     <tr><th scope="row"><code>.skeleton</code></th><td>A placeholder bar, 12px tall, its width set inline (in rem where its cell sizes to its content); <code>data-shape</code>: <code>title</code> (16), <code>figure</code> (24), <code>check</code> (16 square)</td></tr>
+    <tr><th scope="row"><code>.skeleton-stack</code></th><td>A few bars standing in for a block (a record's activity), spaced as lines of text</td></tr>
     <tr><th scope="row"><code>.loading-note</code></th><td>“Still loading…”, at the top of a part after 10 seconds; <code>role="status"</code></td></tr>
     <tr><th scope="row"><code>BolsterLoading.load</code></th><td><code>(region, work, { skeleton, render, error, label, reserve, note, announce })</code>: the timing, the announcement, the error with Try again (loading.js). <code>skeleton</code> and <code>error</code> return html, or draw it themselves; <code>reserve</code> holds a first load's space, unseen, for its first 300 ms; <code>note</code> is where “Still loading…” goes; <code>announce: false</code> where the page says “Loading” itself</td></tr>
   </tbody>
@@ -200,9 +202,9 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
   <ul class="doc-search-results" id="doc-search-results" role="listbox" aria-label="Results"></ul>
 </dialog>
 <script>window.DOC_ROOT="../"</script>
-<script src="../../shared/icons.js?v=fda98cbd"></script>
-<script src="../../system/components/tooltip.js?v=fda98cbd"></script>
-<script src="../assets/search-index.js?v=fda98cbd"></script>
-<script src="../assets/site.js?v=fda98cbd"></script>
+<script src="../../shared/icons.js?v=9364c94b"></script>
+<script src="../../system/components/tooltip.js?v=9364c94b"></script>
+<script src="../assets/search-index.js?v=9364c94b"></script>
+<script src="../assets/site.js?v=9364c94b"></script>
 </body>
 </html>

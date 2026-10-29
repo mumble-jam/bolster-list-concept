@@ -453,6 +453,10 @@
   // the real fonts can land after the first measure: measure again once they have, and redraw if it changed
   document.fonts?.ready.then(() => { const before = JSON.stringify(widths[cfg?.id]); delete widths[cfg?.id]; if (cfg && JSON.stringify(measureColumns()) !== before) renderBody(); });
 
+
+  // a skeleton row per column, in its width and alignment (D142): the page's first load, and the rows on their way at
+  // the end of the list when more are loading (data-skeleton, so a failure can take them away)
+  const skRows = (n, c = cols()) => Array.from({ length: n }, () => `<tr data-skeleton aria-hidden="true"><td class="data-table-select"><span class="skeleton" style="inline-size:var(--space-4);block-size:var(--space-4)"></span></td>${c.map((col, i) => `<td${col.required ? " data-primary" : ""}${col.hideBelow ? ` data-hide-below="${col.hideBelow}"` : ""}${col.m ? ` data-m="${col.m}"` : ""}><span class="skeleton" style="inline-size:${i === 0 ? 70 : 50}%;${col.numeric ? "margin-inline-start:auto" : ""}"></span></td>`).join("")}<td class="row-actions"></td></tr>`).join("");
   function renderBody() {
     const wrap = $("#table-wrap");
     const foot = $("#list-foot");
@@ -479,7 +483,7 @@
     }).join("")}<th class="row-actions"><span class="visually-hidden">Actions</span></th></tr></thead>`;
 
     if (st.mode === "loading") {
-      const sk = Array.from({ length: 8 }, () => `<tr><td class="data-table-select"><span class="skeleton" style="inline-size:var(--space-4);block-size:var(--space-4)"></span></td>${c.map((col, i) => `<td${col.required ? " data-primary" : ""}${col.hideBelow ? ` data-hide-below="${col.hideBelow}"` : ""}${col.m ? ` data-m="${col.m}"` : ""}><span class="skeleton" style="inline-size:${i === 0 ? 70 : 50}%;${col.numeric ? "margin-inline-start:auto" : ""}"></span></td>`).join("")}<td class="row-actions"></td></tr>`).join("");
+      const sk = skRows(8, c);
       wrap.innerHTML = `<table class="data-table" data-density="${st.density}" aria-busy="true">${head}<tbody>${sk}</tbody></table>`;
       return;
     }
@@ -1076,11 +1080,31 @@
   }
   const setFilter = (key, val) => set(() => { st.filters[key] = val; if (!isSet(key, val)) delete st.filters[key]; });
 
+  // the next rows come from the server too (D142, I28): skeleton rows at the end while they're on the way (none under
+  // 300 ms), "Still loading…" in the foot after 10 s; a failure takes the skeleton rows away and says so in the foot,
+  // with Try again. One load at a time; scrolling keeps loading once the rows have landed
+  let loadingMore = false, moreSeq = 0;
   function loadMore({ focus = false } = {}) {
-    const before = st.limit;
-    st.limit += STEP;
-    renderBody();
-    if (focus) $$("#table-wrap tbody tr")[before]?.querySelector(".data-table-link")?.focus();
+    if (loadingMore) return;
+    loadingMore = true;
+    const before = st.limit, my = ++moreSeq, list = cfg.id;
+    BolsterLoading.load($("#table-wrap"), wire(), {
+      label: `more ${cfg.noun[1]}`, note: $("#list-foot"),
+      skeleton: () => { $("#table-wrap tbody")?.insertAdjacentHTML("beforeend", skRows(4)); },
+      render: () => {
+        loadingMore = false;
+        if (my !== moreSeq || list !== cfg.id || st.mode !== "ready") return;
+        st.limit += STEP;
+        renderBody();
+        if (focus) $$("#table-wrap tbody tr")[before]?.querySelector(".data-table-link")?.focus();
+        requestAnimationFrame(autoMore);
+      },
+      error: () => {
+        loadingMore = false;
+        $$("#table-wrap tr[data-skeleton]").forEach((r) => r.remove());
+        $("#list-foot").innerHTML = `<div class="banner" role="alert">${I.alert}<p>More ${esc(cfg.noun[1])} didn't load. Check your connection, then try again.</p><button class="button" data-variant="secondary" data-size="sm" data-load-more-retry>Try again</button></div>`;
+      },
+    });
   }
 
   // the toast is the shell's, every page's (BolsterShell.toast)
@@ -1106,9 +1130,12 @@
     }
     return `<ol class="activity" aria-label="Activity">${html}</ol>`;
   }
-  function detailHtml(id) {
+  // the record (D142): what the row already says shows at once (the name, the status, the amount, its actions); its
+  // activity, related records, details and document are on their way, as bars, until they land
+  function detailHtml(id, { loading = false } = {}) {
     const x = cfg.rows.find((r) => r.id === id);
     const p = cfg.peek(x);
+    if (loading) p.activity = null;
     return `<header class="detail-head">
         <h2 id="detail-title" tabindex="-1">${esc(p.heading)}</h2>
         <span class="tooltip-anchor"><button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only aria-labelledby="detail-open-tip" data-concept-action="${esc(p.open)}">${ic("m-expand", 12, { optical: true })}</button><span class="tooltip" role="tooltip" id="detail-open-tip" data-side="bottom">${esc(p.open)}</span></span>
@@ -1120,12 +1147,13 @@
           ${p.badge}
           ${p.amount || p.empty != null ? `<p class="detail-amount${p.amount ? "" : " is-empty"}">${p.amount ? money(p.amount) : esc(p.empty)}</p>` : ""}
           <p class="detail-sub">${esc(p.sub)}</p>
-          ${activityHtml(p.activity)}
+          ${p.activity ? activityHtml(p.activity) : `<div class="skeleton-stack" aria-hidden="true"><span class="skeleton" style="inline-size:70%"></span><span class="skeleton" style="inline-size:55%"></span><span class="skeleton" style="inline-size:62%"></span></div>`}
           <div class="detail-actions">${p.actions.map(([l, i]) => `<button type="button" class="button" data-variant="secondary" data-concept-action="${esc(l)}">${i ? ic(`m-${i}`, 14, { optical: true }) : ""}${esc(l)}</button>`).join("")}<button type="button" class="button" data-variant="secondary" data-row-menu="${x.id}" aria-haspopup="menu" aria-expanded="false">More${I.chev}</button></div>
         </div>
-        ${p.related?.length ? `<div class="detail-section detail-related"><h3>Related</h3><dl class="detail-fields">${p.related.map(([k, r]) => `<div><dt>${esc(k)}</dt><dd>${r.none ? `<span class="text-secondary">${esc(r.name)}</span>` : `<a href="#${esc(r.id || "")}" class="detail-link" data-concept-action="Open ${esc(k.toLowerCase())}: ${esc(r.name)}">${r.initials ? avatar(r, "sm") : ""}<span>${esc(r.name)}</span></a>`}</dd></div>`).join("")}</dl></div>` : ""}
+        ${loading ? `<dl class="detail-section detail-fields" aria-hidden="true">${p.fields.slice(0, 5).map((f, i) => `<div><dt><span class="skeleton" style="inline-size:${[5, 4, 6, 5, 4][i]}rem"></span></dt><dd><span class="skeleton" style="inline-size:${[7, 9, 6, 8, 7][i]}rem"></span></dd></div>`).join("")}</dl>` : ""}
+        ${loading ? "" : `${p.related?.length ? `<div class="detail-section detail-related"><h3>Related</h3><dl class="detail-fields">${p.related.map(([k, r]) => `<div><dt>${esc(k)}</dt><dd>${r.none ? `<span class="text-secondary">${esc(r.name)}</span>` : `<a href="#${esc(r.id || "")}" class="detail-link" data-concept-action="Open ${esc(k.toLowerCase())}: ${esc(r.name)}">${r.initials ? avatar(r, "sm") : ""}<span>${esc(r.name)}</span></a>`}</dd></div>`).join("")}</dl></div>` : ""}
         <dl class="detail-section detail-fields">${p.fields.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join("")}</dl>
-        ${p.doc ? `<div class="detail-section detail-doc"><div class="detail-doc-head"><span>${esc(p.doc.label)}</span><button type="button" class="link-button" data-concept-action="${esc(p.doc.view)}">${esc(p.doc.view)}</button></div><button type="button" class="detail-file" data-concept-action="Download ${esc(p.doc.name)}">${ic("m-file", 14)}<span>${esc(p.doc.name)}</span>${ic("m-download", 14)}</button></div>` : ""}
+        ${p.doc ? `<div class="detail-section detail-doc"><div class="detail-doc-head"><span>${esc(p.doc.label)}</span><button type="button" class="link-button" data-concept-action="${esc(p.doc.view)}">${esc(p.doc.view)}</button></div><button type="button" class="detail-file" data-concept-action="Download ${esc(p.doc.name)}">${ic("m-file", 14)}<span>${esc(p.doc.name)}</span>${ic("m-download", 14)}</button></div>` : ""}`}
       </div>`;
   }
   const markRow = () => $$("#table-wrap tbody tr[data-id]").forEach((tr) => { const on = tr.dataset.id === openId; tr.toggleAttribute("data-open", on); on ? tr.setAttribute("aria-current", "true") : tr.removeAttribute("aria-current"); });
@@ -1160,23 +1188,38 @@
     if (splitMQ.matches) {
       if ($("#peek").open) { $("#peek").close(); $("#peek").innerHTML = ""; }
       const d = $("#detail");
-      d.innerHTML = detailHtml(id);
+      d.innerHTML = detailHtml(id, { loading: true });
       d.hidden = false;
       d.scrollTop = 0;
       $("#list-split").toggleAttribute("data-open", true);
       // measured once the split view is open, so the card has its width
       fitActions(d); refit.observe(d);
       focusTitle(d, byKey, { preventScroll: true });
+      loadDetail(d, id);
     } else {
       $("#detail").hidden = true;
       $("#detail").innerHTML = "";
       $("#list-split").removeAttribute("data-open");
       const d = $("#peek");
-      d.innerHTML = detailHtml(id);
+      d.innerHTML = detailHtml(id, { loading: true });
       if (!d.open) d.showModal();
       fitActions(d); refit.observe(d);
       focusTitle(d, byKey);
+      loadDetail(d, id);
     }
+  }
+  // the record's own data, on its way as Network says (D142, I28): under 300 ms nothing shows but the record; then the
+  // bars; "Still loading the record…" after 10 s; a failure says so where the details go, with Try again
+  let detailSeq = 0;
+  function loadDetail(d, id) {
+    const my = ++detailSeq, region = $(".detail-scroll", d);
+    let first = true;
+    const inner = (loading) => { const t = document.createElement("template"); t.innerHTML = detailHtml(id, { loading }); return t.content.querySelector(".detail-scroll").innerHTML; };
+    BolsterLoading.load(region, wire(), {
+      label: "the record", reserve: true,
+      skeleton: () => (first ? ((first = false), undefined) : inner(true)),
+      render: () => { if (my !== detailSeq || openId !== id || !region.isConnected) return; region.innerHTML = inner(false); fitActions(d); },
+    });
   }
   function closeDetail({ focus = true } = {}) {
     const id = openId;
@@ -1297,7 +1340,7 @@
       $(`[data-sort="${key}"]`)?.focus({ preventScroll: true });
       return;
     }
-    if (q("[data-load-more]")) { loadMore({ focus: e.detail === 0 }); return; }
+    if (q("[data-load-more], [data-load-more-retry]")) { loadMore({ focus: e.detail === 0 }); return; }
     if ((el = q("[data-group]"))) {
       const k = el.dataset.group;
       st.collapsed.has(k) ? st.collapsed.delete(k) : st.collapsed.add(k);
@@ -1406,10 +1449,10 @@
   // rows keep coming as the footer nears the screen; the button stays for keyboards and short lists
   const foot = $("#list-foot");
   const nearView = () => foot.getBoundingClientRect().top < innerHeight + 240;
+  function autoMore() { if (!loadingMore && st.mode === "ready" && $("[data-load-more]") && nearView()) loadMore(); }
   new IntersectionObserver((entries) => {
     if (!entries.some((x) => x.isIntersecting)) return;
-    const step = () => { if (st.mode === "ready" && $("[data-load-more]") && nearView()) { loadMore(); requestAnimationFrame(step); } };
-    step();
+    autoMore();
   }, { rootMargin: "0px 0px 240px 0px" }).observe(foot);
 
   // what sticks (D, from the scrolling research): the page title scrolls away. Under the top bar the card's
@@ -1512,9 +1555,11 @@
   // after 10 s, the error banner with Try again on a failure. The count says "Loading…" itself, so loading.js stays quiet
   let loadSeq = 0;
   const network = () => document.querySelector('[name="cc-net"]:checked')?.value || "0";
+  // a wait as long as Network says, or a failure: the server, for the concept
+  const wire = () => () => new Promise((ok, no) => { const v = network(); if (v === "fail") setTimeout(() => no(new Error("offline")), 1200); else setTimeout(ok, +v); });
   function fetchList(reserve) {
-    const my = ++loadSeq, v = network(), mine = (fn) => () => { if (my === loadSeq) fn(); };
-    return BolsterLoading.load($(".app-content"), () => new Promise((ok, no) => (v === "fail" ? setTimeout(() => no(new Error("offline")), 1200) : setTimeout(ok, +v))), {
+    const my = ++loadSeq, mine = (fn) => () => { if (my === loadSeq) fn(); };
+    return BolsterLoading.load($(".app-content"), wire(), {
       label: cfg.noun[1], reserve, note: $("#banner"), announce: false,
       skeleton: mine(() => { st.mode = "loading"; render(); }),
       render: mine(() => { st.mode = "ready"; render(); }),

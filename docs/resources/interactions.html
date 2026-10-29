@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../../system/bolster.css?v=fda98cbd">
-<link rel="stylesheet" href="../assets/site.css?v=fda98cbd">
+<link rel="stylesheet" href="../../system/bolster.css?v=9364c94b">
+<link rel="stylesheet" href="../assets/site.css?v=9364c94b">
 <script>try{const t=localStorage.getItem("bds-theme");if(t&&t!=="auto")document.documentElement.dataset.theme=t}catch{}</script>
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
@@ -120,7 +120,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
 <div class="doc-table-wrap"><table class="doc-table"><tbody><tr><th scope="row">Tidying</th><td>When the field is left, never while it's typed: a phone becomes (555) 014-2290, a ZIP 78704-1234, a number 1,250.5, money 1,009.10. Only a right value is tidied; a wrong one stays as typed</td></tr><tr><th scope="row">Errors</th><td>Said in words by the form (<a class="doc-ref" href="interactions.html#i25">I25</a>), the format's own: &quot;Enter a 10-digit phone number, like (555) 014-2290, or start with + and the country code&quot;, &quot;Enter a 5-digit ZIP code, like 78704&quot;, &quot;Enter a number, like 12.5&quot;, &quot;Markup must be 100 or less&quot;</td></tr><tr><th scope="row">Stepping</th><td>↑ and ↓ in a number step it by its step (Shift: ten), held between its min and max; no − and + buttons</td></tr><tr><th scope="row">Country</th><td>The nearest <code>data-country</code> decides phone, postal code and number grouping; the US when none</td></tr></tbody></table></div>
 </div></section>
 <section class="doc-entry" id="i28" data-ref-status="" data-search-text="I28 Loading"><header class="doc-entry-head"><h2 id="i28loading"><span class="doc-entry-id">I28</span>Loading</h2><a class="doc-anchor" href="#i28" aria-label="Link to I28" data-tip="Link">#</a></header><div class="doc-entry-body"><p>What a part does while its data is on the way (<a class="doc-ref" href="decisions.html#d142">D142</a>; <code>system/components/loading.js</code>).</p>
-<div class="doc-table-wrap"><table class="doc-table"><tbody><tr><th scope="row">Under 300 ms</th><td>Nothing changes: no skeleton, no flicker</td></tr><tr><th scope="row">Past 300 ms</th><td>The part shows its skeleton, in the content's shape and size, and is <code>aria-busy</code>; &quot;Loading jobs&quot; is announced once, politely. What's already known (a title, a toolbar, a record's name) is there from the start</td></tr><tr><th scope="row">When it arrives</th><td>The content takes the skeleton's place, the layout unmoved; a skeleton that showed stays at least 300 ms</td></tr><tr><th scope="row">Past 10 s</th><td>&quot;Still loading jobs…&quot; at the top of the part, as a status; the skeleton stays</td></tr><tr><th scope="row">If it fails</th><td>The error state takes the part's place, with Try again, which loads it again the same way</td></tr><tr><th scope="row">Reduced motion</th><td>The bars stop shimmering</td></tr><tr><th scope="row">Not this</th><td>The loading screen (<a class="doc-ref" href="decisions.html#d90">D90</a>) is for the app's first open only; an action's own wait is its button's (&quot;Saving…&quot;)</td></tr></tbody></table></div>
+<div class="doc-table-wrap"><table class="doc-table"><tbody><tr><th scope="row">Under 300 ms</th><td>Nothing changes: no skeleton, no flicker</td></tr><tr><th scope="row">Past 300 ms</th><td>The part shows its skeleton, in the content's shape and size, and is <code>aria-busy</code>; &quot;Loading jobs&quot; is announced once, politely. What's already known (a title, a toolbar, a record's name) is there from the start</td></tr><tr><th scope="row">When it arrives</th><td>The content takes the skeleton's place, the layout unmoved; a skeleton that showed stays at least 300 ms</td></tr><tr><th scope="row">Past 10 s</th><td>&quot;Still loading jobs…&quot; at the top of the part, as a status; the skeleton stays</td></tr><tr><th scope="row">If it fails</th><td>The error state takes the part's place, with Try again, which loads it again the same way</td></tr><tr><th scope="row">Reduced motion</th><td>The bars stop shimmering</td></tr><tr><th scope="row">Where</th><td>A page's first load (its cards and table), a record (what its row says shows at once; the rest as bars), more rows (skeleton rows at the end of the list, the error and Try again in its foot)</td></tr><tr><th scope="row">Not this</th><td>The loading screen (<a class="doc-ref" href="decisions.html#d90">D90</a>) is for the app's first open only; an action's own wait is its button's (&quot;Saving…&quot;)</td></tr></tbody></table></div>
 </div></section></div>
       </article>
 
@@ -134,9 +134,9 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
   <ul class="doc-search-results" id="doc-search-results" role="listbox" aria-label="Results"></ul>
 </dialog>
 <script>window.DOC_ROOT="../"</script>
-<script src="../../shared/icons.js?v=fda98cbd"></script>
-<script src="../../system/components/tooltip.js?v=fda98cbd"></script>
-<script src="../assets/search-index.js?v=fda98cbd"></script>
-<script src="../assets/site.js?v=fda98cbd"></script>
+<script src="../../shared/icons.js?v=9364c94b"></script>
+<script src="../../system/components/tooltip.js?v=9364c94b"></script>
+<script src="../assets/search-index.js?v=9364c94b"></script>
+<script src="../assets/site.js?v=9364c94b"></script>
 </body>
 </html>
