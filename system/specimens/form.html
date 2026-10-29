@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Form · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=fda98cbd">
+<link rel="stylesheet" href="specimen.css?v=fda98cbd">
+<style>
+  .fs-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 28rem), 1fr)); gap: var(--space-6); align-items: start; }
+  .fs-card { display: grid; gap: var(--space-5); padding: var(--space-6); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-xl); background: var(--color-surface-default); }
+  .fs-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+  .fs-head h3 { margin: 0; font-size: var(--text-lg); line-height: var(--leading-lg); }
+  .fs-page { position: relative; display: grid; grid-template-columns: minmax(0, 1fr); padding: var(--space-6); border-radius: var(--radius-xl); background: var(--color-surface-canvas); min-block-size: 30rem; }
+  .fs-note { font-size: var(--text-xs); color: var(--color-content-tertiary); }
+  .fs-widths { display: grid; gap: var(--space-4); }
+</style>
+<script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
+addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
+<script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../../docs/index.html" data-doc-link>← Documentation</a>
+  <h1>Form</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">How fields are laid out, say what they need, show what's wrong and save (D134, I25; the F-rules of the forms research). A form done well: every form saves the same way, with its Save, in a dialog, a sheet or on a page; Save is never off; leaving with changes asks once. Every example below works: type, leave fields, press Save.</p>
+
+  <section class="spec-section" id="create">
+    <h2>A create in a dialog</h2>
+    <p>Up to about five fields: a dialog, its Save in the footer. One column; labels above; the minority marked in words (here “(optional)”, most fields being required); nothing red until a field is left after a change; once in error, checked as you type. Save is never off: pressed with something missing, it says what. Two or more errors, or one out of sight, get a summary at the top that links to each.</p>
+    <div class="fs-grid">
+      <div class="dialog" data-size="sm" open style="position:static;margin:0;inline-size:100%;max-inline-size:28rem;box-shadow:var(--shadow-raised)">
+        <form id="vendor" aria-labelledby="vendor-t" style="display:contents">
+          <header class="dialog-header"><h2 id="vendor-t">New vendor</h2><button type="button" class="button" data-variant="ghost" data-icon-only aria-label="Close" data-tip="Close"><i data-icon="xmark" data-size="16"></i></button></header>
+          <div class="dialog-body">
+            <div class="form" data-density="compact">
+              <div class="form-summary" role="alert" tabindex="-1" hidden></div>
+              <div class="field">
+                <label class="field-label" for="v-name">Company name</label>
+                <input class="input" id="v-name" name="name" required autocomplete="organization" aria-describedby="v-name-error">
+                <p class="field-error" id="v-name-error" hidden></p>
+              </div>
+              <div class="field">
+                <label class="field-label" for="v-email">Email</label>
+                <p class="field-hint" id="v-email-hint">Where they send quotes and invoices</p>
+                <input class="input" id="v-email" name="email" type="email" data-format="email" required autocomplete="email" spellcheck="false" aria-describedby="v-email-hint v-email-error">
+                <p class="field-error" id="v-email-error" hidden></p>
+              </div>
+              <div class="field">
+                <label class="field-label" for="v-phone">Phone <span class="field-optional">(optional)</span></label>
+                <input class="input" id="v-phone" name="phone" type="tel" data-format="phone" autocomplete="tel" aria-describedby="v-phone-error">
+                <p class="field-error" id="v-phone-error" hidden></p>
+              </div>
+              <div class="field">
+                <label class="field-label" for="v-trade">Trade <span class="field-optional">(optional)</span></label>
+                <div class="select"><select class="input" id="v-trade" name="trade"><option value="">Choose a trade</option><option>Drywall supply</option><option>Insulation</option><option>Lumber</option></select></div>
+              </div>
+              <p class="fs-note" id="vendor-done" aria-live="polite"></p>
+            </div>
+          </div>
+          <footer class="dialog-footer"><button type="reset" class="button" data-variant="ghost">Cancel</button><button type="submit" class="button">Save vendor</button></footer>
+        </form>
+      </div>
+      <div class="spec-stack">
+        <p class="spec-note">Try: leave Email after typing “orders@lakeside”; press Save with Company name empty; fix one and watch it clear as you type.</p>
+        <p class="spec-note">Messages come from the field's label (“Enter company name”), or <code>data-error-empty</code> and <code>data-error-format</code> on the input, or a check passed to <code>BolsterForm.attach</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section" id="layout">
+    <h2>Sections, rows and widths</h2>
+    <p>Sections are fieldsets with a heading. Every line ends at the form's edge (D135): a field alone on its line stretches, whatever its answer. Short fields that belong together share a row, one of them stretching and the others as wide as their answers (<code>data-width</code> 4, 8, 12, 20 or 32 characters); on phones the row stacks and each takes the full width.</p>
+    <div class="fs-card" data-surface="raised">
+      <form class="form" aria-label="Job site">
+        <fieldset class="form-section">
+          <legend class="form-section-title">Job site</legend>
+          <p class="form-section-hint">Where the crew goes; printed on the work order</p>
+          <div class="field"><label class="field-label" for="a-street">Street address</label><input class="input" id="a-street" name="street" autocomplete="address-line1" value="70 Orchard Lane"></div>
+          <div class="field"><label class="field-label" for="a-unit">Unit <span class="field-optional">(optional)</span></label><input class="input" id="a-unit" name="unit" autocomplete="address-line2"></div>
+          <div class="form-row">
+            <div class="field"><label class="field-label" for="a-city">City</label><input class="input" id="a-city" name="city" autocomplete="address-level2" value="Austin"></div>
+            <div class="field" data-width="4"><label class="field-label" for="a-state">State</label><input class="input" id="a-state" name="state" autocomplete="address-level1" value="TX"></div>
+            <div class="field" data-width="8"><label class="field-label" for="a-zip">ZIP</label><input class="input" id="a-zip" name="zip" inputmode="numeric" autocomplete="postal-code" value="78704"></div>
+          </div>
+        </fieldset>
+        <fieldset class="form-section">
+          <legend class="form-section-title">Widths, beside a field that stretches</legend>
+          <div class="form-row">
+            <div class="field"><label class="field-label" for="w-item">Item</label><input class="input" id="w-item" value="Drywall, 1/2 in, 4 × 8 ft"></div>
+            <div class="field" data-width="8"><label class="field-label" for="w8">Quantity</label><input class="input" id="w8" data-numeric inputmode="decimal" value="120"></div>
+            <div class="field" data-width="12"><label class="field-label" for="w12">Unit price</label><div class="input-group"><span class="input-adornment">$</span><input class="input" id="w12" data-numeric inputmode="decimal" value="14.80"></div></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label class="field-label" for="w-contact">Contact name</label><input class="input" id="w-contact" value="Dana Cole" autocomplete="name"></div>
+            <div class="field" data-width="20"><label class="field-label" for="w20">Phone</label><input class="input" id="w20" type="tel" value="(512) 555-0142" autocomplete="tel"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label class="field-label" for="w-company">Company</label><input class="input" id="w-company" value="Lakeside Lumber" autocomplete="organization"></div>
+            <div class="field" data-width="32"><label class="field-label" for="w32">Email</label><input class="input" id="w32" type="email" value="orders@lakesidelumber.com" autocomplete="email"></div>
+          </div>
+          <div class="field"><label class="field-label" for="w-ref">Reference <span class="field-optional">(optional)</span></label><input class="input" id="w-ref" value="PO-2291"></div>
+          <p class="fs-note">Alone on its line, a short answer (the reference) takes the full width too.</p>
+        </fieldset>
+      </form>
+    </div>
+  </section>
+
+  <section class="spec-section" id="page">
+    <h2>A longer form on a page: Save at the foot</h2>
+    <p>More than a dialog holds, or a document with money: the page, in sections. Its actions stay at the window's foot while the form is on screen, so Save is always in reach, and the note beside them counts what isn't saved yet. Cancel, or leaving with changes, asks once: Keep editing, Discard, Save.</p>
+    <div class="fs-page" data-surface="canvas">
+      <form class="form" id="job" aria-labelledby="job-t">
+        <div class="fs-head"><h3 id="job-t">Edit job · Roof and kitchen refresh</h3><span class="badge" data-status="booked">Booked</span></div>
+        <div class="form-summary" role="alert" tabindex="-1" hidden></div>
+        <fieldset class="form-section">
+          <legend class="form-section-title">Job</legend>
+          <div class="field"><label class="field-label" for="j-name">Job name</label><input class="input" id="j-name" name="name" value="Roof and kitchen refresh" required aria-describedby="j-name-error"><p class="field-error" id="j-name-error" hidden></p></div>
+          <div class="field"><label class="field-label" for="j-customer">Customer</label><div class="combobox"><input class="input" id="j-customer" name="customer" value="Marco Ruiz" required role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="j-customer-list" autocomplete="off" aria-describedby="j-customer-error"><input type="hidden" name="customer_id" value="c1"><div class="combobox-list" id="j-customer-list" role="listbox" popover="manual"></div></div><p class="field-error" id="j-customer-error" hidden></p></div>
+        </fieldset>
+        <fieldset class="form-section">
+          <legend class="form-section-title">Site</legend>
+          <div class="address" id="j-site" data-country="US" data-home-country="US">
+            <div class="form-row">
+              <div class="field"><label class="field-label" for="j-street">Street address</label><div class="combobox" data-lookup><input class="input" id="j-street" name="street" data-part="street" value="70 Orchard Ln" autocomplete="address-line1" required role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="j-street-list" aria-describedby="j-street-error"><div class="combobox-list" id="j-street-list" role="listbox" popover="manual"></div></div><p class="field-error" id="j-street-error" hidden></p></div>
+              <div class="field" data-width="8"><label class="field-label" for="j-unit">Unit <span class="field-optional">(optional)</span></label><input class="input" id="j-unit" name="unit" data-part="unit" autocomplete="address-line2"></div>
+            </div>
+            <div class="form-row">
+              <div class="field"><label class="field-label" for="j-city">City</label><input class="input" id="j-city" name="city" data-part="city" value="Austin" autocomplete="address-level2"></div>
+              <div class="field" data-width="12"><label class="field-label" for="j-state">State</label><input class="input" id="j-state" name="state" data-part="region" value="TX" autocomplete="address-level1"></div>
+              <div class="field" data-width="8"><label class="field-label" for="j-zip">ZIP code</label><input class="input" id="j-zip" name="zip" data-part="postal" data-format="postal" value="78745" inputmode="numeric" autocomplete="postal-code" aria-describedby="j-zip-error"><p class="field-error" id="j-zip-error" hidden></p></div>
+            </div>
+            <div class="field"><label class="field-label" for="j-country">Country</label><div class="select"><select class="input" id="j-country" name="country" data-part="country" autocomplete="country"><option value="US" selected>United States</option><option value="CA">Canada</option><option value="GB">United Kingdom</option></select></div></div>
+          </div>
+        </fieldset>
+        <fieldset class="form-section">
+          <legend class="form-section-title">Dates and money</legend>
+          <p class="form-section-hint">The deposit is asked for when the client signs</p>
+          <div class="form-row">
+            <div class="field" data-width="12"><label class="field-label" for="j-start">Start date</label><input class="input" id="j-start" name="start" type="date" value="2026-11-09" required aria-describedby="j-start-error"><p class="field-error" id="j-start-error" hidden></p></div>
+            <div class="field"><label class="field-label" for="j-deposit">Deposit</label><div class="input-group"><span class="input-adornment">$</span><input class="input" id="j-deposit" name="deposit" data-format="money" data-min="0" data-numeric inputmode="decimal" value="4,825.00" required aria-describedby="j-deposit-error"></div><p class="field-error" id="j-deposit-error" hidden></p></div>
+          </div>
+          <div class="field"><label class="field-label" for="j-notes">Note for the crew <span class="field-optional">(optional)</span></label><textarea class="input" id="j-notes" name="notes" rows="3">Gate code 4417. Dog in the yard.</textarea></div>
+        </fieldset>
+        <div class="form-actions" data-sticky><button type="submit" class="button">Save changes</button><button type="button" class="button" data-variant="ghost" id="job-cancel">Cancel</button><span class="form-actions-note" id="job-note" aria-live="polite"></span></div>
+      </form>
+    </div>
+  </section>
+
+  <section class="spec-section" id="settings">
+    <h2>Settings: each section has its Save</h2>
+    <p>Settings save the way every form does: change what you need, then the section's Save, switches included, so nothing changes by brushing past it. Most settings are optional, so the few that are needed say “(required)”.</p>
+    <div class="fs-grid">
+      <div class="fs-card" data-surface="raised">
+        <form class="form" id="notify" aria-labelledby="notify-t">
+          <fieldset class="form-section">
+            <legend class="form-section-title" id="notify-t">Notifications</legend>
+            <label class="choice" for="s-signed"><input type="checkbox" role="switch" class="toggle" id="s-signed" name="signed" checked> Email me when a client signs</label>
+            <label class="choice" for="s-paid"><input type="checkbox" role="switch" class="toggle" id="s-paid" name="paid" checked> Email me when an invoice is paid</label>
+            <label class="choice" for="s-daily"><input type="checkbox" role="switch" class="toggle" id="s-daily" name="daily"> A daily summary at 7 am</label>
+          </fieldset>
+          <div class="form-actions"><button type="submit" class="button" data-variant="secondary">Save notifications</button><span class="form-actions-note" id="notify-note" aria-live="polite"></span></div>
+        </form>
+      </div>
+      <div class="fs-card" data-surface="raised">
+        <form class="form" id="company" aria-labelledby="company-t">
+          <fieldset class="form-section">
+            <legend class="form-section-title" id="company-t">Company address</legend>
+            <div class="form-summary" role="alert" tabindex="-1" hidden></div>
+            <div class="field"><label class="field-label" for="c-street">Street address <span class="field-required">(required)</span></label><input class="input" id="c-street" name="street" value="4100 Lake Austin Blvd" required aria-describedby="c-street-error"><p class="field-error" id="c-street-error" hidden></p></div>
+            <div class="field"><label class="field-label" for="c-unit">Suite</label><input class="input" id="c-unit" name="unit" autocomplete="address-line2"></div>
+            <div class="form-row"><div class="field"><label class="field-label" for="c-city">City</label><input class="input" id="c-city" name="city" value="Austin"></div><div class="field" data-width="8"><label class="field-label" for="c-zip">ZIP</label><input class="input" id="c-zip" name="zip" value="78703" inputmode="numeric" data-format="postal" autocomplete="postal-code" aria-describedby="c-zip-error"><p class="field-error" id="c-zip-error" hidden></p></div></div>
+          </fieldset>
+          <div class="form-actions"><button type="submit" class="button" data-variant="secondary">Save address</button><span class="form-actions-note" id="company-note" aria-live="polite"></span></div>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Rules</h2>
+    <ul class="spec-stack" style="max-width:70ch;padding-left:var(--space-5)">
+      <li>Every line ends at the form's edge: a field alone on its line stretches; a short width only beside a field that stretches. Fields sharing a row have no hint of their own (it would push their control out of line): say it in the section's hint.</li>
+      <li>Every field has a visible label above it; a placeholder is never a label; a hint goes between the label and the field.</li>
+      <li>Mark the minority in words: “(optional)” where most are required, “(required)” where most are optional; a form where everything is required says nothing.</li>
+      <li>Error words say what to do, in the label's words: “Enter company name”, “ZIP isn't in the right format”; never “Invalid” or “This field is required”.</li>
+      <li>Every form saves the same way, with its Save; nothing saves by itself. Save is never disabled to say what's missing. Off only while saving, with “Saving…”.</li>
+      <li>Leaving with unsaved changes asks once: Keep editing, Discard, Save. Nothing changed, nothing asked.</li>
+      <li>Where a form lives: a dialog up to about five fields; a side sheet for a related record; the page or the record's window for documents with money; on phones a full-screen sheet.</li>
+      <li>Everything typed is kept when something goes wrong.</li>
+    </ul>
+  </section>
+</main>
+<script src="../../shared/icons.js?v=fda98cbd"></script>
+<script src="specimen.js?v=fda98cbd"></script>
+<script src="../components/field.js?v=fda98cbd"></script>
+<script src="../components/form.js?v=fda98cbd"></script>
+<script src="../components/combobox.js?v=fda98cbd"></script>
+<script src="../components/address-field.js?v=fda98cbd"></script>
+<script src="samples.js?v=fda98cbd"></script>
+<script>
+  // the examples' saving is pretend: a short wait
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  const vendor = document.getElementById("vendor");
+  BolsterForm.attach(vendor, { save: async () => { await wait(600); document.getElementById("vendor-done").textContent = "Saved. Lakeside Lumber is in Subs & vendors."; } });
+  vendor.addEventListener("reset", () => { vendor.querySelectorAll("[aria-invalid]").forEach((el) => el.removeAttribute("aria-invalid")); vendor.querySelectorAll(".field-error").forEach((e) => (e.hidden = true)); vendor.querySelector(".form-summary").hidden = true; });
+
+  const job = document.getElementById("job");
+  // the customer from 240 clients (a combobox, D138); the site looked up as you type (D139)
+  const marco = SAMPLE.clients.find((c) => c.label === "Marco Ruiz");
+  BolsterCombobox.attach(document.getElementById("j-customer"), { options: SAMPLE.clients, noun: ["client", "clients"], value: marco });
+  BolsterAddress.attach(document.getElementById("j-site"), { lookup: SAMPLE.lookup });
+  BolsterForm.attach(job, { save: () => wait(700) });
+  BolsterForm.track(job, document.getElementById("job-note"));
+  job.addEventListener("form-saved", () => { document.getElementById("job-note").textContent = "Saved"; });
+  document.getElementById("job-cancel").addEventListener("click", async (e) => { if (await BolsterForm.leave(job)) document.getElementById("job-note").textContent = "Closed (pretend)"; });
+
+  for (const id of ["notify", "company"]) {
+    const f = document.getElementById(id), note = document.getElementById(`${id}-note`);
+    BolsterForm.attach(f, { save: () => wait(500) });
+    BolsterForm.track(f, note);
+    f.addEventListener("form-saved", () => { note.textContent = "Saved"; });
+  }
+</script>
+</body>
+</html>

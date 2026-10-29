@@ -1,0 +1,150 @@
+/* Form: how fields are laid out, say what they need, show what's wrong and save (D134, I25; the F-rules of the
+   forms research, docs/forms-research.md). Builds on Field (field.css): a form arranges fields, it doesn't restyle them.
+
+   <form class="form" novalidate aria-labelledby="t">                     one column, at most the reading width
+     <div class="form-summary" role="alert" tabindex="-1" hidden>…</div>  errors out of sight, as links (form.js fills it)
+     <fieldset class="form-section">                                     a group with its heading
+       <legend class="form-section-title">Contact</legend>
+       <p class="form-section-hint">Where the vendor sends quotes</p>
+       <div class="field">                                                alone on its line: stretches to the form's edge
+         <label class="field-label" for="p">Phone <span class="field-optional">(optional)</span></label>
+         <p class="field-hint" id="p-hint">The office line, not a crew member's</p>
+         <input class="input" id="p" type="tel" autocomplete="tel" aria-describedby="p-hint p-error">
+         <p class="field-error" id="p-error" hidden></p>                  words under the field, with an icon
+       </div>
+       <div class="form-row">                                             related fields on one line; one stretches
+         <div class="field">…City…</div><div class="field" data-width="4">…State…</div><div class="field" data-width="8">…ZIP…</div></div>
+     </fieldset>
+     <div class="form-actions"><button class="button">Save vendor</button><button class="button" data-variant="ghost">Cancel</button></div>
+   </form>
+
+   Saving (D134, direction A): every form saves the same way, with its Save: in a dialog's footer, at a sheet's foot,
+   or, on a page, in actions that stay at the window's foot (data-sticky), counting what isn't saved yet:
+   <div class="form-actions" data-sticky><button class="button">Save changes</button><button class="button" data-variant="ghost">Cancel</button>
+     <span class="form-actions-note" aria-live="polite">2 unsaved changes</span></div> */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  /* ---------- the form: one column, at most the reading width (F-layout) ---------- */
+  :where(.form) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+    max-inline-size: var(--content-max-width-reading);
+  }
+  :where(.form[data-density="compact"]) { gap: var(--space-4); } /* a dialog or a sheet */
+
+  /* a section: a group of fields under a heading; a fieldset, so its legend names the group */
+  :where(.form-section) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-4);
+    min-inline-size: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  :where(.form-section + .form-section) { padding-block-start: var(--space-6); border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
+  :where(.form-section-title) {
+    float: inline-start; /* a legend that sits in the grid like any other row */
+    inline-size: 100%;
+    padding: 0;
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    line-height: var(--leading-lg);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-content-primary);
+  }
+  :where(.form-section-title) + * { clear: both; }
+  :where(.form-section-hint) { margin-block-start: calc(var(--space-3) * -1); font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
+
+  /* short related fields side by side (city, state, ZIP; first and last name); one column on phones */
+  :where(.form-row) { display: flex; flex-wrap: wrap; align-items: start; gap: var(--space-4); }
+  :where(.form-row) > :where(.field) { flex: 1 1 12rem; }
+  :where(.form-row) > :where(.field[data-width]) { flex: 0 1 auto; }
+  @media (max-width: 639px) { :where(.form-row) { flex-direction: column; align-items: stretch; } }
+
+  /* ---------- a field as wide as its answer, beside one that stretches (F-widths, F-rows, D135) ----------
+     Every line of a form ends at the form's edge. A width holds only in a row, beside a field that stretches (city,
+     state, ZIP: the city stretches); alone on its line a field stretches, whatever its answer. A row whose fields all
+     have a width stretches its last. Fields sharing a row carry no hint (it would push their control out of line); the
+     section's hint says it. The width is in characters of the control's own font, plus its padding and border */
+  :where(.form-row) > :where(.field[data-width]) > :where(.input, .input-group, .select) {
+    inline-size: calc(var(--_ch) * 1ch + 2 * var(--_px, var(--space-3)) + 2 * var(--border-width-default));
+    max-inline-size: 100%;
+  }
+  :where(.form-row) > :where(.field[data-width]) > :where(.select) { inline-size: calc(var(--_ch) * 1ch + 2 * var(--_px, var(--space-3)) + 1.25rem + 2 * var(--border-width-default)); }
+  :where(.form-row:not(:has(> .field:not([data-width])))) > :where(.field:last-child) { flex: 1 1 12rem; }
+  :where(.form-row:not(:has(> .field:not([data-width])))) > :where(.field:last-child) > :where(.input, .input-group, .select) { inline-size: 100%; }
+  @media (max-width: 639px) { :where(.form-row) > :where(.field[data-width]) > :where(.input, .input-group, .select) { inline-size: 100%; } }
+  :where(.field[data-width="4"]) { --_ch: 4; }
+  :where(.field[data-width="8"]) { --_ch: 8; }
+  :where(.field[data-width="12"]) { --_ch: 12; }
+  :where(.field[data-width="20"]) { --_ch: 20; }
+  :where(.field[data-width="32"]) { --_ch: 32; }
+
+  /* ---------- the words around a field (F-labels, F-errors) ---------- */
+  /* a hint sits between the label and the control, so it's read before typing; one short line */
+  :where(.field-hint) { margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  /* "(required)" where most of a form is optional; "(optional)" is field.css's */
+  :where(.field-label) :where(.field-required) { font-weight: var(--font-weight-regular); color: var(--color-content-tertiary); }
+  /* the error: words under the field, an icon before them, never colour alone */
+  :where(.field-error) {
+    display: flex;
+    align-items: start;
+    gap: var(--space-1);
+    margin: 0;
+    font-size: var(--text-xs);
+    line-height: var(--leading-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-feedback-danger-content);
+  }
+  :where(.field-error)::before {
+    content: "";
+    flex: none;
+    inline-size: 0.875rem;
+    block-size: 0.875rem;
+    margin-block-start: 1px;
+    background: currentColor;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Ccircle cx='7' cy='7' r='6.25' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3Cpath d='M7 3.75v4' stroke='%23000' stroke-width='1.5' stroke-linecap='round'/%3E%3Ccircle cx='7' cy='10.1' r='0.9'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+  :where(.field-error[hidden]) { display: none; }
+  /* a choice group in error (radios, checkboxes): its legend says so too */
+  :where(fieldset.field:has([aria-invalid="true"])) > :where(legend) { color: var(--color-feedback-danger-content); }
+
+  /* ---------- the summary: what's wrong, when it's out of sight (F-errors) ---------- */
+  :where(.form-summary) {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-4) var(--space-5);
+    border-radius: var(--radius-md);
+    background: var(--color-feedback-danger-surface);
+    color: var(--color-content-primary);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+  }
+  :where(.form-summary[hidden]) { display: none; }
+  :where(.form-summary):focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: var(--focus-ring-offset); }
+  :where(.form-summary-title) { margin: 0; font-weight: var(--font-weight-medium); color: var(--color-feedback-danger-content); }
+  :where(.form-summary) :where(ul) { display: grid; gap: var(--space-1); margin: 0; padding-inline-start: 1.125rem; }
+  :where(.form-summary) :where(a) { color: var(--color-feedback-danger-content); text-underline-offset: 2px; }
+
+  /* ---------- the actions: primary first, at the form's foot (F-save-never-off: never disabled to say what's missing) ---------- */
+  :where(.form-actions) { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+  :where(.form-actions[data-align="end"]) { justify-content: flex-end; } /* a dialog's footer */
+  :where(.form-actions-note) { margin-inline-start: auto; font-size: var(--text-xs); color: var(--color-content-tertiary); }
+
+  /* a long form on a page: its actions stay at the window's foot, so Save is always in reach (F-where; on phones, the
+     sheet's primary action pinned at the foot). The note beside them counts what isn't saved yet */
+  :where(.form-actions[data-sticky]) {
+    position: sticky;
+    inset-block-end: 0;
+    z-index: var(--z-sticky);
+    margin-inline: calc(var(--space-4) * -1);
+    padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+    border-block-start: var(--border-width-default) solid var(--color-line-subtle);
+    background: var(--color-surface-default);
+  }
+  :where(.form-actions[data-sticky]) :where(.form-actions-note:not(:empty)) { color: var(--color-content-secondary); font-weight: var(--font-weight-medium); }
+}

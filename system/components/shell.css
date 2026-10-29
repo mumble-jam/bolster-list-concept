@@ -47,7 +47,7 @@
     border-block-end: var(--border-width-default) solid var(--color-line-chrome);
   }
   /* The search, a field on the dark bar (D112):
-     <label class="top-bar-search">svg<input type="search" placeholder="Search customers, jobs, invoices, files">
+     <label class="top-bar-search">svg<input type="search" placeholder="Search">
        <button class="top-bar-search-clear" type="button" aria-label="Clear search">svg</button>
        <span class="top-bar-search-keys" aria-hidden="true"><kbd>⌘</kbd><kbd>K</kbd><kbd data-focused>esc</kbd></span></label>
      Lit as the menu's pill is (a faint edge, a lighter line along its top), so it reads as a well in the bar, not a

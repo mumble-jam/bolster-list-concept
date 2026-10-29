@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Address field · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=fda98cbd">
+<link rel="stylesheet" href="specimen.css?v=fda98cbd">
+<style>
+  .ad-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr)); gap: var(--space-6); align-items: start; }
+  .ad-card { display: grid; gap: var(--space-4); padding: var(--space-6); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-xl); background: var(--color-surface-default); }
+  .ad-line { margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  .ad-line b { font-weight: var(--font-weight-medium); color: var(--color-content-primary); }
+</style>
+<script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
+addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
+<script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../../docs/index.html" data-doc-link>← Documentation</a>
+  <h1>Address field</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">A site's address, looked up as you type, its parts kept apart so it can be mapped, routed and sorted by area (D139). The street line is a combobox: pick a suggestion and the parts below fill, each still editable, and the cursor moves on to the unit, which no lookup knows. Without a lookup service it's the same fields, typed by hand. The country decides the parts' words, the state or province list and the postal code's check.</p>
+
+  <section class="spec-section" id="lookup">
+    <h2>With a lookup</h2>
+    <p>Try “barton”, “orchard” or “toronto”. A Canadian pick switches the country, and with it Province and Postal code. Nothing found keeps what you typed: fill the rest by hand.</p>
+    <div class="ad-grid">
+      <form class="ad-card form" id="ad-a" aria-label="Job site, with a lookup">
+        <div class="address" data-country="US" data-home-country="US">
+            <div class="form-row">
+              <div class="field"><label class="field-label" for="a-street">Street address</label><div class="combobox" data-lookup><input class="input" id="a-street" name="street" data-part="street" autocomplete="address-line1" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="a-street-list" placeholder="Start typing the street" value="" required aria-describedby="a-street-error"><div class="combobox-list" id="a-street-list" role="listbox" popover="manual"></div></div><p class="field-error" id="a-street-error" hidden></p></div>
+              <div class="field" data-width="8"><label class="field-label" for="a-unit">Unit <span class="field-optional">(optional)</span></label><input class="input" id="a-unit" name="unit" data-part="unit" autocomplete="address-line2" value=""></div>
+            </div>
+            <div class="form-row">
+              <div class="field"><label class="field-label" for="a-city">City</label><input class="input" id="a-city" name="city" data-part="city" autocomplete="address-level2" value=""></div>
+              <div class="field" data-width="12"><label class="field-label" for="a-region">State</label><input class="input" id="a-region" name="region" data-part="region" autocomplete="address-level1" value=""></div>
+              <div class="field" data-width="8"><label class="field-label" for="a-postal">ZIP code</label><input class="input" id="a-postal" name="postal" data-part="postal" data-format="postal" inputmode="numeric" autocomplete="postal-code" value="" aria-describedby="a-postal-error"><p class="field-error" id="a-postal-error" hidden></p></div>
+            </div>
+            <div class="field"><label class="field-label" for="a-country">Country</label><div class="select"><select class="input" id="a-country" name="country" data-part="country" autocomplete="country"><option value="US" selected>United States</option><option value="CA">Canada</option><option value="AU">Australia</option><option value="FR">France</option><option value="DE">Germany</option><option value="IE">Ireland</option><option value="IT">Italy</option><option value="MX">Mexico</option><option value="NL">Netherlands</option><option value="PL">Poland</option><option value="PT">Portugal</option><option value="ES">Spain</option><option value="UA">Ukraine</option><option value="GB">United Kingdom</option></select></div></div>
+          </div>
+        <p class="ad-line" aria-live="polite">On one line: <b id="ad-a-line">—</b></p>
+      </form>
+    </div>
+  </section>
+
+  <section class="spec-section" id="plain">
+    <h2>Without a lookup</h2>
+    <p>The same fields, typed by hand: what a product gets before it adds a lookup service, or if it never does. Nothing to wire; the formats and checks still hold.</p>
+    <div class="ad-grid">
+      <form class="ad-card form" id="ad-b" aria-label="Job site, typed by hand">
+        <div class="address" data-country="US" data-home-country="US">
+            <div class="form-row">
+              <div class="field"><label class="field-label" for="b-street">Street address</label><input class="input" id="b-street" name="street" data-part="street" autocomplete="address-line1" value="70 Orchard Ln" required aria-describedby="b-street-error"><p class="field-error" id="b-street-error" hidden></p></div>
+              <div class="field" data-width="8"><label class="field-label" for="b-unit">Unit <span class="field-optional">(optional)</span></label><input class="input" id="b-unit" name="unit" data-part="unit" autocomplete="address-line2" value=""></div>
+            </div>
+            <div class="form-row">
+              <div class="field"><label class="field-label" for="b-city">City</label><input class="input" id="b-city" name="city" data-part="city" autocomplete="address-level2" value="Austin"></div>
+              <div class="field" data-width="12"><label class="field-label" for="b-region">State</label><input class="input" id="b-region" name="region" data-part="region" autocomplete="address-level1" value="TX"></div>
+              <div class="field" data-width="8"><label class="field-label" for="b-postal">ZIP code</label><input class="input" id="b-postal" name="postal" data-part="postal" data-format="postal" inputmode="numeric" autocomplete="postal-code" value="78745" aria-describedby="b-postal-error"><p class="field-error" id="b-postal-error" hidden></p></div>
+            </div>
+            <div class="field"><label class="field-label" for="b-country">Country</label><div class="select"><select class="input" id="b-country" name="country" data-part="country" autocomplete="country"><option value="US" selected>United States</option><option value="CA">Canada</option><option value="AU">Australia</option><option value="FR">France</option><option value="DE">Germany</option><option value="IE">Ireland</option><option value="IT">Italy</option><option value="MX">Mexico</option><option value="NL">Netherlands</option><option value="PL">Poland</option><option value="PT">Portugal</option><option value="ES">Spain</option><option value="UA">Ukraine</option><option value="GB">United Kingdom</option></select></div></div>
+          </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="spec-section" id="countries">
+    <h2>Other countries</h2>
+    <p>Canada: Province from its list, Postal code checked and spaced (K1A 0B1). Elsewhere: Region, optional and typed, and the postal code as written. Change the country to see the parts change.</p>
+    <div class="ad-grid">
+      <form class="ad-card form" id="ad-c" aria-label="An address in Canada">
+        <div class="address" data-country="CA" data-home-country="US">
+            <div class="form-row">
+              <div class="field"><label class="field-label" for="c-street">Street address</label><input class="input" id="c-street" name="street" data-part="street" autocomplete="address-line1" value="120 Bloor St E" required aria-describedby="c-street-error"><p class="field-error" id="c-street-error" hidden></p></div>
+              <div class="field" data-width="8"><label class="field-label" for="c-unit">Unit <span class="field-optional">(optional)</span></label><input class="input" id="c-unit" name="unit" data-part="unit" autocomplete="address-line2" value=""></div>
+            </div>
+            <div class="form-row">
+              <div class="field"><label class="field-label" for="c-city">City</label><input class="input" id="c-city" name="city" data-part="city" autocomplete="address-level2" value="Toronto"></div>
+              <div class="field" data-width="12"><label class="field-label" for="c-region">State</label><input class="input" id="c-region" name="region" data-part="region" autocomplete="address-level1" value="ON"></div>
+              <div class="field" data-width="8"><label class="field-label" for="c-postal">ZIP code</label><input class="input" id="c-postal" name="postal" data-part="postal" data-format="postal" inputmode="numeric" autocomplete="postal-code" value="M4W 1B7" aria-describedby="c-postal-error"><p class="field-error" id="c-postal-error" hidden></p></div>
+            </div>
+            <div class="field"><label class="field-label" for="c-country">Country</label><div class="select"><select class="input" id="c-country" name="country" data-part="country" autocomplete="country"><option value="US">United States</option><option value="CA" selected>Canada</option><option value="AU">Australia</option><option value="FR">France</option><option value="DE">Germany</option><option value="IE">Ireland</option><option value="IT">Italy</option><option value="MX">Mexico</option><option value="NL">Netherlands</option><option value="PL">Poland</option><option value="PT">Portugal</option><option value="ES">Spain</option><option value="UA">Ukraine</option><option value="GB">United Kingdom</option></select></div></div>
+          </div>
+      </form>
+      <form class="ad-card form" id="ad-d" aria-label="An address in the United Kingdom">
+        <div class="address" data-country="GB" data-home-country="US">
+            <div class="form-row">
+              <div class="field"><label class="field-label" for="d-street">Street address</label><input class="input" id="d-street" name="street" data-part="street" autocomplete="address-line1" value="14 Orchard Rd" required aria-describedby="d-street-error"><p class="field-error" id="d-street-error" hidden></p></div>
+              <div class="field" data-width="8"><label class="field-label" for="d-unit">Unit <span class="field-optional">(optional)</span></label><input class="input" id="d-unit" name="unit" data-part="unit" autocomplete="address-line2" value=""></div>
+            </div>
+            <div class="form-row">
+              <div class="field"><label class="field-label" for="d-city">City</label><input class="input" id="d-city" name="city" data-part="city" autocomplete="address-level2" value="Oxford"></div>
+              <div class="field" data-width="12"><label class="field-label" for="d-region">State</label><input class="input" id="d-region" name="region" data-part="region" autocomplete="address-level1" value="Oxfordshire"></div>
+              <div class="field" data-width="8"><label class="field-label" for="d-postal">ZIP code</label><input class="input" id="d-postal" name="postal" data-part="postal" data-format="postal" inputmode="numeric" autocomplete="postal-code" value="OX2 6LE" aria-describedby="d-postal-error"><p class="field-error" id="d-postal-error" hidden></p></div>
+            </div>
+            <div class="field"><label class="field-label" for="d-country">Country</label><div class="select"><select class="input" id="d-country" name="country" data-part="country" autocomplete="country"><option value="US">United States</option><option value="CA">Canada</option><option value="AU">Australia</option><option value="FR">France</option><option value="DE">Germany</option><option value="IE">Ireland</option><option value="IT">Italy</option><option value="MX">Mexico</option><option value="NL">Netherlands</option><option value="PL">Poland</option><option value="PT">Portugal</option><option value="ES">Spain</option><option value="UA">Ukraine</option><option value="GB" selected>United Kingdom</option></select></div></div>
+          </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>Rules</h2>
+    <ul class="spec-stack" style="max-width:70ch;padding-left:var(--space-5)">
+      <li>An address is kept in parts: street, unit, city, region, postal code, country. Lists and records read it on one line (D59).</li>
+      <li>The street line looks the address up as you type; a pick fills the parts, each still editable. A lookup is an aid, never a gate: what's typed always stands.</li>
+      <li>Without a lookup service, the same fields typed by hand. A product can leave the lookup out and add it later without changing the form.</li>
+      <li>The country decides the words (State and ZIP code, Province and Postal code, Region and Postal code), the list and the check. It starts as the company's.</li>
+      <li>The rows follow F-rows: the street beside a short unit, the city beside the state and the code, the country alone and full width. Phones stack them.</li>
+    </ul>
+<code class="spec-code">&lt;div class="address" data-country="US"&gt;
+  &lt;div class="form-row"&gt;
+    &lt;div class="field"&gt;&lt;label class="field-label" for="street"&gt;Street address&lt;/label&gt;
+      &lt;div class="combobox" data-lookup&gt;&lt;input class="input" id="street" name="street" data-part="street"
+        role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="street-list"&gt;
+        &lt;div class="combobox-list" id="street-list" role="listbox" popover="manual"&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+    &lt;div class="field" data-width="8"&gt;…Unit, data-part="unit"…&lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="form-row"&gt;…City (city) · State (region, data-width="12") · ZIP code (postal, data-format="postal", data-width="8")…&lt;/div&gt;
+  &lt;div class="field"&gt;…Country (country)…&lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;BolsterAddress.attach(el, { lookup: (text, country) =&gt; … })&lt;/script&gt;</code>
+  </section>
+</main>
+<script src="../../shared/icons.js?v=fda98cbd"></script>
+<script src="specimen.js?v=fda98cbd"></script>
+<script src="../components/field.js?v=fda98cbd"></script>
+<script src="../components/form.js?v=fda98cbd"></script>
+<script src="../components/combobox.js?v=fda98cbd"></script>
+<script src="../components/address-field.js?v=fda98cbd"></script>
+<script src="samples.js?v=fda98cbd"></script>
+<script>
+  for (const id of ["ad-a", "ad-b", "ad-c", "ad-d"]) BolsterForm.attach(document.getElementById(id));
+  const a = document.querySelector("#ad-a .address");
+  BolsterAddress.attach(a, { lookup: SAMPLE.lookup });
+  for (const id of ["ad-b", "ad-c", "ad-d"]) BolsterAddress.attach(document.querySelector(`#${id} .address`));
+  const line = () => (document.getElementById("ad-a-line").textContent = BolsterAddress.line(a) || "—");
+  a.addEventListener("input", line); a.addEventListener("change", line);
+</script>
+</body>
+</html>

@@ -64,8 +64,8 @@
   :root { scroll-padding-block-start: calc(var(--list-head-top, 0px) + var(--space-2)); }
   /* the page is the one scroller down (D128): a card never scrolls on its own. What sticks to the page (the table's
      header, the timeline's scale, the calendar's weekdays) sits at --page-top, under the bars, and slides up with them
-     as they hide; a part that's wider than the screen scrolls sideways only, and keeps its scrollbar at the window's
-     foot (.page-hscroll), so a mouse always has it in reach: drawn by hand, so it shows on a Mac too, where
+     as they hide; a part that's wider than the screen scrolls sideways only: in a card with the card's own scrollbar, on
+     the page itself (the board) and in the timeline with one at the window's foot (.page-hscroll, D141), so a mouse always has it in reach: drawn by hand, so it shows on a Mac too, where
      scrollbars hide; on the canvas, so nothing shows through it */
   @property --page-top { syntax: "<length>"; inherits: true; initial-value: 0px; }
   .list-page { --page-top: var(--list-head-top, 0px); transition: --page-top 300ms var(--ease-out); }

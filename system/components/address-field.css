@@ -1,0 +1,14 @@
+/* Address field: a street line that looks the address up (a combobox, data-lookup), and its parts in rows below it,
+   each editable: unit; city, state and ZIP code; country. D139, address-field.js.
+   <div class="address" data-country="US">
+     <div class="form-row"><div class="field">…Street address (data-part="street")…</div><div class="field" data-width="8">…Unit…</div></div>
+     <div class="form-row"><div class="field">…City…</div><div class="field" data-width="12">…State…</div><div class="field" data-width="8">…ZIP code…</div></div>
+     <div class="field">…Country…</div>
+   </div> */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  /* its rows are spaced as a section's are, so it sits in one unnoticed */
+  :where(.address) { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); min-inline-size: 0; }
+}

@@ -1,45 +1,45 @@
 // Specimen helpers (not required for styling). Vanilla, no dependencies.
 
-// Global navigation: one list of every page in the back office, drawn as a sidebar on the left (the
-// shell's sidebar items). From 1024 wide it's always there; narrower, a menu button in the page header
-// opens it as a drawer (a popover, so Escape and a click outside close it). Links are worked out from
-// this script's own address, so they hold wherever the folder is served.
+// One documentation (D133): the site (site/) is where the system is read; a specimen is its workbench, every variant
+// and state working on the system's own CSS. Its way back is a link to the site's page for it, worked out here from
+// the link's own address (`data-doc-link`), so it holds wherever the folders are served.
 (() => {
-  const script = document.currentScript;
-  if (!script || document.querySelector(".spec-nav")) return;
-  const root = new URL("../", script.src); // system/
-  const CONCEPT = "../index.html";
-  const NAV = [
-    ["Overview", [["Catalog", "index.html"], ["Drafts", "index.html#drafts"]]],
-    ["Foundations", [["Tokens", "specimens/tokens.html"], ["App shell", "specimens/shell.html"]]],
-    ["Page types", [["List page", "specimens/list-page.html"], ["List recipe", "specimens/list-recipe.html"]]],
-    ["List page parts", [["Summary cards", "specimens/summary-cards.html"], ["Table card", "specimens/table-card.html"], ["Record", "specimens/record.html"], ["Floating bar", "specimens/floating-bar.html"], ["Popover", "specimens/popover.html"], ["States", "specimens/states.html"]]],
-    ["Components", [["Button", "specimens/button.html"], ["Badge", "specimens/badge.html"], ["Field", "specimens/field.html"], ["Search field and chip", "specimens/toolbar.html"], ["Checkbox, radio, toggle", "specimens/choice.html"], ["Segmented control", "specimens/segmented-control.html"], ["Tabs", "specimens/tabs.html"], ["Tooltip, menu, dialog", "specimens/overlays.html"], ["Data table, cards, avatars, thumbnails", "specimens/data.html"], ["Toast", "specimens/toast.html"], ["Calendar", "specimens/calendar.html"], ["Icon vocabulary", "specimens/icons.html"]]],
-    ["Live", [["List concept ↗", CONCEPT]]],
-  ];
-  const here = location.pathname.replace(/\/$/, "/index.html");
-  const esc = (t) => t.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-  const nav = document.createElement("nav");
-  nav.className = "spec-nav"; nav.id = "spec-nav"; nav.setAttribute("aria-label", "Design system"); nav.setAttribute("popover", "");
-  nav.innerHTML = `<a class="sidebar-title spec-nav-title" href="${new URL("index.html", root).href}">Bolster design system</a>
-    <p class="spec-nav-note"><span class="badge" data-tone="info">Status quo · Oct 2026</span></p>` +
-    NAV.map(([group, items]) => `<p class="sidebar-group">${esc(group)}</p>` + items.map(([label, path]) => {
-      const url = new URL(path, root);
-      const on = url.pathname === here && !url.hash;
-      return `<a class="sidebar-item" href="${url.href}"${on ? ' aria-current="page"' : ""}>${esc(label)}</a>`;
-    }).join("")).join("");
-  document.body.prepend(nav);
-  // narrow screens: a menu button at the start of the page header opens the drawer
-  const header = document.querySelector(".spec-header");
-  if (header) {
-    const btn = document.createElement("button");
-    btn.type = "button"; btn.className = "button spec-nav-toggle"; btn.dataset.variant = "ghost"; btn.dataset.size = "sm"; btn.dataset.iconOnly = ""; btn.dataset.tip = "Menu";
-    btn.setAttribute("aria-label", "Menu"); btn.setAttribute("popovertarget", "spec-nav"); btn.setAttribute("aria-controls", "spec-nav");
-    btn.innerHTML = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
-    header.prepend(btn);
-    nav.addEventListener("toggle", (e) => btn.setAttribute("aria-expanded", e.newState === "open"));
+  const DOC = {
+    "address-field.html": "components/address-field.html", "badge.html": "components/badge.html", "button.html": "components/button.html", "calendar.html": "components/calendar.html",
+    "choice.html": "components/choice.html", "combobox.html": "components/combobox.html", "data.html": "components/data-table.html", "field.html": "components/field.html",
+    "floating-bar.html": "components/floating-bar.html", "form.html": "patterns/forms.html", "icons.html": "foundations/iconography.html",
+    "list-page.html": "page-types/list.html", "list-recipe.html": "page-types/list.html", "overlays.html": "components/dialog.html",
+    "popover.html": "components/popover.html", "record.html": "components/record.html", "segmented-control.html": "components/segmented-control.html",
+    "shell.html": "components/app-shell.html", "states.html": "components/states.html", "summary-cards.html": "components/summary-cards.html",
+    "table-card.html": "components/data-table.html", "tabs.html": "components/tabs.html", "toast.html": "components/toast.html",
+    "tokens.html": "resources/tokens.html", "toolbar.html": "components/toolbar.html",
+  };
+  const page = DOC[location.pathname.split("/").pop()];
+  const link = document.querySelector("a[data-doc-link]");
+  if (link && page) link.href = new URL(page, link.href).href;
+})();
+
+// Inside the documentation: ?embed shows the specimen's examples without its header, intro, rules and markup notes
+// (the page around it says those), or ?embed=id,id only those sections; it tells the page how tall it is, so the
+// page stays the one scroller (D128), follows its theme, and opens links in the window, not the frame.
+(() => {
+  const q = new URLSearchParams(location.search);
+  if (!q.has("embed")) return;
+  const html = document.documentElement;
+  html.classList.add("spec-embed");
+  const want = (q.get("embed") || "").split(",").filter(Boolean);
+  for (const s of document.querySelectorAll(".spec-section")) {
+    const id = s.id || s.querySelector(":scope > h2[id]")?.id || "";
+    const head = s.querySelector("h2")?.textContent.trim() || "";
+    s.hidden = want.length ? !want.includes(id) : /^(Rules|Markup)$/.test(head);
   }
-  nav.querySelector('[aria-current="page"]')?.scrollIntoView({ block: "nearest" });
+  const post = () => parent.postMessage({ bdsSpecimen: true, h: Math.ceil(document.body.getBoundingClientRect().height) }, "*");
+  new ResizeObserver(post).observe(document.body);
+  addEventListener("load", post);
+  const theme = (t) => { if (!t || t === "auto") delete html.dataset.theme; else html.dataset.theme = t; };
+  addEventListener("message", (e) => { if (e.source === parent && e.data?.bdsTheme) theme(e.data.bdsTheme); });
+  addEventListener("storage", (e) => { if (e.key === "bds-theme") theme(e.newValue); });
+  document.addEventListener("click", (e) => { const a = e.target.closest("a[href]"); if (a && !a.getAttribute("href").startsWith("#")) a.target = "_top"; });
 })();
 
 // Theme: auto → light → dark, remembered per browser.
@@ -69,6 +69,25 @@ document.addEventListener("click", (e) => {
   const closer = e.target.closest("dialog [data-close]");
   if (closer) closer.closest("dialog").close();
 });
+
+// A part wider than its column scrolls sideways (D128), so the keyboard can reach it: focusable while it overflows,
+// named by its section. Checked as sizes change (fonts and icons arrive, the frame narrows).
+(() => {
+  const focusable = "a[href], button, input, select, textarea, [tabindex]:not([data-scroll-stop])";
+  const check = (el) => {
+    const over = (el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight) && !el.querySelector(focusable);
+    if (over && !el.hasAttribute("tabindex")) {
+      el.tabIndex = 0; el.dataset.scrollStop = "";
+      if (!el.getAttribute("role")) { el.setAttribute("role", "region"); el.setAttribute("aria-label", el.closest(".spec-section")?.querySelector("h2")?.textContent.trim() || "Example"); el.dataset.scrollRole = ""; }
+    } else if (!over && "scrollStop" in el.dataset) {
+      el.removeAttribute("tabindex"); delete el.dataset.scrollStop;
+      if ("scrollRole" in el.dataset) { el.removeAttribute("role"); el.removeAttribute("aria-label"); delete el.dataset.scrollRole; }
+    }
+  };
+  const ro = new ResizeObserver((entries) => entries.forEach((e) => check(e.target)));
+  const scan = () => document.querySelectorAll(".spec-main *").forEach((el) => { if (/(auto|scroll)/.test(getComputedStyle(el).overflowX)) { ro.observe(el); check(el); } });
+  if (document.readyState === "complete") scan(); else addEventListener("load", scan);
+})();
 
 // Indeterminate checkboxes can only be set from JS.
 document.querySelectorAll("[data-indeterminate]").forEach((el) => (el.indeterminate = true));

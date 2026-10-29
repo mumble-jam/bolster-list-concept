@@ -7,20 +7,20 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=d8edba0e">
-<link rel="stylesheet" href="specimen.css?v=d8edba0e">
+<link rel="stylesheet" href="../bolster.css?v=fda98cbd">
+<link rel="stylesheet" href="specimen.css?v=fda98cbd">
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
 <script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <header class="spec-header">
-  <a href="../index.html">← Catalog</a>
+  <a href="../../docs/index.html" data-doc-link>← Documentation</a>
   <h1>States</h1>
   <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
 </header>
 <main class="spec-main">
-  <p class="spec-intro">Every list designs four states besides the normal one: loading, empty (no records yet), no results (filters exclude everything) and error. They sit inside the table card, so the page keeps its shape.</p>
+  <p class="spec-intro">Every list designs four states besides the normal one: loading, empty (no records yet), no results (filters exclude everything) and error. They sit where the content will be, so the page keeps its shape; loading also covers the summary cards, the record and a page's first load.</p>
 
   <section class="spec-section">
     <h2>Empty: no records yet</h2>
@@ -38,17 +38,60 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
     <div class="spec-panel" style="padding:var(--space-1) 0 var(--space-3)"><div class="banner" role="alert"><i data-icon="triangle-exclamation"></i><p>Jobs didn't load. Check your connection and try again.</p><button class="button" data-variant="secondary" data-size="sm">Try again</button></div></div>
   </section>
 
-  <section class="spec-section">
+  <section class="spec-section" id="loading">
     <h2>Loading</h2>
-    <p>Skeleton rows in the columns' own widths, so nothing moves when the data arrives. They shimmer unless reduced motion is on.</p>
+    <p>Skeletons stand where the content will be, in its shape and size, so nothing moves when it arrives (D142). They shimmer unless reduced motion is on. The region loading is <code>aria-busy</code>; what's already known (a page's title and toolbar, a record's name and status) shows at once.</p>
+    <h3>Rows</h3>
+    <div class="spec-panel"><section class="card list-panel"><div class="table-wrap"><table class="data-table" aria-busy="true"><thead><tr><th class="data-table-select"><input type="checkbox" class="checkbox" aria-label="Select all shown" disabled></th><th data-primary>Job</th><th style="inline-size:7rem">Status</th><th style="inline-size:8rem" data-numeric>Total</th></tr></thead><tbody><tr><td class="data-table-select"><span class="skeleton" data-shape="check"></span></td><td data-primary data-m="title"><span class="skeleton" style="inline-size:70%"></span></td><td data-m="badge"><span class="skeleton" style="inline-size:4.5rem"></span></td><td data-numeric data-m="trail"><span class="skeleton" style="inline-size:5rem;margin-inline-start:auto"></span></td></tr><tr><td class="data-table-select"><span class="skeleton" data-shape="check"></span></td><td data-primary data-m="title"><span class="skeleton" style="inline-size:70%"></span></td><td data-m="badge"><span class="skeleton" style="inline-size:4.5rem"></span></td><td data-numeric data-m="trail"><span class="skeleton" style="inline-size:5rem;margin-inline-start:auto"></span></td></tr><tr><td class="data-table-select"><span class="skeleton" data-shape="check"></span></td><td data-primary data-m="title"><span class="skeleton" style="inline-size:70%"></span></td><td data-m="badge"><span class="skeleton" style="inline-size:4.5rem"></span></td><td data-numeric data-m="trail"><span class="skeleton" style="inline-size:5rem;margin-inline-start:auto"></span></td></tr></tbody></table></div></section></div>
+    <h3>Summary cards</h3>
+    <p>Each card at its size, a bar for the label and a taller one for the figure.</p>
+    <div class="spec-panel"><div class="slice-row" style="--_slices:4" data-no-insight role="group" aria-busy="true" aria-label="Status cards, loading"><div class="slice" aria-hidden="true"><span class="skeleton" style="inline-size:60%"></span><span class="skeleton" data-shape="figure" style="inline-size:75%"></span></div><div class="slice" aria-hidden="true"><span class="skeleton" style="inline-size:60%"></span><span class="skeleton" data-shape="figure" style="inline-size:75%"></span></div><div class="slice" aria-hidden="true"><span class="skeleton" style="inline-size:60%"></span><span class="skeleton" data-shape="figure" style="inline-size:75%"></span></div><div class="slice" aria-hidden="true"><span class="skeleton" style="inline-size:60%"></span><span class="skeleton" data-shape="figure" style="inline-size:75%"></span></div></div></div>
+    <h3>The record</h3>
+    <p>The name and status come from the row that was clicked, so they show at once; the details stand in as a few rows of bars, not an exact copy.</p>
+    <div class="spec-panel"><section class="card detail" style="position:static;max-block-size:none;max-inline-size:24rem" aria-labelledby="sk-rec-t" aria-busy="true">
+      <header class="detail-head"><h2 id="sk-rec-t">Jamie Sorensen · Skim coat</h2></header>
+      <div class="detail-scroll"><div class="detail-section detail-hero"><span class="badge" data-status="pending">Pending</span><span class="skeleton" data-shape="figure" style="inline-size:8rem"></span></div>
+      <div class="detail-section"><dl class="detail-fields" aria-hidden="true"><div><dt><span class="skeleton" style="inline-size:5rem"></span></dt><dd><span class="skeleton" style="inline-size:7rem"></span></dd></div><div><dt><span class="skeleton" style="inline-size:4rem"></span></dt><dd><span class="skeleton" style="inline-size:9rem"></span></dd></div><div><dt><span class="skeleton" style="inline-size:6rem"></span></dt><dd><span class="skeleton" style="inline-size:6rem"></span></dd></div><div><dt><span class="skeleton" style="inline-size:5rem"></span></dt><dd><span class="skeleton" style="inline-size:8rem"></span></dd></div></dl></div></div>
+    </section></div>
+    <h3>A page's first load</h3>
+    <p>Opening a page from the menu: the title, the toolbar and Create show at once; the cards and the table show their skeletons, the count says “Loading…”. The loading screen is only for the app's first open (D90).</p>
     <div class="spec-panel" style="display:grid;gap:var(--space-4)">
-      <span class="skeleton" style="inline-size:70%"></span>
-      <span class="skeleton" style="inline-size:50%"></span>
-      <span class="skeleton" style="inline-size:62%"></span>
+      <div class="fx-row" style="display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap"><h3 style="margin:0;flex:1">Jobs</h3><button type="button" class="button" data-variant="secondary" data-size="sm">Export</button><button type="button" class="button" data-size="sm">Create job</button></div>
+      <div class="slice-row" style="--_slices:4" data-no-insight role="group" aria-busy="true" aria-label="Status cards, loading"><div class="slice" aria-hidden="true"><span class="skeleton" style="inline-size:60%"></span><span class="skeleton" data-shape="figure" style="inline-size:75%"></span></div><div class="slice" aria-hidden="true"><span class="skeleton" style="inline-size:60%"></span><span class="skeleton" data-shape="figure" style="inline-size:75%"></span></div><div class="slice" aria-hidden="true"><span class="skeleton" style="inline-size:60%"></span><span class="skeleton" data-shape="figure" style="inline-size:75%"></span></div><div class="slice" aria-hidden="true"><span class="skeleton" style="inline-size:60%"></span><span class="skeleton" data-shape="figure" style="inline-size:75%"></span></div></div>
+      <section class="card list-panel"><p class="text-caption" style="padding:var(--space-3) var(--space-4) 0;margin:0">Loading…</p><div class="table-wrap"><table class="data-table" aria-busy="true"><thead><tr><th class="data-table-select"><input type="checkbox" class="checkbox" aria-label="Select all shown" disabled></th><th data-primary>Job</th><th style="inline-size:7rem">Status</th><th style="inline-size:8rem" data-numeric>Total</th></tr></thead><tbody><tr><td class="data-table-select"><span class="skeleton" data-shape="check"></span></td><td data-primary data-m="title"><span class="skeleton" style="inline-size:70%"></span></td><td data-m="badge"><span class="skeleton" style="inline-size:4.5rem"></span></td><td data-numeric data-m="trail"><span class="skeleton" style="inline-size:5rem;margin-inline-start:auto"></span></td></tr><tr><td class="data-table-select"><span class="skeleton" data-shape="check"></span></td><td data-primary data-m="title"><span class="skeleton" style="inline-size:70%"></span></td><td data-m="badge"><span class="skeleton" style="inline-size:4.5rem"></span></td><td data-numeric data-m="trail"><span class="skeleton" style="inline-size:5rem;margin-inline-start:auto"></span></td></tr><tr><td class="data-table-select"><span class="skeleton" data-shape="check"></span></td><td data-primary data-m="title"><span class="skeleton" style="inline-size:70%"></span></td><td data-m="badge"><span class="skeleton" style="inline-size:4.5rem"></span></td><td data-numeric data-m="trail"><span class="skeleton" style="inline-size:5rem;margin-inline-start:auto"></span></td></tr><tr><td class="data-table-select"><span class="skeleton" data-shape="check"></span></td><td data-primary data-m="title"><span class="skeleton" style="inline-size:70%"></span></td><td data-m="badge"><span class="skeleton" style="inline-size:4.5rem"></span></td><td data-numeric data-m="trail"><span class="skeleton" style="inline-size:5rem;margin-inline-start:auto"></span></td></tr><tr><td class="data-table-select"><span class="skeleton" data-shape="check"></span></td><td data-primary data-m="title"><span class="skeleton" style="inline-size:70%"></span></td><td data-m="badge"><span class="skeleton" style="inline-size:4.5rem"></span></td><td data-numeric data-m="trail"><span class="skeleton" style="inline-size:5rem;margin-inline-start:auto"></span></td></tr><tr><td class="data-table-select"><span class="skeleton" data-shape="check"></span></td><td data-primary data-m="title"><span class="skeleton" style="inline-size:70%"></span></td><td data-m="badge"><span class="skeleton" style="inline-size:4.5rem"></span></td><td data-numeric data-m="trail"><span class="skeleton" style="inline-size:5rem;margin-inline-start:auto"></span></td></tr></tbody></table></div></section>
+    </div>
+    <h3>Live: the timing</h3>
+    <p>A load under 300 ms shows no skeleton at all; once one shows it stays at least 300 ms; after 10 s it says so in words; a failure puts the error in its place, with Try again.</p>
+    <div class="spec-panel" style="display:grid;gap:var(--space-4)">
+      <div style="display:flex;flex-wrap:wrap;gap:var(--space-3);align-items:center">
+        <div class="segmented" role="radiogroup" aria-label="How the load goes" data-size="sm">
+          <label class="segmented-option"><input type="radio" name="sk-speed" value="150"> 150 ms</label>
+          <label class="segmented-option"><input type="radio" name="sk-speed" value="1500" checked> 1.5 s</label>
+          <label class="segmented-option"><input type="radio" name="sk-speed" value="12000"> 12 s</label>
+          <label class="segmented-option"><input type="radio" name="sk-speed" value="fail"> Fails</label>
+        </div>
+        <button type="button" class="button" data-variant="secondary" data-size="sm" id="sk-go">Load the jobs</button>
+      </div>
+      <section class="card list-panel" id="sk-region" aria-label="Jobs"><div class="table-wrap"><table class="data-table"><thead><tr><th class="data-table-select"><input type="checkbox" class="checkbox" aria-label="Select all shown" disabled></th><th data-primary>Job</th><th style="inline-size:7rem">Status</th><th style="inline-size:8rem" data-numeric>Total</th></tr></thead><tbody></tbody></table></div></section>
     </div>
   </section>
 </main>
-<script src="../../shared/icons.js?v=d8edba0e"></script>
-<script src="specimen.js?v=d8edba0e"></script>
+<script src="../../shared/icons.js?v=fda98cbd"></script>
+<script src="specimen.js?v=fda98cbd"></script>
+<script src="../components/loading.js?v=fda98cbd"></script>
+<script>
+  const ROW = `<tr><td class="data-table-select"><span class="skeleton" data-shape="check"></span></td><td data-primary data-m="title"><span class="skeleton" style="inline-size:70%"></span></td><td data-m="badge"><span class="skeleton" style="inline-size:4.5rem"></span></td><td data-numeric data-m="trail"><span class="skeleton" style="inline-size:5rem;margin-inline-start:auto"></span></td></tr>`;
+  const head = `<thead><tr><th class="data-table-select"><input type="checkbox" class="checkbox" aria-label="Select all shown" disabled></th><th data-primary>Job</th><th style="inline-size:7rem">Status</th><th style="inline-size:8rem" data-numeric>Total</th></tr></thead>`;
+  const jobs = [["Roof and kitchen refresh", "booked", "Booked", "$48,250.00"], ["Garage drywall", "pending", "Pending", "$2,419.00"], ["Basement insulation", "lead", "Lead", "$6,800.00"]];
+  const region = document.getElementById("sk-region");
+  document.getElementById("sk-go").addEventListener("click", () => {
+    const v = document.querySelector('[name="sk-speed"]:checked').value;
+    BolsterLoading.load(region, () => new Promise((ok, no) => setTimeout(() => (v === "fail" ? no(new Error("offline")) : ok(jobs)), v === "fail" ? 1200 : +v)), {
+      label: "jobs",
+      skeleton: () => `<div class="table-wrap"><table class="data-table" aria-busy="true">${head}<tbody>${ROW.repeat(6)}</tbody></table></div>`,
+      render: (rows) => (region.innerHTML = `<div class="table-wrap"><table class="data-table">${head}<tbody>${rows.map(([n, st, label, t]) => `<tr><td class="data-table-select"><input type="checkbox" class="checkbox" aria-label="Select ${n}"></td><td data-primary data-m="title">${n}</td><td data-m="badge"><span class="badge" data-status="${st}">${label}</span></td><td data-numeric data-m="trail">${t}</td></tr>`).join("")}</tbody></table></div>`),
+    });
+  });
+</script>
 </body>
 </html>

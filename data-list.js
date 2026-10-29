@@ -1324,7 +1324,7 @@
       toast(`Concept only: “${what}” isn't wired up.`);
       return;
     }
-    if (q("[data-retry]")) { st.mode = "loading"; render(); setTimeout(() => { st.mode = "ready"; render(); }, 900); return; }
+    if (q("[data-retry]")) { st.frozen = false; fetchList(false); return; }
     if ((el = q("[data-concept-action]"))) {
       if (el.tagName === "A") e.preventDefault(); // a related record's link: the concept has no page behind it
       if (pop.contains(el)) pop.hidePopover();
@@ -1358,7 +1358,7 @@
       $("#select-page")?.focus({ preventScroll: true });
       return;
     }
-    if (t.name === "cc-state") { st.mode = t.value; st.selected.clear(); st.picking = false; render(); }
+    if (t.name === "cc-state") { st.mode = t.value; st.frozen = t.value !== "ready"; st.selected.clear(); st.picking = false; render(); }
     if (t.id === "cc-grid") {
       if (t.checked) delete document.documentElement.dataset.grid; else document.documentElement.dataset.grid = "off";
       $('[data-tune="net"]').hidden = !t.checked;
@@ -1503,8 +1503,23 @@
     cfg = next;
     st = saved[cfg.id] || fresh(cfg);
     if (query) fromHash(query);
-    render();
+    // a state chosen in Concept controls holds; otherwise the list loads as it would from the server (D142, I28)
+    if (st.frozen) render(); else fetchList(true);
     stick();
+  }
+  // the rows from the server, as long as Concept controls' Network says; loading.js decides what shows meanwhile:
+  // nothing under 300 ms (the skeleton's space held, unseen), then the cards' and the table's skeletons, "Still loading…"
+  // after 10 s, the error banner with Try again on a failure. The count says "Loading…" itself, so loading.js stays quiet
+  let loadSeq = 0;
+  const network = () => document.querySelector('[name="cc-net"]:checked')?.value || "0";
+  function fetchList(reserve) {
+    const my = ++loadSeq, v = network(), mine = (fn) => () => { if (my === loadSeq) fn(); };
+    return BolsterLoading.load($(".app-content"), () => new Promise((ok, no) => (v === "fail" ? setTimeout(() => no(new Error("offline")), 1200) : setTimeout(ok, +v))), {
+      label: cfg.noun[1], reserve, note: $("#banner"), announce: false,
+      skeleton: mine(() => { st.mode = "loading"; render(); }),
+      render: mine(() => { st.mode = "ready"; render(); }),
+      error: mine(() => { st.mode = "error"; render(); }),
+    });
   }
   // ---------- tuners: concept tooling, a panel of sliders that writes custom properties, opened from Concept controls ----------
   // groups are [legend, rows, note?]; a row is [key, label, min, max, step, unit], [key, label, "color"] or [key, label, "check"].

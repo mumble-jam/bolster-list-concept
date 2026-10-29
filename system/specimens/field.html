@@ -7,20 +7,20 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=d8edba0e">
-<link rel="stylesheet" href="specimen.css?v=d8edba0e">
+<link rel="stylesheet" href="../bolster.css?v=fda98cbd">
+<link rel="stylesheet" href="specimen.css?v=fda98cbd">
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
 <script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <header class="spec-header">
-  <a href="../index.html">← Catalog</a>
+  <a href="../../docs/index.html" data-doc-link>← Documentation</a>
   <h1>Field</h1>
   <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
 </header>
 <main class="spec-main">
-  <p class="spec-intro">Text inputs, text areas, native selects and money inputs share one field frame: label above, control, helper below. Borders clear 3:1 against the page so the control is findable (the as-is border was 2.9:1). Focus turns the border blue with a 1px inner ring. Errors colour both the border and the helper.</p>
+  <p class="spec-intro">Text inputs, text areas, native selects and money inputs share one field frame: label above, control, helper below. Borders clear 3:1 against the page so the control is findable (the as-is border was 2.9:1). Focus turns the border blue with a 1px ring inside it. Errors colour both the border and the helper.</p>
 
   <section class="spec-section">
     <h2>States</h2>
@@ -33,6 +33,17 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
         <div class="field"><label class="field-label" for="f5">Disabled</label><input class="input" id="f5" value="Lakeside Drywall" disabled></div>
         <div class="field"><label class="field-label" for="f6">Read only</label><input class="input" id="f6" value="LD-100000678" readonly></div>
         <div class="field"><label class="field-label" for="f7">Optional <span class="field-optional">(optional)</span></label><input class="input" id="f7"></div>
+      </div>
+    </div>
+    <h3>With an adornment</h3>
+    <div class="spec-panel">
+      <div class="spec-grid">
+        <div class="field"><label class="field-label" for="g1">Default</label><div class="input-group"><span class="input-adornment">$</span><input class="input" id="g1" data-numeric inputmode="decimal" value="4,825.00"></div></div>
+        <div class="field"><label class="field-label" for="g2">Hover</label><div class="input-group" data-state="hover"><span class="input-adornment">$</span><input class="input" id="g2" data-numeric inputmode="decimal" value="4,825.00"></div></div>
+        <div class="field"><label class="field-label" for="g3">Focus</label><div class="input-group" data-state="focus"><span class="input-adornment">$</span><input class="input" id="g3" data-numeric inputmode="decimal" value="4,825.00"></div></div>
+        <div class="field"><label class="field-label" for="g4">Error</label><div class="input-group"><span class="input-adornment">$</span><input class="input" id="g4" data-numeric inputmode="decimal" value="48.25.00" aria-invalid="true" aria-describedby="g4h"></div><p class="field-helper" id="g4h">Enter an amount, like 1,250.00</p></div>
+        <div class="field"><label class="field-label" for="g5">Disabled</label><div class="input-group"><span class="input-adornment">$</span><input class="input" id="g5" data-numeric inputmode="decimal" value="4,825.00" disabled></div></div>
+        <div class="field"><label class="field-label" for="g6">Read only</label><div class="input-group"><input class="input" id="g6" data-numeric value="640" readonly><span class="input-adornment">sq ft</span></div></div>
       </div>
     </div>
   </section>
@@ -65,6 +76,35 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
     </div>
   </section>
 
+  <section class="spec-section" id="formats">
+    <h2>Formats: phone, email, postal code</h2>
+    <p>Typed any way, tidied when the field is left (never while it's typed), by the country it's in: the company's, or an address's own. Wrong, it stays as typed and says why. Try “5550142290”, “+44 20 7946 0958”, “Name@Gmail.COM”, “787041234” or “k1a0b1”, then leave the field.</p>
+    <div class="spec-panel">
+      <form id="formats-form" class="spec-grid" data-country="US">
+        <div class="field"><label class="field-label" for="p1">Phone</label><input class="input" id="p1" name="phone" type="tel" data-format="phone" autocomplete="tel" placeholder="(555) 014-2290" aria-describedby="p1-error"><p class="field-error" id="p1-error" hidden></p></div>
+        <div class="field"><label class="field-label" for="p2">Email</label><input class="input" id="p2" name="email" type="email" data-format="email" autocomplete="email" spellcheck="false" placeholder="name@company.com" aria-describedby="p2-error"><p class="field-error" id="p2-error" hidden></p></div>
+        <div class="field"><label class="field-label" for="p3">ZIP code</label><input class="input" id="p3" name="zip" data-format="postal" inputmode="numeric" autocomplete="postal-code" placeholder="78704" aria-describedby="p3-error"><p class="field-error" id="p3-error" hidden></p></div>
+        <div class="field" data-country="CA"><label class="field-label" for="p4">Postal code (Canada)</label><input class="input" id="p4" name="postal" data-format="postal" autocomplete="postal-code" placeholder="K1A 0B1" aria-describedby="p4-error"><p class="field-error" id="p4-error" hidden></p></div>
+        <div class="field" data-country="GB"><label class="field-label" for="p5">Phone (a company in the UK)</label><input class="input" id="p5" name="phone_gb" type="tel" data-format="phone" autocomplete="tel" placeholder="020 7946 0958" aria-describedby="p5-error"><p class="field-error" id="p5-error" hidden></p></div>
+      </form>
+    </div>
+  </section>
+
+  <section class="spec-section" id="numbers">
+    <h2>Numbers and units</h2>
+    <p>Typed, never stepped with buttons: ↑ and ↓ step by the field's step (Shift: ten). The unit sits after the number, in its words. When left, a number is grouped and rounded to its unit's places; money always shows cents. Empty stays empty. Grouping follows the country: 1,250.5 here, 1.250,5 in Germany.</p>
+    <div class="spec-panel">
+      <form id="numbers-form" class="spec-grid" data-country="US">
+        <div class="field"><label class="field-label" for="n1">Quantity</label><div class="input-group"><input class="input" id="n1" name="qty" data-format="number" data-numeric inputmode="numeric" data-decimals="0" data-min="0" value="24" aria-describedby="n1-error"><span class="input-adornment">each</span></div><p class="field-error" id="n1-error" hidden></p></div>
+        <div class="field"><label class="field-label" for="n2">Area</label><div class="input-group"><input class="input" id="n2" name="area" data-format="number" data-numeric inputmode="decimal" data-decimals="2" data-min="0" value="1,250.5" aria-describedby="n2-error"><span class="input-adornment">sq ft</span></div><p class="field-error" id="n2-error" hidden></p></div>
+        <div class="field"><label class="field-label" for="n3">Labor</label><div class="input-group"><input class="input" id="n3" name="hours" data-format="number" data-numeric inputmode="decimal" data-decimals="2" data-step="0.25" data-min="0" value="6.5" aria-describedby="n3-error"><span class="input-adornment">hrs</span></div><p class="field-error" id="n3-error" hidden></p></div>
+        <div class="field"><label class="field-label" for="n4">Unit price</label><div class="input-group"><span class="input-adornment">$</span><input class="input" id="n4" name="price" data-format="money" data-numeric inputmode="decimal" data-min="0" value="18.4" aria-describedby="n4-error"><span class="input-adornment">per sheet</span></div><p class="field-error" id="n4-error" hidden></p></div>
+        <div class="field"><label class="field-label" for="n5">Markup</label><div class="input-group"><input class="input" id="n5" name="markup" data-format="number" data-numeric inputmode="decimal" data-decimals="1" data-min="0" data-max="100" value="25" aria-describedby="n5-error"><span class="input-adornment">%</span></div><p class="field-error" id="n5-error" hidden></p></div>
+        <div class="field" data-country="DE"><label class="field-label" for="n6">Area (a company in Germany)</label><div class="input-group"><input class="input" id="n6" name="area_de" data-format="number" data-numeric inputmode="decimal" data-decimals="2" value="1.250,5" aria-describedby="n6-error"><span class="input-adornment">m²</span></div><p class="field-error" id="n6-error" hidden></p></div>
+      </form>
+    </div>
+  </section>
+
   <section class="spec-section">
     <h2>Rules</h2>
     <ul class="spec-stack" style="max-width:70ch;padding-left:var(--space-5)">
@@ -72,6 +112,9 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
       <li>Empty values stay empty: never render "null" or "$0.00" for an unset price (the as-is settings page shows "null").</li>
       <li>Error text says how to fix it, in sentence case.</li>
       <li>One search field design app-wide (the audit found four).</li>
+      <li>A value is tidied when the field is left, never while it's typed, and only when it's right; wrong, it stays as typed and says why.</li>
+      <li>Phones, postal codes and number grouping follow the country (the company's, or an address's own). A number starting with + is kept international.</li>
+      <li>Numbers are typed; no − and + buttons. The unit goes after the number, in words people say (“sq ft”, “hrs”), never typed into it.</li>
     </ul>
 <code class="spec-code">&lt;div class="field"&gt;
   &lt;label class="field-label" for="email"&gt;Email&lt;/label&gt;
@@ -80,6 +123,9 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
 &lt;/div&gt;</code>
   </section>
 </main>
-<script src="specimen.js?v=d8edba0e"></script>
+<script src="specimen.js?v=fda98cbd"></script>
+<script src="../components/field.js?v=fda98cbd"></script>
+<script src="../components/form.js?v=fda98cbd"></script>
+<script>for (const id of ["formats-form", "numbers-form"]) BolsterForm.attach(document.getElementById(id));</script>
 </body>
 </html>

@@ -34,7 +34,16 @@
   let mode = "auto";
   try { mode = localStorage.getItem("bds-theme") || "auto"; } catch {}
   const apply = () => { if (mode === "auto") delete html.dataset.theme; else html.dataset.theme = mode; $$('input[name="doc-theme"]').forEach((r) => (r.checked = r.value === mode)); };
-  $$('input[name="doc-theme"]').forEach((r) => r.addEventListener("change", () => { mode = r.value; try { localStorage.setItem("bds-theme", mode); } catch {} apply(); }));
+  // the live specimens follow the page's theme (D133)
+  const tellFrames = () => $$(".doc-specimen iframe").forEach((f) => f.contentWindow?.postMessage({ bdsTheme: mode }, "*"));
+  $$('input[name="doc-theme"]').forEach((r) => r.addEventListener("change", () => { mode = r.value; try { localStorage.setItem("bds-theme", mode); } catch {} apply(); tellFrames(); }));
+  $$(".doc-specimen iframe").forEach((f) => f.addEventListener("load", () => f.contentWindow?.postMessage({ bdsTheme: mode }, "*")));
+  // a specimen says how tall it is, so the page stays the one scroller (D128)
+  addEventListener("message", (e) => {
+    if (!e.data?.bdsSpecimen) return;
+    const f = $$(".doc-specimen iframe").find((x) => x.contentWindow === e.source);
+    if (f && e.data.h > 0) f.style.blockSize = `${e.data.h}px`;
+  });
   apply();
 
   // copying: code blocks, and anything with data-copy-text (tokens, palette steps)

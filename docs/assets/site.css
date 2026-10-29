@@ -141,7 +141,10 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 .doc-content h4 { margin-block-start: var(--space-6); font-family: var(--font-sans); font-size: var(--text-base); font-weight: var(--font-weight-medium); }
 .doc-content p, .doc-content li { text-wrap: pretty; }
 .doc-content > p, .doc-content > ul:not([role="list"]), .doc-content > ol:not([role="list"]) { max-inline-size: var(--doc-prose); }
-.doc-content ul:not([role="list"]), .doc-content ol { padding-inline-start: 1.25rem; display: grid; gap: var(--space-2); }
+.doc-content ul:not([role="list"]), .doc-content ol { padding-inline-start: 1.25rem; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
+/* a code block or a long token in a list item scrolls or wraps inside it, never widening the page */
+.doc-content li { min-inline-size: 0; }
+.doc-content :is(p, li) > code { overflow-wrap: anywhere; }
 .doc-content li::marker { color: var(--color-content-tertiary); }
 .doc-content :not(pre) > code { color: var(--color-content-primary); padding: 0.1em 0.35em; border-radius: var(--radius-sm); background: var(--color-surface-tint); font-family: var(--font-mono); font-size: 0.85em; overflow-wrap: anywhere; }
 .doc-content a:not([class]) { color: var(--color-content-link); }
@@ -158,6 +161,8 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 .doc-callout[data-tone="brand"] { background: var(--color-surface-chrome); color: var(--color-content-on-chrome); color-scheme: dark; }
 .doc-callout[data-tone="brand"] strong { color: var(--color-action-brand); }
 .doc-callout p { max-inline-size: none; }
+/* a link on a tinted callout reads in the text's colour, underlined: the link blue falls under AA on the dark tints */
+.doc-content .doc-callout:not([data-tone="brand"]) a:not([class]) { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
 
 /* tables */
 .doc-table-wrap { overflow-x: auto; border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-lg); background: var(--color-surface-default); }
@@ -309,7 +314,7 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 /* ============ the decision log ============ */
 .doc-log-tools { position: sticky; inset-block-start: 0; z-index: 3; display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-3); margin-inline: calc(var(--space-2) * -1); padding: var(--space-3) var(--space-2); background: var(--color-surface-canvas); border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
 .doc-filter { display: flex; align-items: center; gap: var(--space-2); flex: 1 1 16rem; block-size: var(--control-height-sm); padding-inline: var(--space-3); border: var(--border-width-default) solid var(--color-line-input); border-radius: var(--radius-md); background: var(--color-surface-default); color: var(--color-content-tertiary); }
-.doc-filter:focus-within { border-color: var(--color-line-focus); box-shadow: 0 0 0 1px var(--color-line-focus); }
+.doc-filter:focus-within { border-color: var(--color-line-focus); box-shadow: inset 0 0 0 1px var(--color-line-focus); }
 .doc-filter input { flex: 1; min-inline-size: 0; border: 0; outline: 0; background: none; font-size: var(--text-sm); color: var(--color-content-primary); }
 .doc-log { display: grid; gap: var(--space-3); margin-block-start: var(--space-6) !important; }
 .doc-entry { padding: var(--space-5) var(--space-6); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-xl); background: var(--color-surface-default); scroll-margin-block-start: var(--space-20); }
@@ -478,7 +483,7 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 .button[data-variant="secondary"][data-state="active"] { --_sk: 0.3; --_pa: 0.08; --_lift: 1px; }
 [data-state="focus"] { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: var(--focus-ring-offset); }
 .input[data-state="hover"], .input-group[data-state="hover"] { --_border: var(--color-line-input-hover); }
-.input[data-state="focus"], .input-group[data-state="focus"] { --_border: var(--color-line-focus); box-shadow: 0 0 0 1px var(--color-line-focus); outline: none; }
+.input[data-state="focus"], .input-group[data-state="focus"] { --_border: var(--color-line-focus); box-shadow: inset 0 0 0 1px var(--color-line-focus); outline: none; }
 .tab[data-state="hover"] { color: var(--color-content-primary); background: var(--color-surface-tint); }
 .tab[data-state="focus"] { outline-offset: -2px; }
 .menu-item[data-state="hover"] { background: var(--color-surface-hover-raised); }
@@ -496,6 +501,7 @@ tr[data-state="hover"] { background: var(--color-surface-hover); }
 
 /* ============ the backlog ============ */
 .bl-tools { justify-content: space-between; }
+.bl-tools .segmented { max-inline-size: 100%; overflow-x: auto; }
 .bl-check { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); }
 .bl-group { margin-block-start: var(--space-12) !important; }
 .bl-group > h2 { display: flex; align-items: center; gap: var(--space-3); margin-block-start: 0 !important; }
@@ -543,3 +549,11 @@ tr[data-state="hover"] { background: var(--color-surface-hover); }
 /* headings inside an example are the component's own: the page's heading styles stay out */
 .doc-content :is(.doc-ex-stage, .doc-dodont) :is(h1, h2, h3, h4), .doc-content :is(.doc-ex-stage, .doc-dodont) :is(h1, h2, h3, h4) + * { margin-block-start: revert-layer; font-family: revert-layer; font-size: revert-layer; line-height: revert-layer; font-weight: revert-layer; letter-spacing: revert-layer; scroll-margin-block-start: revert-layer; }
 .doc-ex-stage > * + *, .doc-dodont .doc-ex-stage > * + * { margin-block-start: 0; }
+/* links inside an example are the component's own colour */
+.doc-content :is(.doc-ex-stage, .doc-dodont) a:not([class]) { color: revert-layer; }
+
+/* a specimen, live (D133): the component's workbench in a frame as tall as its examples, so the page stays the one
+   scroller; its own canvas inside, the example's frame around it */
+.doc-specimen { margin: var(--space-6) 0 0; border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-xl); background: var(--color-surface-canvas); overflow: clip; }
+.doc-specimen iframe { display: block; inline-size: 100%; block-size: 30rem; border: 0; background: var(--color-surface-canvas); color-scheme: normal; }
+.doc-specimen .doc-ex-label a { color: inherit; }

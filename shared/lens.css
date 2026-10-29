@@ -1,0 +1,75 @@
+/* The intent lens (lens.js): an inspector's outline and a card over the page, a bar at its foot. Tooling, not the
+   design, so it sits over everything; on semantic tokens. A level's colour: yours the accent's blue, steered the
+   pending stage's yellow, mine a quiet grey, Bolster's the events' purple; each drawn with the status marks' shapes,
+   filling as a part gets more of your intent (full, half, dashed, an empty ring for what's kept as Bolster has it). */
+@layer components {
+  [data-lens-level="yours"] { --_lv: var(--color-action-accent); --_lv-ink: var(--color-content-on-accent); }
+  [data-lens-level="steered"] { --_lv: var(--color-status-pending-dot); --_lv-ink: var(--color-content-on-brand); }
+  [data-lens-level="mine"] { --_lv: var(--color-content-secondary); --_lv-ink: var(--color-content-inverse); }
+  [data-lens-level="bolster"] { --_lv: var(--color-avatar-4); --_lv-ink: var(--color-content-on-avatar); }
+
+  :root[data-lens] body, :root[data-lens] body * { cursor: help; }
+  :root[data-lens] .lens-ui button, :root[data-lens] .lens-ui a, :root[data-lens] .concept-controls, :root[data-lens] .concept-controls * { cursor: revert; }
+  .lens-ui { position: fixed; inset: 0; z-index: 2147483000; pointer-events: none; }
+  .lens-ui[hidden] { display: none; }
+  .lens-mark { --_dot: var(--_lv); inline-size: 0.75rem; block-size: 0.75rem; }
+
+  /* the part pointed at: its outline, and its name in a tag on its corner */
+  .lens-box { position: fixed; box-sizing: border-box; border: 2px solid var(--_lv); border-radius: var(--radius-sm); background: color-mix(in srgb, var(--_lv) 10%, transparent); transition: left 80ms var(--ease-out), top 80ms var(--ease-out), width 80ms var(--ease-out), height 80ms var(--ease-out); }
+  .lens-box[hidden] { display: none; }
+  .lens-tag { position: absolute; inset-block-end: calc(100% + 2px); inset-inline-start: -2px; display: inline-flex; align-items: center; gap: var(--space-1); max-inline-size: 20rem; padding: 2px var(--space-2) 2px var(--space-1); border-radius: var(--radius-sm); background: var(--_lv); color: var(--_lv-ink); font: var(--font-weight-medium) var(--text-xs) / var(--leading-xs) var(--font-sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lens-tag .lens-mark { --_dot: currentColor; }
+  .lens-box[data-below] .lens-tag { inset-block-end: auto; inset-block-start: calc(100% + 2px); }
+
+  /* every part of a level, painted at once from the bar */
+  .lens-paint-box { position: fixed; box-sizing: border-box; border: 1.5px solid var(--_lv); border-radius: var(--radius-sm); background: color-mix(in srgb, var(--_lv) 14%, transparent); }
+  .lens-paint-box[data-lens-level="mine"] { border-style: dashed; }
+  .lens-paint-box[data-lens-level="bolster"] { border-style: dotted; }
+
+  /* the card: what it is, how intentional, where that came from */
+  .lens-card { position: fixed; display: grid; gap: var(--space-3); inline-size: min(23rem, calc(100vw - 1.5rem)); max-block-size: calc(100dvh - 7rem); overflow-y: auto; overscroll-behavior: contain; padding: var(--space-4); border: var(--border-width-default) solid var(--color-line-card); border-block-start: 3px solid var(--_lv); border-radius: var(--radius-lg); background: var(--color-surface-raised); color: var(--color-content-primary); box-shadow: var(--shadow-popover); font-size: var(--text-sm); line-height: var(--leading-sm); }
+  .lens-card[hidden] { display: none; }
+  .lens-card[data-pinned] { pointer-events: auto; }
+  .lens-card-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
+  .lens-level { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
+  .lens-hint { font-size: var(--text-xs); color: var(--color-content-tertiary); }
+  .lens-close { display: grid; place-items: center; inline-size: 1.5rem; block-size: 1.5rem; margin: calc(-1 * var(--space-1)); border: 0; border-radius: var(--radius-sm); background: none; color: var(--color-content-secondary); }
+  @media (hover: hover) { .lens-close:hover { background: var(--color-surface-hover-raised); color: var(--color-content-primary); } }
+  .lens-name { margin: 0; font-family: var(--font-display); font-size: var(--text-lg); line-height: var(--leading-lg); font-weight: var(--font-weight-medium); text-wrap: balance; }
+  .lens-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); margin: calc(-1 * var(--space-2)) 0 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-tertiary); }
+  .lens-meta code { padding: 0 var(--space-1); border-radius: var(--radius-xs); background: var(--color-surface-tint); font-family: var(--font-mono); font-size: var(--text-xxs); color: var(--color-content-secondary); }
+  .lens-rows { display: grid; gap: var(--space-3); margin: 0; padding-block-start: var(--space-3); border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
+  .lens-row { display: grid; gap: 2px; }
+  .lens-row dt { font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-tertiary); }
+  .lens-row dd { margin: 0; color: var(--color-content-secondary); text-wrap: pretty; }
+  .lens-row:first-child dd { color: var(--color-content-primary); }
+  .lens-row.is-open { padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--color-feedback-warning-surface); }
+  .lens-row.is-open dt, .lens-row.is-open dd { color: var(--color-feedback-warning-content); }
+  .lens-refs { display: flex; flex-wrap: wrap; gap: var(--space-1); margin: 0; }
+  .lens-ref { padding: 1px var(--space-2); border: var(--border-width-default) solid var(--color-line-default); border-radius: var(--radius-full); font-family: var(--font-mono); font-size: var(--text-xxs); line-height: var(--leading-xs); color: var(--color-content-secondary); text-decoration: none; }
+  .lens-card:not([data-pinned]) .lens-ref { border-style: dashed; }
+  @media (hover: hover) { .lens-ref:hover { border-color: var(--color-action-accent); color: var(--color-content-link); } }
+
+  /* the bar at the window's foot: the lens's name, the levels with how many of the page's parts each has, Off */
+  .lens-bar { position: fixed; inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom, 0px)); inset-inline-start: 50%; translate: -50% 0; display: flex; align-items: center; gap: var(--space-1); max-inline-size: calc(100vw - 1.5rem); padding: var(--space-1); border-radius: var(--radius-lg); background: var(--color-surface-chrome); color: var(--color-content-on-chrome); box-shadow: var(--shadow-overlay); pointer-events: auto; overflow-x: auto; scrollbar-width: none; color-scheme: dark; }
+  .lens-bar-name { display: inline-flex; align-items: center; gap: var(--space-2); padding-inline: var(--space-2) var(--space-1); font-size: var(--text-sm); font-weight: var(--font-weight-medium); white-space: nowrap; }
+  .lens-bar-sep { flex: none; inline-size: 1px; block-size: 1.25rem; background: var(--color-line-chrome); }
+  .lens-bar-levels { display: flex; gap: 2px; }
+  .lens-bar-btn { display: inline-flex; align-items: center; gap: var(--space-2); flex: none; block-size: 2rem; min-inline-size: 2rem; justify-content: center; padding-inline: var(--space-2); border: 0; border-radius: var(--radius-md); background: none; color: var(--color-content-on-chrome-muted); font: inherit; font-size: var(--text-xs); white-space: nowrap; }
+  .lens-bar-btn b { font-weight: var(--font-weight-medium); color: var(--color-content-on-chrome); font-variant-numeric: tabular-nums; }
+  .lens-bar-btn[aria-pressed="true"] { background: var(--color-surface-chrome-selected); color: var(--color-content-on-chrome); }
+  .lens-bar-btn:disabled { opacity: 0.45; }
+  @media (hover: hover) { .lens-bar-btn:not(:disabled):hover { background: var(--color-surface-chrome-hover); color: var(--color-content-on-chrome); } }
+  .lens-bar-btn:focus-visible, .lens-ref:focus-visible, .lens-close:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
+  /* on the dark bar, the levels' marks in colours that read there */
+  .lens-bar [data-lens-level="mine"], .lens-bar [data-lens-level="bolster"] { --_lv: var(--color-content-on-chrome-muted); }
+  .lens-bar [data-lens-level="yours"] { --_lv: var(--color-content-link); }
+
+  /* phones: the card is a sheet above the bar */
+  @media (max-width: 767px) {
+    .lens-card { inset-inline: var(--space-3); inset-block-end: calc(var(--space-16) + env(safe-area-inset-bottom, 0px)); inline-size: auto; max-block-size: 55dvh; }
+    .lens-bar-btn span { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .lens-box { transition: none; } }
+  .cc-help kbd { display: inline-grid; place-items: center; min-inline-size: 1.125rem; padding-inline: 3px; border: var(--border-width-default) solid var(--color-line-default); border-block-end-width: 2px; border-radius: var(--radius-xs); font: var(--font-weight-medium) var(--text-xxs) / 1.4 var(--font-sans); }
+}

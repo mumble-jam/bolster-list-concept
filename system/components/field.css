@@ -7,7 +7,8 @@
    Error: aria-invalid="true" on the control; the helper turns red (class stays the same).
    Adornments: wrap the control in <div class="input-group"> with <span class="input-adornment">.
    Select: <div class="select"><select class="input">…</select></div>.
-   Money: data-numeric on the input (right-aligned, tabular). See D7. */
+   Money and numbers: data-numeric on the input (right-aligned, tabular), D7; the unit in a suffix adornment.
+   Formats (phone, email, postal code, number, money): data-format, tidied when the field is left (field.js, D136, D137). */
 
 @layer tokens, base, components, utilities;
 
@@ -58,14 +59,14 @@
     :where(.input:hover:not(:disabled, :read-only, :focus)) { --_border: var(--color-line-input-hover); }
     :where(select.input:hover:not(:disabled, :focus)) { --_border: var(--color-line-input-hover); }
   }
-  /* focus: border turns blue with a 1px inner ring (2px total), no outer outline */
+  /* focus: border turns blue with a 1px inner ring (2px total, all inside the box, D8), no outer outline */
   :where(.input:focus-visible, .input:focus) {
     outline: none;
     --_border: var(--color-line-focus);
-    box-shadow: 0 0 0 1px var(--color-line-focus);
+    box-shadow: inset 0 0 0 1px var(--color-line-focus);
   }
   :where(.input[aria-invalid="true"]) { --_border: var(--color-feedback-danger-content); }
-  :where(.input[aria-invalid="true"]:focus) { box-shadow: 0 0 0 1px var(--color-feedback-danger-content); }
+  :where(.input[aria-invalid="true"]:focus) { box-shadow: inset 0 0 0 1px var(--color-feedback-danger-content); }
 
   :where(.input:disabled) {
     background: var(--color-surface-disabled);
@@ -109,8 +110,16 @@
     transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
   }
   :where(.input-group) > :where(.input) { block-size: 100%; padding: 0; border: 0; background: transparent; box-shadow: none; }
-  :where(.input-group:has(.input:focus)) { --_border: var(--color-line-focus); box-shadow: 0 0 0 1px var(--color-line-focus); }
+  /* the group takes its control's states: hover, focus, error, disabled, read only */
+  @media (hover: hover) {
+    :where(.input-group:hover:not(:has(> .input:read-only, > .input:focus))) { --_border: var(--color-line-input-hover); }
+  }
+  :where(.input-group:has(> .input:focus)) { --_border: var(--color-line-focus); box-shadow: inset 0 0 0 1px var(--color-line-focus); }
   :where(.input-group:has([aria-invalid="true"])) { --_border: var(--color-feedback-danger-content); }
+  :where(.input-group:has([aria-invalid="true"]:focus)) { box-shadow: inset 0 0 0 1px var(--color-feedback-danger-content); }
+  :where(.input-group:has(> .input:disabled)) { --_border: transparent; background: var(--color-surface-disabled); color: var(--color-content-disabled); cursor: not-allowed; }
+  :where(.input-group:has(> .input:disabled)) > :where(.input-adornment) { color: var(--color-content-disabled); }
+  :where(.input-group:has(> .input:read-only:not(:disabled))) { --_border: transparent; background: var(--color-surface-tint); }
   :where(.input-adornment) { flex-shrink: 0; color: var(--color-content-secondary); font-size: var(--_font, var(--text-sm)); white-space: nowrap; }
   :where(.input-adornment) > svg { inline-size: 1rem; block-size: 1rem; }
 }

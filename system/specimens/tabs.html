@@ -7,15 +7,15 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=d8edba0e">
-<link rel="stylesheet" href="specimen.css?v=d8edba0e">
+<link rel="stylesheet" href="../bolster.css?v=fda98cbd">
+<link rel="stylesheet" href="specimen.css?v=fda98cbd">
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
 <script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </head>
 <body>
 <header class="spec-header">
-  <a href="../index.html">← Catalog</a>
+  <a href="../../docs/index.html" data-doc-link>← Documentation</a>
   <h1>Tabs</h1>
   <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
 </header>
@@ -38,11 +38,11 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
   <section class="spec-section">
     <h2>States and sizes</h2>
     <div class="spec-panel">
-      <div class="tabs" role="presentation" style="margin-bottom:var(--space-6)">
-        <span class="tab" aria-selected="true">Selected</span><span class="tab">Default</span><span class="tab" data-state="hover">Hover</span><span class="tab" data-state="focus">Focus</span>
+      <div class="tabs" role="tablist" aria-label="Tab states" style="margin-bottom:var(--space-6)">
+        <span class="tab" role="tab" aria-selected="true">Selected</span><span class="tab" role="tab" aria-selected="false">Default</span><span class="tab" role="tab" aria-selected="false" data-state="hover">Hover</span><span class="tab" role="tab" aria-selected="false" data-state="focus">Focus</span>
       </div>
-      <div class="tabs" data-size="md" role="presentation">
-        <span class="tab" aria-selected="true">Medium · 48</span><span class="tab">Invoices</span><span class="tab">Payments</span>
+      <div class="tabs" data-size="md" role="tablist" aria-label="Medium tabs">
+        <span class="tab" role="tab" aria-selected="true">Medium · 48</span><span class="tab" role="tab" aria-selected="false">Invoices</span><span class="tab" role="tab" aria-selected="false">Payments</span>
       </div>
     </div>
 <code class="spec-code">&lt;div class="tabs" role="tablist" aria-label="Job sections"&gt;
@@ -51,6 +51,6 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
 &lt;/div&gt;</code>
   </section>
 </main>
-<script src="specimen.js?v=d8edba0e"></script>
+<script src="specimen.js?v=fda98cbd"></script>
 </body>
 </html>

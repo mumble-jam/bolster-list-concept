@@ -114,7 +114,7 @@ window.BolsterShell = (() => {
         <button class="menu-item" role="menuitem" data-not-built="switch-company">${icon("arrow-left-right", 16)}Switch company</button>
         <button class="menu-item" role="menuitem" data-open-settings="company-settings">${icon("briefcase", 16)}Company settings</button>
       </div>
-      <label class="top-bar-search">${chrome("search", 16)}<input type="search" placeholder="Search customers, jobs, invoices, files" aria-label="Search Bolster" enterkeyhint="search" autocomplete="off" spellcheck="false"><button class="top-bar-search-clear" type="button" aria-label="Clear search" data-tip="Clear">${chrome("xmark", 14)}</button><span class="top-bar-search-keys" aria-hidden="true"><kbd>⌘</kbd><kbd>K</kbd><kbd data-focused>esc</kbd></span></label>
+      <label class="top-bar-search">${chrome("search", 16)}<input type="search" placeholder="Search" aria-label="Search Bolster" enterkeyhint="search" autocomplete="off" spellcheck="false"><button class="top-bar-search-clear" type="button" aria-label="Clear search" data-tip="Clear">${chrome("xmark", 14)}</button><span class="top-bar-search-keys" aria-hidden="true"><kbd>⌘</kbd><kbd>K</kbd><kbd data-focused>esc</kbd></span></label>
       <div class="bs-top-actions">
         <button class="bs-icon-btn bs-assistant" type="button" aria-label="Ask Bolton" data-not-built="assistant" data-tip="Ask Bolton"><img src="${ASSETS}bolton-head.svg" alt=""></button>
         <button class="bs-avatar" type="button" popovertarget="bs-user-menu" aria-haspopup="menu" aria-label="${esc(USER.name)}" data-tip="Your account"><span class="avatar" data-color="${USER.color}" aria-hidden="true">${USER.initials}</span></button>

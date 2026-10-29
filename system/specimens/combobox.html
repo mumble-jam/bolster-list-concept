@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Combobox · Bolster DS</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../bolster.css?v=fda98cbd">
+<link rel="stylesheet" href="specimen.css?v=fda98cbd">
+<style>
+  .cb-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: var(--space-6); align-items: start; }
+  .cb-note { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-tertiary); min-block-size: 1lh; }
+</style>
+<script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
+addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
+<script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<header class="spec-header">
+  <a href="../../docs/index.html" data-doc-link>← Documentation</a>
+  <h1>Combobox</h1>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+<main class="spec-main">
+  <p class="spec-intro">Type to find one value in a long list, in the field itself (D138, I26): a client, a trade, the crew. The list narrows as you type, the matched letters marked, the first row ready for Enter. Nothing matching offers to add one, at the end. On a phone the field opens the picker sheet. Every example works: type, use the arrows, Enter, Escape.</p>
+
+  <section class="spec-section" id="one">
+    <h2>One value</h2>
+    <p>240 clients: the list shows 50 and asks you to narrow them. A name and the line people tell clients apart by (their address). Typing a name that has no match offers “Add new client”, which opens the New client form with the name filled in.</p>
+    <div class="spec-panel">
+      <div class="cb-grid">
+        <div class="field">
+          <label class="field-label" for="cb-client">Client</label>
+          <div class="combobox">
+            <input class="input" id="cb-client" name="client" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="cb-client-list" autocomplete="off" placeholder="Search clients">
+            <input type="hidden" name="client_id">
+            <div class="combobox-list" id="cb-client-list" role="listbox" popover="manual"></div>
+          </div>
+          <p class="cb-note" id="cb-client-note" aria-live="polite"></p>
+        </div>
+        <div class="field">
+          <label class="field-label" for="cb-trade">Trade</label>
+          <div class="combobox">
+            <input class="input" id="cb-trade" name="trade" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="cb-trade-list" autocomplete="off" value="Drywall and insulation">
+            <div class="combobox-list" id="cb-trade-list" role="listbox" popover="manual"></div>
+          </div>
+          <p class="cb-note">21 trades, one picked. Click it to see the list, the pick ticked.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section" id="several">
+    <h2>Several values</h2>
+    <p>The crew on a job: each pick is a chip, and the list stays open for the next one. The field stays one line, whatever the count: the chips that fit, then “+3” for the rest (their names in its tooltip), which opens the list with the picks first, ticked. Pick a ticked row again to take it off; Backspace in an empty field takes off the last.</p>
+    <div class="spec-panel">
+      <div class="cb-grid">
+        <div class="field">
+          <label class="field-label" for="cb-crew">Crew</label>
+          <div class="combobox" data-multiple>
+            <input class="input" id="cb-crew" name="crew" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="cb-crew-list" autocomplete="off">
+            <input type="hidden" name="crew_ids">
+            <div class="combobox-list" id="cb-crew-list" role="listbox" popover="manual"></div>
+          </div>
+        </div>
+        <div class="field" style="max-inline-size:20rem">
+          <label class="field-label" for="cb-crew2">Crew, in a narrow column</label>
+          <div class="combobox" data-multiple>
+            <input class="input" id="cb-crew2" name="crew2" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="cb-crew2-list" autocomplete="off">
+            <div class="combobox-list" id="cb-crew2-list" role="listbox" popover="manual"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section" id="lookup">
+    <h2>A lookup as you type</h2>
+    <p>When the list lives on a server (an address lookup, a supplier's catalog): nothing shows until something's typed, “Searching addresses…” after a short wait, and what's typed stays where free text is allowed. The address field is built on it (<a href="address-field.html">Address field</a>).</p>
+    <div class="spec-panel">
+      <div class="cb-grid">
+        <div class="field">
+          <label class="field-label" for="cb-place">Street address</label>
+          <div class="combobox" data-lookup>
+            <input class="input" id="cb-place" name="place" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="cb-place-list" autocomplete="off" placeholder="Start typing the street">
+            <div class="combobox-list" id="cb-place-list" role="listbox" popover="manual"></div>
+          </div>
+          <p class="cb-note">Try “barton”, “toronto” or “orchard”.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section" id="states">
+    <h2>States</h2>
+    <p>The field’s own: an error in words under it, disabled, and focus, which draws the field’s ring.</p>
+    <div class="spec-panel">
+      <div class="cb-grid">
+        <div class="field">
+          <label class="field-label" for="cb-e">Client</label>
+          <div class="combobox"><input class="input" id="cb-e" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="cb-e-list" autocomplete="off" aria-invalid="true" aria-describedby="cb-e-error"><div class="combobox-list" id="cb-e-list" role="listbox" popover="manual"></div></div>
+          <p class="field-error" id="cb-e-error">Choose a client</p>
+        </div>
+        <div class="field">
+          <label class="field-label" for="cb-d">Client</label>
+          <div class="combobox"><input class="input" id="cb-d" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="cb-d-list" value="Marco Ruiz" disabled><div class="combobox-list" id="cb-d-list" role="listbox" popover="manual"></div></div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="cb-f">Client</label>
+          <div class="combobox"><input class="input" id="cb-f" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="cb-f-list" value="Marco Ruiz" data-state="focus"><div class="combobox-list" id="cb-f-list" role="listbox" popover="manual"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <dialog class="dialog" data-size="sm" id="new-client" aria-labelledby="new-client-t">
+    <form method="dialog" style="display:contents">
+      <header class="dialog-header"><h2 id="new-client-t">New client</h2></header>
+      <div class="dialog-body"><div class="form" data-density="compact">
+        <div class="field"><label class="field-label" for="nc-name">Name</label><input class="input" id="nc-name" name="name" required></div>
+        <div class="field"><label class="field-label" for="nc-email">Email <span class="field-optional">(optional)</span></label><input class="input" id="nc-email" name="email" type="email" data-format="email"></div>
+        <div class="field"><label class="field-label" for="nc-phone">Phone <span class="field-optional">(optional)</span></label><input class="input" id="nc-phone" name="phone" type="tel" data-format="phone"></div>
+      </div></div>
+      <footer class="dialog-footer"><button class="button" data-variant="ghost" value="cancel" formnovalidate>Cancel</button><button class="button" value="save">Save client</button></footer>
+    </form>
+  </dialog>
+
+  <section class="spec-section">
+    <h2>Rules</h2>
+    <ul class="spec-stack" style="max-width:70ch;padding-left:var(--space-5)">
+      <li>A list people search (clients, items, the crew, more than about 15): a combobox. A short fixed list: a native select. Two to five visible choices: radios or a segmented control.</li>
+      <li>The list narrows as you type; the first row is ready for Enter; the matched letters are marked. Each row carries what tells two apart (an address, a trade), never an id alone.</li>
+      <li>Escape puts back what was there. Leaving keeps only a pick, or what's typed where free text is allowed; a typed name that's an option is picked.</li>
+      <li>“Add new …” comes last, never above the options (I2), and opens the create form with what was typed: a client needs more than a name.</li>
+      <li>Several values: chips in the field, the list open for the next. The field stays one line: what doesn't fit is counted (“+3”). Never a second component for it.</li>
+      <li>On phones, the picker sheet: the find box on top, the rows full width, a pick closes it (Done, with several).</li>
+    </ul>
+<code class="spec-code">&lt;div class="field"&gt;
+  &lt;label class="field-label" for="client"&gt;Client&lt;/label&gt;
+  &lt;div class="combobox"&gt;
+    &lt;input class="input" id="client" name="client" role="combobox" aria-expanded="false"
+           aria-autocomplete="list" aria-controls="client-list" autocomplete="off"&gt;
+    &lt;input type="hidden" name="client_id"&gt;
+    &lt;div class="combobox-list" id="client-list" role="listbox" popover="manual"&gt;&lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;BolsterCombobox.attach(document.getElementById("client"), { options, add, noun: ["client", "clients"] })&lt;/script&gt;</code>
+  </section>
+</main>
+<script src="../../shared/icons.js?v=fda98cbd"></script>
+<script src="specimen.js?v=fda98cbd"></script>
+<script src="../components/field.js?v=fda98cbd"></script>
+<script src="../components/combobox.js?v=fda98cbd"></script>
+<script src="samples.js?v=fda98cbd"></script>
+<script>
+  const { clients, crew, trades, lookup } = SAMPLE;
+  // “Add new client”: the New client form, its name filled in; resolves with the client made, or nothing
+  const dlg = document.getElementById("new-client");
+  const newClient = (text) => new Promise((resolve) => {
+    dlg.querySelector("form").reset();
+    dlg.querySelector("#nc-name").value = text;
+    dlg.addEventListener("close", () => {
+      const name = dlg.querySelector("#nc-name").value.trim();
+      if (dlg.returnValue !== "save" || !name) return resolve(null);
+      const made = { id: `c${clients.length + 1}`, label: name, detail: "New client" };
+      clients.push(made); resolve(made);
+    }, { once: true });
+    dlg.showModal();
+    dlg.querySelector("#nc-email").focus();
+  });
+  const note = document.getElementById("cb-client-note");
+  BolsterCombobox.attach(document.getElementById("cb-client"), { options: clients, add: newClient, noun: ["client", "clients"], onPick: (o) => (note.textContent = `Picked ${o.label} (${o.id})`) });
+  BolsterCombobox.attach(document.getElementById("cb-trade"), { options: trades, noun: ["trade", "trades"], value: trades.find((t) => t.label === "Drywall and insulation") });
+  BolsterCombobox.attach(document.getElementById("cb-crew"), { options: crew, noun: ["person", "people"], value: [crew[0], crew[2]] });
+  BolsterCombobox.attach(document.getElementById("cb-crew2"), { options: crew, noun: ["person", "people"], value: [crew[0], crew[2], crew[3], crew[4], crew[6]] });
+  BolsterCombobox.attach(document.getElementById("cb-place"), { options: (t) => lookup(t, "US"), free: true, noun: ["address", "addresses"] });
+  for (const id of ["cb-e", "cb-f"]) BolsterCombobox.attach(document.getElementById(id), { options: clients, noun: ["client", "clients"] });
+</script>
+</body>
+</html>

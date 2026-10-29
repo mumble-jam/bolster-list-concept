@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=d8edba0e">
-<link rel="stylesheet" href="data-list.css?v=d8edba0e">
+<link rel="stylesheet" href="system/bolster.css?v=fda98cbd">
+<link rel="stylesheet" href="data-list.css?v=fda98cbd">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -80,7 +80,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
   <header class="inv-head">
     <p class="text-caption"><a href="index.html">Jobs list concept</a></p>
     <h1>Components, and who decided them</h1>
-    <p>Every component the jobs list concept uses, marked by how much of it came from you. Built from your messages on 8 to 25 October and the commits behind them. Where you only reported a bug, that doesn't count as a design decision, so it's noted but the component stays my call.</p>
+    <p>Every component the jobs list concept uses, marked by how much of it came from you. Built from your messages on 8 to 29 October and the commits behind them. Where you only reported a bug, that doesn't count as a design decision, so it's noted but the component stays my call.</p>
   </header>
 
   <section class="inv-legend" aria-label="Levels">
@@ -111,7 +111,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=d8edba0e"></script>
+<script src="shared/icons.js?v=fda98cbd"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
@@ -179,13 +179,14 @@ const C = [
   ["Menus and overlays", "Bottom sheets on phones", "steered", "Menus as bottom sheets on phones (9 Oct); then nested menus showing the wrong rows (a bug) and a clear way back (14 Oct).", "Nested menus drill in, every other row goes, and a header with Back and the menu's name sits on top; the warm scrim."],
   ["Menus and overlays", "Tooltip", "yours", "A tooltip on display settings. Then a rule: every icon without a label has a tooltip, descriptive or interactive (14 Oct, D52).", "Its style and placement; one tooltip in the top layer that shows only while a control's label is hidden; the checker and the sweep through the concept."],
 
-  ["Feedback and states", "Loading", "mine", "Never discussed.", "Skeleton rows and cards."],
+  ["Feedback and states", "Loading", "yours", "Your rules (29 Oct, D142): skeletons in the content's shape for the cards, the rows, the record and a page's first load; nothing under 300 ms and at least 300 ms once shown; the same footprint; no spinners for content; “Still loading…” after 10 s, the error with Try again on a failure; announced once; still under reduced motion; the loading screen only for the app's first open.", "The shapes, loading.js and its timing, the Network control to try it."],
   ["Feedback and states", "Empty, no results, error", "mine", "Never discussed.", "Wording, icons and actions for each state."],
   ["Feedback and states", "Toasts", "mine", "You reported Undo failing contrast in dark (25 Oct, D125).", "What confirms an action, and how it dismisses; Undo in the yellow's darkest shade on the light toast in dark."],
 
   ["Trying out", "Canvas grid", "yours", "Mike's grid around the pointer, light and dark; cells from the page header, from the top-right corner; your tuned values; on by default.", "The way it trails and fades, and keeping it cheap to run."],
 
   ["Concept tooling", "Concept controls and tuners", "yours", "Sliders beside the concept (you named them tuners); switches for the grid and the cards; on phones, in the More menu instead of a pill (13 Oct). The Warm and Cool switch went with the status quo (D33).", "The panel's layout and Copy settings."],
+  ["Concept tooling", "Intent lens (trying out)", "steered", "An inspector of how intentional each part is: point at it to see the level and its details, a switch in Concept controls, the pipeline first (26 Oct, D131).", "The four levels (the inventory's three and Bolster's), the card, pinning, Esc and I, the bar that counts and paints each level, and every part's record."],
 ];
 
 const LEVEL = { yours: ["full", "You decided"], steered: ["half", "You steered"], mine: ["dashed", "My call"] };
@@ -269,6 +270,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=d8edba0e"></script>
+<script src="system/specimens/specimen.js?v=fda98cbd"></script>
 </body>
 </html>

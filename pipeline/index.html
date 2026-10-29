@@ -10,11 +10,12 @@
 <link rel="apple-touch-icon" href="../shared/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../system/bolster.css?v=d8edba0e">
-<link rel="stylesheet" href="../shared/shell.css?v=d8edba0e">
-<link rel="stylesheet" href="../data-list.css?v=d8edba0e">
-<link rel="stylesheet" href="../calendar/calendar.css?v=d8edba0e">
-<link rel="stylesheet" href="pipeline.css?v=d8edba0e">
+<link rel="stylesheet" href="../system/bolster.css?v=fda98cbd">
+<link rel="stylesheet" href="../shared/shell.css?v=fda98cbd">
+<link rel="stylesheet" href="../data-list.css?v=fda98cbd">
+<link rel="stylesheet" href="../calendar/calendar.css?v=fda98cbd">
+<link rel="stylesheet" href="pipeline.css?v=fda98cbd">
+<link rel="stylesheet" href="../shared/lens.css?v=fda98cbd">
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
 <script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
@@ -98,6 +99,10 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
       </ul>
     </section>
     <section>
+      <h3>The intent lens</h3>
+      <p>Concept controls' Intent lens (or I) turns the page into an inspector: point at any part to see how intentional it is (you decided, you steered, my call, or kept as Bolster has it), what came from whom, what's still open and the decisions behind it; click to pin, Esc to leave. Its bar counts the page's parts by level and paints each level over the page (D131, I24).</p>
+    </section>
+    <section>
       <h3>Open questions</h3>
       <ul>
         <li>Never sent and Drafts: are these different (a draft still being priced, and a finished one not sent)? Assumed so.</li>
@@ -118,10 +123,14 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
     </div>
   </div>
 </details>
-<script src="../shared/icons.js?v=d8edba0e"></script>
-<script src="../shared/shell.js?v=d8edba0e"></script>
-<script src="../system/specimens/specimen.js?v=d8edba0e"></script>
-<script src="../data.js?v=d8edba0e"></script>
-<script src="pipeline.js?v=d8edba0e"></script>
+<script src="../shared/icons.js?v=fda98cbd"></script>
+<script src="../shared/shell.js?v=fda98cbd"></script>
+<script src="../system/specimens/specimen.js?v=fda98cbd"></script>
+<script src="../data.js?v=fda98cbd"></script>
+<script src="pipeline.js?v=fda98cbd"></script>
+<!-- the intent lens (Concept controls): who decided each part and why, the shell's parts and the page's -->
+<script src="../shared/intent.js?v=fda98cbd"></script>
+<script src="intent.js?v=fda98cbd"></script>
+<script src="../shared/lens.js?v=fda98cbd"></script>
 </body>
 </html>

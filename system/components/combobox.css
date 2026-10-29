@@ -1,0 +1,166 @@
+/* Combobox: type to find one value in a long list, in the field itself (D138, I26). The list floats under the field
+   (top layer, placed by combobox.js); on phones it opens as the picker sheet. Several values show as chips in the field, on one line: those that fit, then "+2".
+   <div class="field">
+     <label class="field-label" for="client">Client</label>
+     <div class="combobox" [data-multiple]>
+       <input class="input" id="client" name="client" role="combobox" aria-expanded="false" aria-autocomplete="list"
+              aria-controls="client-list" autocomplete="off">
+       <div class="combobox-list" id="client-list" role="listbox" aria-label="Clients" popover="manual"></div>
+     </div>
+   </div>
+   Rows are filled by combobox.js: .combobox-option (role="option"; a name, a detail line under it, the matched letters
+   marked), .combobox-status (searching, nothing matches, more to narrow) and the add row at the end (I2). */
+
+@layer tokens, base, components, utilities;
+
+@layer components {
+  :where(.combobox) { position: relative; display: block; }
+  /* a chevron says there's a list; the field itself opens it */
+  :where(.combobox) > :where(.input) { padding-inline-end: calc(var(--_px, var(--space-3)) + 1.25rem); }
+  :where(.combobox)::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: var(--_px, var(--space-3));
+    inline-size: 0.75rem;
+    block-size: 0.75rem;
+    margin-block: auto;
+    background: var(--color-content-secondary);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 4l4 4 4-4' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+    pointer-events: none;
+  }
+  :where(.combobox[data-lookup])::after { content: none; }
+  :where(.combobox[data-lookup]) > :where(.input) { padding-inline-end: var(--_px, var(--space-3)); }
+
+  /* several values: the field stays one line (your call, D138): the chips that fit, then "+2" for the rest */
+  :where(.combobox[data-multiple]) {
+    --_border: var(--color-line-input);
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--space-1);
+    block-size: var(--_h, var(--control-height-md));
+    padding-block: 0;
+    padding-inline: calc(var(--space-2) - var(--border-width-default)) calc(var(--_px, var(--space-3)) + 1.25rem);
+    overflow: hidden;
+    border: var(--border-width-default) solid var(--_border);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-default);
+    cursor: text;
+    transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
+  }
+  :where(.combobox[data-multiple]) > :where(.input) {
+    flex: 1 1 3rem;
+    min-inline-size: 0;
+    inline-size: auto;
+    block-size: 100%;
+    padding: 0 var(--space-1);
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  @media (hover: hover) { :where(.combobox[data-multiple]:hover:not(:focus-within)) { --_border: var(--color-line-input-hover); } }
+  :where(.combobox[data-multiple]:focus-within) { --_border: var(--color-line-focus); box-shadow: inset 0 0 0 1px var(--color-line-focus); }
+  :where(.combobox[data-multiple]:has([aria-invalid="true"])) { --_border: var(--color-feedback-danger-content); }
+
+  /* a chip: the value and its remove button, 24 tall in the field's middle; 8 in from the field's edge, past its
+     4 corner, so its own corner is free (D35): Bolster's 4 */
+  :where(.combobox-chip), :where(.combobox-more) {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    block-size: var(--space-6);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface-tint);
+    color: var(--color-content-primary);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+    white-space: nowrap;
+  }
+  :where(.combobox-chip) { gap: var(--space-0-5); max-inline-size: 10rem; padding-inline: var(--space-2) var(--space-0-5); }
+  :where(.combobox-chip[hidden]), :where(.combobox-more[hidden]) { display: none; }
+  :where(.combobox-chip) > :where(span) { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
+  :where(.combobox-chip) > :where(button) {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    inline-size: var(--space-5);
+    block-size: var(--space-5);
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-xs);
+    background: none;
+    color: var(--color-content-secondary);
+    cursor: pointer;
+  }
+  :where(.combobox-chip) > :where(button) > svg { inline-size: 0.75rem; block-size: 0.75rem; }
+  @media (hover: hover) { :where(.combobox-chip) > :where(button:hover) { color: var(--color-content-primary); background: var(--color-surface-hover); } }
+  :where(.combobox-chip) > :where(button:focus-visible) { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 0; }
+  /* the count of the picks with no room: opens the list, the picks first */
+  :where(.combobox-more) { padding-inline: var(--space-2); border: 0; color: var(--color-content-secondary); font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; cursor: pointer; }
+  @media (hover: hover) { :where(.combobox-more:hover) { color: var(--color-content-primary); } }
+
+  /* ---------- the list: floats under the field, the menus' look (12 corners, rows of 4, 8 in: D35) ---------- */
+  .combobox-list {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    max-block-size: min(20rem, 50dvh);
+    padding: calc(var(--inset-menu) - var(--border-width-default));
+    overflow: auto;
+    overscroll-behavior: contain;
+    border: var(--border-width-default) solid var(--color-line-card);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-raised);
+    color: var(--color-content-primary);
+    box-shadow: var(--shadow-popover);
+    --color-surface-hover: var(--color-surface-hover-raised);
+  }
+  .combobox-list:not(:popover-open) { display: none; }
+  /* in the sheet, the list is the sheet's body: no float, no frame */
+  .combobox-sheet .combobox-list { position: static; display: block; inline-size: auto; block-size: auto; max-block-size: none; padding: 0; overflow: visible; border: 0; border-radius: 0; background: none; box-shadow: none; }
+
+  .combobox-option {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0;
+    min-block-size: var(--control-height-sm);
+    padding: var(--space-1) var(--space-8) var(--space-1) var(--space-2);
+    position: relative;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    line-height: var(--leading-sm);
+    cursor: pointer;
+  }
+  .combobox-option-detail { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  .combobox-option mark { background: var(--color-highlight-search); color: inherit; border-radius: 2px; }
+  @media (hover: hover) { .combobox-option:hover { background: var(--color-surface-hover); } }
+  .combobox-option[data-active] { background: var(--color-surface-hover); box-shadow: inset 0 0 0 var(--border-width-default) var(--color-line-strong); }
+  /* on a filled row the highlighter thins, so the letters on it keep their contrast in dark (it's see-through there) */
+  .combobox-option:is([data-active], :hover) mark { background: color-mix(in oklab, var(--color-highlight-search) 70%, transparent); }
+  .combobox-option[aria-selected="true"]::after {
+    content: "";
+    position: absolute;
+    inset-inline-end: var(--space-2);
+    inset-block: 0;
+    margin-block: auto;
+    inline-size: 0.875rem;
+    block-size: 0.875rem;
+    background: var(--color-content-primary);
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 14 14'%3E%3Cpath d='M2.5 7.5l3 3 6-7' fill='none' stroke='%23000' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat;
+  }
+  /* the add row comes last, after a rule, never above the options (I2) */
+  .combobox-add { flex-direction: row; align-items: center; justify-content: flex-start; gap: var(--space-2); }
+  .combobox-add > svg { inline-size: 0.875rem; block-size: 0.875rem; flex: none; color: var(--color-content-link); }
+  .combobox-option + .combobox-add, .combobox-status + .combobox-add { margin-block-start: var(--space-1); }
+  .combobox-add::before { content: ""; position: absolute; inset-inline: 0; inset-block-start: calc(var(--space-1) * -0.5 - var(--border-width-default)); border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
+  .combobox-option:first-child.combobox-add::before { content: none; }
+  .combobox-status { padding: var(--space-2); font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
+  .combobox-status[data-more] { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-tertiary); }
+  @media (pointer: coarse) { .combobox-option { min-block-size: var(--touch-target-min); } }
+
+  /* ---------- the sheet (phones): the picker sheet (I2), its find field on top ---------- */
+  .combobox-sheet .dialog-body { padding-block-start: var(--space-3); display: grid; gap: var(--space-3); align-content: start; }
+  .combobox-sheet .combobox-find { position: sticky; inset-block-start: calc(var(--space-3) * -1); z-index: 1; padding-block: var(--space-1); background: var(--color-surface-default); }
+}
