@@ -331,6 +331,11 @@
     --_nx: 50%; --_ny: 0px; --_oy: 0px; --_vis: 0; transition: --_vis var(--net-fade) var(--ease-out);
   }
   .canvas-net, .canvas-glow { grid-area: 1 / 1; align-self: start; position: sticky; inset-block-start: 0; block-size: 100dvh; }
+  /* a workspace's page (dialog.css) scrolls itself, not the window (D146): its layers stick to its top, one page area
+     tall, taking no room; the shell shifts the pattern by how far the page has scrolled */
+  .workspace-page { container-type: size; }
+  .workspace-page > .canvas-layers { position: sticky; inset: auto; inset-block-start: 0; flex: none; block-size: 0; overflow: visible; display: block; }
+  .workspace-page > .canvas-layers > :is(.canvas-net, .canvas-glow) { position: absolute; inset-inline: 0; inset-block-start: 0; block-size: 100cqb; }
   .canvas-net {
     /* the light theme's line: cement on the warm page, black on cool, unless the panel picked one */
     --_line-l: var(--net-line-l);

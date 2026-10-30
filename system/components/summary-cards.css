@@ -33,11 +33,12 @@
   .slice-row[data-no-insight] { grid-template-columns: repeat(var(--_slices, 5), minmax(var(--slice-min), 1fr)); }
   .slice-row {
     /* equal slice columns at every width (D145): one shared minimum, not each card's own content, so a row's cards are
-       always one size; a label longer than it wraps inside its card. The insight card twice as wide; too narrow, and
-       the row scrolls rather than wraps */
+       always one size; a label longer than it wraps inside its card. The insight card twice as wide, at least two
+       status cards and the gap between them, its content wrapping to fit (a legend, a note), never widening the row;
+       too narrow, and the row scrolls rather than wraps */
     --slice-min: 9rem;
     display: grid; gap: var(--space-3);
-    grid-template-columns: repeat(var(--_slices, 5), minmax(var(--slice-min), 1fr)) minmax(max-content, 2fr);
+    grid-template-columns: repeat(var(--_slices, 5), minmax(var(--slice-min), 1fr)) minmax(calc(2 * var(--slice-min) + var(--space-3)), 2fr);
     overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity;
     margin: calc(var(--space-1) * -1); padding: var(--space-1); /* room for the focus ring */
     scroll-padding-inline: var(--space-1); /* the cards snap to the padding's edge, so the row loads at 0 */
@@ -101,6 +102,8 @@
     .slice-row { margin-inline: calc(var(--space-4) * -1); padding-inline: var(--space-4); scroll-padding-inline: var(--space-4); }
     /* the insight card comes first on phones (data-list.js puts it first), then All and the slices */
     .slice-row { grid-template-columns: max-content repeat(var(--_slices, 5), var(--slice-min)); }
+    /* the insight card as wide as its content, never wider than the screen between its gutters: past that it wraps (D145) */
+    .slice-row > .slice-insight { max-inline-size: calc(100vw - 2 * var(--space-4)); }
     .slice-row .slice-insight[aria-hidden="true"] { order: -1; }
   }
 }

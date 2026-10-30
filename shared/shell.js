@@ -570,24 +570,32 @@ window.BolsterShell = (() => {
   // sizes the cells from the page header and eases a light toward the pointer, one write per frame, on the
   // layers alone. data-grid="off" on the root (Concept controls, kept in this browser) turns it off. The
   // list's grid panel tunes it: canvas.set({ div, trail }); the rest are --net-* properties on the root.
+  // A workspace's page (dialog.css, D144) is a page area too: canvas.start(itsPage) puts the grid there, where the page
+  // scrolls itself rather than the window (D146)
   const canvas = (() => {
     const v = { div: 2, trail: 0.8 };
-    let cell = () => {};
-    function start() {
-      const main = document.querySelector(".app-main"), head = main?.querySelector(".page-header");
+    const cells = [];
+    const cell = () => cells.forEach((f) => f());
+    function start(main = document.querySelector(".app-main")) {
+      const head = main?.querySelector(":scope > .page-header") || main?.querySelector(".page-header");
       if (!main) return;
+      const own = main.matches(".workspace-page");
       try { if (localStorage.getItem("bolster-concepts:grid") === "off") document.documentElement.dataset.grid = "off"; } catch {}
       if (!main.querySelector(":scope > .canvas-layers")) main.insertAdjacentHTML("afterbegin", '<div class="canvas-layers" aria-hidden="true"><div class="canvas-glow"></div><div class="canvas-net"></div></div>');
       const layers = main.querySelector(":scope > .canvas-layers"), net = layers.querySelector(".canvas-net"), lay = layers.style;
-      cell = () => head && document.documentElement.style.setProperty("--net-cell", `${head.offsetHeight / v.div}px`);
+      // the cells are half the page header's height: the app's on the root, a workspace's on its page
+      const to = own ? main : document.documentElement;
+      cells.push(() => head && to.style.setProperty("--net-cell", `${head.offsetHeight / v.div}px`));
+      cell();
       if (head) new ResizeObserver(() => cell()).observe(head);
       const still = matchMedia("(prefers-reduced-motion: reduce)");
       let px = 0, py = 0, x = 0, y = 0, raf = 0, placed = false, over = false;
       const tick = () => {
         raf = 0;
         const n = net.getBoundingClientRect();
-        // how far the layers have stuck below the top of the page, so the pattern stays on the page
-        lay.setProperty("--_oy", `${Math.round(n.top - main.getBoundingClientRect().top)}px`);
+        // how far the layers have stuck below the top of the page (or, in a workspace, how far its page has scrolled),
+        // so the pattern stays on the page
+        lay.setProperty("--_oy", `${Math.round(own ? main.scrollTop : n.top - main.getBoundingClientRect().top)}px`);
         if (!over) return;
         const tx = px - n.left, ty = py - n.top, k = still.matches ? 0 : v.trail;
         if (!placed) { x = tx; y = ty; placed = true; }
@@ -603,7 +611,7 @@ window.BolsterShell = (() => {
         go();
       });
       main.addEventListener("pointerleave", () => { lay.setProperty("--_vis", "0"); over = placed = false; });
-      addEventListener("scroll", go, { passive: true });
+      (own ? main : window).addEventListener("scroll", go, { passive: true });
       addEventListener("resize", go);
       go();
     }

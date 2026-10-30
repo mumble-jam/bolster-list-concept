@@ -14,7 +14,7 @@
        <header class="dialog-header"><h2 id="w-title">Settings</h2>…its actions…<button … data-close>…</button></header>
        <div class="dialog-body">
          <nav class="sidebar workspace-nav" aria-label="Settings"><p class="sidebar-group">…</p><button class="sidebar-item" aria-current="page">…</button></nav>
-         <section class="workspace-page">…the page, built as the app's page area builds it…</section></div>
+         <section class="workspace-page app-main"><header class="page-header">…</header><div class="app-content">…</div></section></div>
      </dialog>
      Its navigation folds away beside the page ([data-nav-hidden] on the dialog), from a button in the page's own
      header, as Collapse menu folds the app's; on phones the list and the page take turns. BolsterShell.workspace
@@ -156,7 +156,9 @@
     transition: margin-inline-start 280ms cubic-bezier(0.2, 0.8, 0, 1), visibility 0s linear 280ms;
   }
   @media (prefers-reduced-motion: reduce) { .workspace-nav { transition: none !important; } }
-  /* the page: the app's page area in miniature, the one scroller (D128) */
+  /* the page: the app's page area in miniature (.workspace-page.app-main, D146): its page header and content are the
+     app's (.page-header, .app-content), the canvas grid behind them (BolsterShell.canvas.start(page)); the one
+     scroller (D128) */
   :where(.workspace-page) { flex: 1; min-inline-size: 0; overflow: hidden auto; overscroll-behavior: contain; background: var(--color-surface-canvas); }
 
   @media (max-width: 767px) {
