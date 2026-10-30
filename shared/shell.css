@@ -508,4 +508,41 @@
   .top-bar-search-scope { display: inline-flex; align-items: center; flex: none; gap: var(--space-0-5); block-size: 1.375rem; padding-inline: var(--space-2) var(--space-0-5); border-radius: var(--radius-sm); background: color-mix(in oklab, var(--color-content-on-chrome) 14%, transparent); color: var(--color-content-on-chrome); font-size: var(--text-xs); font-weight: var(--font-weight-medium); white-space: nowrap; }
   .top-bar-search-scope button { display: grid; place-items: center; inline-size: 1.125rem; block-size: 1.125rem; padding: 0; border: 0; border-radius: var(--radius-xs); background: none; color: var(--color-content-on-chrome-muted); cursor: pointer; }
   @media (hover: hover) { .top-bar-search-scope button:hover { background: color-mix(in oklab, var(--color-content-on-chrome) 14%, transparent); color: var(--color-content-on-chrome); } }
+
+  /* ---------- concept controls and the About dialog: every concept's tooling, not part of the design (moved up from
+     the list concept, so a concept needn't load its stylesheet for them) ---------- */
+  .concept-controls {
+    position: fixed; inset-inline-end: var(--space-4); inset-block-end: var(--space-4); z-index: var(--z-toast);
+    --surface-raised: 1; /* a raised panel: its buttons lie flat (D78) */
+    inline-size: 18rem; max-inline-size: calc(100vw - var(--space-8));
+    max-block-size: calc(100dvh - var(--space-8)); overflow-y: auto; overscroll-behavior: contain; /* it floats: it scrolls in itself (D128) */
+    border: 2px dashed var(--color-action-accent); border-radius: var(--radius-lg);
+    background: var(--color-surface-raised); box-shadow: var(--shadow-overlay);
+    font-size: var(--text-sm);
+  }
+  .concept-controls:not([open]) { inline-size: auto; }
+  /* toasts rise above the closed pill, so it never covers an Undo (on phones the pill isn't there) */
+  @media (min-width: 768px) { body:has(.concept-controls:not([open])) .toast-region { inset-block-end: calc(var(--space-4) + 3rem); } }
+  .concept-controls > summary { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); cursor: pointer; font-weight: var(--font-weight-medium); list-style: none; }
+  .concept-controls > summary::-webkit-details-marker { display: none; }
+  .concept-controls > summary::after { content: "▾"; margin-inline-start: auto; color: var(--color-content-secondary); }
+  .concept-controls:not([open]) > summary::after { content: "▴"; }
+  .concept-tag { padding: 0 var(--space-2); border-radius: var(--radius-full); background: var(--color-action-accent); color: var(--color-content-on-accent); font-size: var(--text-xxs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); }
+  .concept-body { display: grid; gap: var(--space-3); padding: var(--space-1) var(--space-3) var(--space-3); }
+  /* on phones there's no pill: the controls open from More (the shell lists them there) as a panel
+     above the tab bar, and closing them hides them again */
+  @media (max-width: 767px) {
+    .concept-controls:not([open]) { display: none; }
+    .concept-controls {
+      inset-block-end: calc(var(--shell-bottom-bar-height) + var(--space-3)); inset-inline: var(--space-3);
+      inline-size: auto; max-inline-size: none; max-block-size: calc(100dvh - var(--shell-bottom-bar-height) - var(--space-8)); overflow-y: auto;
+    }
+  }
+
+  .notes { --_w: 44rem; }
+  .notes .dialog-body { display: grid; gap: var(--space-5); font-size: var(--text-sm); }
+  .notes h3 { font-size: var(--text-base); line-height: var(--leading-base); margin-block-end: var(--space-2); }
+  .notes ol, .notes ul { display: grid; gap: var(--space-2); padding-inline-start: var(--space-5); margin: 0; }
+  .notes li b { font-weight: var(--font-weight-medium); }
+  @media (max-width: 767px) { body[data-selecting] .concept-controls { display: none; } }
 }
