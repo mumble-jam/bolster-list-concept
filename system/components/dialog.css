@@ -9,7 +9,16 @@
    Variants:
    - (default) centred modal: confirmations, forms, filters.
    - sheet: picker for long lists (the as-is select sheet). Centred on desktop, bottom sheet on phones.
-   - workspace: the job modal, full-bleed with a dark header and its own nav.
+   - workspace: a full-screen window with its own navigation, one for every area that has one (Settings, a job; D144):
+     <dialog class="dialog" data-variant="workspace" aria-labelledby="w-title">
+       <header class="dialog-header"><h2 id="w-title">Settings</h2>…its actions…<button … data-close>…</button></header>
+       <div class="dialog-body">
+         <nav class="sidebar workspace-nav" aria-label="Settings"><p class="sidebar-group">…</p><button class="sidebar-item" aria-current="page">…</button></nav>
+         <section class="workspace-page">…the page, built as the app's page area builds it…</section></div>
+     </dialog>
+     Its navigation folds away beside the page ([data-nav-hidden] on the dialog), from a button in the page's own
+     header, as Collapse menu folds the app's; on phones the list and the page take turns. BolsterShell.workspace
+     (concepts/shared/shell.js) does the folding, so every window folds alike.
    Light dismiss (click on the backdrop): opt in with closedby="any" (see I-entries). */
 
 @layer tokens, base, components, utilities;
@@ -105,16 +114,56 @@
     max-block-size: none;
     border-radius: var(--radius-xl);
   }
+  /* a 48 header: its buttons 8 in from the top and the end, so Close's corner shares the window's (D35); what it
+     starts with (a title, an avatar) starts where the navigation's icons do */
   :where(.dialog[data-variant="workspace"]) :where(.dialog-header) {
-    min-block-size: var(--space-16);
-    padding-inline: var(--space-4);
+    min-block-size: 0;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
     border-block-end-color: var(--color-line-chrome);
     background: var(--color-surface-chrome);
     color: var(--color-content-on-chrome);
+    /* the header is dark in both themes: what sits on it (a status badge, the focus ring) takes the dark theme's colours */
+    color-scheme: dark;
   }
+  /* its quiet buttons take the chrome's inks, as the top bar's do (button.css sets the ghost's hover outside :where) */
+  .dialog[data-variant="workspace"] > .dialog-header .button[data-variant="ghost"] { --_fg: var(--color-content-on-chrome-muted); --_fg-hover: var(--color-content-on-chrome); --_bg-hover: var(--color-surface-chrome-hover); }
   :where(.dialog[data-variant="workspace"]) :where(.dialog-header) :where(h2) { color: inherit; font-family: var(--font-sans); font-size: var(--text-base); font-weight: var(--font-weight-medium); }
-  :where(.dialog[data-variant="workspace"]) :where(.dialog-body) { display: flex; padding: 0; }
+  :where(.dialog[data-variant="workspace"][open]) { display: flex; flex-direction: column; overflow: hidden; }
+  :where(.dialog[data-variant="workspace"]) :where(.dialog-header) { flex: none; }
+  :where(.dialog[data-variant="workspace"]) :where(.dialog-body) { flex: 1; min-block-size: 0; display: flex; padding: 0; overflow: hidden; }
+
+  /* its navigation: the app's sidebar items in a column of their own, beside the page (outside :where, so it outranks
+     the app's .sidebar, which shell.css loads later) */
+  .workspace-nav {
+    position: static; flex: none; display: block;
+    inline-size: var(--workspace-nav-width, 16rem); block-size: auto; min-block-size: 0; /* a long list scrolls in it */
+    overflow-y: auto; padding: var(--space-3) var(--space-2);
+    translate: none; box-shadow: none;
+    transition: margin-inline-start 280ms cubic-bezier(0.2, 0.8, 0, 1), visibility 0s;
+  }
+  :where(.workspace-nav) :where(button.sidebar-item) { inline-size: 100%; border: 0; background: none; font-family: inherit; text-align: start; cursor: pointer; }
+  @media (hover: hover) { :where(.workspace-nav) :where(.sidebar-item:hover) { background: var(--color-surface-sidebar-hover); } }
+  :where(.workspace-nav) :where(.sidebar-item[aria-current="page"]) { background: var(--color-surface-default); box-shadow: var(--shadow-raised); }
+  :where(.workspace-nav) :where(.sidebar-item:focus-visible) { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
+  /* its icons a step quieter than their names; the page you're on, and the one you point at, in full ink (D88) */
+  :where(.workspace-nav) :where(.sidebar-item) > svg { color: var(--color-content-secondary); transition: color var(--duration-fast) var(--ease-standard); }
+  :where(.workspace-nav) :where(.sidebar-item[aria-current="page"]) > svg { color: var(--color-content-primary); }
+  @media (hover: hover) { :where(.workspace-nav) :where(.sidebar-item:hover) > svg { color: var(--color-content-primary); } }
+  /* folded: it slides out beside the page, which takes its room */
+  .dialog[data-variant="workspace"][data-nav-hidden] .workspace-nav {
+    margin-inline-start: calc(-1 * var(--workspace-nav-width, 16rem)); visibility: hidden;
+    transition: margin-inline-start 280ms cubic-bezier(0.2, 0.8, 0, 1), visibility 0s linear 280ms;
+  }
+  @media (prefers-reduced-motion: reduce) { .workspace-nav { transition: none !important; } }
+  /* the page: the app's page area in miniature, the one scroller (D128) */
+  :where(.workspace-page) { flex: 1; min-inline-size: 0; overflow: hidden auto; overscroll-behavior: contain; background: var(--color-surface-canvas); }
+
   @media (max-width: 767px) {
     :where(.dialog[data-variant="workspace"]) { inline-size: 100vw; block-size: 100dvh; border-radius: 0; }
+    /* on phones the list and the page take turns: the list until a page is picked, the page's header button brings it back */
+    .workspace-nav { flex: 1; inline-size: auto; margin: 0 !important; border-inline-end: 0; transition: none; }
+    .dialog[data-variant="workspace"]:not([data-nav-hidden]) .workspace-page { display: none; }
+    .dialog[data-variant="workspace"][data-nav-hidden] .workspace-nav { display: none; }
   }
 }

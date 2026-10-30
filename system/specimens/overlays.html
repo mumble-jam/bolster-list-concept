@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=9364c94b">
-<link rel="stylesheet" href="specimen.css?v=9364c94b">
+<link rel="stylesheet" href="../bolster.css?v=604211e8">
+<link rel="stylesheet" href="specimen.css?v=604211e8">
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
 <script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
@@ -84,7 +84,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
 
   <section class="spec-section">
     <h2 id="dialog">Dialog</h2>
-    <p>Centred modal for forms and filters; sheet for long pickers (bottom sheet on phones); workspace for the job modal. Escape closes all of them; clicking the backdrop closes the sheet (closedby="any").</p>
+    <p>Centred modal for forms and filters; sheet for long pickers (bottom sheet on phones); workspace for a window with its own navigation (Settings, a job; D144). Escape closes all of them; clicking the backdrop closes the sheet (closedby="any").</p>
     <div class="spec-panel">
       <div class="spec-row">
         <button class="button" data-variant="secondary" data-open-dialog="d-filters">Open filters dialog</button>
@@ -135,15 +135,16 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
     <header class="dialog-header"><span class="avatar" data-color="2" data-size="sm" aria-hidden="true">MK</span><h2 id="d-work-t">Mykola Khvylovy · New estimate</h2>
       <span class="badge" data-status="pending">Pending</span>
       <button class="button" data-variant="brand" data-size="sm">Preview and send</button>
-      <button class="button" data-variant="ghost" data-icon-only aria-label="Close job" data-close style="--_fg:var(--color-content-on-chrome-muted);--_fg-hover:var(--color-content-on-chrome);--_bg-hover:var(--color-surface-chrome-hover)" data-tip="Close job">×</button></header>
+      <button class="button" data-variant="ghost" data-size="sm" data-icon-only aria-label="Close job" data-close data-tip="Close job">×</button></header>
     <div class="dialog-body">
-      <nav class="sidebar" aria-label="Job" style="position:static;block-size:auto;inline-size:15rem;translate:none;box-shadow:none">
-        <a class="sidebar-item" href="#">Overview</a><a class="sidebar-item" href="#" aria-current="page">Estimate <span class="badge" data-count>5</span></a><a class="sidebar-item" href="#">Takeoff</a><a class="sidebar-item" href="#">Proposal</a>
+      <nav class="sidebar workspace-nav" aria-label="Job">
+        <p class="sidebar-group">Pre-production</p>
+        <button type="button" class="sidebar-item">Overview</button><button type="button" class="sidebar-item" aria-current="page">Estimate <span class="badge" data-count>5</span></button><button type="button" class="sidebar-item">Measurements</button><button type="button" class="sidebar-item">Proposal</button>
       </nav>
-      <div style="flex:1;padding:var(--space-6)"><h3>Estimate</h3><p class="text-secondary">The spreadsheet goes here.</p></div>
+      <section class="workspace-page" style="padding:var(--space-6)"><h3>Estimate</h3><p class="text-secondary">The page goes here, built as the app's page area builds it.</p></section>
     </div>
   </dialog>
 </main>
-<script src="specimen.js?v=9364c94b"></script>
+<script src="specimen.js?v=604211e8"></script>
 </body>
 </html>

@@ -48,9 +48,9 @@
     :root[data-chrome-hidden] .button[data-float] { inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom)); }
   }
   /* the overlay menu on narrower screens takes the top bar's place while it's away */
-  @media (max-width: 1023px) { :root[data-chrome-hidden] .sidebar { inset-block-start: 0; } }
+  @media (max-width: 1023px) { :root[data-chrome-hidden] .sidebar:not(.workspace-nav) { inset-block-start: 0; } }
   @media (min-width: 1024px) {
-    :root[data-chrome-hidden] :is(.app-shell[data-rail-pinned] > .rail, .sidebar) { inset-block-start: 0; block-size: 100dvh; }
+    :root[data-chrome-hidden] :is(.app-shell[data-rail-pinned] > .rail, .sidebar:not(.workspace-nav)) { inset-block-start: 0; block-size: 100dvh; }
     /* trying out: with the rail collapsed, the logo stays above it while the rest of the top bar
        slides away, so the left column reads as one dark strip (pinned, the rail still rises) */
     .bs-logo { background: var(--color-surface-chrome); transition: translate 300ms var(--ease-out), border-color 300ms var(--ease-out); }

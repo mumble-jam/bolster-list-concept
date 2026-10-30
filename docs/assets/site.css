@@ -112,8 +112,11 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 .doc-eyebrow { display: inline-flex; align-items: center; gap: var(--space-2); margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-content-tertiary); }
 .doc-eyebrow::before { content: ""; inline-size: 0.625rem; block-size: 0.625rem; background: var(--color-action-brand); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-content-primary) 70%, transparent); }
 .doc-head h1 { font-family: var(--font-display); font-size: clamp(2.25rem, 1.6rem + 2.2vw, 3.25rem); line-height: 1.05; font-weight: var(--font-weight-medium); letter-spacing: -0.025em; text-wrap: balance; }
-.doc-lead { max-inline-size: 62ch; font-size: var(--text-lg); line-height: var(--leading-lg); color: var(--color-content-secondary); text-wrap: pretty; }
+.doc-lead { font-size: var(--text-lg); line-height: var(--leading-lg); color: var(--color-content-secondary); text-wrap: pretty; }
 .doc-meta { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); padding-block-start: var(--space-1); font-size: var(--text-xs); color: var(--color-content-tertiary); }
+/* the date ends the row at the header's right edge, under the lead's; on a phone it wraps under the rest, at the left */
+.doc-meta-date { margin-inline-start: auto; }
+@media (max-width: 639px) { .doc-meta-date { margin-inline-start: 0; } }
 .doc-meta-files { display: inline-flex; flex-wrap: wrap; gap: var(--space-1); }
 .doc-meta-files code { padding: 1px var(--space-2); border-radius: var(--radius-sm); background: var(--color-surface-tint); font-family: var(--font-mono); font-size: var(--text-xxs); color: var(--color-content-secondary); }
 

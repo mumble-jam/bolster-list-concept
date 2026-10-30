@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=9364c94b">
-<link rel="stylesheet" href="specimen.css?v=9364c94b">
+<link rel="stylesheet" href="../bolster.css?v=604211e8">
+<link rel="stylesheet" href="specimen.css?v=604211e8">
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
 <script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
@@ -26,7 +26,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
     <h2>Status cards and the insight card</h2>
     <p>Pending is pressed: the list shows pending jobs only. Pressing it again, or All, clears it.</p>
     <div class="spec-panel" data-surface="canvas">
-      <div class="slice-row" style="--_slices:4" role="group" aria-label="Filter by status">
+      <div class="slice-row" role="group" aria-label="Filter by status">
         <button class="slice" type="button" aria-pressed="false"><span class="slice-head"><span class="slice-label">All jobs</span><span class="slice-count">132</span></span><span class="slice-value">$1,284,906</span></button>
         <button class="slice" type="button" aria-pressed="true"><span class="slice-head"><span class="slice-label"><span class="mark" data-mark="quarter" style="--_dot:var(--color-status-pending-mark)"></span>Pending</span><span class="slice-count">33</span></span><span class="slice-value">$318,420</span></button>
         <button class="slice" type="button" aria-pressed="false"><span class="slice-head"><span class="slice-label"><span class="mark" data-mark="half" style="--_dot:var(--color-status-booked-dot)"></span>Booked</span><span class="slice-count">31</span></span><span class="slice-value">$402,115</span></button>
@@ -48,7 +48,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
     <table class="spec-table">
       <thead><tr><th>Part</th><th>Class</th><th>Notes</th></tr></thead>
       <tbody>
-        <tr><td>Row</td><td class="spec-label">.slice-row</td><td>Equal status columns, the insight twice as wide (set <code>--_slices</code> to the number of status cards). Too narrow, and it scrolls sideways rather than wrapping.</td></tr>
+        <tr><td>Row</td><td class="spec-label">.slice-row</td><td>Equal status columns, the insight twice as wide, counted by the row itself. Too narrow, and it scrolls sideways rather than wrapping.</td></tr>
         <tr><td>Status card</td><td class="spec-label">button.slice[aria-pressed]</td><td>Label with its mark, a count top right, a figure below (Space Grotesk 20). <code>data-empty</code> greys the figure.</td></tr>
         <tr><td>Insight card</td><td class="spec-label">.slice.slice-insight</td><td>A rate, the counts behind it, its parts as a split bar, then one more figure. The (?) explains it in the screen's own words (D27).</td></tr>
         <tr><td>Body</td><td class="spec-label">card.css</td><td>The cards' quiet body: a top line, a darker bottom edge, two shadows tinted with the page. Status cards lift 1px on hover and sink when pressed; a pressed one stays in.</td></tr>
@@ -65,7 +65,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
     </ul>
   </section>
 </main>
-<script src="../../shared/icons.js?v=9364c94b"></script>
-<script src="specimen.js?v=9364c94b"></script>
+<script src="../../shared/icons.js?v=604211e8"></script>
+<script src="specimen.js?v=604211e8"></script>
 </body>
 </html>

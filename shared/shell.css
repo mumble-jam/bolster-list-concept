@@ -91,19 +91,15 @@
   .bs-nav-bottom { position: sticky; inset-block-end: 0; z-index: 1; margin: auto calc(var(--space-2) * -1) 0; padding: var(--space-2) var(--space-2) var(--space-3);
     border-block-start: var(--border-width-default) solid var(--color-line-chrome); background: var(--color-surface-chrome); }
   .bs-nav-main { padding-block-end: var(--space-3); }
-  :is(.bs-sidebar, .bs-settings-nav) :is(button, summary).sidebar-item { inline-size: 100%; border: 0; background: none; font-family: inherit; text-align: start; cursor: pointer; list-style: none; }
+  .bs-sidebar :is(button, summary).sidebar-item { inline-size: 100%; border: 0; background: none; font-family: inherit; text-align: start; cursor: pointer; list-style: none; }
   .bs-acc > summary::-webkit-details-marker { display: none; }
   /* a section with pages: a chevron at the row's end (your ask, 22 Oct), quiet as the rail's, turning down as it opens */
   .bs-acc-more { display: inline-flex; margin-inline: auto var(--space-1); color: var(--color-content-on-chrome-muted); rotate: -90deg; transition: rotate var(--duration-fast) var(--ease-standard); }
   .bs-acc-more > svg { inline-size: 0.75rem; block-size: 0.75rem; }
   .bs-acc[open] > summary .bs-acc-more { rotate: 0deg; }
-  @media (hover: hover) { :is(.bs-sidebar, .bs-settings-nav) .sidebar-item:hover { background: var(--color-surface-sidebar-hover); } }
-  :is(.bs-sidebar, .bs-settings-nav) .sidebar-item[aria-current="page"] { background: var(--color-surface-default); box-shadow: var(--shadow-raised); }
-  :is(.bs-sidebar, .bs-settings-nav) .sidebar-item:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
-  /* Settings' icons a step quieter than their names; the page you're on, and the one you point at, in full ink */
-  .bs-settings-nav .sidebar-item > svg { color: var(--color-content-secondary); transition: color var(--duration-fast) var(--ease-standard); }
-  .bs-settings-nav .sidebar-item[aria-current="page"] > svg { color: var(--color-content-primary); }
-  @media (hover: hover) { .bs-settings-nav .sidebar-item:hover > svg { color: var(--color-content-primary); } }
+  @media (hover: hover) { .bs-sidebar .sidebar-item:hover { background: var(--color-surface-sidebar-hover); } }
+  .bs-sidebar .sidebar-item[aria-current="page"] { background: var(--color-surface-default); box-shadow: var(--shadow-raised); }
+  .bs-sidebar .sidebar-item:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
   .bs-acc-body { display: grid; padding-block-end: var(--space-1); }
   /* a section's pages: their icons start where the section's label does (its padding, the 28px icon column, the gap),
      a step smaller than the section's and in a 20px slot of their own, so every page's name starts in one line */
@@ -266,17 +262,10 @@
   .bs-extra { display: none; }
   @media (max-width: 767px) { .bs-sidebar .bs-extra { display: flex; } }
 
-  /* ---------- Settings, a full-screen window with its own navigation (D88) ---------- */
-  /* a 48 header, Close 8 in from the top and the end, so its corner shares the window's (D35) */
-  .bs-settings .dialog-header { min-block-size: 0; padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4); }
-  .bs-settings .bs-settings-nav { position: static; flex: none; inline-size: 16rem; block-size: auto; overflow-y: auto; padding: var(--space-3) var(--space-2); translate: none; box-shadow: none; }
-  .bs-settings-page { flex: 1; min-inline-size: 0; padding: var(--space-8); }
-  /* the page slot (D89): a built page fills it, as the app's page area; the navigation folds away beside it */
-  .bs-settings-page[data-frame] { display: flex; padding: 0; }
+  /* ---------- Settings, a workspace window (D88, D144): the window, its header, navigation and folding are
+     dialog.css's; this is only its page slot (D89), where a built page fills it as the app's page area does ---------- */
+  .bs-settings-page[data-frame] { display: flex; overflow: hidden; }
   .bs-settings-frame { flex: 1; inline-size: 100%; block-size: 100%; border: 0; display: block; background: var(--color-surface-canvas); }
-  .bs-settings .bs-settings-nav { transition: margin-inline-start 280ms cubic-bezier(0.2, 0.8, 0, 1), visibility 0s; }
-  .bs-settings[data-nav-hidden] .bs-settings-nav { margin-inline-start: -16rem; visibility: hidden; transition: margin-inline-start 280ms cubic-bezier(0.2, 0.8, 0, 1), visibility 0s linear 280ms; }
-  @media (prefers-reduced-motion: reduce) { .bs-settings .bs-settings-nav { transition: none; } }
   /* the loading screen (D90): its cover is here, so it's up before its drawings arrive (loaders.css, lazily); over
      everything, the floating menu button included */
   .bs-loader { position: fixed; inset: 0; z-index: calc(var(--z-modal) + 2); display: grid; place-items: center; background: var(--color-surface-canvas); transition: opacity var(--duration-medium) var(--ease-out); }
@@ -331,17 +320,6 @@
   /* a page in the slot draws no shell of its own (shell.js, ?embed=settings) */
   :root[data-embed] .app-shell { display: block; min-block-size: 100dvh; }
   :root[data-embed] .concept-controls { display: none; }
-  .bs-settings-page h3 { margin: 0 0 var(--space-2); font-family: var(--font-display); font-size: var(--text-2xl); line-height: var(--leading-xl); font-weight: var(--font-weight-medium); }
-  .bs-settings-page .button { margin-block-start: var(--space-4); }
-  @media (max-width: 767px) {
-    .bs-settings .dialog-body { flex-direction: column; }
-    .bs-settings .bs-settings-nav { inline-size: auto; max-block-size: 45dvh; border-inline-end: 0; border-block-end: var(--border-width-default) solid var(--color-line-sidebar); }
-    .bs-settings[data-nav-hidden] .bs-settings-nav { display: none; }
-    /* a page in the slot (D89) gets the whole window; its header's button swaps the navigation in for it */
-    .bs-settings:not([data-nav-hidden]):has(.bs-settings-page[data-frame]) .bs-settings-nav { flex: 1; max-block-size: none; border-block-end: 0; }
-    .bs-settings:not([data-nav-hidden]) .bs-settings-page[data-frame] { display: none; }
-    .bs-settings-page { padding: var(--space-5) var(--space-4); }
-  }
   .bs-sep { margin: var(--space-2) 0; border: 0; border-block-start: var(--border-width-default) solid var(--color-line-sidebar); }
 
   /* settings groups: 12px medium label with a small chevron, collapsible */

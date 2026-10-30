@@ -217,7 +217,8 @@
     --color-content-on-accent: var(--color-flame-white);
     --color-content-on-brand: var(--color-black);
     --color-content-on-primary: light-dark(var(--color-level-yellow), var(--color-black));
-    --color-content-link: light-dark(var(--color-blue-print-600), var(--color-blue-print-300));
+    /* in dark, a quarter of the way to 200: 300 alone falls under 4.5:1 on raised surfaces and tints (sheets, dialogs) */
+    --color-content-link: light-dark(var(--color-blue-print-600), color-mix(in srgb, var(--color-blue-print-300) 75%, var(--color-blue-print-200)));
     /* search hits: the matched letters on Bolster's highlighter yellow */
     --color-highlight-search: light-dark(var(--color-yellow-300), color-mix(in srgb, var(--color-yellow-700) 40%, transparent));
     /* section labels in menus */

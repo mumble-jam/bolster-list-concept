@@ -17,11 +17,27 @@
   /* the flat base: an edge; the tactile body (sheen, shadows) comes from card.css unless data-cards="flat" */
   .slices { min-inline-size: 0; }
   .slices[hidden] { display: none; }
-  .slice-row[data-no-insight] { grid-template-columns: repeat(var(--_slices, 5), minmax(max-content, 1fr)); }
+  /* the row counts its own status cards (D143): no page has to say how many there are */
+  .slice-row:has(> :nth-child(1 of .slice:not(.slice-insight))) { --_slices: 1; }
+  .slice-row:has(> :nth-child(2 of .slice:not(.slice-insight))) { --_slices: 2; }
+  .slice-row:has(> :nth-child(3 of .slice:not(.slice-insight))) { --_slices: 3; }
+  .slice-row:has(> :nth-child(4 of .slice:not(.slice-insight))) { --_slices: 4; }
+  .slice-row:has(> :nth-child(5 of .slice:not(.slice-insight))) { --_slices: 5; }
+  .slice-row:has(> :nth-child(6 of .slice:not(.slice-insight))) { --_slices: 6; }
+  .slice-row:has(> :nth-child(7 of .slice:not(.slice-insight))) { --_slices: 7; }
+  .slice-row:has(> :nth-child(8 of .slice:not(.slice-insight))) { --_slices: 8; }
+  .slice-row:has(> :nth-child(9 of .slice:not(.slice-insight))) { --_slices: 9; }
+  .slice-row:has(> :nth-child(10 of .slice:not(.slice-insight))) { --_slices: 10; }
+  .slice-row:has(> :nth-child(11 of .slice:not(.slice-insight))) { --_slices: 11; }
+  .slice-row:has(> :nth-child(12 of .slice:not(.slice-insight))) { --_slices: 12; }
+  .slice-row[data-no-insight] { grid-template-columns: repeat(var(--_slices, 5), minmax(var(--slice-min), 1fr)); }
   .slice-row {
-    /* equal slice columns, the insight card twice as wide; too narrow, and the row scrolls rather than wraps */
+    /* equal slice columns at every width (D145): one shared minimum, not each card's own content, so a row's cards are
+       always one size; a label longer than it wraps inside its card. The insight card twice as wide; too narrow, and
+       the row scrolls rather than wraps */
+    --slice-min: 9rem;
     display: grid; gap: var(--space-3);
-    grid-template-columns: repeat(var(--_slices, 5), minmax(max-content, 1fr)) minmax(max-content, 2fr);
+    grid-template-columns: repeat(var(--_slices, 5), minmax(var(--slice-min), 1fr)) minmax(max-content, 2fr);
     overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity;
     margin: calc(var(--space-1) * -1); padding: var(--space-1); /* room for the focus ring */
     scroll-padding-inline: var(--space-1); /* the cards snap to the padding's edge, so the row loads at 0 */
@@ -40,7 +56,11 @@
   button.slice:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
   .slice[aria-pressed="true"] { border-color: var(--color-action-accent); background: var(--color-surface-selected); box-shadow: inset 0 0 0 1px var(--color-action-accent); }
   .slice-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-inline-size: 0; font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
-  .slice-label { display: flex; align-items: center; gap: var(--space-2); min-inline-size: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .slice-label { display: flex; align-items: flex-start; gap: var(--space-2); min-inline-size: 0; overflow-wrap: anywhere; }
+  /* a label that wraps keeps its mark, and its card's count, on its first line */
+  .slice:not(.slice-insight) .slice-head { align-items: baseline; }
+  .slice-label > :is(svg, .dot, .mark) { flex: none; margin-block-start: calc((1lh - 0.875rem) / 2); }
+  .slice-label > .dot { margin-block-start: calc((1lh - var(--space-2)) / 2); }
   .slice-label .dot { inline-size: var(--space-2); block-size: var(--space-2); border-radius: var(--radius-full); flex: none; background: var(--_dot); }
   .slice-label .mark { inline-size: 0.875rem; block-size: 0.875rem; }
   .slice-count { flex: none; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-tertiary); font-variant-numeric: tabular-nums; }
@@ -80,7 +100,7 @@
   @media (max-width: 767px) {
     .slice-row { margin-inline: calc(var(--space-4) * -1); padding-inline: var(--space-4); scroll-padding-inline: var(--space-4); }
     /* the insight card comes first on phones (data-list.js puts it first), then All and the slices */
-    .slice-row { grid-template-columns: max-content repeat(var(--_slices, 5), minmax(8.5rem, max-content)); }
+    .slice-row { grid-template-columns: max-content repeat(var(--_slices, 5), var(--slice-min)); }
     .slice-row .slice-insight[aria-hidden="true"] { order: -1; }
   }
 }

@@ -350,7 +350,6 @@
     const row = $("#metrics");
 
     if (st.mode === "loading") {
-      row.style.setProperty("--_slices", cfg.metrics.length + 1);
       row.innerHTML = [...Array(cfg.metrics.length + 1)].map(() => `<div class="slice" aria-hidden="true"><span class="skeleton" style="inline-size:60%"></span><span class="skeleton" style="block-size:var(--space-6);inline-size:75%"></span></div>`).join("")
         + (cfg.insight ? `<div class="slice slice-insight" aria-hidden="true"><span class="skeleton" style="inline-size:40%"></span><span class="skeleton" style="block-size:var(--space-6);inline-size:30%"></span></div>` : "");
       return;
@@ -370,7 +369,6 @@
       const slice = scope.filter((r) => cardMatch(m).includes(filterDef(cardKeyOf(m)).get(r)));
       return card(m.value, m.title || m.label, cfg.statusMap?.[m.status || m.value], m.noCount ? null : slice.length, m.big(slice, scope), picked === m.value, !slice.length, slice);
     });
-    row.style.setProperty("--_slices", cfg.metrics.length + 1);
     row.toggleAttribute("data-no-insight", !cfg.insight);
     row.toggleAttribute("data-graphs", !!g);
     // on phones the insight leads: it's the overview, so it belongs in the first screen, not behind a swipe
@@ -1180,6 +1178,9 @@
     if (!cfg.rows.some((r) => r.id === id)) return;
     // D69: a thing with its own full-screen window opens there, which the concept doesn't build; Quick look
     // (the row's ··· menu) still opens the record beside the list
+    // A job's window is the estimate concept (round 2): in the repo, Open job goes there, every job showing its one sample
+    // estimate; it isn't published yet, so on Pages it still says so
+    if (fullWindow() && !quick && cfg.id === "jobs" && location.pathname.includes("/concepts/")) { location.href = "../estimate/index.html?from=jobs"; return; }
     if (fullWindow() && !quick) { toast(`${openLabel(id)}: its own full-screen window, not part of this concept. Quick look is in the row's ··· menu.`); return; }
     hostPop(); // out of the sheet before its contents are redrawn
     if (pop.matches(":popover-open")) pop.hidePopover();

@@ -447,8 +447,8 @@ window.BolsterShell = (() => {
     const nav = s.groups.map((g) => `<p class="sidebar-group">${esc(g.label)}</p>${g.items.map((x) => `<button type="button" class="sidebar-item" data-settings-page="${x.id}">${icon(x.icon, 18)}<span>${esc(x.label)}</span></button>`).join("")}`).join("");
     return `<dialog class="dialog bs-settings" data-variant="workspace" id="bs-settings" aria-labelledby="bs-settings-t">
       <header class="dialog-header"><h2 id="bs-settings-t">Settings</h2>
-        <button class="button" data-variant="ghost" data-size="sm" data-icon-only data-close aria-label="Close settings" data-tip="Close settings" style="--_fg:var(--color-content-on-chrome-muted);--_fg-hover:var(--color-content-on-chrome);--_bg-hover:var(--color-surface-chrome-hover)">${icon("xmark", 16)}</button></header>
-      <div class="dialog-body"><nav class="sidebar bs-settings-nav" aria-label="Settings">${nav}</nav><section class="bs-settings-page" aria-live="polite"></section></div>
+        <button class="button" data-variant="ghost" data-size="sm" data-icon-only data-close aria-label="Close settings" data-tip="Close settings">${icon("xmark", 16)}</button></header>
+      <div class="dialog-body"><nav class="sidebar workspace-nav" aria-label="Settings">${nav}</nav><section class="workspace-page bs-settings-page" aria-live="polite"></section></div>
     </dialog>`;
   }
   function openSettings(pageId) {
@@ -469,14 +469,12 @@ window.BolsterShell = (() => {
           slot.querySelector("iframe").addEventListener("load", (e) => { const t = document.documentElement.dataset.theme; try { if (t) e.target.contentDocument.documentElement.dataset.theme = t; } catch {} });
         }
         // on phones the page and the list of pages take turns at the window: the page once one is picked
-        if (picked && matchMedia("(max-width: 767px)").matches) d.setAttribute("data-nav-hidden", "");
+        if (picked) workspace.picked(d);
       }
       slot.toggleAttribute("data-frame", true);
     };
-    // it always opens with its list of pages out, however it was left
-    if (!d.open) d.removeAttribute("data-nav-hidden");
     show(pageId);
-    if (!d.open) d.showModal();
+    workspace.open(d);
     d.onclick = (e) => {
       const b = e.target.closest("[data-settings-page]");
       if (b) show(b.dataset.settingsPage, true);
@@ -624,20 +622,37 @@ window.BolsterShell = (() => {
     const title = document.querySelector(".page-title");
     if (title && host()) {
       title.insertAdjacentHTML("afterbegin", `<button class="button page-tool bs-embed-fold" data-variant="ghost" data-size="sm" data-icon-only type="button"></button>`);
-      const btn = title.querySelector(".bs-embed-fold");
-      const sync = (hidden) => { const l = hidden ? "Show settings menu" : "Hide settings menu"; btn.innerHTML = foldIcon(hidden ? "out" : "in"); btn.setAttribute("aria-label", l); btn.dataset.tip = l; };
-      sync(host().settingsNav());
-      btn.addEventListener("click", () => sync(host().settingsNav("toggle")));
-      // the window can show or hide its list without this page (it opens with it out): the button follows
       const win = window.parent.document.getElementById("bs-settings");
-      if (win) new MutationObserver(() => sync(win.hasAttribute("data-nav-hidden"))).observe(win, { attributes: true, attributeFilter: ["data-nav-hidden"] });
+      if (win) host().workspace.foldButton(title.querySelector(".bs-embed-fold"), win, "settings menu");
     }
     // Escape with nothing open in the page closes the window around it
     addEventListener("keydown", (e) => { if (e.key === "Escape" && !e.defaultPrevented && !document.querySelector(":popover-open, dialog[open]")) host()?.closeSettings(); });
   }
-  // the Settings window's side of it: fold its navigation, say whether it's folded, close
-  function settingsNav(op) { const d = document.getElementById("bs-settings"); if (!d) return false; if (op === "toggle") d.toggleAttribute("data-nav-hidden"); return d.hasAttribute("data-nav-hidden"); }
+  // the Settings window's side of it: close
   function closeSettings() { document.getElementById("bs-settings")?.close(); }
+
+  // A workspace window (D144): a full-screen window with its own navigation, as Settings and a job are, the system's
+  // dialog[data-variant="workspace"]. Its navigation folds away beside the page from a button in the page's own header,
+  // as Collapse menu folds the app's; on phones the list and the page take turns. Every window folds through here
+  const workspace = {
+    // fold or unfold the navigation ("toggle", "show", "hide"); says whether it's folded
+    nav(d, op) {
+      if (op === "toggle") d.toggleAttribute("data-nav-hidden");
+      else if (op) d.toggleAttribute("data-nav-hidden", op === "hide");
+      return d.hasAttribute("data-nav-hidden");
+    },
+    // a page was picked from the list: on phones the page takes the window
+    picked(d) { if (matchMedia("(max-width: 767px)").matches) d.setAttribute("data-nav-hidden", ""); },
+    // it always opens with its list out, however it was left
+    open(d) { if (d.open) return; d.removeAttribute("data-nav-hidden"); d.showModal(); },
+    // the fold button in the page's header (its first tool): its icon and name follow the window ("settings menu")
+    foldButton(btn, d, name) {
+      const sync = () => { const h = d.hasAttribute("data-nav-hidden"), l = `${h ? "Show" : "Hide"} ${name}`; btn.innerHTML = foldIcon(h ? "out" : "in"); btn.setAttribute("aria-label", l); btn.dataset.tip = l; };
+      sync();
+      new MutationObserver(sync).observe(d, { attributes: true, attributeFilter: ["data-nav-hidden"] });
+      btn.addEventListener("click", () => workspace.nav(d, "toggle"));
+    },
+  };
 
   // The loading screen (D90): Anna's drawings, one at random, with a line from its trade (loader.js). It plays on
   // the first page of a session, and from the concept controls; its files (her drawings, their animations, the
@@ -1022,5 +1037,5 @@ window.BolsterShell = (() => {
   }
   Object.assign(filterChips, { chip, clearAll, menu: filterMenu });
 
-  return { mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling, week, canvas, settingsNav, closeSettings, loading, logo, searchButton, nestedMenus, filterChips };
+  return { mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling, week, canvas, workspace, closeSettings, loading, logo, searchButton, nestedMenus, filterChips };
 })();
