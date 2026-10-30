@@ -7,6 +7,9 @@
 // Escape. It's for sighted pointer and keyboard users: the element keeps its own accessible name
 // (aria-label), so the tooltip itself is hidden from screen readers. Touch has no hover: never put
 // the only copy of something important in a tooltip.
+// A tip with more than words (a colour key, figures) puts it in a <template data-tip-html> inside the element; it's
+// shown instead of data-tip, which stays as the text it falls back to (D147):
+//   <div class="split-bar" role="img" aria-label="…" data-tip="Labor $4,653 · …"><template data-tip-html><dl class="tip-key">…</dl></template>…</div>
 (() => {
   if (window.BolsterTips) return;
   const tip = document.createElement("div");
@@ -31,7 +34,8 @@
     on = el;
     // inside a modal sheet the tooltip lives in it, or the sheet would cover it
     if (tip.parentElement !== host()) { if (tip.matches(":popover-open")) tip.hidePopover(); host().append(tip); }
-    tip.textContent = text;
+    const rich = el.querySelector(":scope > template[data-tip-html]");
+    if (rich) { tip.replaceChildren(rich.content.cloneNode(true)); tip.dataset.rich = ""; } else { tip.textContent = text; delete tip.dataset.rich; }
     // focus can land while another popover is still opening (a page moving focus as its menu opens or closes),
     // and the browser refuses a second one mid-show: then the tip comes a frame later, if it's still wanted
     if (!tip.matches(":popover-open")) {

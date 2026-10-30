@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../../system/bolster.css?v=0e31165d">
-<link rel="stylesheet" href="../assets/site.css?v=0e31165d">
+<link rel="stylesheet" href="../../system/bolster.css?v=125f0e43">
+<link rel="stylesheet" href="../assets/site.css?v=125f0e43">
 <script>try{const t=localStorage.getItem("bds-theme");if(t&&t!=="auto")document.documentElement.dataset.theme=t}catch{}</script>
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
@@ -480,6 +480,8 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
 </div></section>
 <section class="doc-entry" id="d146" data-ref-status="stable" data-search-text="D146 A workspace's page is the app's page area"><header class="doc-entry-head"><h2 id="d146a-workspace-s-page-is-the-app-s-page-area"><span class="doc-entry-id">D146</span>A workspace's page is the app's page area</h2><span class="badge" data-tone="success">Decided</span><a class="doc-anchor" href="#d146" aria-label="Link to D146" data-tip="Link">#</a></header><div class="doc-entry-body"><p>Your ask (30 Oct 2026): with the window one component (<a class="doc-ref" href="decisions.html#d144">D144</a>), its page should wear the same chrome as every other page; the estimate's had no divider under its header and no blueprint grid behind it. It had built its own: the header inside the list, stripped of the page header's height, padding and rule, and the canvas grid only ever started in the app's main area.</p>
 <ul><li><strong>The page area is the app's, in miniature:</strong> <code>.workspace-page.app-main</code>, holding the app's <code>.page-header</code> (64 tall, its rule underneath, the shell's paddings at every width) and <code>.app-content</code> (its widths, <code>data-width</code>, its padding). A page in a workspace builds as it would anywhere; it adds only what's its own.</li><li><strong>The canvas grid goes wherever a page is</strong> (<a class="doc-ref" href="decisions.html#d81">D81</a>): <code>BolsterShell.canvas.start(page)</code> puts it in a workspace's page too. There the page scrolls itself, not the window, so the layers stick to its top, one page area tall, and the pattern shifts by the page's scroll; the cells take half its header's height, as everywhere.</li><li>Settings already had both: its pages sit in its slot as whole pages (<a class="doc-ref" href="decisions.html#d89">D89</a>).</li><li>On phones the insight card leads its row (the estimate's margin card too), at most the screen's width between its gutters, wrapping past that (<a class="doc-ref" href="decisions.html#d145">D145</a>).</li></ul>
+</div></section>
+<section class="doc-entry" id="d147" data-ref-status="trying" data-search-text="D147 A tooltip can hold a colour key"><header class="doc-entry-head"><h2 id="d147a-tooltip-can-hold-a-colour-key"><span class="doc-entry-id">D147</span>A tooltip can hold a colour key</h2><span class="badge" data-tone="info">Trying out</span><a class="doc-anchor" href="#d147" aria-label="Link to D147" data-tip="Link">#</a></header><div class="doc-entry-body"><p>Your call (30 Oct 2026), on the estimate's margin card: hide the legend under the cost bar and show it when the bar is pointed at. A tooltip was words only, and a legend needs its colours. <code>tooltip.js</code> now shows the content of a <code>&lt;template data-tip-html&gt;</code> inside the element instead of its <code>data-tip</code> text, which stays as the fallback (and the element's <code>aria-label</code> says the same to screen readers); <code>tooltip.css</code> gives it <code>.tip-key</code>, a row per colour (its dot from <code>--_dot</code>), its figure at the end. Everything else is the tooltip's: the pause under a mouse, keyboard focus, Escape, the top layer. Touch has no hover, so what the key says is also said elsewhere: the margin's (?) note lists the split. The margin bar's hover reaches 8 above and below it, so a 6-tall bar is easy to point at.</p>
 </div></section></div>
       </article>
 
@@ -493,9 +495,9 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
   <ul class="doc-search-results" id="doc-search-results" role="listbox" aria-label="Results"></ul>
 </dialog>
 <script>window.DOC_ROOT="../"</script>
-<script src="../../shared/icons.js?v=0e31165d"></script>
-<script src="../../system/components/tooltip.js?v=0e31165d"></script>
-<script src="../assets/search-index.js?v=0e31165d"></script>
-<script src="../assets/site.js?v=0e31165d"></script>
+<script src="../../shared/icons.js?v=125f0e43"></script>
+<script src="../../system/components/tooltip.js?v=125f0e43"></script>
+<script src="../assets/search-index.js?v=125f0e43"></script>
+<script src="../assets/site.js?v=125f0e43"></script>
 </body>
 </html>

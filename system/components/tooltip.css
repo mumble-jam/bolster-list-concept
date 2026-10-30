@@ -7,7 +7,8 @@
    Trigger with its own label: aria-describedby → the tooltip adds detail.
    Never put the only copy of important information in a tooltip; they don't exist on touch.
    Everywhere else, and always for an icon that stands without a label (D52): data-tip="…" on the
-   element, drawn by tooltip.js as one .tip in the top layer, so no card or table clips it. */
+   element, drawn by tooltip.js as one .tip in the top layer, so no card or table clips it. A colour key or figures:
+   a <template data-tip-html> inside the element, its content a .tip-key (D147). */
 
 @layer tokens, base, components, utilities;
 
@@ -57,5 +58,12 @@
     opacity: 0; transition: opacity var(--duration-fast) var(--ease-out), display var(--duration-fast) allow-discrete, overlay var(--duration-fast) allow-discrete;
   }
   .tip[popover]:popover-open { opacity: 1; }
+  /* a tip with more than words (D147): a colour key, a row per colour, its figure at the end */
+  .tip[data-rich] { padding: var(--space-2) var(--space-3); font-weight: var(--font-weight-regular); }
+  .tip-key { display: grid; gap: var(--space-1); margin: 0; }
+  .tip-key > div { display: flex; justify-content: space-between; gap: var(--space-4); }
+  .tip-key dt { display: inline-flex; align-items: center; gap: var(--space-1-5, 0.375rem); }
+  .tip-key dt::before { content: ""; flex: none; inline-size: var(--space-2); block-size: var(--space-2); border-radius: var(--radius-full); background: var(--_dot, currentColor); }
+  .tip-key dd { margin: 0; font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; }
   @starting-style { .tip[popover]:popover-open { opacity: 0; } }
 }
