@@ -9,8 +9,8 @@
 <link rel="icon" href="shared/assets/favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=28e42320">
-<link rel="stylesheet" href="data-list.css?v=28e42320">
+<link rel="stylesheet" href="system/bolster.css?v=ce368c63">
+<link rel="stylesheet" href="data-list.css?v=ce368c63">
 <style>
   @layer concept {
     /* the inventory: one row per component, with who decided it. Marks borrow the status shapes:
@@ -80,7 +80,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
   <header class="inv-head">
     <p class="text-caption"><a href="index.html">Jobs list concept</a></p>
     <h1>Components, and who decided them</h1>
-    <p>Every component the jobs list concept uses, marked by how much of it came from you. Built from your messages on 8 to 29 October and the commits behind them. Where you only reported a bug, that doesn't count as a design decision, so it's noted but the component stays my call.</p>
+    <p>Every component the jobs list concept uses, marked by how much of it came from you. Built from your messages from 8 October to 2 November and the commits behind them. Where you only reported a bug, that doesn't count as a design decision, so it's noted but the component stays my call.</p>
   </header>
 
   <section class="inv-legend" aria-label="Levels">
@@ -111,14 +111,15 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
   <div id="groups"></div>
 </main>
 
-<script src="shared/icons.js?v=28e42320"></script>
+<script src="shared/icons.js?v=ce368c63"></script>
 <script>
 // [group, name, level, your input, my part]
 const C = [
   ["Foundations", "Warm and cool colour", "yours", "A warmer page (8 Oct); Paper and cement edges from your Figma sketch; warm on every neutral. Then the status quo (13 Oct, D33): warm in light, cool in dark, as the system's own tokens; the Colour switch is gone.", "Which cement step goes where, and the new tokens (card edge, open row, menu hover)."],
   ["Foundations", "Type", "steered", "Cera Pro and Space Grotesk come from your prototype's tokens; you chose Inter for the published copy, then Cera Pro itself there too, Bolster's licence covering the web (20 Oct).", "Sizes and weights here: the page title, the big card numbers, table text and sub-lines."],
   ["Foundations", "Icons", "yours", "Font Awesome 6 Pro, with your key: Light at first (Regular for search and help), then Regular in the page and Light only in the app shell (20 Oct, D84); then Regular in the dark menu too (21 Oct, D93); table-cells-columns for display settings; smaller, bolder icons in menus. Icons side by side match in ink and line, not box size, after expand and close looked unbalanced (14 Oct, D41). All the job list's picks approved as the system's icon vocabulary, one meaning one icon, every new page drawing from it (15 Oct, D58).", "Every other pick: filter, calendar, one icon per attribute in menus, the action icons; measuring ink and line, the weight step for smaller icons, the checker."],
-  ["Foundations", "Corners", "yours", "Every button 8px (9 Oct). Nested corners share a centre: the inner radius is the outer minus the offset (13 Oct, D35); you chose 16 on cards with controls 8 in, over smaller buttons or a tighter header.", "Menus stay 12 with 4px rows 8 in; dialogs 12; round chips, badges and avatars; the check that finds every break (check-radii.js)."],
+  ["Foundations", "Corners", "yours", "Every button 8px (9 Oct). Nested corners share a centre: the inner radius is the outer minus the offset (13 Oct, D35); you chose 16 on cards with controls 8 in, over smaller buttons or a tighter header. Settled by role, as the concept shows them (2 Nov, D149); then menus 12 at every width and a toast's buttons 8, from the inconsistencies I listed, which you had me fix (D150).", "Menus 12 with 4px rows 8 in; dialogs 12; round chips, badges and avatars; the check that finds every break (check-radii.js). The eleven roles (card, window, sheet, menu, dialog, control, toast, field, row, tooltip, checkbox), which thing takes which, and the components moved onto them."],
+  ["Foundations", "Depth and shadows", "steered", "Asked to settle the overlay shadows the way the cards were (2 Nov, D149); tooltips on the popover shadow, from my list of what was left (D150); a shadow for what's dragged and for sticky headers, and anything else I'd recommend (D151).", "The roles: raised for a control lifted from its group, popover for what opens from something (menus, popovers, tooltips), overlay for what floats over the page, drag for what's in your hand (one shadow and a 1.02 growth for the pipeline's card, a to-do row and a calendar event, which had three). Sticky things cast none, their rule marking the edge. The floating buttons' falls as tokens; a drag step on the layer scale, the unused scrim step gone."],
   ["Foundations", "Spacing and layout", "steered", "Follow the layout rules from the list research boards (8 Oct).", "The actual gaps and paddings."],
   ["Foundations", "Words", "steered", "Explanations use the screen's own words (D27); the search field just says Search.", "All the other copy: labels, menu items, empty and error text, the About dialog."],
 
@@ -130,7 +131,7 @@ const C = [
   ["Shell", "Favicon", "yours", "Bolster's mark in white instead of yellow.", "The black tile behind it and the PNG fallback."],
 
   ["Page", "Page header", "steered", "Its title scrolls away (variant D).", "Its contents: the hide-menu button, the title, Export and Create job."],
-  ["Page", "Create on phones", "yours", "The three frames from the floating-button research (D29): Create floats above the tab bar, shrinks to + while you scroll, and gives way to the bulk bar. A transition between the two, the label dissolving into a soft right edge rather than cut (13 Oct).", "The sizes; the morph: 300 ms with the bars, the right edge holding, the soft edge's width and timing, the + growing into the square."],
+  ["Page", "Create on phones", "yours", "The three frames from the floating-button research (D29): Create floats above the tab bar, shrinks to + while you scroll, and gives way to the bulk bar. A transition between the two, the label dissolving into a soft right edge rather than cut (13 Oct).", "The sizes; the morph: 300 ms with the bars, the right edge holding, the soft edge's width and timing, the + growing into the square. Its fall, and the menu button's a step above it, as tokens (2 Nov, D151)."],
   ["Page", "Scrolling", "yours", "Research on too many fixed elements, then variant D on desktop and phones: the title scrolls away, the top bar and card header hide on scroll down and come back on scroll up.", "The 300ms slide, and keeping focus out from under the bars."],
   ["Page", "Primary and brand buttons", "yours", "Claude Design-style body, then your values from the button tuner (edge, lines, sheen, shadows, hover lift, press sink, 150ms).", "Nothing: the values are yours."],
   ["Page", "Secondary, ghost and danger buttons", "steered", "Research asked for (10 Oct, Figma research page); you took all my recommendations: a quieter tactile secondary, no tertiary, a ghost hover that shows, red only for Delete in three weights. Then the field button folded into secondary, lifted on the page and flat on raised surfaces, its label in regular weight (20 Oct, D78); its edge a shade lighter (20 Oct, D79).", "The values: cement edge and shadow, hover fills, the confirmation wording “Keep jobs”."],
@@ -141,7 +142,7 @@ const C = [
   ["Status cards", "Insight card", "steered", "Different from the other cards, between Jobber and Deel; the “2 of 4” version below five decided; you questioned a selected state for it; first on phones, so the overview is in the first screen (13 Oct).", "Win rate as the figure, the split bar, the second figure (average won job)."],
   ["Status cards", "Ambient graphs (trying out)", "steered", "Asked for (23 Oct): each number with its own minimal, ambient-gradient graph in its card, first as a second job list to compare (D116); then only on hover, and none in the insight card (23 Oct).", "What each graph shows (its money over eight months, smoothed), the line and its fading wash in the status's colour behind the card's lower part, the halo that lets the line pass behind the words."],
   ["Status cards", "Info popovers", "steered", "Their copy follows your rule: the screen's own words, statuses drawn with their marks (D27).", "The ⓘ button and its popover."],
-  ["Status cards", "Tactile cards", "steered", "Asked for (9 Oct), with sliders in the concept controls.", "Every value: the body, both shadows, hover, press and selected. Not tuned by you yet."],
+  ["Status cards", "Tactile cards", "steered", "Asked for (9 Oct), with sliders in the concept controls. Made the system's card as the concept shows it by default, for now (2 Nov, D148), since another Claude couldn't read them.", "Every value: the body, both shadows, hover, press and selected; not tuned by you. Written out as tokens (the card's edge, sheen and four shadows, light and dark), the same to the pixel; flat for one card; a linked card's hover deepening its shadow."],
 
   ["Table card", "Table in a card", "yours", "The table sits in a card and the rest outside it; a Shopify-style card header (8 Oct).", "The card's edge and its two header rows."],
   ["Table card", "Add filter", "yours", "Add filter, then chips (8 Oct); styled like the All time button. Both are secondary buttons now, flat on the card (20 Oct, D78).", "The field menu: which fields, their order and icons."],
@@ -175,17 +176,17 @@ const C = [
   ["Record", "Record header", "steered", "Keep the look; don't cut the name short; Open job isn't a new tab, since it opens the job's modal (14 Oct). You picked an expand icon beside close (D40), and dropped ↗ from View proposal.", "The three options, the expand icon over ↗, the tooltip naming the record type, ↗ kept for what leaves the app."],
   ["Record", "Record actions", "yours", "When the second action doesn't fit beside More, show one action plus More. No Next step column on rows: where a page today has a per-row next step, it's the record's first action (14 Oct, D43).", "Measuring the fit and moving the second action into More."],
 
-  ["Menus and overlays", "Menus", "steered", "Warm, not cold; nested menus with a check; icons, then smaller and bolder (14px Regular).", "Item height, padding, separators, shadow, hover."],
+  ["Menus and overlays", "Menus", "steered", "Warm, not cold; nested menus with a check; icons, then smaller and bolder (14px Regular).", "Item height, padding, separators, shadow, hover. Their corner and shadow by role: 12 at every width, the popover shadow (D149, D150)."],
   ["Menus and overlays", "Bottom sheets on phones", "steered", "Menus as bottom sheets on phones (9 Oct); then nested menus showing the wrong rows (a bug) and a clear way back (14 Oct).", "Nested menus drill in, every other row goes, and a header with Back and the menu's name sits on top; the warm scrim."],
-  ["Menus and overlays", "Tooltip", "yours", "A tooltip on display settings. Then a rule: every icon without a label has a tooltip, descriptive or interactive (14 Oct, D52).", "Its style and placement; one tooltip in the top layer that shows only while a control's label is hidden; the checker and the sweep through the concept."],
+  ["Menus and overlays", "Tooltip", "yours", "A tooltip on display settings. Then a rule: every icon without a label has a tooltip, descriptive or interactive (14 Oct, D52).", "Its style and placement; one tooltip in the top layer that shows only while a control's label is hidden; the checker and the sweep through the concept. The popover shadow, as what opens from something (D150)."],
 
   ["Feedback and states", "Loading", "yours", "Your rules (29 Oct, D142): skeletons in the content's shape for the cards, the rows, the record and a page's first load; nothing under 300 ms and at least 300 ms once shown; the same footprint; no spinners for content; “Still loading…” after 10 s, the error with Try again on a failure; announced once; still under reduced motion; the loading screen only for the app's first open.", "The shapes, loading.js and its timing, the Network control to try it; the record (what the row says at once, the rest as bars) and loading more rows go through it too."],
   ["Feedback and states", "Empty, no results, error", "mine", "Never discussed.", "Wording, icons and actions for each state."],
-  ["Feedback and states", "Toasts", "mine", "You reported Undo failing contrast in dark (25 Oct, D125).", "What confirms an action, and how it dismisses; Undo in the yellow's darkest shade on the light toast in dark."],
+  ["Feedback and states", "Toasts", "mine", "You reported Undo failing contrast in dark (25 Oct, D125). Its buttons' corners at 8, as every button, from my list (2 Nov, D150).", "What confirms an action, and how it dismisses; Undo in the yellow's darkest shade on the light toast in dark."],
 
   ["Trying out", "Canvas grid", "yours", "Mike's grid around the pointer, light and dark; cells from the page header, from the top-right corner; your tuned values; on by default.", "The way it trails and fades, and keeping it cheap to run."],
 
-  ["Concept tooling", "Concept controls and tuners", "yours", "Sliders beside the concept (you named them tuners); switches for the grid and the cards; on phones, in the More menu instead of a pill (13 Oct). The Warm and Cool switch went with the status quo (D33).", "The panel's layout and Copy settings."],
+  ["Concept tooling", "Concept controls and tuners", "yours", "Sliders beside the concept (you named them tuners); switches for the grid and the cards; on phones, in the More menu instead of a pill (13 Oct). The Warm and Cool switch went with the status quo (D33).", "The panel's layout and Copy settings. The cards' tuner writes the system's card tokens, nothing at its defaults; its duration slider went (2 Nov, D148)."],
   ["Concept tooling", "Intent lens (trying out)", "steered", "An inspector of how intentional each part is: point at it to see the level and its details, a switch in Concept controls, the pipeline first (26 Oct, D131).", "The four levels (the inventory's three and Bolster's), the card, pinning, Esc and I, the bar that counts and paints each level, and every part's record."],
 ];
 
@@ -270,6 +271,6 @@ document.addEventListener("change", (e) => {
 document.addEventListener("input", (e) => { if (e.target.dataset.note) { todos[e.target.dataset.note].note = e.target.value; save(); } });
 render();
 </script>
-<script src="system/specimens/specimen.js?v=28e42320"></script>
+<script src="system/specimens/specimen.js?v=ce368c63"></script>
 </body>
 </html>
