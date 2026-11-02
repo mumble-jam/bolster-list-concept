@@ -116,9 +116,11 @@
     box-shadow: var(--shadow-popover);
     --color-surface-hover: var(--color-surface-hover-raised);
   }
+  /* its rows 2 apart, as a menu's (popover.css) */
+  .combobox-list:popover-open, .combobox-sheet .combobox-list { display: grid; gap: var(--space-0-5); align-content: start; }
   .combobox-list:not(:popover-open) { display: none; }
   /* in the sheet, the list is the sheet's body: no float, no frame */
-  .combobox-sheet .combobox-list { position: static; display: block; inline-size: auto; block-size: auto; max-block-size: none; padding: 0; overflow: visible; border: 0; border-radius: 0; background: none; box-shadow: none; }
+  .combobox-sheet .combobox-list { position: static; inline-size: auto; block-size: auto; max-block-size: none; padding: 0; overflow: visible; border: 0; border-radius: 0; background: none; box-shadow: none; }
 
   .combobox-option {
     display: flex;
@@ -126,7 +128,7 @@
     justify-content: center;
     gap: 0;
     min-block-size: var(--control-height-sm);
-    padding: var(--space-1) var(--space-8) var(--space-1) var(--space-2);
+    padding: var(--space-1) calc(var(--space-3) + 0.875rem + var(--space-2)) var(--space-1) var(--space-3); /* a menu row's 12, the tick's room at the end */
     position: relative;
     border-radius: var(--radius-row);
     font-size: var(--text-sm);
@@ -134,15 +136,19 @@
     cursor: pointer;
   }
   .combobox-option-detail { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
-  .combobox-option mark { background: var(--color-highlight-search); color: inherit; border-radius: 2px; }
-  @media (hover: hover) { .combobox-option:hover { background: var(--color-surface-hover); } }
-  .combobox-option[data-active] { background: var(--color-surface-hover); box-shadow: inset 0 0 0 var(--border-width-default) var(--color-line-strong); }
+  /* the typed letters, marked as a search marks them in a table (data-table.css) */
+  .combobox-option mark { background: var(--color-highlight-search); color: inherit; }
+  /* one highlighted row, where Enter goes: the pointer and the keys move the same highlight (combobox.js), a menu row's
+     hover fill; moved with the arrow keys it adds the focus ring, as a menu's rows do under the keyboard (menu.css).
+     What's picked is the tick, never a fill or an outline */
+  .combobox-option[data-active] { background: var(--color-surface-hover); }
+  .combobox-option[data-active="keys"] { box-shadow: inset 0 0 0 var(--focus-ring-width) var(--color-focus-ring); }
   /* on a filled row the highlighter thins, so the letters on it keep their contrast in dark (it's see-through there) */
-  .combobox-option:is([data-active], :hover) mark { background: color-mix(in oklab, var(--color-highlight-search) 70%, transparent); }
+  .combobox-option[data-active] mark { background: color-mix(in oklab, var(--color-highlight-search) 70%, transparent); }
   .combobox-option[aria-selected="true"]::after {
     content: "";
     position: absolute;
-    inset-inline-end: var(--space-2);
+    inset-inline-end: var(--space-3);
     inset-block: 0;
     margin-block: auto;
     inline-size: 0.875rem;
@@ -154,9 +160,9 @@
   .combobox-add { flex-direction: row; align-items: center; justify-content: flex-start; gap: var(--space-2); }
   .combobox-add > svg { inline-size: 0.875rem; block-size: 0.875rem; flex: none; color: var(--color-content-link); }
   .combobox-option + .combobox-add, .combobox-status + .combobox-add { margin-block-start: var(--space-1); }
-  .combobox-add::before { content: ""; position: absolute; inset-inline: 0; inset-block-start: calc(var(--space-1) * -0.5 - var(--border-width-default)); border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
+  .combobox-add::before { content: ""; position: absolute; inset-inline: 0; inset-block-start: calc((var(--space-1) + var(--space-0-5)) / -2 - var(--border-width-default)); border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
   .combobox-option:first-child.combobox-add::before { content: none; }
-  .combobox-status { padding: var(--space-2); font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
+  .combobox-status { margin: 0; padding: var(--space-2) var(--space-3); font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
   .combobox-status[data-more] { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-tertiary); }
   @media (pointer: coarse) { .combobox-option { min-block-size: var(--touch-target-min); } }
 
