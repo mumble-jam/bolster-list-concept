@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=5f9dfef4">
-<link rel="stylesheet" href="specimen.css?v=5f9dfef4">
+<link rel="stylesheet" href="../bolster.css?v=28e42320">
+<link rel="stylesheet" href="specimen.css?v=28e42320">
 <style>
   .tok-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); }
   .tok-swatch { display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto; column-gap: var(--space-3); align-items: center; }
@@ -108,6 +108,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
       <div style="text-align:center"><div style="width:4rem;height:3rem;border-radius:var(--radius-window);background:var(--color-surface-selected);border:1.5px solid var(--color-action-accent)"></div><div class="spec-label" style="margin-top:var(--space-2)">radius-window</div></div>
       <div style="text-align:center"><div style="width:6rem;height:3rem;border-radius:var(--radius-md);background:var(--color-surface-raised);box-shadow:var(--shadow-raised)"></div><div class="spec-label" style="margin-top:var(--space-2)">shadow-raised</div></div>
       <div style="text-align:center"><div style="width:6rem;height:3rem;border-radius:var(--radius-md);background:var(--color-surface-raised);box-shadow:var(--shadow-overlay)"></div><div class="spec-label" style="margin-top:var(--space-2)">shadow-overlay</div></div>
+      <div style="text-align:center"><div style="width:6rem;height:3rem;border-radius:var(--radius-md);background:var(--color-surface-raised);box-shadow:var(--shadow-drag)"></div><div class="spec-label" style="margin-top:var(--space-2)">shadow-drag</div></div>
       <div style="text-align:center"><div style="width:6rem;height:3rem;border-radius:var(--radius-md);background:var(--color-surface-raised);box-shadow:var(--shadow-popover)"></div><div class="spec-label" style="margin-top:var(--space-2)">shadow-popover</div></div>
       <div style="text-align:center"><div style="width:6rem;height:3rem;border-radius:var(--radius-md);background:var(--color-surface-raised);box-shadow:var(--shadow-card)"></div><div class="spec-label" style="margin-top:var(--space-2)">shadow-card</div></div>
       <div style="text-align:center"><div style="width:6rem;height:3rem;border-radius:var(--radius-md);background:var(--color-surface-raised);box-shadow:var(--shadow-card-hover)"></div><div class="spec-label" style="margin-top:var(--space-2)">shadow-card-hover</div></div>
@@ -143,11 +144,11 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
       <tr><td class="spec-label">--z-raised</td><td class="spec-label" data-raw="--z-raised"></td></tr>
       <tr><td class="spec-label">--z-sticky</td><td class="spec-label" data-raw="--z-sticky"></td></tr>
       <tr><td class="spec-label">--z-shell</td><td class="spec-label" data-raw="--z-shell"></td></tr>
-      <tr><td class="spec-label">--z-scrim</td><td class="spec-label" data-raw="--z-scrim"></td></tr>
       <tr><td class="spec-label">--z-modal</td><td class="spec-label" data-raw="--z-modal"></td></tr>
       <tr><td class="spec-label">--z-popover</td><td class="spec-label" data-raw="--z-popover"></td></tr>
       <tr><td class="spec-label">--z-toast</td><td class="spec-label" data-raw="--z-toast"></td></tr>
       <tr><td class="spec-label">--z-tooltip</td><td class="spec-label" data-raw="--z-tooltip"></td></tr>
+      <tr><td class="spec-label">--z-drag</td><td class="spec-label" data-raw="--z-drag"></td></tr>
       <tr><td class="spec-label">--duration-instant</td><td class="spec-label" data-raw="--duration-instant"></td></tr>
       <tr><td class="spec-label">--duration-fast</td><td class="spec-label" data-raw="--duration-fast"></td></tr>
       <tr><td class="spec-label">--duration-medium</td><td class="spec-label" data-raw="--duration-medium"></td></tr>
@@ -178,7 +179,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
       <div><div class="spec-label" style="margin-bottom:var(--space-1)">avatar</div><div class="tok-ramp"><div class="tok-step"><span style="background:var(--color-avatar-1)"></span><span class="spec-label">1</span></div><div class="tok-step"><span style="background:var(--color-avatar-2)"></span><span class="spec-label">2</span></div><div class="tok-step"><span style="background:var(--color-avatar-3)"></span><span class="spec-label">3</span></div><div class="tok-step"><span style="background:var(--color-avatar-4)"></span><span class="spec-label">4</span></div><div class="tok-step"><span style="background:var(--color-avatar-5)"></span><span class="spec-label">5</span></div><div class="tok-step"><span style="background:var(--color-avatar-6)"></span><span class="spec-label">6</span></div><div class="tok-step"><span style="background:var(--color-avatar-7)"></span><span class="spec-label">7</span></div><div class="tok-step"><span style="background:var(--color-avatar-8)"></span><span class="spec-label">8</span></div></div></div>
     </div></section>
 </main>
-<script src="specimen.js?v=5f9dfef4"></script>
+<script src="specimen.js?v=28e42320"></script>
 <script>
   // print resolved values; recompute when the theme changes
   const probe = document.createElement("span"); document.body.append(probe);

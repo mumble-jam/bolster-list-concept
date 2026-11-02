@@ -231,7 +231,7 @@
   .cal-tray-empty { margin: 0; padding: var(--space-4) var(--space-1); font-size: var(--text-sm); color: var(--color-content-secondary); }
 
   /* ---------- dragging: a ghost follows the pointer and says where it lands ---------- */
-  .cal-ghost { position: fixed; z-index: 1000; inset: 0 auto auto 0; display: grid; gap: 1px; max-inline-size: 16rem; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); background: var(--color-surface-inverse); color: var(--color-content-inverse); font-size: var(--text-xs); line-height: var(--leading-xs); box-shadow: var(--shadow-popover); pointer-events: none; }
+  .cal-ghost { position: fixed; z-index: var(--z-drag); inset: 0 auto auto 0; display: grid; gap: 1px; max-inline-size: 16rem; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); background: var(--color-surface-inverse); color: var(--color-content-inverse); font-size: var(--text-xs); line-height: var(--leading-xs); box-shadow: var(--shadow-drag); pointer-events: none; }
   .cal-ghost b { font-weight: var(--font-weight-medium); }
   :root[data-cal-dragging], :root[data-cal-dragging] * { cursor: grabbing !important; user-select: none; }
   :root[data-cal-dragging="resize"], :root[data-cal-dragging="resize"] * { cursor: ew-resize !important; }

@@ -133,7 +133,7 @@
   :root[data-tl-dragging], :root[data-tl-dragging] * { cursor: grabbing !important; user-select: none; }
   :root[data-tl-dragging="stretch"], :root[data-tl-dragging="stretch"] * { cursor: ew-resize !important; }
   :root[data-tl-dragging="link"], :root[data-tl-dragging="link"] * { cursor: crosshair !important; }
-  .tl-link-draft { position: fixed; inset: 0; z-index: 999; inline-size: 100vw; block-size: 100vh; pointer-events: none; overflow: visible; }
+  .tl-link-draft { position: fixed; inset: 0; z-index: var(--z-drag); inline-size: 100vw; block-size: 100vh; pointer-events: none; overflow: visible; }
   .tl-link-draft line { stroke: var(--color-action-accent); stroke-width: 2; stroke-dasharray: 4 3; }
   [data-link-over] { outline: var(--border-width-strong) solid var(--color-action-accent); outline-offset: 1px; }
   .tl-late { color: var(--color-feedback-danger-content); }

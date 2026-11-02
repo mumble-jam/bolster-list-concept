@@ -439,12 +439,18 @@
        raised for a control lifted out of its group (the segmented control's pick, the current nav item); popover for
        what opens from something and stays by it (menus, popovers, the combobox's list, tooltips), tinted with the page in
        light; overlay for what floats over the whole page (dialogs and sheets, toasts, the floating bar, the sidebar and
-       rail when they slide over it) */
+       rail when they slide over it); drag for what's in your hand (a card, a row, an event being moved: D151). Sticky
+       things cast none: a rule marks where the page goes under them (D151) */
     --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.06), 0 1px 3px rgb(0 0 0 / 0.08);
     --shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.1), 0 12px 32px rgb(0 0 0 / 0.12);
+    --shadow-drag: 0 4px 12px rgb(0 0 0 / 0.1), 0 12px 32px rgb(0 0 0 / 0.12);
     --shadow-popover: 0 2px 6px color-mix(in srgb, var(--color-cement-950) 8%, transparent), 0 12px 32px color-mix(in srgb, var(--color-cement-950) 14%, transparent);
     /* the colour shadows are mixed from (cards, secondary buttons): cement in light, black in dark */
     --color-shadow-tint: light-dark(var(--color-cement-950), #000);
+    /* a floating button on phones (Create, the menu button) has its own body, so its fall is a filter around it, not a
+       box-shadow; the menu button sits a step above Create (D151) */
+    --drop-shadow-float: drop-shadow(0 6px 14px rgb(0 0 0 / 0.18));
+    --drop-shadow-float-over: drop-shadow(0 2px 4px rgb(0 0 0 / 0.16)) drop-shadow(0 12px 24px rgb(0 0 0 / 0.28));
     /* the card's body (D148, the tactile card): light falls from above. Every card and summary card wears it. Each
        shadow is the same six layers, so one eases into the next: the selected ring (off at rest), a white top line,
        a darker bottom lip, an inner shadow (a press), a tight contact shadow that seats the card and a soft ambient one
@@ -491,11 +497,11 @@
     --z-raised: 10;
     --z-sticky: 100;
     --z-shell: 200;
-    --z-scrim: 300;
     --z-modal: 400;
     --z-popover: 500;
     --z-toast: 600;
     --z-tooltip: 700;
+    --z-drag: 800;      /* what's in your hand, above everything while it moves (D151) */
 
     /* ---------- Motion (D10) ---------- */
     --duration-instant: 0ms;
@@ -503,6 +509,7 @@
     --duration-medium: 240ms;
     --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
     --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --drag-scale: 1.02; /* what's picked up grows by this, from its raised shadow to the drag one (D151) */
 
     color-scheme: light dark;
   }
@@ -515,6 +522,7 @@
     :root:not([data-theme="light"]) {
       --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.4);
       --shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.5);
+      --shadow-drag: 0 4px 12px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.5);
       --shadow-popover: var(--shadow-overlay);
       --shadow-card:
         inset 0 0 0 0 transparent,
@@ -549,6 +557,7 @@
   :root[data-theme="dark"] {
     --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.4);
     --shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.5);
+    --shadow-drag: 0 4px 12px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.5);
     --shadow-popover: var(--shadow-overlay);
     --shadow-card:
       inset 0 0 0 0 transparent,

@@ -430,7 +430,7 @@
       border: var(--border-width-default) solid var(--color-line-chrome); border-radius: var(--radius-lg);
       background: var(--color-surface-chrome); color: var(--color-content-on-chrome); cursor: pointer;
       /* lifted a step above Create: a close contact shadow and a wider, deeper fall */
-      filter: drop-shadow(0 2px 4px rgb(0 0 0 / 0.16)) drop-shadow(0 12px 24px rgb(0 0 0 / 0.28));
+      filter: var(--drop-shadow-float-over);
     }
     .bs-menu-fab > svg { grid-area: 1 / 1; inline-size: 1.25rem; block-size: 1.25rem; }
     .bs-menu-fab[aria-expanded="true"] > svg:first-child { opacity: 0; rotate: 90deg; scale: 0.6; }

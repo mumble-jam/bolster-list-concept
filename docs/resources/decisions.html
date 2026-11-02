@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../../system/bolster.css?v=5f9dfef4">
-<link rel="stylesheet" href="../assets/site.css?v=5f9dfef4">
+<link rel="stylesheet" href="../../system/bolster.css?v=28e42320">
+<link rel="stylesheet" href="../assets/site.css?v=28e42320">
 <script>try{const t=localStorage.getItem("bds-theme");if(t&&t!=="auto")document.documentElement.dataset.theme=t}catch{}</script>
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
@@ -491,6 +491,9 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
 </div></section>
 <section class="doc-entry" id="d150" data-ref-status="stable" data-search-text="D150 Three inconsistencies D149 left, fixed"><header class="doc-entry-head"><h2 id="d150three-inconsistencies-d149-left-fixed"><span class="doc-entry-id">D150</span>Three inconsistencies D149 left, fixed</h2><span class="badge" data-tone="success">Decided</span><a class="doc-anchor" href="#d150" aria-label="Link to D150" data-tip="Link">#</a></header><div class="doc-entry-body"><p>Your call (2 Nov 2026), on the three <a class="doc-ref" href="decisions.html#d149">D149</a> wrote down:</p>
 <ul><li><strong>Menus are 12 at every width.</strong> On phones a floating menu was 8 while its rows stayed 8 in, so the corners didn't share a centre (<a class="doc-ref" href="decisions.html#d35">D35</a>). Now <code>--radius-menu</code> is 12 everywhere and <code>--inset-menu</code> is worked out from it (<code>--radius-menu</code> − <code>--radius-row</code>): 12 around 4 px rows, 8 in. Most popovers become bottom sheets on phones and keep the sheet's 16; what still floats there (a submenu, a menu from the top bar) changes.</li><li><strong>Tooltips cast the popover shadow.</strong> A tooltip opens from something and stays by it, which is the popover's role, not the overlay's; the overlay shadow stays for what floats over the whole page (dialogs and sheets, toasts, the floating bar).</li><li><strong>A toast's buttons are 8</strong>, <code>--radius-control</code>, as every other button (<a class="doc-ref" href="decisions.html#d33">D33</a>). They sit 8 in from the toast's end and 12 from its top, past its 8 corner, so its curve doesn't bind them.</li></ul>
+</div></section>
+<section class="doc-entry" id="d151" data-ref-status="stable" data-search-text="D151 What's in your hand, floating buttons and sticky edges"><header class="doc-entry-head"><h2 id="d151what-s-in-your-hand-floating-buttons-and-sticky-edges"><span class="doc-entry-id">D151</span>What's in your hand, floating buttons and sticky edges</h2><span class="badge" data-tone="success">Decided</span><a class="doc-anchor" href="#d151" aria-label="Link to D151" data-tip="Link">#</a></header><div class="doc-entry-body"><p>Your ask (2 Nov 2026): give a dragged card and a sticky header their own shadow tokens, and act on anything else worth settling. Looking closer, the two weren't as the inventory said.</p>
+<ul><li><strong>Dragging had three shadows:</strong> the pipeline's card in hand cast the overlay shadow, a to-do row lifted on phones the raised one, a calendar event the popover one. Now one token, <code>--shadow-drag</code> (the overlay's values for now, light and dark, so the pipeline's card is unchanged), and <code>--drag-scale</code> (1.02) for the growth as it's picked up, from its raised shadow (the pipeline's lift). The to-do row and the calendar's event now lift as the pipeline's card does.</li><li><strong>No sticky header casts a shadow,</strong> and none should: a header, a toolbar or a table's head that sticks keeps its rule underneath and the page slides under it, flat (<a class="doc-ref" href="decisions.html#d128">D128</a>, <a class="doc-ref" href="interactions.html#i23">I23</a>). Two box-shadows near sticky things are fills, not depth: the pipeline's column heads and the logo cover a 1 px seam in their surface's colour; they stay. Written into the Depth tokens' note and the Elevation page, so nobody adds one.</li><li><strong>Floating buttons on phones made their own:</strong> Create's fall and the menu button's, a step above it, were written out where they're drawn. They're filters (<code>drop-shadow()</code>), since both buttons carry their own body: <code>--drop-shadow-float</code> and <code>--drop-shadow-float-over</code>, same values.</li><li><strong>Layers (<a class="doc-ref" href="decisions.html#d9">D9</a>):</strong> <code>--z-drag</code> (800) for what's in your hand, above everything while it moves; the pipeline's card (it was the popover's step), the calendar's event (1000) and the timeline's dependency being drawn (999) take it. <code>--z-scrim</code> is gone: nothing used it, a dialog's or sheet's scrim being its <code>::backdrop</code> in the top layer. The foot scrollbar (<code>.page-hscroll</code>) sticks at <code>--z-raised</code>, the step the list's sticky parts share, not a raw 3.</li></ul>
 </div></section></div>
       </article>
 
@@ -504,9 +507,9 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
   <ul class="doc-search-results" id="doc-search-results" role="listbox" aria-label="Results"></ul>
 </dialog>
 <script>window.DOC_ROOT="../"</script>
-<script src="../../shared/icons.js?v=5f9dfef4"></script>
-<script src="../../system/components/tooltip.js?v=5f9dfef4"></script>
-<script src="../assets/search-index.js?v=5f9dfef4"></script>
-<script src="../assets/site.js?v=5f9dfef4"></script>
+<script src="../../shared/icons.js?v=28e42320"></script>
+<script src="../../system/components/tooltip.js?v=28e42320"></script>
+<script src="../assets/search-index.js?v=28e42320"></script>
+<script src="../assets/site.js?v=28e42320"></script>
 </body>
 </html>

@@ -214,7 +214,7 @@
     .todo-grip { display: none; }
     /* a long press lifts a task to reorder it: no text selection or callout under the finger */
     .todo-row { -webkit-touch-callout: none; user-select: none; transition: scale var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
-    .todo-row[data-lifted] { z-index: 2; background: var(--color-surface-default); box-shadow: var(--shadow-raised); scale: 1.02; }
+    .todo-row[data-lifted] { z-index: 2; background: var(--color-surface-default); box-shadow: var(--shadow-drag); scale: var(--drag-scale); }
     .todo-check, .todo-row .checkbox { grid-column: 1; justify-self: center; --_box: var(--space-6); inline-size: var(--_box); block-size: var(--_box); }
     .todo-prio { grid-column: 2; grid-row: 1; }
     .todo-main { grid-column: 3; display: grid; row-gap: var(--space-0-5); }

@@ -70,7 +70,7 @@
   @property --page-top { syntax: "<length>"; inherits: true; initial-value: 0px; }
   .list-page { --page-top: var(--list-head-top, 0px); transition: --page-top 300ms var(--ease-out); }
   :root[data-chrome-hidden] .list-page { --page-top: 0px; }
-  .page-hscroll { position: sticky; inset-block-end: 0; z-index: 3; overflow-x: auto; overflow-y: hidden; padding-block: var(--space-1); background: var(--color-surface-canvas); }
+  .page-hscroll { position: sticky; inset-block-end: 0; z-index: var(--z-raised); overflow-x: auto; overflow-y: hidden; padding-block: var(--space-1); background: var(--color-surface-canvas); }
   .page-hscroll[hidden] { display: none; }
   .page-hscroll > * { display: block; block-size: 1px; }
   .page-hscroll::-webkit-scrollbar { block-size: 10px; }
@@ -118,7 +118,7 @@
       display: inline-grid; grid-template-columns: 1.5rem 1fr; align-items: center; column-gap: var(--space-2);
       block-size: 3.5rem; padding-inline: var(--space-4) var(--space-5); /* 56 in both states: only the width moves */
       border-radius: var(--radius-lg); font-size: var(--text-base);
-      filter: drop-shadow(0 6px 14px rgb(0 0 0 / 0.18));
+      filter: var(--drop-shadow-float);
       transition: --_sa 150ms, --_sk 150ms, --_pa 150ms, --_da 150ms, translate 150ms, background-color var(--duration-fast), border-color var(--duration-fast), color var(--duration-fast),
         grid-template-columns var(--_morph), column-gap var(--_morph), padding var(--_morph), inset-block-end var(--_morph);
     }
