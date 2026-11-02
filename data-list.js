@@ -1678,25 +1678,32 @@ ${JSON.stringify(v)}`;
         "Two layers: a tight contact shadow seats the card, a soft ambient one lifts it. Tinted with the page (cement on warm), since grey shadows look dirty on paper. Keep the ambient low, or a row of cards floats."],
       ["Light and dark", [["lineL", "Top line, light", 0, 1, 0.05, ""], ["lineD", "Top line, dark", 0, 0.2, 0.01, ""], ["darkK", "Dark shadows ×", 1, 4, 0.1, ""]],
         "A white top line barely shows on a white card but carries the edge in dark, where shadows hardly read; so each theme has its own, and dark scales the shadows up."],
-      ["Cards you can press", [["lift", "Hover lift", 0, 4, 0.5, "px"], ["hoverK", "Hover shadow ×", 1, 3, 0.1, ""], ["sink", "Press sinks", 0, 3, 0.5, "px"], ["pressIn", "Press, inner shadow", 0, 0.3, 0.01, ""], ["onIn", "Selected, inner shadow", 0, 0.3, 0.01, ""], ["onK", "Selected, shadow ×", 0, 1, 0.05, ""], ["ms", "Duration", 0, 400, 10, "ms"]],
+      ["Cards you can press", [["lift", "Hover lift", 0, 4, 0.5, "px"], ["hoverK", "Hover shadow ×", 1, 3, 0.1, ""], ["sink", "Press sinks", 0, 3, 0.5, "px"], ["pressIn", "Press, inner shadow", 0, 0.3, 0.01, ""], ["onIn", "Selected, inner shadow", 0, 0.3, 0.01, ""], ["onK", "Selected, shadow ×", 0, 1, 0.05, ""]],
         "Only the status cards move, being buttons. Hover lifts a pixel or two; a press lands at once and eases back; a selected filter stays pressed in, a toggle that's on. Reduced motion keeps them still."],
     ],
     def: { radius: 16, edge: 15, lip: 0.05, sheen: 0.04, shade: 0.015, depth: 64, sc: "#3b3320", cy: 1, cb: 2, ca: 0.07, ay: 4, ab: 10, aa: 0.045, lineL: 0.8, lineD: 0.07, darkK: 2.5,
-      lift: 1, hoverK: 1.6, sink: 1, pressIn: 0.1, onIn: 0.07, onK: 0.3, ms: 150 },
+      lift: 1, hoverK: 1.6, sink: 1, pressIn: 0.1, onIn: 0.07, onK: 0.3 },
     presets: {
       tactile: { name: "Tactile (default)" },
       paper: { name: "Paper: barely there", edge: 8, lip: 0.03, sheen: 0, shade: 0, ca: 0.05, cb: 1, ay: 2, ab: 4, aa: 0.03, lineL: 0.6, lineD: 0.05, lift: 0.5, hoverK: 1.4, sink: 0.5, pressIn: 0.06, onIn: 0.05, onK: 0.4 },
-      pillow: { name: "Pillow: deep", radius: 16, edge: 25, lip: 0.08, sheen: 0.08, shade: 0.03, depth: 96, cb: 3, ca: 0.1, ay: 8, ab: 20, aa: 0.07, lineL: 1, lineD: 0.1, lift: 2, hoverK: 1.5, sink: 1.5, pressIn: 0.14, onIn: 0.1, onK: 0.2, ms: 180 },
+      pillow: { name: "Pillow: deep", radius: 16, edge: 25, lip: 0.08, sheen: 0.08, shade: 0.03, depth: 96, cb: 3, ca: 0.1, ay: 8, ab: 20, aa: 0.07, lineL: 1, lineD: 0.1, lift: 2, hoverK: 1.5, sink: 1.5, pressIn: 0.14, onIn: 0.1, onK: 0.2 },
       flat: { name: "Flat: as before", edge: 0, lip: 0, sheen: 0, shade: 0, ca: 0, aa: 0, lineL: 0, lineD: 0, lift: 0, hoverK: 1, sink: 0, pressIn: 0, onIn: 0, onK: 1 },
     },
+    // it writes the system's card tokens (tokens.css, D148), one value for both themes through light-dark(); at its
+    // defaults it writes nothing, so the system's own values show
     set(v, def) {
-      const html = document.documentElement, root = html.style, px = (k) => `${v[k]}px`;
-      Object.entries({ "--card-radius": px("radius"), "--card-edge": `${v.edge}%`, "--card-lip": v.lip, "--card-sheen": v.sheen, "--card-shade": v.shade, "--card-depth": px("depth"),
-        "--card-cy": px("cy"), "--card-cb": px("cb"), "--card-ca": v.ca, "--card-ay": px("ay"), "--card-ab": px("ab"), "--card-aa": v.aa,
-        "--card-line-l": v.lineL, "--card-line-d": v.lineD, "--card-dark-k": v.darkK,
-        "--card-lift": px("lift"), "--card-hover-k": v.hoverK, "--card-sink": px("sink"), "--card-press-in": v.pressIn, "--card-on-in": v.onIn, "--card-on-k": v.onK, "--card-ms": `${v.ms}ms` }).forEach(([k, x]) => root.setProperty(k, x));
-      // the shadow is the page's tint (cement in light) until a colour is picked
-      if (v.sc === def.sc) root.removeProperty("--card-shadow-l"); else root.setProperty("--card-shadow-l", v.sc);
+      const root = document.documentElement.style;
+      const names = ["--radius-card", "--color-line-card-edge", "--gradient-card", "--shadow-card", "--shadow-card-hover", "--shadow-card-pressed", "--shadow-card-selected", "--card-lift", "--card-sink", "--card-shadow-reach-block", "--card-shadow-reach-inline"];
+      if (Object.keys(def).every((k) => v[k] === def[k])) return names.forEach((n) => root.removeProperty(n));
+      const tint = v.sc === def.sc ? "var(--color-cement-950)" : v.sc;
+      const tinted = (a) => `light-dark(color-mix(in srgb, ${tint} ${+(a * 100).toFixed(3)}%, transparent), rgb(0 0 0 / ${+(a * v.darkK).toFixed(4)}))`;
+      const top = (ci) => { const k = Math.max(0, 1 - ci * 6); return `light-dark(rgb(255 255 255 / ${+(v.lineL * k).toFixed(4)}), rgb(255 255 255 / ${+(v.lineD * k).toFixed(4)}))`; };
+      const shadow = (ring, ci, cs) => [ring ? "inset 0 0 0 1px var(--color-action-accent)" : "inset 0 0 0 0 transparent", `inset 0 1px 0 ${top(ci)}`, `inset 0 -1px 0 rgb(0 0 0 / ${v.lip})`,
+        `inset 0 1px 3px rgb(0 0 0 / ${ci})`, `0 ${v.cy}px ${v.cb}px ${tinted(v.ca * cs)}`, `0 ${v.ay}px ${v.ab}px ${tinted(v.aa * cs)}`].join(", ");
+      Object.entries({ "--radius-card": `${v.radius}px`, "--color-line-card-edge": `color-mix(in oklab, var(--color-line-card), black ${v.edge}%)`,
+        "--gradient-card": `linear-gradient(rgb(255 255 255 / ${v.sheen}), transparent ${v.depth}px), linear-gradient(to top, rgb(0 0 0 / ${v.shade}), transparent ${v.depth}px)`,
+        "--shadow-card": shadow(false, 0, 1), "--shadow-card-hover": shadow(false, 0, v.hoverK), "--shadow-card-pressed": shadow(false, v.pressIn, 0), "--shadow-card-selected": shadow(true, v.onIn, v.onK),
+        "--card-lift": `${v.lift}px`, "--card-sink": `${v.sink}px`, "--card-shadow-reach-block": `${v.ay + v.ab}px`, "--card-shadow-reach-inline": `${v.ab}px` }).forEach(([k, x]) => root.setProperty(k, x));
     },
   });
   const tactile = (on) => {

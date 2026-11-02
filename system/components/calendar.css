@@ -35,7 +35,7 @@
   .calendar-grid td { padding: 0; block-size: var(--_cell); }
   .calendar-day {
     display: grid; place-items: center; inline-size: 100%; block-size: var(--_cell); padding: 0;
-    border: 0; border-radius: var(--radius-md); background: none; color: var(--color-content-primary);
+    border: 0; border-radius: var(--radius-control); background: none; color: var(--color-content-primary);
     font: inherit; font-size: var(--text-sm); font-variant-numeric: tabular-nums; cursor: pointer;
   }
   @media (hover: hover) { .calendar-day:hover:not(:disabled) { background: var(--color-surface-hover); } }

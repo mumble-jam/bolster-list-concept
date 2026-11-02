@@ -25,13 +25,13 @@
     inline-size: max-content;
     max-inline-size: 16rem;
     padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-tooltip);
     background: var(--color-surface-tooltip);
     color: var(--color-content-inverse);
     font-size: var(--text-xs);
     font-weight: var(--font-weight-medium);
     line-height: var(--leading-xs);
-    box-shadow: var(--shadow-overlay);
+    box-shadow: var(--shadow-popover);
     pointer-events: none;
     opacity: 0;
     visibility: hidden;
@@ -51,10 +51,10 @@
   .tip[popover] {
     position: fixed; inset: auto; margin: 0; border: 0;
     max-inline-size: 16rem; padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-tooltip);
     background: var(--color-surface-tooltip); color: var(--color-content-inverse);
     font-size: var(--text-xs); font-weight: var(--font-weight-medium); line-height: var(--leading-xs);
-    box-shadow: var(--shadow-overlay); pointer-events: none;
+    box-shadow: var(--shadow-popover); pointer-events: none;
     opacity: 0; transition: opacity var(--duration-fast) var(--ease-out), display var(--duration-fast) allow-discrete, overlay var(--duration-fast) allow-discrete;
   }
   .tip[popover]:popover-open { opacity: 1; }

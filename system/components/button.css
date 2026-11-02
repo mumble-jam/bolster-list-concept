@@ -40,7 +40,7 @@
     min-inline-size: var(--_h);
     padding: 0 var(--_px);
     border: var(--border-width-default) solid var(--_border-state, var(--_border));
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-control);
     background: var(--_bg-state, var(--_bg));
     color: var(--_fg-state, var(--_fg));
     font-family: var(--font-sans);
@@ -152,7 +152,7 @@
      1px and brightens; press sinks 1px at once and eases back. Numbers that differ by fill are set per fill;
      yellow is the default (brand everywhere, primary in dark), black is primary in light. */
   /* every button takes 8px corners, so the CTAs don't stand apart from the buttons beside them */
-  .button { border-radius: var(--radius-md); }
+  .button { border-radius: var(--radius-control); }
   @property --_sa { syntax: "<number>"; inherits: true; initial-value: 0; }
   @property --_sk { syntax: "<number>"; inherits: true; initial-value: 1; }
   @property --_pa { syntax: "<number>"; inherits: true; initial-value: 0; }

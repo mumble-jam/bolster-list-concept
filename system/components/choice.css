@@ -41,7 +41,7 @@
   }
 
   /* checkbox */
-  :where(.checkbox) { border-radius: var(--radius-xs); }
+  :where(.checkbox) { border-radius: var(--radius-checkbox); }
   :where(.checkbox)::before {
     content: "";
     inline-size: 0.75rem;

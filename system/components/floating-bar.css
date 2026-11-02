@@ -44,7 +44,7 @@
     flex: none; display: inline-flex; align-items: center; gap: var(--space-2);
     block-size: calc(var(--control-height-sm) + var(--space-1));
     padding: 0 var(--space-3) 0 calc(var(--space-2) + var(--space-0-5));
-    border: 0; border-radius: var(--radius-md);
+    border: 0; border-radius: var(--radius-control);
     background: var(--color-surface-inverse-hover); color: inherit;
     font: inherit; font-weight: var(--font-weight-medium); white-space: nowrap; font-variant-numeric: tabular-nums;
     cursor: pointer; transition: background-color var(--duration-fast) var(--ease-standard);
@@ -55,7 +55,7 @@
   /* select all: a quiet underlined link */
   .floating-bar-link {
     flex: none; block-size: calc(var(--control-height-sm) + var(--space-1)); padding: 0 calc(var(--space-2) + var(--space-0-5));
-    border: 0; border-radius: var(--radius-md); background: none;
+    border: 0; border-radius: var(--radius-control); background: none;
     color: color-mix(in srgb, var(--color-content-inverse) 72%, var(--color-surface-inverse));
     font: inherit; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; cursor: pointer;
   }
@@ -103,7 +103,7 @@
     .floating-bar-actions { display: contents; }
     .floating-bar .button {
       --_h: var(--shell-bottom-bar-height); --_icon: 1.25rem; --_gap: var(--space-1); --_px: var(--space-1);
-      flex: 1 1 0; min-inline-size: 0; flex-direction: column; border-radius: var(--radius-md);
+      flex: 1 1 0; min-inline-size: 0; flex-direction: column; border-radius: var(--radius-control);
       font-size: var(--text-xs);
     }
     .floating-bar .button[data-variant="ghost"] { --_fg: var(--color-content-on-chrome); --_fg-hover: var(--color-content-on-chrome); --_bg-hover: var(--color-surface-chrome-hover); --_bg-active: var(--color-surface-chrome-hover); }

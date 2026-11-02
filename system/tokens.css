@@ -415,20 +415,76 @@
     --radius-md: 0.5rem;    /* 8 */
     --radius-lg: 0.75rem;   /* 12 */
     --radius-xl: 1rem;      /* 16: modal, large surfaces */
-    --radius-full: 9999px;
+    --radius-full: 9999px;  /* pills: badges, chips, avatars, dots, round icon buttons */
+    /* corners by role (D149): what each kind of thing takes; components use these, the steps above are the scale */
+    --radius-field: var(--radius-sm);     /* 4: inputs, selects, the combobox's field */
+    --radius-checkbox: var(--radius-xs);  /* 2 */
+    --radius-control: var(--radius-md);   /* 8: buttons, the segmented control, toolbar controls, nav items, calendar days */
+    --radius-row: var(--radius-sm);       /* 4: rows inside menus, popovers and the combobox's list (8 in from a 12 edge, D35) */
+    --radius-tooltip: var(--radius-sm);   /* 4 */
+    --radius-toast: var(--radius-md);     /* 8 */
+    --radius-card: var(--radius-xl);      /* 16: cards, the table card, summary cards, the record */
+    --radius-menu: var(--radius-lg);      /* 12: menus, popovers, the combobox's list, at every width (D150) */
+    --radius-dialog: var(--radius-lg);    /* 12: a centred dialog */
+    --radius-sheet: var(--radius-xl);     /* 16: a bottom sheet's top corners */
+    --radius-window: var(--radius-xl);    /* 16: a workspace window (D144) */
     /* Nested corners (D35): something rounded sitting in a rounded corner shares that corner's centre,
        so its radius is the outer one minus the gap between their edges (r = R − d), the gap the same
        across and down. These are the gaps, from the outer edge; the padding is the gap less the border. */
-    --inset-card: calc(var(--radius-xl) - var(--radius-md)); /* 8: a card's 16 around 8px controls */
-    --inset-menu: calc(var(--radius-lg) - var(--radius-sm)); /* 8: a menu's 12 around 4px rows */
+    --inset-card: calc(var(--radius-card) - var(--radius-control)); /* 8: a card's 16 around 8px controls */
+    --inset-menu: calc(var(--radius-menu) - var(--radius-row)); /* 8: a menu's 12 around 4px rows */
 
-    /* ---------- Depth ---------- */
+    /* ---------- Depth (D149) ----------
+       By how far something floats, each shadow for its own things: the card's body (--shadow-card, below) for cards;
+       raised for a control lifted out of its group (the segmented control's pick, the current nav item); popover for
+       what opens from something and stays by it (menus, popovers, the combobox's list, tooltips), tinted with the page in
+       light; overlay for what floats over the whole page (dialogs and sheets, toasts, the floating bar, the sidebar and
+       rail when they slide over it) */
     --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.06), 0 1px 3px rgb(0 0 0 / 0.08);
     --shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.1), 0 12px 32px rgb(0 0 0 / 0.12);
-    /* menus and popovers: tinted with the page in light */
     --shadow-popover: 0 2px 6px color-mix(in srgb, var(--color-cement-950) 8%, transparent), 0 12px 32px color-mix(in srgb, var(--color-cement-950) 14%, transparent);
     /* the colour shadows are mixed from (cards, secondary buttons): cement in light, black in dark */
     --color-shadow-tint: light-dark(var(--color-cement-950), #000);
+    /* the card's body (D148, the tactile card): light falls from above. Every card and summary card wears it. Each
+       shadow is the same six layers, so one eases into the next: the selected ring (off at rest), a white top line,
+       a darker bottom lip, an inner shadow (a press), a tight contact shadow that seats the card and a soft ambient one
+       that lifts it, both tinted with the page (cement in light, black in dark, where they're 2.5 times as strong and
+       the top line carries the edge) */
+    --color-line-card-edge: color-mix(in oklab, var(--color-line-card), black 15%); /* the bottom edge, 15% darker */
+    --gradient-card: linear-gradient(rgb(255 255 255 / 0.04), transparent 64px), linear-gradient(to top, rgb(0 0 0 / 0.015), transparent 64px);
+    --shadow-card:
+      inset 0 0 0 0 transparent,
+      inset 0 1px 0 rgb(255 255 255 / 0.8),
+      inset 0 -1px 0 rgb(0 0 0 / 0.05),
+      inset 0 1px 3px rgb(0 0 0 / 0),
+      0 1px 2px color-mix(in srgb, var(--color-cement-950) 7%, transparent),
+      0 4px 10px color-mix(in srgb, var(--color-cement-950) 4.5%, transparent);
+    --shadow-card-hover:
+      inset 0 0 0 0 transparent,
+      inset 0 1px 0 rgb(255 255 255 / 0.8),
+      inset 0 -1px 0 rgb(0 0 0 / 0.05),
+      inset 0 1px 3px rgb(0 0 0 / 0),
+      0 1px 2px color-mix(in srgb, var(--color-cement-950) 11.2%, transparent),
+      0 4px 10px color-mix(in srgb, var(--color-cement-950) 7.2%, transparent);
+    --shadow-card-pressed:
+      inset 0 0 0 0 transparent,
+      inset 0 1px 0 rgb(255 255 255 / 0.32),
+      inset 0 -1px 0 rgb(0 0 0 / 0.05),
+      inset 0 1px 3px rgb(0 0 0 / 0.1),
+      0 1px 2px color-mix(in srgb, var(--color-cement-950) 0%, transparent),
+      0 4px 10px color-mix(in srgb, var(--color-cement-950) 0%, transparent);
+    --shadow-card-selected:
+      inset 0 0 0 1px var(--color-action-accent),
+      inset 0 1px 0 rgb(255 255 255 / 0.464),
+      inset 0 -1px 0 rgb(0 0 0 / 0.05),
+      inset 0 1px 3px rgb(0 0 0 / 0.07),
+      0 1px 2px color-mix(in srgb, var(--color-cement-950) 2.1%, transparent),
+      0 4px 10px color-mix(in srgb, var(--color-cement-950) 1.35%, transparent);
+    /* cards you press (summary cards): hover lifts 1, a press sinks 1; the room their shadow needs below and aside */
+    --card-lift: 1px;
+    --card-sink: 1px;
+    --card-shadow-reach-block: 14px;
+    --card-shadow-reach-inline: 10px;
 
     /* ---------- Layers (D9) ---------- */
     --z-base: 0;
@@ -460,12 +516,68 @@
       --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.4);
       --shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.5);
       --shadow-popover: var(--shadow-overlay);
+      --shadow-card:
+        inset 0 0 0 0 transparent,
+        inset 0 1px 0 rgb(255 255 255 / 0.07),
+        inset 0 -1px 0 rgb(0 0 0 / 0.05),
+        inset 0 1px 3px rgb(0 0 0 / 0),
+        0 1px 2px rgb(0 0 0 / 0.175),
+        0 4px 10px rgb(0 0 0 / 0.1125);
+      --shadow-card-hover:
+        inset 0 0 0 0 transparent,
+        inset 0 1px 0 rgb(255 255 255 / 0.07),
+        inset 0 -1px 0 rgb(0 0 0 / 0.05),
+        inset 0 1px 3px rgb(0 0 0 / 0),
+        0 1px 2px rgb(0 0 0 / 0.28),
+        0 4px 10px rgb(0 0 0 / 0.18);
+      --shadow-card-pressed:
+        inset 0 0 0 0 transparent,
+        inset 0 1px 0 rgb(255 255 255 / 0.028),
+        inset 0 -1px 0 rgb(0 0 0 / 0.05),
+        inset 0 1px 3px rgb(0 0 0 / 0.1),
+        0 1px 2px rgb(0 0 0 / 0),
+        0 4px 10px rgb(0 0 0 / 0);
+      --shadow-card-selected:
+        inset 0 0 0 1px var(--color-action-accent),
+        inset 0 1px 0 rgb(255 255 255 / 0.0406),
+        inset 0 -1px 0 rgb(0 0 0 / 0.05),
+        inset 0 1px 3px rgb(0 0 0 / 0.07),
+        0 1px 2px rgb(0 0 0 / 0.0525),
+        0 4px 10px rgb(0 0 0 / 0.03375);
     }
   }
   :root[data-theme="dark"] {
     --shadow-raised: 0 1px 2px rgb(0 0 0 / 0.4);
     --shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.4), 0 12px 32px rgb(0 0 0 / 0.5);
     --shadow-popover: var(--shadow-overlay);
+    --shadow-card:
+      inset 0 0 0 0 transparent,
+      inset 0 1px 0 rgb(255 255 255 / 0.07),
+      inset 0 -1px 0 rgb(0 0 0 / 0.05),
+      inset 0 1px 3px rgb(0 0 0 / 0),
+      0 1px 2px rgb(0 0 0 / 0.175),
+      0 4px 10px rgb(0 0 0 / 0.1125);
+    --shadow-card-hover:
+      inset 0 0 0 0 transparent,
+      inset 0 1px 0 rgb(255 255 255 / 0.07),
+      inset 0 -1px 0 rgb(0 0 0 / 0.05),
+      inset 0 1px 3px rgb(0 0 0 / 0),
+      0 1px 2px rgb(0 0 0 / 0.28),
+      0 4px 10px rgb(0 0 0 / 0.18);
+    --shadow-card-pressed:
+      inset 0 0 0 0 transparent,
+      inset 0 1px 0 rgb(255 255 255 / 0.028),
+      inset 0 -1px 0 rgb(0 0 0 / 0.05),
+      inset 0 1px 3px rgb(0 0 0 / 0.1),
+      0 1px 2px rgb(0 0 0 / 0),
+      0 4px 10px rgb(0 0 0 / 0);
+    --shadow-card-selected:
+      inset 0 0 0 1px var(--color-action-accent),
+      inset 0 1px 0 rgb(255 255 255 / 0.0406),
+      inset 0 -1px 0 rgb(0 0 0 / 0.05),
+      inset 0 1px 3px rgb(0 0 0 / 0.07),
+      0 1px 2px rgb(0 0 0 / 0.0525),
+      0 4px 10px rgb(0 0 0 / 0.03375);
   }
 
   /* the canvas grid (the app shell's page background, D81): its line and its light around the pointer. The

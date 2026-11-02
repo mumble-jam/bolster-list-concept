@@ -34,7 +34,7 @@
     align-items: flex-start;
     gap: var(--space-3);
     padding: var(--space-3) var(--space-2) var(--space-3) var(--space-4);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-toast);
     border-inline-start: var(--space-1) solid var(--_accent);
     background: var(--color-surface-inverse);
     color: var(--color-content-inverse);
@@ -54,7 +54,7 @@
     min-block-size: var(--control-height-sm);
     padding: 0 var(--space-2);
     border: 0;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-control);
     background: none;
     color: inherit;
     font-weight: var(--font-weight-medium);
