@@ -104,6 +104,7 @@
     .slice-row { grid-template-columns: max-content repeat(var(--_slices, 5), var(--slice-min)); }
     /* the insight card as wide as its content, never wider than the screen between its gutters: past that it wraps (D145) */
     .slice-row > .slice-insight { max-inline-size: calc(100vw - 2 * var(--space-4)); }
-    .slice-row .slice-insight[aria-hidden="true"] { order: -1; }
+    /* first in the row whatever its place in the markup, so it always gets the first column (the specimen writes it last) */
+    .slice-row > .slice-insight { order: -1; }
   }
 }
