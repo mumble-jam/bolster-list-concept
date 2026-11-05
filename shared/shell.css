@@ -554,3 +554,6 @@
     .app-shell[data-no-section] .sidebar { display: none; }
   }
 }
+
+/* published copy: the local-only concept controls (publish-concept.mjs) */
+#concept-controls :is(#cc-shell, #cc-lens, .cc-links, [data-local-only]) { display: none !important; }
