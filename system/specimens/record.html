@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=865bbaf1">
-<link rel="stylesheet" href="specimen.css?v=865bbaf1">
+<link rel="stylesheet" href="../bolster.css?v=10b8e9f5">
+<link rel="stylesheet" href="specimen.css?v=10b8e9f5">
 <style>.spec-panel .detail.card { position: static; max-block-size: none; inline-size: 24rem; max-inline-size: 100%; }</style>
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
@@ -85,6 +85,64 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
     </div>
   </section>
 
+  <section class="spec-section" id="in-place">
+    <h2>Read and changed in place</h2>
+    <p>The record you read is the form (forms C, D140; D154): labels beside values, a value changed where it is, what's rarely set waiting as a chip, each value's marks on the line under it, and what a step needs checked before it. The behaviour (what saves, what a chip opens) is the page's.</p>
+    <div class="spec-panel" data-surface="canvas">
+      <section class="card detail" aria-label="An item's record, read and changed in place">
+        <div class="detail-scroll">
+          <section class="detail-section" aria-labelledby="ip-qty"><h3 class="detail-section-title" id="ip-qty">Quantity</h3>
+            <div class="detail-row"><div class="detail-label"><i data-icon="hashtag" data-size="12" data-optical></i><span>Quantity</span></div>
+              <button type="button" class="detail-value" aria-label="Quantity: 42 ft. Edit">42 ft<span class="detail-value-sub">from ridge length, 42 ft</span><span class="detail-pencil" aria-hidden="true"><i data-icon="pen" data-size="12"></i></span></button></div>
+            <div class="detail-row"><div class="detail-label"><i data-icon="ruler" data-size="12" data-optical></i><span>Unit</span></div>
+              <div class="detail-value" data-static>ft</div></div>
+            <div class="detail-row"><div class="detail-label"><i data-icon="calendar" data-size="12" data-optical></i><span>Target start</span></div>
+              <button type="button" class="detail-value" aria-label="Target start: none. Add it"><span class="detail-prompt">Add a start date</span><span class="detail-value-sub">Needed to schedule it</span><span class="detail-pencil" aria-hidden="true"><i data-icon="pen" data-size="12"></i></span></button></div>
+            <div class="detail-row"><div class="detail-label"><i data-icon="text" data-size="12" data-optical></i><span>SKU</span></div>
+              <button type="button" class="detail-value" aria-label="SKU: none. Add it"><span class="detail-none" aria-hidden="true">—</span><span class="detail-pencil" aria-hidden="true"><i data-icon="pen" data-size="12"></i></span></button></div>
+            <div class="detail-reveal" role="group" aria-label="More for quantity"><span class="chip"><button type="button" class="chip-main">+ Customer can change it</button></span></div>
+          </section>
+          <section class="detail-section" aria-labelledby="ip-price"><h3 class="detail-section-title" id="ip-price">Where values came from</h3>
+            <div class="detail-row"><div class="detail-label"><i data-icon="dollar" data-size="12" data-optical></i><span>Roofing</span></div>
+              <button type="button" class="detail-value" aria-label="Roofing: $8,700.00. Edit">$8,700.00<span class="detail-pencil" aria-hidden="true"><i data-icon="pen" data-size="12"></i></span></button>
+              <span class="detail-marks"><button type="button" class="detail-mark" data-kind="source" data-tip="Roofing 60% done, set by Hiro Nakamura on Oct 27"><i data-icon="chart-gantt" data-size="12"></i>From the schedule</button><span class="detail-mark-reason">Roofing 60% done · Hiro, Oct 27</span></span></div>
+            <div class="detail-row"><div class="detail-label"><i data-icon="calendar" data-size="12" data-optical></i><span>Due</span></div>
+              <button type="button" class="detail-value" aria-label="Due: Net 30. Edit">Net 30, Nov 28, 2026<span class="detail-pencil" aria-hidden="true"><i data-icon="pen" data-size="12"></i></span></button>
+              <span class="detail-marks"><span class="detail-mark" data-kind="suggested"><i data-icon="sparkles" data-size="12"></i>suggested</span><span class="detail-mark-reason">Your last 4 invoices to Vera were Net 30</span><button type="button" class="button" data-variant="secondary" data-size="sm">Accept</button></span></div>
+            <div class="detail-row"><div class="detail-label"><i data-icon="calendar" data-size="12" data-optical></i><span>Issued</span></div>
+              <button type="button" class="detail-value" aria-label="Issued: Oct 29, 2026. Edit">Oct 29, 2026<span class="detail-pencil" aria-hidden="true"><i data-icon="pen" data-size="12"></i></span></button>
+              <span class="detail-marks"><span class="detail-mark" data-kind="default">today</span></span></div>
+            <div class="detail-row"><div class="detail-label"><i data-icon="percent" data-size="12" data-optical></i><span>Margin</span></div>
+              <button type="button" class="detail-value" aria-label="Margin: 32%. Edit">32%<span class="detail-pencil" aria-hidden="true"><i data-icon="pen" data-size="12"></i></span></button>
+              <span class="detail-marks"><span class="detail-mark" data-kind="typed">changed by you</span><button type="button" class="button" data-variant="ghost" data-size="sm">Put back 30%</button></span></div>
+          </section>
+          <section class="detail-section" aria-labelledby="ip-edit"><h3 class="detail-section-title" id="ip-edit">A value being changed, and a long one</h3>
+            <div class="detail-row" data-editing><div class="detail-label"><i data-icon="percent" data-size="12" data-optical></i><span>Margin</span></div>
+              <form class="detail-editor" novalidate><div class="field" data-size="sm"><label class="field-label" for="ip-margin">Margin</label><span class="input-group" data-size="sm"><input class="input" data-size="sm" id="ip-margin" inputmode="decimal" value="30"><span class="input-adornment">%</span></span></div>
+                <div class="detail-editor-foot"><button type="submit" class="button" data-size="sm">Save</button><button type="button" class="button" data-variant="ghost" data-size="sm">Cancel</button></div></form></div>
+            <div class="detail-row" data-wide><div class="detail-label"><i data-icon="message" data-size="12" data-optical></i><span>Message</span></div>
+              <button type="button" class="detail-value" aria-label="Message. Edit">Hi Vera, here's the invoice for the roofing so far and the skylight. Thank you!<span class="detail-pencil" aria-hidden="true"><i data-icon="pen" data-size="12"></i></span></button>
+              <p class="detail-row-note">Written from the lines.</p></div>
+          </section>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <section class="spec-section" id="check">
+    <h2>Before a step</h2>
+    <p>Asked for when the step is (Send, Create): what to fix, then what to check, each a link to its value; it goes once nothing blocks the step.</p>
+    <div class="spec-panel" data-surface="canvas">
+      <section class="detail-check" role="alert" tabindex="-1" aria-labelledby="ck-t" style="max-inline-size:36rem"><h3 id="ck-t">Before sending it</h3>
+        <div class="detail-check-part" data-tone="error"><h4>1 to fix</h4><ul><li><i data-icon="triangle-exclamation" data-size="14"></i><a href="#in-place">Add a line</a></li></ul></div>
+        <div class="detail-check-part" data-tone="check"><h4>2 to check</h4><ul>
+          <li data-kind="suggested"><i data-icon="sparkles" data-size="14"></i><span class="detail-check-text"><b>Due</b>: “Net 30, Nov 28, 2026”. Your last 4 invoices to Vera were Net 30</span><span class="detail-check-acts"><button type="button" class="button" data-variant="secondary" data-size="sm">Accept</button><button type="button" class="button" data-variant="ghost" data-size="sm">Change</button></span></li>
+          <li data-kind="warning"><i data-icon="triangle-exclamation" data-size="14"></i><span class="detail-check-text"><b>Kitchen</b>: billed in full, $16,550.00; the schedule says it hasn't started. Say why, and it's kept in Activity</span><label class="detail-check-why"><span class="visually-hidden">Why the kitchen</span><input class="input" data-size="sm" placeholder="Why, in a line"></label></li>
+        </ul></div>
+      </section>
+    </div>
+  </section>
+
   <section class="spec-section">
     <h2>Rules</h2>
     <ul class="spec-stack" style="max-width:70ch;padding-left:var(--space-5)">
@@ -97,7 +155,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
     </ul>
   </section>
 </main>
-<script src="../../shared/icons.js?v=865bbaf1"></script>
-<script src="specimen.js?v=865bbaf1"></script>
+<script src="../../shared/icons.js?v=10b8e9f5"></script>
+<script src="specimen.js?v=10b8e9f5"></script>
 </body>
 </html>

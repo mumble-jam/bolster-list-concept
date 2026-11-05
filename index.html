@@ -10,9 +10,9 @@
 <link rel="apple-touch-icon" href="shared/assets/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="system/bolster.css?v=865bbaf1">
-<link rel="stylesheet" href="shared/shell.css?v=865bbaf1">
-<link rel="stylesheet" href="data-list.css?v=865bbaf1">
+<link rel="stylesheet" href="system/bolster.css?v=10b8e9f5">
+<link rel="stylesheet" href="shared/shell.css?v=10b8e9f5">
+<link rel="stylesheet" href="data-list.css?v=10b8e9f5">
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
 <script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
@@ -171,6 +171,12 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
       <p class="cc-help">How long the server takes (D142): opening a list, a record, loading more rows and Try again. Nothing shows under 300 ms; after 10 s it says so.</p></div>
     <div class="cc-row"><label for="cc-grid">Grid on the page</label><button class="button" data-variant="ghost" data-size="sm" data-tune="net" aria-label="Tune the grid" hidden>Tune</button><input type="checkbox" role="switch" class="toggle" id="cc-grid"></div>
     <div class="cc-row"><label for="cc-cards">Tactile cards</label><button class="button" data-variant="ghost" data-size="sm" data-tune="cards" aria-label="Tune the cards" hidden>Tune</button><input type="checkbox" role="switch" class="toggle" id="cc-cards"></div>
+    <div class="cc-field"><span class="cc-label" id="cc-rec-l">Record fields</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="cc-rec-l">
+        <label class="segmented-option"><input type="radio" name="cc-rec" value="sheet" checked> Current</label>
+        <label class="segmented-option"><input type="radio" name="cc-rec" value="rows"> Rows</label>
+      </div>
+      <p class="cc-help">Rows: the record's fields and related records on the estimate's rows (D154), read only, empty ones left out. To be discussed.</p></div>
     <div class="cc-field"><div class="cc-row"><label for="cc-recipe">Built from page descriptions</label><input type="checkbox" role="switch" class="toggle" id="cc-recipe"></div>
       <p class="cc-help">The four lists drawn by recipe.js from their descriptions (system/recipes/list/concept), not from data.js.</p></div>
     <button class="button" data-variant="secondary" data-size="sm" data-open-dialog="notes">About this concept</button>
@@ -183,12 +189,12 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
 </details>
 
 <div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
-<script src="shared/icons.js?v=865bbaf1"></script>
-<script src="shared/shell.js?v=865bbaf1"></script>
-<script src="system/specimens/specimen.js?v=865bbaf1"></script>
-<script src="system/components/loading.js?v=865bbaf1"></script>
-<script src="data.js?v=865bbaf1"></script>
-<script src="recipe.js?v=865bbaf1"></script>
+<script src="shared/icons.js?v=10b8e9f5"></script>
+<script src="shared/shell.js?v=10b8e9f5"></script>
+<script src="system/specimens/specimen.js?v=10b8e9f5"></script>
+<script src="system/components/loading.js?v=10b8e9f5"></script>
+<script src="data.js?v=10b8e9f5"></script>
+<script src="recipe.js?v=10b8e9f5"></script>
 <script>
   // ?from=description builds the four lists from their page descriptions; ?d=<path> adds one more list
   // from any description. Either way data-list.js starts once the descriptions are compiled.

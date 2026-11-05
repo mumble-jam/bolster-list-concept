@@ -85,6 +85,98 @@
   .detail-file svg { flex: none; color: var(--color-content-secondary); }
   @media (hover: hover) { .detail-file:hover { border-color: var(--color-line-strong); } }
 
+  /* ---------- a record you read and change in place (D154; forms C, D140: C-read, C-sections, C-empty, C-edit) ----------
+     <section class="detail-section" aria-labelledby="s-price"><h3 class="detail-section-title" id="s-price">Pricing</h3>
+       <div class="detail-row" data-row="cost"><div class="detail-label">…icon…<span>Cost per unit</span></div>
+         <button type="button" class="detail-value" aria-label="Cost per unit: $55.00. Edit">$55.00 / sq
+           <span class="detail-value-sub">labor $55.00</span><span class="detail-pencil" aria-hidden="true">…pen…</span></button>
+         <span class="detail-marks">…marks (.detail-mark)…</span></div>
+       <div class="detail-reveal" role="group" aria-label="More for pricing"><span class="chip"><button class="chip-main">+ Tax</button></span></div>
+     </section>
+     A row: the label on the left, a step quieter (12, the secondary ink) with its field's icon, about a third of the width;
+     the value on the right in full ink, on the label's first baseline. No rules between rows: a section's rows stand on
+     spacing and the rule between sections is the only one. The value is a button where it can change (a click turns it
+     into its field, .detail-editor, under the row), a div[data-static] where it can't. An empty value says what kind of
+     empty it is: a prompt naming what it's for (.detail-prompt) or a dash; a value rarely set waits as a chip naming it
+     (.detail-reveal), which opens its field where its row goes. Its marks (where it came from, a suggestion to accept)
+     sit on the line under it, in the same place on every row. data-wide: a value that takes the full width under its
+     label (a message, a note). The behaviour (what saves, what a chip opens) is the page's. */
+  .detail-section:has(> :is(.detail-section-title, .detail-row)) { display: grid; align-content: start; }
+  :where(.detail-section-title) { margin: 0 0 var(--space-2); font-family: var(--font-sans); font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); color: var(--color-content-primary); }
+  :where(.detail-row) { display: grid; grid-template-columns: minmax(6.5rem, 38%) minmax(0, 1fr); align-items: baseline; gap: var(--space-1) var(--space-3); padding-block: var(--space-1); font-size: var(--text-sm); }
+  :where(.detail-row[data-wide]) { grid-template-columns: minmax(0, 1fr); }
+  :where(.detail-label) { display: flex; align-items: flex-start; gap: var(--space-2); padding-block: 2px; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); overflow-wrap: anywhere; }
+  /* its icon a step quieter again, centred on the first line, each drawn at its own optical size (D41) in one 16-wide
+     slot, so every label's words share a left edge */
+  :where(.detail-label) > svg { flex: none; inline-size: var(--space-4); block-size: var(--icon-size, 0.75rem); margin-block-start: calc((1lh - var(--icon-size, 0.75rem)) / 2); color: var(--color-content-tertiary); }
+  :where(.detail-label) > span { min-inline-size: 0; }
+  :where(.detail-value) { position: relative; display: grid; justify-items: start; gap: 1px; min-inline-size: 0; margin: 0 calc(var(--space-1) * -1); padding: 2px var(--space-6) 2px var(--space-1); border: 0; border-radius: var(--radius-xs); background: none; color: var(--color-content-primary); font: inherit; text-align: start; overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+  :where(button.detail-value) { cursor: pointer; }
+  @media (hover: hover) { :where(button.detail-value:hover) { background: var(--color-surface-hover); } }
+  :where(button.detail-value:focus-visible) { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 0; }
+  /* the pencil says it changes: shown on hover and focus, always on touch */
+  :where(.detail-pencil) { position: absolute; inset-inline-end: var(--space-1); inset-block-start: 4px; display: inline-flex; color: var(--color-content-tertiary); opacity: 0; transition: opacity var(--duration-fast) var(--ease-standard); }
+  :where(button.detail-value:is(:hover, :focus-visible)) :where(.detail-pencil) { opacity: 1; }
+  @media (hover: none) { :where(.detail-pencil) { opacity: 1; } }
+  :where(.detail-value-sub) { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  :where(.detail-prompt) { color: var(--color-content-link); }
+  :where(.detail-none) { color: var(--color-content-secondary); }
+  :where(.detail-row-note) { grid-column: 1 / -1; margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  /* a link where a value goes ("Save it to the catalog"): its words set the row's baseline, its icon centred on them */
+  .detail-row-link.link-button { justify-self: start; display: inline-flex; align-items: baseline; gap: var(--space-1); }
+  .detail-row-link.link-button > svg { align-self: center; }
+  :where(.detail-reveal) { display: flex; flex-wrap: wrap; gap: var(--space-2); padding-block-start: var(--space-3); }
+  /* the field where the value was (C-edit), or the small form of values that belong together (C-together), under the
+     row's own label: Enter saves, Escape puts it back */
+  :where(.detail-row[data-editing]) { grid-template-columns: minmax(0, 1fr); padding-block: var(--space-3); }
+  :where(.detail-row[data-editing]) > :where(.detail-label) { display: none; }
+  :where(.detail-editor, .detail-editor > form) { display: grid; gap: var(--space-3); }
+  :where(.detail-editor) :where(.field) { --_w: auto; }
+  :where(.detail-editor) :where(.field[style*="--_w"]) :where(.input-group, .field > .input) { inline-size: min(100%, calc(var(--_w) + 2rem)); }
+  :where(.detail-editor-foot) { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+
+  /* ---------- where a value came from (C-marks): a mark on the line under the value ----------
+     <span class="detail-marks"><button type="button" class="detail-mark" data-kind="source" data-tip="…">…icon… From the schedule</button>
+       <span class="detail-mark-reason">Roofing 60% done, Hiro, Oct 27</span></span>
+     source: read from a named source (the voicemail, the schedule; it opens its evidence); suggested: Bolster inferred
+     it, with Accept beside it; default: the company's; typed: changed by a person (Put back beside it, while it can). */
+  :where(.detail-marks) { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); font-size: var(--text-xs); line-height: var(--leading-xs); }
+  /* straight in a row, they sit under the value, in its column */
+  :where(.detail-row) > :where(.detail-marks) { grid-column: 2; }
+  :where(.detail-row[data-wide]) > :where(.detail-marks) { grid-column: 1; }
+  :where(.detail-mark) { display: inline-flex; align-items: center; gap: var(--space-1); padding: 0 var(--space-1); border: 0; border-radius: var(--radius-sm); font: inherit; font-size: var(--text-xs); line-height: 1.25rem; white-space: nowrap; }
+  :where(.detail-mark) > svg { inline-size: 0.75rem; block-size: 0.75rem; flex: none; }
+  :where(.detail-mark[data-kind="source"]) { background: var(--color-feedback-info-surface); color: var(--color-feedback-info-content); }
+  :where(button.detail-mark) { cursor: pointer; }
+  :where(button.detail-mark:focus-visible) { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
+  :where(.detail-mark[data-kind="suggested"]) { background: var(--color-status-pending-surface); color: var(--color-status-pending-content); }
+  :where(.detail-mark[data-kind="default"]) { background: var(--color-feedback-neutral-surface); color: var(--color-feedback-neutral-content); }
+  :where(.detail-mark[data-kind="typed"]) { padding-inline: 0; background: none; color: var(--color-content-secondary); }
+  :where(.detail-mark[data-compact]) { inline-size: var(--space-5); block-size: var(--space-5); justify-content: center; padding: 0; }
+  :where(.detail-mark-reason) { color: var(--color-content-secondary); }
+
+  /* ---------- before a step (C-gate, C-summary): what to fix, then what to check, each a link to its value ----------
+     <section class="detail-check" role="alert" tabindex="-1" aria-labelledby="ck-t"><h3 id="ck-t">Before sending it</h3>
+       <div class="detail-check-part" data-tone="error"><h4>1 to fix</h4><ul><li>…icon… <a href="#…">Add a line</a></li></ul></div>
+       <div class="detail-check-part" data-tone="check"><h4>2 to check</h4><ul><li data-kind="suggested|warning">…</li></ul></div>
+     </section>
+     It appears when the step is asked for and nothing blocks it any more once each item is settled. */
+  :where(.detail-check) { display: grid; gap: var(--space-3); padding: var(--space-4) var(--space-5); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-lg); background: var(--color-surface-default); }
+  :where(.detail-check:focus) { outline: none; box-shadow: 0 0 0 var(--focus-ring-width) var(--color-focus-ring); }
+  :where(.detail-check) > :where(h3) { margin: 0; font-family: var(--font-sans); font-size: var(--text-base); line-height: var(--leading-base); }
+  :where(.detail-check-part) > :where(h4) { margin: 0 0 var(--space-1); font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-section); }
+  :where(.detail-check-part) > :where(ul) { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-2); }
+  :where(.detail-check-part) :where(li) { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); font-size: var(--text-sm); line-height: var(--leading-sm); }
+  :where(.detail-check-part) :where(li) > svg { inline-size: 0.875rem; block-size: 0.875rem; flex: none; }
+  :where(.detail-check-part[data-tone="error"]) :where(li) { color: var(--color-feedback-danger-content); }
+  :where(.detail-check-part[data-tone="error"]) :where(a) { color: inherit; }
+  :where(.detail-check-part[data-tone="check"]) :where(li[data-kind="warning"]) > svg { color: var(--color-feedback-warning-accent); }
+  :where(.detail-check-part[data-tone="check"]) :where(li[data-kind="suggested"]) > svg { color: var(--color-status-pending-content); }
+  :where(.detail-check-text) { flex: 1 1 18rem; min-inline-size: 0; }
+  :where(.detail-check-acts) { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+  /* a strong warning asks why, in a line kept with the step */
+  :where(.detail-check-why) { display: block; flex: 1 1 14rem; }
+
   /* the activity: a line through the events, solid for what happened, dashed to the next step.
      Job events wear the status shape they moved the job to; others are small dots, green for money
      in, red for a miss; the next step is a hollow dashed ring */

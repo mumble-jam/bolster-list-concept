@@ -1128,6 +1128,28 @@
     }
     return `<ol class="activity" aria-label="Activity">${html}</ol>`;
   }
+  // the record's fields and related records as the system's rows (D154), read only, to compare with the sheet they
+  // are now (Concept controls → Record fields; to be discussed): a label with its field's icon, the value beside it on
+  // one left edge, wrapping; an empty value left out
+  let recRows = false;
+  try { recRows = localStorage.getItem("bolster-concepts:record-fields") === "rows"; } catch {}
+  // the hand-written lists' fields carry no key: their icon by label, from the vocabulary (system/model/icons.json)
+  const ICON_BY_LABEL = { Owner: "user", Created: "calendar", Issued: "calendar", Due: "calendar", "Last activity": "clock", "Price updated": "clock", Source: "signpost", Email: "contact", Phone: "contact", Address: "location", "Open jobs": "briefcase", Vendor: "store", "Used in": "calculator", Client: "users", Customer: "users", Job: "briefcase" };
+  // a field's icon is its own (by key); a related record's is the record's (a job: briefcase, not the job name's text)
+  const fieldIcon = (label, key) => (key && attrIcon(key)) || ICON_BY_LABEL[label] || null;
+  // a count of another list (a vendor's orders) takes that list's icon in the app's menu (shared/shell.js)
+  const LIST_ICON = { job: "briefcase", "vendor-order": "package", expense: "receipt", "bid-request": "send" };
+  const recordIcon = (label, key) => ICON_BY_LABEL[label] || LIST_ICON[key] || (key && attrIcon(key)) || null;
+  const blank = (v) => v == null || v === "" || v === "–" || v === "—";
+  const recRow = (label, value, i) => `<div class="detail-row"><dt class="detail-label">${i ? ic(i, 12, { optical: true }) : ""}<span>${esc(label)}</span></dt><dd class="detail-value" data-static>${value}</dd></div>`;
+  const relatedValue = (k, r) => r.none ? `<span class="text-secondary">${esc(r.name)}</span>` : `<a href="#${esc(r.id || "")}" class="detail-link" data-concept-action="Open ${esc(k.toLowerCase())}: ${esc(r.name)}">${r.initials ? avatar(r, "sm") : ""}<span>${esc(r.name)}</span></a>`;
+  function fieldsHtml(p) {
+    if (!recRows) return `${p.related?.length ? `<div class="detail-section detail-related"><h3>Related</h3><dl class="detail-fields">${p.related.map(([k, r]) => `<div><dt>${esc(k)}</dt><dd>${relatedValue(k, r)}</dd></div>`).join("")}</dl></div>` : ""}
+        <dl class="detail-section detail-fields">${p.fields.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join("")}</dl>`;
+    const fields = p.fields.filter(([, v]) => !blank(v));
+    return `${p.related?.length ? `<section class="detail-section" aria-labelledby="detail-related-t"><h3 class="detail-section-title" id="detail-related-t">Related</h3><dl class="detail-rows">${p.related.map(([k, r, key]) => recRow(k, relatedValue(k, r), recordIcon(k, key))).join("")}</dl></section>` : ""}
+        ${fields.length ? `<dl class="detail-section detail-rows">${fields.map(([k, v, key]) => recRow(k, v, fieldIcon(k, key))).join("")}</dl>` : ""}`;
+  }
   // the record (D142): what the row already says shows at once (the name, the status, the amount, its actions); its
   // activity, related records, details and document are on their way, as bars, until they land
   function detailHtml(id, { loading = false } = {}) {
@@ -1149,8 +1171,7 @@
           <div class="detail-actions">${p.actions.map(([l, i]) => `<button type="button" class="button" data-variant="secondary" data-concept-action="${esc(l)}">${i ? ic(`m-${i}`, 14, { optical: true }) : ""}${esc(l)}</button>`).join("")}<button type="button" class="button" data-variant="secondary" data-row-menu="${x.id}" aria-haspopup="menu" aria-expanded="false">More${I.chev}</button></div>
         </div>
         ${loading ? `<dl class="detail-section detail-fields" aria-hidden="true">${p.fields.slice(0, 5).map((f, i) => `<div><dt><span class="skeleton" style="inline-size:${[5, 4, 6, 5, 4][i]}rem"></span></dt><dd><span class="skeleton" style="inline-size:${[7, 9, 6, 8, 7][i]}rem"></span></dd></div>`).join("")}</dl>` : ""}
-        ${loading ? "" : `${p.related?.length ? `<div class="detail-section detail-related"><h3>Related</h3><dl class="detail-fields">${p.related.map(([k, r]) => `<div><dt>${esc(k)}</dt><dd>${r.none ? `<span class="text-secondary">${esc(r.name)}</span>` : `<a href="#${esc(r.id || "")}" class="detail-link" data-concept-action="Open ${esc(k.toLowerCase())}: ${esc(r.name)}">${r.initials ? avatar(r, "sm") : ""}<span>${esc(r.name)}</span></a>`}</dd></div>`).join("")}</dl></div>` : ""}
-        <dl class="detail-section detail-fields">${p.fields.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${v}</dd></div>`).join("")}</dl>
+        ${loading ? "" : `${fieldsHtml(p)}
         ${p.doc ? `<div class="detail-section detail-doc"><div class="detail-doc-head"><span>${esc(p.doc.label)}</span><button type="button" class="link-button" data-concept-action="${esc(p.doc.view)}">${esc(p.doc.view)}</button></div><button type="button" class="detail-file" data-concept-action="Download ${esc(p.doc.name)}">${ic("m-file", 14)}<span>${esc(p.doc.name)}</span>${ic("m-download", 14)}</button></div>` : ""}`}
       </div>`;
   }
@@ -1410,6 +1431,12 @@
       try { localStorage.setItem("bolster-concepts:grid", t.checked ? "on" : "off"); } catch {}
     }
     if (t.id === "cc-recipe") { const u = new URL(location.href); t.checked ? u.searchParams.set("from", "description") : u.searchParams.delete("from"); location.href = u.href; return; }
+    if (t.name === "cc-rec") {
+      recRows = t.value === "rows";
+      try { localStorage.setItem("bolster-concepts:record-fields", t.value); } catch {}
+      const d = splitMQ.matches ? $("#detail") : $("#peek"), r = d && $(".detail-scroll", d);
+      if (openId && r) { const tp = document.createElement("template"); tp.innerHTML = detailHtml(openId); r.innerHTML = tp.content.querySelector(".detail-scroll").innerHTML; fitActions(d); }
+    }
     if (t.id === "cc-cards") { tactile(t.checked); try { localStorage.setItem("bolster-concepts:tactile", t.checked ? "on" : "off"); } catch {} }
   });
 
@@ -1728,6 +1755,7 @@ ${JSON.stringify(v)}`;
     try { on = localStorage.getItem("bolster-concepts:tactile") !== "off"; } catch {}
     tactile(on);
   }
+  { const r = $(`input[name="cc-rec"][value="${recRows ? "rows" : "sheet"}"]`); if (r) r.checked = true; }
   addEventListener("hashchange", load);
   load();
 })();

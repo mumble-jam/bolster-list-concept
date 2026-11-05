@@ -3,6 +3,10 @@
    tuners, the About dialog, the recipe note) and what's still being tried (the grid on the page). */
 
 @layer concept {
+  /* the record's fields on the system's rows, to compare (Record fields → Rows): a description list as a grid */
+  .detail-rows { display: grid; margin: 0; }
+  .detail-rows .detail-link { max-inline-size: 100%; }
+
   /* display settings: its icon sized by height like the header's others, a 1px optical nudge, its tooltip
      flush right so the card's edge doesn't clip it; icon-only on phones */
   #view-options > svg { inline-size: auto; block-size: 1rem; flex: none; translate: 0 1px; }

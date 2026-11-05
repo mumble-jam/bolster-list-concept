@@ -435,12 +435,12 @@ window.BDS_RECIPE = (() => {
       actions: recordActions(x),
       // the records it connects to, as links (L-related)
       related: [
-        ...(d.record?.related || []).filter((k) => byKey[k] && x[k]).map((k) => [byKey[k].label || cap(k), typeof x[k] !== "object" ? { name: text(x[k]) } : byKey[k].party ? x[k] : { id: x[k].id, name: x[k].name }]), // an avatar only for a person or company (D87)
+        ...(d.record?.related || []).filter((k) => byKey[k] && x[k]).map((k) => [byKey[k].label || cap(k), typeof x[k] !== "object" ? { name: text(x[k]) } : byKey[k].party ? x[k] : { id: x[k].id, name: x[k].name }, k]), // an avatar only for a person or company (D87)
         // lists that point here (a vendor's orders), with a count; an inactive or new record has fewer (L-sample)
-        ...(d.record?.has || []).map((h, j) => { const n = x._has?.[j] ?? 0, one = h.thing.replace(/-/g, " "); return [h.label, n ? { name: fmt.plural(n, one, `${one}s`) } : { name: "None yet", none: true }]; }), // counted in the thing's own noun
+        ...(d.record?.has || []).map((h, j) => { const n = x._has?.[j] ?? 0, one = h.thing.replace(/-/g, " "); return [h.label, n ? { name: fmt.plural(n, one, `${one}s`) } : { name: "None yet", none: true }, h.thing]; }), // counted in the thing's own noun
       ],
       // each field reads as its type does in the list (L-types): money as money, a date as a date
-      fields: recordFields.filter((k) => byKey[k]).map((k) => [byKey[k].label || cap(k), byKey[k].type === "person" ? person(x[k]) : byKey[k].type === "status" ? badge(statusMap[x[k]]) : byKey[k].type === "kinds" ? esc(kindsText(byKey[k], x[k]) || "–") : byKey[k].type === "flags" && !x[k]?.length ? "Clear" /* as the filter names it */ : x[k] == null || x[k] === "" ? "–" : cellOf(byKey[k], { statusMap })(x)]),
+      fields: recordFields.filter((k) => byKey[k]).map((k) => [byKey[k].label || cap(k), byKey[k].type === "person" ? person(x[k]) : byKey[k].type === "status" ? badge(statusMap[x[k]]) : byKey[k].type === "kinds" ? esc(kindsText(byKey[k], x[k]) || "–") : byKey[k].type === "flags" && !x[k]?.length ? "Clear" /* as the filter names it */ : x[k] == null || x[k] === "" ? "–" : cellOf(byKey[k], { statusMap })(x), k]),
       doc: d.record?.document ? { label: d.record.document, name: `${d.record.document.replace(/\s+/g, "-")}-${idKey ? text(x[idKey]).replace(/^#/, "") : x.id}.pdf`, view: `View ${d.record.document.toLowerCase()}` } : null,
     });
 
