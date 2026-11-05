@@ -1,0 +1,227 @@
+/* Bolton's chat: his head in the top bar opens it; it slides in from the right under the bar, and he pops up in its
+   corner to wave. The drawings are made for paper, so the figure keeps its own white. */
+.bt-state { display: contents; }
+/* his head, the same size as the avatar beside it (36px). No grey circle on hover or while the chat is open, which
+   crowded his hair: pointing at him, he leans in a touch instead */
+.bs-assistant.bt-bar { padding: 0; inline-size: 2.125rem; block-size: 2.125rem; border-radius: var(--radius-full); }
+.bs-top-actions:has(> .bt-bar) { gap: var(--space-3); }   /* his head and your avatar, 12 apart (feedback, 29 Oct) */
+.bs-assistant.bt-bar, .bs-assistant.bt-bar:is(:hover, :active, [aria-expanded="true"]) { background: none; }
+.bs-assistant.bt-bar { display: grid; place-items: center; overflow: visible; }
+.bs-assistant.bt-bar .av { margin: -.5px; transition: scale var(--duration-fast) var(--ease-standard); }
+/* in the bar he keeps still beside the avatar (he only blinks): no idle bob */
+.bs-assistant.bt-bar [data-state="idle"] .av .h-all { animation: none; }
+.bs-assistant.bt-bar [data-state="idle"] .av .h-eyes { animation: none; }   /* still in the bar; he looks around only when you point at him */
+@media (hover: hover) { .bs-assistant.bt-bar:hover .av { scale: 1.08; } }
+.bs-assistant.bt-bar .av { pointer-events: none; }
+.bs-assistant.bt-bar .av svg, .bt-chat-head .av svg { inline-size: 100%; block-size: 100%; max-inline-size: none; }
+.bs-assistant.bt-pop .av { animation: bt-pop .6s cubic-bezier(.33, 0, .2, 1); }
+@keyframes bt-pop { 0% { scale: 1; } 30% { scale: .9; } 65% { scale: 1.06; } 100% { scale: 1; } }
+
+.bt-chat {
+  /* the input's outline: a deep gold that clears 3:1 on the white chat (3.4) and on the dark one (3.7); the brand
+     yellow vanishes on white. Not a system token yet */
+  --bt-outline: #b58300;
+  position: fixed; inset-inline-end: 0; inset-block-end: 0; z-index: var(--z-shell);   /* a side panel over the page and its sticky headers */
+  inline-size: min(24rem, 100vw); display: flex; flex-direction: column;
+  background: var(--color-surface-raised); color: var(--color-content-primary);
+  border-inline-start: 1px solid var(--color-line-default); box-shadow: var(--shadow-overlay);
+  translate: 100% 0; transition: translate .38s cubic-bezier(.3, 0, .2, 1);
+}
+.bt-chat[data-open] { translate: 0 0; transition: translate .5s cubic-bezier(.22, 1, .36, 1); }
+.bt-chat[hidden] { display: none; }
+.bt-chat-top { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-block-end: 1px solid var(--color-line-subtle); font: var(--font-weight-medium) var(--text-base)/var(--leading-base) var(--font-display); }
+.bt-chat-head .av { opacity: 0; scale: .8; transition: opacity .3s, scale .5s cubic-bezier(.22, 1.2, .36, 1); }
+.bt-chat[data-open] .bt-chat-head .av { opacity: 1; scale: 1; transition-delay: .25s; }
+.bt-chat-x { margin-inline-start: auto; border: 0; background: none; color: inherit; font-size: 1.5rem; line-height: 1; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); cursor: pointer; }
+.bt-chat-x:hover { background: var(--color-surface-hover); }
+.bt-chat-x:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+.bt-chat-log { flex: 1; padding: var(--space-5) var(--space-4); overflow: auto; }
+.bt-chat-msg { margin: 0; min-block-size: 1.5em; padding-inline-start: var(--space-3); border-inline-start: 3px solid var(--color-feedback-success-accent); }
+.bt-chat-input { position: relative; z-index: 2; margin: var(--space-3); padding: var(--space-2); display: flex; align-items: center; gap: var(--space-1); border: var(--border-width-strong) solid var(--bt-outline);   /* its buttons sit 8 clear of the edge every way, inside the border: a ring around a circle that shares its centre (D35) */ border-radius: var(--radius-full); color: var(--color-content-tertiary); background: var(--color-surface-raised); }
+
+/* he stands behind the input, in the corner, and only his top half shows */
+.bt-peek { position: absolute; inset-inline-end: -2rem; inset-block-end: 2.5rem; inline-size: 16rem; padding-inline-start: 3rem; box-sizing: border-box; block-size: 12.5rem; overflow: hidden; pointer-events: none; z-index: 1;
+}
+/* his cut-off waist fades into the chat above the input, so the drawing's cut edge (the ends of his sleeve and shirt)
+   never shows. A veil in the chat's colour over him, not a mask: a mask turns him into a picture and softens his lines */
+.bt-peek::after { content: ""; position: absolute; inset-inline: 0; inset-block-end: 0; block-size: 4.5rem; z-index: 1;   /* opaque from 2.25rem up, over the input's top edge */
+  background: linear-gradient(to bottom, transparent, var(--color-surface-raised) 50%); }
+.bt-peek.stages { display: block; }
+/* after waving he bends his arm onto his drawn salute, then the drawing takes over in a short cross-fade */
+.bt-peek[data-arm="bend"] .body-wave { display: inline; }
+.bt-peek[data-arm="bend"] .body-full { display: none; }
+.bt-peek[data-arm="bend"] :is(.laugh-arc, .fold-pit) { display: inline; }
+.bt-peek[data-arm="bend"] :is(circle.fold-full, .wave-fore > .fold-full) { display: none; }
+.bend-cover { display: none; }
+.bt-peek[data-arm="bend"] .bend-cover { display: inline; }
+/* a short laugh when he's poked: his face and shoulders laugh, the drawn arm stays at his brow */
+.bt-peek[data-arm="rest"][data-state="laughing"] .body-full { display: inline; }
+.bt-peek[data-arm="rest"][data-state="laughing"] .body-wave { display: none; }
+/* his eyes open (and close in a laugh) softly rather than snapping */
+/* his face changes (eyes opening, a wink, a new mouth) fade rather than snap, in the chat and on a page */
+:is(.bt-peek, .bt-follow) :is(.h-eyes, .eyes-happy, .eye-r, .h-mouth > *) { transition: opacity .22s ease; }
+.bt-peek-slot { display: block; translate: 0 100%; transition: translate .3s cubic-bezier(.5, 0, .7, .4); }
+.bt-peek-slot svg { display: block; inline-size: 13rem; block-size: auto; }
+/* he rises into the corner in one long, easing move (a whisker of overshoot, no bounce) as the panel settles */
+.bt-chat[data-open] .bt-peek-slot { translate: 0 1.125rem;   /* whole pixels, so he is never drawn between them */
+  transition: translate 1s cubic-bezier(.2, 1.08, .3, 1) .18s; }
+/* his hello, in a yellow speech bubble beside him: rounded, its tail pointing at him from the corner nearest his face */
+.bt-peek-say { position: absolute; z-index: 3; inset-inline-end: 10.25rem; inset-block-end: 9.25rem; inline-size: max-content; max-inline-size: 12.5rem; min-block-size: 2.75rem; margin: 0;
+  padding: var(--space-2) var(--space-3); border-radius: var(--radius-lg) var(--radius-lg) var(--radius-xs) var(--radius-lg);
+  background: var(--color-action-brand); color: var(--color-content-on-brand); font-weight: var(--font-weight-medium); font-size: var(--text-sm); line-height: var(--leading-sm);
+  box-shadow: var(--shadow-raised);
+  opacity: 0; scale: .6; translate: .5rem .5rem; transform-origin: 100% 100%; transition: opacity .15s, scale .2s, translate .2s; pointer-events: none; }
+.bt-peek-say::after { content: ""; position: absolute; inset-inline-end: -0.6rem; inset-block-end: 0; inline-size: 0.75rem; block-size: 0.75rem;
+  background: inherit; clip-path: polygon(0 0, 100% 100%, 0 100%); }
+/* the bubble grows out of its tail as he lands (4 Nov: it showed empty for a moment before its words; now they start with it) */
+.bt-chat[data-open] .bt-peek-say { opacity: 1; scale: 1; translate: 0 0; transition: opacity .22s ease-out .72s, scale .6s cubic-bezier(.2, 1.3, .35, 1) .72s, translate .6s cubic-bezier(.2, 1, .3, 1) .72s; }
+@media (prefers-reduced-motion: reduce) {
+  .bt-chat, .bt-peek-slot, .bt-peek-say, .bt-chat-head .av { transition: none !important; }
+  .bs-assistant.bt-pop .av { animation: none; }
+}
+/* a concept's floating tools step aside while the chat is open */
+body:has(.bt-chat[data-open]) .concept-controls { inset-inline-end: calc(min(24rem, 100vw) + var(--space-4)); transition: inset-inline-end .3s; }
+/* light or dark chat: the panel picks its own scheme, the tokens follow (light-dark()) */
+.bt-chat[data-scheme="light"] { color-scheme: light; }
+.bt-chat[data-scheme="dark"] { color-scheme: dark; }
+.bt-chat-scheme { border: 0; background: none; color: inherit; padding: var(--space-1); border-radius: var(--radius-sm); cursor: pointer; display: inline-grid; place-items: center; }
+.bt-chat-scheme + .bt-chat-x { margin-inline-start: 0; }
+.bt-chat-scheme { margin-inline-start: auto; }
+.bt-chat-scheme:hover { background: var(--color-surface-hover); }
+.bt-chat-scheme:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+
+/* pretend conversations: chips to try, your message on the right, his on the left, a tick when he's done */
+.bt-chat-log { display: grid; align-content: start; gap: var(--space-4); }
+.bt-try { display: grid; gap: var(--space-2); }
+.bt-try-label { font-size: var(--text-xs); color: var(--color-content-tertiary); font-weight: var(--font-weight-medium); }
+.bt-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.bt-chip { border: 1px solid var(--color-line-default); background: var(--color-surface-default); color: var(--color-content-primary); border-radius: var(--radius-full); padding: var(--space-1) var(--space-3); font-size: var(--text-sm); cursor: pointer; text-align: start; }
+.bt-chip:hover:not(:disabled) { background: var(--color-surface-hover); }
+.bt-chip:disabled { opacity: .5; cursor: default; }
+.bt-chip:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+.bt-msgs { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--space-3); }
+.bt-msg { max-inline-size: 85%; padding: var(--space-2) var(--space-3); border-radius: var(--radius-lg); font-size: var(--text-sm); line-height: var(--leading-sm); animation: bt-in .25s var(--ease-out); }
+.bt-you { justify-self: end; background: var(--color-surface-sunken); border-end-end-radius: var(--radius-xs); }
+.bt-bolton { justify-self: start; background: var(--color-surface-default); border: 1px solid var(--color-line-subtle); border-end-start-radius: var(--radius-xs); position: relative; }
+.bt-bolton.bt-ok::after { content: ""; position: absolute; inset-inline-end: -0.5rem; inset-block-start: -0.5rem; inline-size: 1.25rem; block-size: 1.25rem; border-radius: 50%;
+  background: var(--color-feedback-success-accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M4 8.5l2.5 2.5L12 5.5' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 0.875rem no-repeat;
+  animation: bt-tick .45s cubic-bezier(.3, 1.6, .5, 1); }
+.bt-dots { justify-self: start; display: inline-flex; gap: 4px; padding: var(--space-3); background: var(--color-surface-default); border: 1px solid var(--color-line-subtle); border-radius: var(--radius-lg); }
+.bt-dots::before, .bt-dots::after, .bt-dots { --_d: var(--color-content-tertiary); }
+.bt-dots::before { content: "• • •"; color: var(--_d); letter-spacing: 2px; animation: bt-dots 1s steps(3) infinite; }
+@keyframes bt-in { from { opacity: 0; translate: 0 6px; } }
+@keyframes bt-tick { from { scale: 0; } }
+@keyframes bt-dots { 0% { opacity: .35; } 50% { opacity: 1; } 100% { opacity: .35; } }
+.bt-input { flex: 1; min-inline-size: 0; border: 0; background: none; color: var(--color-content-primary); font-size: var(--text-sm); padding: var(--space-2) var(--space-1); outline: none; }
+.bt-input::placeholder { color: var(--color-content-tertiary); }
+/* no ring while you type in it (feedback, 27 Oct): the caret shows where you are */
+.bt-ib, .bt-send { flex: none; inline-size: 2.25rem; block-size: 2.25rem; border-radius: 50%; border: 0; display: grid; place-items: center; cursor: pointer; padding: 0; }
+.bt-ib { background: none; color: var(--color-content-secondary); }
+.bt-ib:hover { background: var(--color-action-ghost-hover); color: var(--color-content-primary); }   /* the system's ghost button hover */
+.bt-ib svg, .bt-send svg { display: block; }
+/* send: quiet while empty, the system's bright blue (accent) once there's a message */
+/* the right of the box is one round button that changes, as in Bolster's own chat (your screens, 27 Oct): with nothing
+   typed it's the mic on a yellow circle; once there's text it's send, white on a blue circle */
+.bt-send { background: var(--color-action-accent); color: var(--color-content-on-accent); transition: background-color var(--duration-fast) var(--ease-standard), scale .15s; }
+.bt-send:hover { background: var(--color-action-accent-hover); }
+/* the mic: on white, the box's own deep gold with a white icon (Bolster's yellow is too faint on white, and black was too
+   heavy); on the dark chat, yellow with a black icon, as in Bolster's dark chat */
+.bt-chat-input :is(.bt-ib, .bt-send) { inline-size: 2rem; block-size: 2rem; }   /* 32 in the 52 box, so the gap around reads as a gap, as in the reference */
+.bt-chat-input .bt-input { padding-block: 0; }   /* the button sets the box's height, not the text */
+.bt-chat-input .bt-ib[aria-label^="Speak"] { background: var(--bt-mic, #b58300); color: var(--color-content-on-accent); }
+/* on the dark chat too: the gold with a white mic, not Bolster yellow (feedback, 27 Oct) */
+.bt-chat-input .bt-ib[aria-label^="Speak"]:hover { filter: brightness(1.12); }
+.bt-chat-input:has(.bt-input:placeholder-shown) .bt-send { display: none; }
+.bt-chat-input:not(:has(.bt-input:placeholder-shown)) .bt-ib[aria-label^="Speak"] { display: none; }
+.bt-send:disabled { cursor: default; }
+
+.bt-send.bt-press { scale: .88; }
+.bt-ib:focus-visible, .bt-send:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+.bt-chat-input { color: inherit; }
+/* the bubble beside him: "Done!" with a tick */
+.bt-peek-say[data-mood="done"] .bt-say-text::before { content: "✓ "; }
+.bt-peek-say[data-mood] { animation: bt-say .4s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes bt-say { 0% { scale: .85; } 100% { scale: 1; } }
+/* done on the page: the thing he changed glows green once */
+.bt-done-flash { animation: bt-glow 1.6s var(--ease-out); }
+@keyframes bt-glow { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-feedback-success-accent) 70%, transparent); background-color: var(--color-feedback-success-surface); }
+  60% { box-shadow: 0 0 0 8px transparent; background-color: var(--color-feedback-success-surface); } 100% { box-shadow: 0 0 0 0 transparent; } }
+/* on the dark chat his black outline sinks into the background: a white outline around the whole figure (and the small
+   head) keeps his shape, like a sticker */
+.bt-peek-slot { position: relative; }
+.bt-peek-slot .bt-halo { position: absolute; inset: 0 auto auto 0; }   /* its display follows his (which drawing shows) */
+.bt-peek-slot > svg:not(.bt-halo) { position: relative; }   /* he paints over his outline */
+.bt-chat:not([data-scheme="dark"]) .bt-halo { visibility: hidden; }
+/* the outline is drawn from his silhouette (the copy's shape, softened and cut sharp again by a filter of its own), so it's
+   one even, round-cornered line all the way round, whatever his arm does, and it keeps step with him through the wave.
+   Only the copy is filtered: he stays vector on top. Its own id per copy: bolton-chat.js */
+/* suggestion chips, compact: a page's one line of them (Getting started's chat box) */
+.bt-chips-compact .bt-chip { flex: none; white-space: nowrap; font-size: var(--text-xs); line-height: var(--leading-xs); padding: var(--space-1) var(--space-3); }
+.bt-chat[data-scheme="dark"] .bt-chat-head .av svg { filter: drop-shadow(1px 0 0 #fff) drop-shadow(-1px 0 0 #fff) drop-shadow(0 1px 0 #fff) drop-shadow(0 -1px 0 #fff); }
+/* small heads (top bar, chat header): at 32-44px his 14-unit lines fall under a pixel and go soft, so every ink shape
+   gets a screen-pixel hairline of its own ink on top of the avatar's own (1.4px), and the features a touch too */
+.bt-state .av [fill="#232021"] { stroke-width: 2px; }
+.bt-state .av :is(.eye, .ear) { stroke: #232021; stroke-width: .9px; vector-effect: non-scaling-stroke; }
+.bt-state .av .h-mouth .mouth { stroke-width: .25px; }   /* the mouth too, a little under the other lines, or it reads thinner than his eyes */
+/* his words fade up in turn as a message arrives */
+.bt-w { display: inline-block; animation: bt-word .34s cubic-bezier(.2, .7, .3, 1) both; }
+@keyframes bt-word { from { opacity: 0; translate: 0 .3em; filter: blur(2px); } }
+@media (prefers-reduced-motion: reduce) { .bt-w { animation: none; } }
+/* on a page (Getting started), when he laughs only his face and shoulders do: his drawn arm stays at his brow, so
+   nothing jumps (here, not in the page's own CSS, because his drawing's rules sit outside the page's layers) */
+.bt-follow[data-state="laughing"] .body-full { display: inline; }
+.bt-follow[data-state="laughing"] .body-wave { display: none; }
+/* small sizes (the chat, a page, the bar): his talking and laughing mouths without the cheek tick, which at this
+   size reads as a stray line on his lip */
+:is(.bt-peek, .bt-follow, .bt-state) .mouth-tick { display: none; }
+/* the chat box on a page: no margin of its own, the page places it */
+.bt-ask .av :is(.h-all, .h-eyes) { animation: none; }   /* his head in a page's chat box keeps still, like the bar's */
+.bt-ask { --bt-outline: #b58300; margin: 0; inline-size: 100%; }   /* the page that holds it sets its width */   /* the chat's own gold edge */
+
+/* messages ease in; his answer's words fade up one after another */
+.bt-msg { animation: bt-msg-in .32s cubic-bezier(.2, .7, .3, 1) both; }
+@keyframes bt-msg-in { from { opacity: 0; translate: 0 6px; } }
+.bt-msg .bt-w { display: inline-block; animation: bt-word .34s cubic-bezier(.2, .7, .3, 1) both; animation-delay: calc(var(--i) * 70ms); }
+@media (prefers-reduced-motion: reduce) { .bt-msg, .bt-msg .bt-w { animation: none; } }
+
+/* the wave from his drawn salute (bolton-chat.js, salRig): his forearm turns about his elbow, up from the salute, two
+   waves, and back down onto it; the hand turns about the wrist on top of it, a beat behind, so it follows through.
+   Every swing eases in and out on one curve, the last one slowest, so he lands on the drawing softly */
+.body-sal { display: none; }
+.bt-peek[data-arm="sal"] .body-sal { display: inline; }
+.bt-peek[data-arm="sal"] svg:has(.body-sal) :is(.body-full, .body-wave) { display: none !important; }
+.sal-arm { transform-origin: 170px 512px; }
+.sal-fore { transform-origin: 217.05px 385.35px; }
+.bt-peek[data-arm="sal"] .sal-arm { animation: bt-sal-arm 3.1s .25s both; }
+.bt-peek[data-arm="sal"] .sal-fore { animation: bt-sal-wave 3.1s .25s both; }
+.bt-peek[data-arm="sal"] .sal-tips { animation: bt-sal-tips 3.1s .25s both; }
+/* he leans into the wave from his waist, and back, on the same curve (4 Nov): the halo leans with him */
+.bt-peek-slot > svg { transform-box: view-box; transform-origin: 50% 100%; }
+.bt-peek[data-arm="sal"] .bt-peek-slot > svg { animation: bt-sal-lean 3.1s .25s both; }
+@keyframes bt-sal-lean {
+  0% { rotate: 0deg; animation-timing-function: cubic-bezier(.33, 0, .25, 1); }
+  22% { rotate: -2.2deg; animation-timing-function: cubic-bezier(.37, 0, .63, 1); }
+  48% { rotate: -1.2deg; animation-timing-function: cubic-bezier(.37, 0, .63, 1); }
+  70% { rotate: -2deg; animation-timing-function: cubic-bezier(.45, 0, .25, 1); }
+  100% { rotate: 0deg; }
+}
+@media (prefers-reduced-motion: reduce) { .bt-peek[data-arm="sal"] .bt-peek-slot > svg { animation: none; } }
+@keyframes bt-sal-tips { 0%, 100% { opacity: 1; } 5%, 86% { opacity: 0; } }
+/* smaller swings than before (30 Oct: the raised arm left his frame and the elbow showed a gap at the top of the swing),
+   all on one sine-like curve so they flow into each other, and the hand a beat behind the arm, so it follows through */
+@keyframes bt-sal-arm {
+  0% { rotate: 0deg; animation-timing-function: cubic-bezier(.33, 0, .25, 1); }
+  20% { rotate: -17deg; animation-timing-function: cubic-bezier(.37, 0, .63, 1); }
+  37% { rotate: -9deg; animation-timing-function: cubic-bezier(.37, 0, .63, 1); }
+  54% { rotate: -18deg; animation-timing-function: cubic-bezier(.37, 0, .63, 1); }
+  71% { rotate: -9deg; animation-timing-function: cubic-bezier(.45, 0, .25, 1); }
+  100% { rotate: 0deg; }
+}
+@keyframes bt-sal-wave {
+  0% { rotate: 0deg; animation-timing-function: cubic-bezier(.33, 0, .25, 1); }
+  24% { rotate: -18deg; animation-timing-function: cubic-bezier(.37, 0, .63, 1); }
+  41% { rotate: -5deg; animation-timing-function: cubic-bezier(.37, 0, .63, 1); }
+  58% { rotate: -19deg; animation-timing-function: cubic-bezier(.37, 0, .63, 1); }
+  75% { rotate: -5deg; animation-timing-function: cubic-bezier(.45, 0, .25, 1); }
+  100% { rotate: 0deg; }
+}

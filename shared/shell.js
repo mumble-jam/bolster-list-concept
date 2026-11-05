@@ -689,9 +689,9 @@ window.BolsterShell = (() => {
       .catch(() => { L.hidden = true; done(); });
   }
 
-  // links every page has, so a page passes only its own: Getting started, the homepage (every concept sits one folder
-  // under concepts/, beside it)
-  const SHARED_LINKS = {};
+  // links every page has, so a page passes only its own: Getting started, the homepage, found beside the shell's folder
+  // (concepts/getting-started/ in the repo, /getting-started/ once published)
+  const SHARED_LINKS = { "getting-started": new URL("../getting-started/index.html", document.currentScript.src).href };
   function mount(o) {
     opts = { ...opts, ...o, links: { ...SHARED_LINKS, ...o.links } };
     shell = document.querySelector(".app-shell");
@@ -739,7 +739,7 @@ window.BolsterShell = (() => {
       const sec = (title, id) => `<section class="cc-sec"${id ? ` id="${id}"` : ""}><h3 class="cc-h">${title}</h3></section>`;
       cc.innerHTML = (fields.length ? sec("This page", "cc-page") : "") + sec("Theme", "cc-theme") + sec("Loading screen", "cc-shell") + `<nav class="cc-links" aria-label="About the concepts"></nav>`;
       cc.querySelector("#cc-page")?.append(...fields);
-      // the links as rows, About first, All concepts last
+      // the links as rows, About first
       const nav = cc.querySelector(".cc-links");
       for (const el of [...links.sort((x, y) => y.matches("[data-open-dialog]") - x.matches("[data-open-dialog]")), hub].filter(Boolean)) {
         el.className = "cc-link"; el.removeAttribute("data-variant"); el.removeAttribute("data-size");

@@ -1,0 +1,1126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolster page types</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../system/bolster.css?v=d2cd6d94">
+<link rel="stylesheet" href="../system/specimens/specimen.css?v=d2cd6d94">
+<style>
+  /* ---------- wireframe palette: skeleton style, but with real contrast ---------- */
+  :root {
+    --wf-bg:      light-dark(#ebe8e3, #1d1a1b);
+    --wf-chrome:  light-dark(#2a2628, #050405);
+    --wf-ink:     light-dark(#6b6467, #4b4547);  /* blocks on the dark chrome */
+    --wf-side:    light-dark(#d8d3cc, #2c282a);
+    --wf-surface: light-dark(#ffffff, #3a3537);
+    --wf-line:    light-dark(#a39c94, #625b5e);
+    --wf-block:   light-dark(#c6c0b8, #504a4c);
+    --wf-text:    light-dark(#8e8780, #7c7577);
+    --wf-strong:  light-dark(#45403d, #b8b1b3);
+    --wf-brand:   #f5c518;
+    --wf-hl:      light-dark(#2f5cff, #7d9bff);
+    --wf-scrim:   light-dark(rgb(20 18 19 / .45), rgb(0 0 0 / .6));
+  }
+
+  .pt-main { max-width: 80rem; }
+  .spec-header h1 { white-space: nowrap; }
+  @media (width < 560px) { .spec-header .pt-alt { display: none; } }
+  .pt-toc { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+  .pt-toc a { font-size: var(--text-sm); }
+
+  /* page-type article */
+  .pt { display: grid; gap: var(--space-5); padding-top: var(--space-8); border-top: 1px solid var(--color-line-default); scroll-margin-top: var(--space-16); }
+  .pt-head { display: grid; gap: var(--space-2); max-width: 75ch; }
+  .pt-family { font-size: var(--text-xs); font-weight: 500; color: var(--color-content-tertiary); }
+  .pt-head h2 { font-size: var(--text-2xl); line-height: var(--leading-2xl); }
+  .pt-head p { color: var(--color-content-secondary); }
+  .pt-routes { font-family: var(--font-mono); font-size: var(--text-xxs); line-height: var(--leading-xs); color: var(--color-content-tertiary); }
+
+  .pt-frames { display: grid; gap: var(--space-5); grid-template-columns: minmax(0, 3fr) minmax(0, 1fr); align-items: start; }
+  .pt-frames[data-single] { grid-template-columns: minmax(0, 1fr); max-width: 60rem; }
+  @media (width < 720px) { .pt-frames { grid-template-columns: minmax(0, 1fr); } .pt-frames .frame[data-phone] { max-width: 15rem; } }
+  .frame { margin: 0; display: grid; gap: var(--space-2); }
+  .frame figcaption { font-size: var(--text-xs); color: var(--color-content-tertiary); }
+
+  .pt-body { display: grid; gap: var(--space-6); grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); }
+  .pt-body h3 { font-size: var(--text-md); line-height: var(--leading-md); margin-bottom: var(--space-2); }
+  .pins { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--space-3); }
+  .pins li { display: grid; grid-template-columns: 1.5rem 1fr; gap: var(--space-2); align-items: start; }
+  .pins li::before { content: attr(data-n); display: grid; place-items: center; inline-size: 1.25rem; block-size: 1.25rem; margin-top: 1px;
+    border-radius: 50%; background: var(--wf-hl); color: #fff; font: 600 11px/1 var(--font-sans); }
+  .pins b { font-weight: 500; }
+  .issues { padding-left: var(--space-5); margin: 0; display: grid; gap: var(--space-2); color: var(--color-content-secondary); }
+  .variants { padding-left: var(--space-5); margin: 0; display: grid; gap: var(--space-2); }
+
+  .examples { display: flex; gap: var(--space-3); overflow-x: auto; padding-bottom: var(--space-2); }
+  .examples a { flex: none; display: grid; gap: var(--space-1); text-decoration: none; color: var(--color-content-secondary); font-size: var(--text-xs); }
+  .examples img { block-size: 9rem; inline-size: auto; border-radius: var(--radius-md); border: 1px solid var(--color-line-default); background: var(--wf-bg); }
+  .examples a:hover img { border-color: var(--color-line-strong, var(--wf-line)); }
+  .no-shot { font-size: var(--text-xs); color: var(--color-content-tertiary); }
+
+  /* matrix */
+  .matrix { border-collapse: collapse; font-size: var(--text-sm); min-width: 56rem; }
+  .matrix th, .matrix td { padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--color-line-subtle); text-align: center; }
+  .matrix th:first-child, .matrix td:first-child { text-align: left; white-space: nowrap; }
+  .matrix thead th { font-size: var(--text-xs); font-weight: 500; color: var(--color-content-secondary); vertical-align: bottom; min-width: 5rem; max-width: 7rem; line-height: 1.3; }
+  .matrix .core { color: var(--wf-hl); font-size: 1rem; }
+  .matrix .some { color: var(--color-content-tertiary); font-size: 1rem; }
+
+  /* legend */
+  .legend { display: grid; gap: var(--space-3); grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr)); }
+  .legend > div { display: flex; align-items: center; gap: var(--space-3); font-size: var(--text-sm); }
+  .sw { inline-size: 2.5rem; block-size: 1.25rem; border-radius: 4px; flex: none; position: relative; }
+
+  .overlay-grid { display: grid; gap: var(--space-5); grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); }
+  .overlay-grid .frame figcaption { font-size: var(--text-sm); color: var(--color-content-secondary); }
+  .overlay-grid .frame figcaption b { color: var(--color-content-primary); font-weight: 500; display: block; }
+
+  /* ---------- wireframe primitives ---------- */
+  .wf-wrap { container-type: inline-size; }
+  .wf {
+    --s: calc(var(--k, 1) * 1cqi);
+    position: relative; display: grid; aspect-ratio: 16 / 10;
+    grid-template-areas: "top top top" "rail side main";
+    grid-template-columns: calc(4 * var(--s)) calc(17 * var(--s)) minmax(0, 1fr);
+    grid-template-rows: calc(4.2 * var(--s)) 1fr;
+    background: var(--wf-bg); border: 1px solid var(--wf-line); border-radius: calc(1 * var(--s));
+  }
+  .wf[data-shell="noside"] { grid-template-columns: calc(4 * var(--s)) 0 minmax(0, 1fr); }
+  .wf[data-shell="toponly"] { grid-template-areas: "top" "main"; grid-template-columns: minmax(0, 1fr); }
+  .wf[data-shell="bare"] { grid-template-areas: "main"; grid-template-columns: minmax(0, 1fr); grid-template-rows: 1fr; }
+  .wf[data-phone] { --k: 3.2; aspect-ratio: 9 / 17; grid-template-areas: "top" "main" "bottom"; grid-template-columns: minmax(0, 1fr); grid-template-rows: calc(4.2 * var(--s)) 1fr calc(5 * var(--s)); border-radius: calc(2 * var(--s)); }
+  .wf[data-phone][data-shell="bare"] { grid-template-areas: "main"; grid-template-rows: 1fr; }
+
+  .wf-top { grid-area: top; display: flex; align-items: center; gap: calc(1 * var(--s)); padding: 0 calc(1.2 * var(--s)); background: var(--wf-chrome); border-radius: calc(1 * var(--s) - 1px) calc(1 * var(--s) - 1px) 0 0; }
+  .wf-top i, .wf-rail i, .wf-bottom i { display: block; flex: none; background: var(--wf-ink); }
+  .wf-top .logo { inline-size: calc(1.8 * var(--s)); block-size: calc(1.8 * var(--s)); border-radius: 2px; background: var(--wf-brand); }
+  .wf-top .co { inline-size: calc(8 * var(--s)); block-size: calc(1 * var(--s)); border-radius: 99px; }
+  .wf-top .srch { flex: 0 1 calc(30 * var(--s)); block-size: calc(2.2 * var(--s)); border-radius: calc(.5 * var(--s)); }
+  .wf-top .sp, .wf-rail .sp { flex: 1; background: none; }
+  .wf-top .ic { inline-size: calc(1.6 * var(--s)); block-size: calc(1.6 * var(--s)); border-radius: 50%; }
+  .wf-top .av { inline-size: calc(2.2 * var(--s)); block-size: calc(2.2 * var(--s)); border-radius: 50%; background: var(--wf-text); }
+  .wf-top .back { inline-size: calc(1.6 * var(--s)); block-size: calc(1.6 * var(--s)); border-radius: 3px; }
+
+  .wf-rail { grid-area: rail; display: flex; flex-direction: column; align-items: center; gap: calc(1.4 * var(--s)); padding: calc(1.4 * var(--s)) 0; background: var(--wf-chrome); border-radius: 0 0 0 calc(1 * var(--s) - 1px); }
+  .wf-rail i { inline-size: calc(1.6 * var(--s)); block-size: calc(1.6 * var(--s)); border-radius: 3px; }
+  .wf-rail i.on { background: var(--wf-text); }
+  .wf[data-shell="noside"] .wf-side { display: none; }
+
+  .wf-side { grid-area: side; display: flex; flex-direction: column; gap: calc(1.2 * var(--s)); padding: calc(1.6 * var(--s)) calc(1.4 * var(--s)); background: var(--wf-side); border-right: 1px solid var(--wf-line); min-width: 0; }
+  .wf-side .t { --w: 70%; }
+  .wf-side .sel { background: var(--wf-surface); border-radius: 3px; padding: calc(.6 * var(--s)); margin: 0 calc(-.6 * var(--s)); }
+
+  .wf-main { grid-area: main; position: relative; display: flex; flex-direction: column; gap: calc(1.4 * var(--s)); padding: calc(2 * var(--s)); min-width: 0; }
+  .wf-bottom { grid-area: bottom; display: flex; align-items: center; justify-content: space-around; background: var(--wf-chrome); border-radius: 0 0 calc(2 * var(--s) - 1px) calc(2 * var(--s) - 1px); }
+  .wf-bottom i { inline-size: calc(1.6 * var(--s)); block-size: calc(1.6 * var(--s)); border-radius: 3px; }
+  .wf-bottom i.on { background: var(--wf-brand); }
+
+  .wf .t { display: block; flex: none; block-size: calc(.8 * var(--s)); min-block-size: 3px; border-radius: 99px; background: var(--wf-text); inline-size: var(--w, 60%); }
+  .wf .h { display: block; flex: none; block-size: calc(1.5 * var(--s)); min-block-size: 5px; border-radius: 2px; background: var(--wf-strong); inline-size: var(--w, 30%); }
+  .wf .h.lg { block-size: calc(2 * var(--s)); }
+  .wf .blk { display: block; background: var(--wf-block); border-radius: calc(.6 * var(--s)); block-size: calc(var(--hh, 6) * var(--s)); inline-size: var(--w, auto); flex: none; }
+  .wf .card { display: flex; flex-direction: column; gap: calc(1 * var(--s)); padding: calc(1.4 * var(--s)); background: var(--wf-surface); border: 1px solid var(--wf-line); border-radius: calc(.8 * var(--s)); min-width: 0; }
+  .wf .card.flat { gap: 0; padding: 0; }
+  .wf .ctl { display: block; flex: none; block-size: calc(3 * var(--s)); inline-size: var(--w, auto); background: var(--wf-surface); border: 1.5px solid var(--wf-line); border-radius: calc(.6 * var(--s)); position: relative; }
+  .wf .ctl.chev::before { content: ""; position: absolute; right: calc(.8 * var(--s)); top: 50%; inline-size: calc(.7 * var(--s)); block-size: calc(.7 * var(--s)); border: solid var(--wf-strong); border-width: 0 1.5px 1.5px 0; transform: translateY(-70%) rotate(45deg); }
+  .wf .btn { display: block; flex: none; block-size: calc(3 * var(--s)); inline-size: var(--w, calc(3 * var(--s))); background: var(--wf-strong); border-radius: calc(.6 * var(--s)); position: relative; }
+  .wf .btn.cta { background: var(--wf-brand); }
+  .wf .btn.out { background: var(--wf-surface); border: 1.5px solid var(--wf-line); }
+  .wf .btn.off { background: var(--wf-block); opacity: .7; }
+  .wf .btn.sm { block-size: calc(2.2 * var(--s)); }
+  .wf .dot { display: block; flex: none; inline-size: calc(2.2 * var(--s)); block-size: calc(2.2 * var(--s)); border-radius: 50%; background: var(--wf-block); }
+  .wf .dot.sm { inline-size: calc(1.2 * var(--s)); block-size: calc(1.2 * var(--s)); }
+  .wf .dash { display: block; flex: none; inline-size: calc(1.8 * var(--s)); block-size: calc(1.8 * var(--s)); border-radius: 50%; border: 1.5px dashed var(--wf-line); }
+  .wf .box { display: block; flex: none; inline-size: calc(1.4 * var(--s)); block-size: calc(1.4 * var(--s)); border-radius: 2px; border: 1.5px solid var(--wf-line); background: var(--wf-surface); }
+  .wf .box.on { background: var(--wf-strong); border-color: var(--wf-strong); }
+  .wf .pill { display: block; flex: none; inline-size: var(--w, calc(5 * var(--s))); block-size: calc(1.6 * var(--s)); border-radius: 99px; background: var(--wf-block); border: 1px solid var(--wf-line); }
+  .wf .seg { display: flex; flex: none; gap: 2px; padding: 2px; background: var(--wf-block); border-radius: calc(.6 * var(--s)); block-size: calc(3 * var(--s)); position: relative; }
+  .wf .seg i { display: block; inline-size: calc(var(--sw, 5) * var(--s)); border-radius: calc(.4 * var(--s)); }
+  .wf .seg i.on { background: var(--wf-surface); }
+  .wf .row { display: flex; align-items: center; gap: calc(1 * var(--s)); min-width: 0; }
+  .wf .col { display: flex; flex-direction: column; gap: calc(1 * var(--s)); min-width: 0; }
+  .wf .grow { flex: 1 1 0; min-width: 0; }
+  .wf .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: calc(1.6 * var(--s)); }
+  .wf .line { border-top: 1px solid var(--wf-line); }
+  .wf .tr { display: flex; align-items: center; gap: calc(1.2 * var(--s)); padding: calc(.9 * var(--s)) calc(1.2 * var(--s)); border-bottom: 1px solid var(--wf-block); position: relative; }
+  .wf .tr.sel { background: var(--wf-block); }
+  .wf .tr.head { background: var(--wf-bg); }
+  .wf .tr.bulk { background: var(--wf-chrome); }
+  .wf .tr.bulk .t { background: var(--wf-ink); }
+  .wf .center { align-items: center; text-align: center; }
+  .wf .edge { border-left: calc(.5 * var(--s)) solid var(--wf-strong); }
+  .wf .rule { border-top: calc(.5 * var(--s)) solid var(--wf-strong); }
+  .wf .empty { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(1 * var(--s)); border: 1.5px dashed var(--wf-line); border-radius: calc(.8 * var(--s)); }
+  .wf .scrim { position: absolute; inset: 0; background: var(--wf-scrim); border-radius: inherit; z-index: 1; }
+  .wf .over { position: absolute; z-index: 2; }
+  .wf .fade { mask-image: linear-gradient(to bottom, #000 60%, transparent); }
+
+  /* interaction zone: dashed outline plus a numbered pin */
+  .wf .hl { outline: 2px dashed var(--wf-hl); outline-offset: 2px; position: relative; }
+  .wf .hl::after {
+    content: attr(data-pin); position: absolute; z-index: 5; top: -10px; left: -10px;
+    inline-size: 18px; block-size: 18px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--wf-hl); color: #fff; font: 600 11px/1 var(--font-sans, system-ui);
+    box-shadow: 0 0 0 2px var(--wf-bg);
+  }
+  .wf .hl[data-pin-at="right"]::after { left: auto; right: -10px; }
+  .wf .hl[data-pin-at="bottom"]::after { top: auto; bottom: -10px; }
+  .wf .over.hl { position: absolute; }
+</style>
+<script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
+addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
+<script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<header class="spec-header">
+  <h1>Page types</h1>
+  <a class="pt-alt" href="../site/index.html">To-be documentation</a>
+  <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+</header>
+
+<main class="spec-main pt-main">
+  <p class="spec-intro">This page shows every kind of page in Bolster's live product today (as-is), drawn as a schematic, with the interactions that define it. It's one part of the audit; the <a href="index.html">as-is board</a> holds the rest: tokens, components, layouts, patterns and drift. Numbered pins on each schematic match the list under it. The screenshots under each type come from the layout audit, taken at 1440, 768 and 500 px wide. The 500 px captures stand in for 375, since both fall in the same breakpoint tier. Where a type has no screenshot, its structure comes from a read-only DOM read on 3 October 2026. Nothing in Bolster was edited, submitted or created to make this page. Interactions marked "not opened" were left alone because they change data or preferences.</p>
+
+  <section class="spec-section">
+    <h2>Legend</h2>
+    <div class="spec-panel">
+      <div class="legend">
+        <div><span class="sw" style="background:var(--wf-chrome)"></span>Dark chrome: top bar, rail, bottom bar</div>
+        <div><span class="sw" style="background:var(--wf-side);border:1px solid var(--wf-line)"></span>Section sidebar</div>
+        <div><span class="sw" style="background:var(--wf-surface);border:1px solid var(--wf-line)"></span>Card or panel</div>
+        <div><span class="sw" style="background:var(--wf-block)"></span>Image, row fill, placeholder</div>
+        <div><span class="sw" style="background:linear-gradient(var(--wf-text),var(--wf-text)) center/80% 5px no-repeat"></span>Text line</div>
+        <div><span class="sw" style="background:linear-gradient(var(--wf-strong),var(--wf-strong)) center/60% 9px no-repeat"></span>Heading</div>
+        <div><span class="sw" style="background:var(--wf-surface);border:1.5px solid var(--wf-line)"></span>Input or select</div>
+        <div><span class="sw" style="background:var(--wf-strong)"></span>Black button (primary)</div>
+        <div><span class="sw" style="background:var(--wf-brand)"></span>Yellow call to action</div>
+        <div><span class="sw" style="outline:2px dashed var(--wf-hl);outline-offset:2px"></span>Interaction zone, numbered</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="spec-section">
+    <h2>All types at a glance</h2>
+    <p>Thirteen types in six families, plus the app shell they all sit in. The matrix shows which interactions belong to which type: <span style="color:var(--wf-hl)">●</span> means the interaction defines the type; <span style="color:var(--color-content-tertiary)">○</span> means it appears on some pages of that type.</p>
+    <div class="spec-panel">
+      <table class="matrix">
+        <thead><tr>
+          <th>Page type</th><th>Card or row opens a page</th><th>Toolbar search</th><th>Filter cards (tabs)</th><th>Select sheet filters</th><th>Filter and columns dialog</th><th>Row select, bulk bar</th><th>Opens job workspace</th><th>View switch</th><th>Inline edit, save</th><th>Create (+)</th><th>Drag or reorder</th><th>Sticky action bar</th><th>Split panes</th>
+        </tr></thead>
+        <tbody>
+          <tr><td><a href="#home">Home</a></td><td class="core">●</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td><a href="#dashboard">Dashboard</a></td><td class="core">●</td><td></td><td></td><td class="core">●</td><td></td><td></td><td></td><td></td><td></td><td class="some">○</td><td class="some">○</td><td></td><td></td></tr>
+          <tr><td><a href="#reports">Report builder</a></td><td></td><td></td><td></td><td class="core">●</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td><a href="#list">Data list</a></td><td></td><td class="core">●</td><td class="core">●</td><td></td><td class="core">●</td><td class="core">●</td><td class="core">●</td><td class="some">○</td><td class="some">○</td><td class="core">●</td><td></td><td></td><td></td></tr>
+          <tr><td><a href="#board">Board</a></td><td class="core">●</td><td class="core">●</td><td></td><td class="some">○</td><td class="some">○</td><td></td><td class="some">○</td><td></td><td></td><td class="core">●</td><td class="some">○</td><td></td><td></td></tr>
+          <tr><td><a href="#tasks">Task list</a></td><td></td><td class="core">●</td><td></td><td></td><td class="some">○</td><td class="some">○</td><td></td><td class="core">●</td><td class="core">●</td><td class="core">●</td><td></td><td></td><td></td></tr>
+          <tr><td><a href="#files">Files</a></td><td></td><td class="core">●</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="core">●</td><td></td><td></td><td class="core">●</td></tr>
+          <tr><td><a href="#workspace">Job workspace</a></td><td></td><td class="some">○</td><td></td><td></td><td></td><td></td><td></td><td class="core">●</td><td class="core">●</td><td class="core">●</td><td></td><td></td><td class="core">●</td></tr>
+          <tr><td><a href="#preview">Document preview</a></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="core">●</td><td></td></tr>
+          <tr><td><a href="#messages">Messaging</a></td><td class="core">●</td><td class="core">●</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="core">●</td><td></td><td></td><td class="core">●</td></tr>
+          <tr><td><a href="#settings-hub">Settings hub</a></td><td class="core">●</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td><a href="#settings-form">Settings form</a></td><td></td><td></td><td></td><td class="core">●</td><td></td><td></td><td></td><td class="some">○</td><td class="core">●</td><td></td><td></td><td class="some">○</td><td></td></tr>
+          <tr><td><a href="#mobile">Mobile app</a></td><td class="core">●</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="some">○</td><td></td><td></td><td></td><td></td><td></td></tr>
+          <tr><td><a href="#other">404 and others</a></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <nav class="pt-toc" aria-label="Page types">
+      <a href="#shell">App shell</a> · <a href="#home">Home</a> · <a href="#dashboard">Dashboard</a> · <a href="#reports">Report builder</a> · <a href="#list">Data list</a> · <a href="#board">Board</a> · <a href="#tasks">Task list</a> · <a href="#files">Files</a> · <a href="#workspace">Job workspace</a> · <a href="#preview">Document preview</a> · <a href="#messages">Messaging</a> · <a href="#settings-hub">Settings hub</a> · <a href="#settings-form">Settings form</a> · <a href="#mobile">Mobile app</a> · <a href="#overlays">Overlays</a> · <a href="#other">Not drawn</a>
+    </nav>
+  </section>
+
+  <!-- ===================================================== SHELL -->
+  <article class="pt" id="shell">
+    <header class="pt-head">
+      <p class="pt-family">Frame · every company page</p>
+      <h2>App shell</h2>
+      <p>The frame every company page sits in: a black top bar, a black icon rail, a warm section sidebar for the current area (Jobs, Financial, Settings…), and a sticky page title bar. Below 768 px the rail and sidebar give way to a hamburger and a black bottom tab bar.</p>
+    </header>
+    <div class="pt-frames">
+      <figure class="frame"><div class="wf-wrap"><div class="wf">
+        <div class="wf-top"><i class="logo"></i><i class="co hl" data-pin="3"></i><i class="srch hl" data-pin="4"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av hl" data-pin="5" data-pin-at="right"></i></div>
+        <div class="wf-rail hl" data-pin="1" data-pin-at="bottom"><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i class="sp"></i><i></i><i></i></div>
+        <div class="wf-side hl" data-pin="2"><span class="h" style="--w:50%"></span><span class="t sel" style="--w:auto"></span><span class="t"></span><span class="t" style="--w:55%"></span><span class="t" style="--w:65%"></span><span class="t" style="--w:45%"></span><span class="t" style="--w:60%"></span></div>
+        <div class="wf-main">
+          <div class="row hl" data-pin="6"><span class="h lg" style="--w:18%"></span><span class="dot sm"></span><span class="grow"></span><span class="ctl" style="--w:22%"></span><span class="btn"></span></div>
+          <div class="blk" style="--hh:8"></div>
+          <div class="grid2"><div class="blk" style="--hh:14"></div><div class="blk" style="--hh:14"></div></div>
+          <div class="blk fade" style="--hh:6"></div>
+        </div>
+      </div></div><figcaption>Desktop, 1440. Rail 60 px + sidebar 300 px; at 768 the sidebar shrinks to 220 px</figcaption></figure>
+      <figure class="frame" data-phone><div class="wf-wrap"><div class="wf" data-phone>
+        <div class="wf-top"><i class="ic hl" data-pin="2"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-main">
+          <div class="row hl" data-pin="6"><span class="h lg" style="--w:45%"></span></div>
+          <div class="blk" style="--hh:10"></div><div class="blk" style="--hh:10"></div><div class="blk fade" style="--hh:10"></div>
+        </div>
+        <div class="wf-bottom hl" data-pin="7" data-pin-at="bottom"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+      </div></div><figcaption>Phone, 375 tier</figcaption></figure>
+    </div>
+    <div class="pt-body">
+      <section><h3>Core interactions</h3><ol class="pins">
+        <li data-n="1"><span><b>Rail expands on hover</b> from 60 to about 245 px, over the content, with labels. "Pin sidebar" keeps it open (not opened: it's a preference).</span></li>
+        <li data-n="2"><span><b>Section sidebar</b> lists the pages of the current area. On phones it's behind a hamburger.</span></li>
+        <li data-n="3"><span><b>Company switcher</b> opens a menu: Switch company, Company settings.</span></li>
+        <li data-n="4"><span><b>Global search</b> is a button styled as a field. It opens a full-screen blurred layer with type chips (Client, Invoice, Job…).</span></li>
+        <li data-n="5"><span><b>Avatar menu</b>: Edit profile, Manage users, Logout. Help, the assistant and product updates sit next to it.</span></li>
+        <li data-n="6"><span><b>Page title bar</b>: Space Grotesk title, a refresh icon, page actions on the right. Sticky.</span></li>
+        <li data-n="7"><span><b>Bottom tab bar</b> on phones: Getting started, Dashboard, Jobs, Customers, More.</span></li>
+      </ol></section>
+      <section><h3>As-is issues</h3><ul class="issues">
+        <li>Rail buttons have no accessible names; the tooltip is the only label.</li>
+        <li>At 768 the sidebar stays open and squeezes the page (settings labels wrap to three lines).</li>
+        <li>On phones the sticky title covers the first heading on three pages.</li>
+        <li>The rail widens over 1 s, which feels slow.</li>
+      </ul></section>
+    </div>
+    <div class="examples">
+      <a href="layouts/img/list-1440.jpg"><img loading="lazy" src="layouts/img/list-1440.jpg" alt="Shell at 1440 on the jobs list">1440</a>
+      <a href="layouts/img/list-768.jpg"><img loading="lazy" src="layouts/img/list-768.jpg" alt="Shell at 768">768</a>
+      <a href="layouts/img/list-375.jpg"><img loading="lazy" src="layouts/img/list-375.jpg" alt="Shell at the 375 tier">375 tier</a>
+      <a href="patterns/img/rail-expanded.jpg"><img loading="lazy" src="patterns/img/rail-expanded.jpg" alt="Rail expanded on hover">Rail expanded</a>
+      <a href="patterns/img/company-menu.png"><img loading="lazy" src="patterns/img/company-menu.png" alt="Company switcher menu">Company menu</a>
+      <a href="patterns/img/avatar-menu.png"><img loading="lazy" src="patterns/img/avatar-menu.png" alt="Avatar menu">Avatar menu</a>
+    </div>
+  </article>
+
+  <!-- ===================================================== HOME -->
+  <article class="pt" id="home">
+    <header class="pt-head">
+      <p class="pt-family">Overview</p>
+      <h2>Home and onboarding</h2>
+      <p>A centred single column with no section sidebar. A hero with an illustration and an assistant prompt sits above a checklist of setup tasks. Each card starts a short guided flow.</p>
+      <p class="pt-routes">~/getting_started · ~/home · ~/getting-started · ~/onboarding/welcome</p>
+    </header>
+    <div class="pt-frames">
+      <figure class="frame"><div class="wf-wrap"><div class="wf" data-shell="noside">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-rail"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i class="sp"></i><i></i><i></i></div>
+        <div class="wf-main" style="align-items:center">
+          <div class="col center" style="inline-size:52%">
+            <span class="blk" style="--hh:5;--w:calc(5 * var(--s))"></span>
+            <span class="h lg" style="--w:35%"></span>
+            <span class="t" style="--w:85%"></span><span class="t" style="--w:60%"></span>
+            <div class="row hl" data-pin="1" style="inline-size:100%"><span class="ctl grow"></span><span class="btn" style="border-radius:50%;margin-left:calc(-4 * var(--s));block-size:calc(2.2 * var(--s));inline-size:calc(2.2 * var(--s))"></span></div>
+          </div>
+          <div class="col" style="inline-size:70%">
+            <span class="h" style="--w:30%"></span><span class="t" style="--w:45%"></span>
+            <div class="card hl" data-pin="2"><div class="row"><span class="blk" style="--hh:2.4;--w:calc(2.4 * var(--s))"></span><div class="col grow"><span class="t" style="--w:35%;background:var(--wf-strong)"></span><span class="t" style="--w:60%"></span></div><span class="box on" style="border-radius:50%"></span></div></div>
+            <div class="card"><div class="row"><span class="blk" style="--hh:2.4;--w:calc(2.4 * var(--s))"></span><div class="col grow"><span class="t" style="--w:30%;background:var(--wf-strong)"></span><span class="t" style="--w:55%"></span></div><span class="box on" style="border-radius:50%"></span></div></div>
+            <div class="card fade"><div class="row"><span class="blk" style="--hh:2.4;--w:calc(2.4 * var(--s))"></span><div class="col grow"><span class="t" style="--w:40%;background:var(--wf-strong)"></span><span class="t" style="--w:65%"></span></div><span class="box" style="border-radius:50%"></span></div></div>
+          </div>
+        </div>
+      </div></div><figcaption>Desktop, 1440. Columns of 512, 576 and 768 px, centred</figcaption></figure>
+      <figure class="frame" data-phone><div class="wf-wrap"><div class="wf" data-phone>
+        <div class="wf-top"><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-main">
+          <div class="col center"><span class="blk" style="--hh:4;--w:calc(4 * var(--s))"></span><span class="h lg" style="--w:60%"></span><span class="t" style="--w:90%"></span><span class="ctl" style="--w:100%"></span></div>
+          <div class="card"><div class="row"><div class="col grow"><span class="t" style="--w:60%;background:var(--wf-strong)"></span><span class="t"></span></div><span class="box on" style="border-radius:50%"></span></div></div>
+          <div class="card fade"><div class="row"><div class="col grow"><span class="t" style="--w:50%;background:var(--wf-strong)"></span><span class="t"></span></div><span class="box" style="border-radius:50%"></span></div></div>
+        </div>
+        <div class="wf-bottom"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+      </div></div><figcaption>Phone, 375 tier. Cards go full width</figcaption></figure>
+    </div>
+    <div class="pt-body">
+      <section><h3>Core interactions</h3><ol class="pins">
+        <li data-n="1"><span><b>Assistant prompt</b> ("Draft an estimate for…") hands off to Bolster's assistant. Not opened.</span></li>
+        <li data-n="2"><span><b>Checklist cards</b>: the whole card is a button that opens a guided flow; a check shows it's done.</span></li>
+      </ol></section>
+      <section><h3>As-is issues</h3><ul class="issues">
+        <li>Task cards are 74 px buttons with no focus style.</li>
+        <li>The checklist can be hidden from settings ("Show Getting started"), so the home page is optional.</li>
+      </ul></section>
+    </div>
+    <div class="examples">
+      <a href="layouts/img/home-1440.jpg"><img loading="lazy" src="layouts/img/home-1440.jpg" alt="Home at 1440">1440</a>
+      <a href="layouts/img/home-768.jpg"><img loading="lazy" src="layouts/img/home-768.jpg" alt="Home at 768">768</a>
+      <a href="layouts/img/home-375.jpg"><img loading="lazy" src="layouts/img/home-375.jpg" alt="Home at the 375 tier">375 tier</a>
+    </div>
+  </article>
+
+  <!-- ===================================================== DASHBOARD -->
+  <article class="pt" id="dashboard">
+    <header class="pt-head">
+      <p class="pt-family">Overview</p>
+      <h2>Dashboard</h2>
+      <p>A grid of white widgets on the page background, two columns on desktop and one below 768. Filters in the title bar scope every widget. Widgets are summaries that link into lists: recommended actions, pipeline stages, assignments, money.</p>
+      <p class="pt-routes">~/dashboard · ~/sales-dashboard · ~/jobs-dashboard · ~/metrics · ~/marketing · ~/financial-services/financial-overview</p>
+    </header>
+    <div class="pt-frames">
+      <figure class="frame"><div class="wf-wrap"><div class="wf" data-shell="noside">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-rail"><i></i><i class="on"></i><i></i><i></i><i></i><i></i><i class="sp"></i><i></i><i></i></div>
+        <div class="wf-main">
+          <div class="row"><span class="h lg" style="--w:14%"></span><span class="dot sm"></span><span class="grow"></span>
+            <div class="row hl" data-pin="1"><span class="ctl chev" style="--w:calc(9 * var(--s))"></span><span class="ctl chev" style="--w:calc(9 * var(--s))"></span></div>
+            <span class="btn out hl" data-pin="2" style="--w:calc(9 * var(--s))"></span><span class="btn hl" data-pin="3" data-pin-at="right"></span></div>
+          <div class="grid2">
+            <div class="col">
+              <div class="card"><div class="row"><span class="h" style="--w:45%"></span><span class="grow"></span><span class="t hl" data-pin="6" data-pin-at="right" style="--w:calc(1 * var(--s))"></span></div>
+                <div class="col hl" data-pin="4">
+                  <div class="row line" style="padding-top:calc(.8 * var(--s))"><span class="dot sm"></span><div class="col grow"><span class="t" style="--w:45%;background:var(--wf-strong)"></span><span class="t" style="--w:65%"></span></div><span class="dot sm"></span><span class="t" style="--w:calc(1.5 * var(--s))"></span></div>
+                  <div class="row line" style="padding-top:calc(.8 * var(--s))"><span class="dot sm"></span><div class="col grow"><span class="t" style="--w:40%;background:var(--wf-strong)"></span><span class="t" style="--w:55%"></span></div><span class="dot sm"></span><span class="t" style="--w:calc(1.5 * var(--s))"></span></div>
+                  <div class="row line" style="padding-top:calc(.8 * var(--s))"><span class="dot sm"></span><div class="col grow"><span class="t" style="--w:50%;background:var(--wf-strong)"></span><span class="t" style="--w:60%"></span></div><span class="dot sm"></span><span class="t" style="--w:calc(1.5 * var(--s))"></span></div>
+                </div></div>
+              <div class="card"><span class="h" style="--w:35%"></span><div class="empty" style="block-size:calc(9 * var(--s))"><span class="dot"></span><span class="t" style="--w:40%"></span></div></div>
+            </div>
+            <div class="card"><div class="row"><span class="h" style="--w:30%"></span><span class="grow"></span><span class="btn out sm" style="--w:calc(7 * var(--s))"></span></div><span class="t" style="--w:50%"></span>
+              <div class="col hl" data-pin="5">
+                <div class="card edge"><div class="row"><div class="col grow"><span class="t" style="--w:35%;background:var(--wf-strong)"></span><span class="t" style="--w:25%"></span></div><span class="t" style="--w:calc(1 * var(--s))"></span></div></div>
+                <div class="card edge"><div class="row"><div class="col grow"><span class="t" style="--w:50%;background:var(--wf-strong)"></span><span class="t" style="--w:30%"></span></div><span class="t" style="--w:calc(1 * var(--s))"></span></div></div>
+                <div class="card edge"><div class="row"><div class="col grow"><span class="t" style="--w:40%;background:var(--wf-strong)"></span><span class="t" style="--w:25%"></span></div><span class="t" style="--w:calc(1 * var(--s))"></span></div></div>
+                <div class="card edge fade"><div class="row"><div class="col grow"><span class="t" style="--w:45%;background:var(--wf-strong)"></span><span class="t" style="--w:30%"></span></div><span class="t" style="--w:calc(1 * var(--s))"></span></div></div>
+              </div></div>
+          </div>
+        </div>
+      </div></div><figcaption>Desktop, 1440. Two columns of 519 px, max width 1500</figcaption></figure>
+      <figure class="frame" data-phone><div class="wf-wrap"><div class="wf" data-phone>
+        <div class="wf-top"><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-main">
+          <div class="row"><span class="h lg" style="--w:45%"></span><span class="grow"></span><span class="btn"></span></div>
+          <div class="row"><span class="ctl chev grow"></span><span class="ctl chev grow"></span></div>
+          <div class="card"><span class="h" style="--w:60%"></span><div class="row"><span class="t grow"></span><span class="t" style="--w:10%"></span></div><div class="row"><span class="t grow"></span><span class="t" style="--w:10%"></span></div><div class="row"><span class="t grow"></span><span class="t" style="--w:10%"></span></div></div>
+          <div class="card fade"><span class="h" style="--w:40%"></span><span class="t"></span><span class="t"></span></div>
+        </div>
+        <div class="wf-bottom"><i></i><i class="on"></i><i></i><i></i><i></i></div>
+      </div></div><figcaption>Phone, 375 tier. One column; rows keep a text + count grid</figcaption></figure>
+    </div>
+    <div class="pt-body">
+      <section><h3>Core interactions</h3><ol class="pins">
+        <li data-n="1"><span><b>Scope filters</b> ("Everyone", "All groups") are tertiary buttons with a chevron. They open the select sheet from the bottom right. Opened.</span></li>
+        <li data-n="2"><span><b>Customize</b> changes which widgets show. Not opened (preference).</span></li>
+        <li data-n="3"><span><b>Create (+)</b>, black, icon only. Not opened.</span></li>
+        <li data-n="4"><span><b>Recommended-action rows</b> (Draft pending jobs to send, Unapproved change orders…) each with a coloured dot, a count and a chevron; they open the matching list.</span></li>
+        <li data-n="5"><span><b>Pipeline accordion</b>: one row per stage with a coloured left edge and totals.</span></li>
+        <li data-n="6"><span><b>Widget handle</b> (⋮⋮) in each widget header; on the financial overview the same widgets carry "Move" handles for drag reordering.</span></li>
+      </ol></section>
+      <section>
+        <h3>Variants</h3><ul class="variants">
+          <li><b>Sales and jobs dashboards</b>: same frame, different widgets.</li>
+          <li><b>Financial overview</b>: customisable widgets (Payment account, Cashflow summary, Money overview, Payables, Accounts, Payment volume, QuickBooks) with drag handles and "Customize". DOM read only.</li>
+        </ul>
+        <h3 style="margin-top:var(--space-5)">As-is issues</h3><ul class="issues">
+          <li>Three hover greys across row-style clickables; accordion rows use Tailwind's cool <code>#e5e7eb</code> border.</li>
+          <li>Widgets have no border, only white on the page; the layout depends on the canvas being darker.</li>
+        </ul>
+      </section>
+    </div>
+    <div class="examples">
+      <a href="layouts/img/dashboard-1440.jpg"><img loading="lazy" src="layouts/img/dashboard-1440.jpg" alt="Dashboard at 1440">1440</a>
+      <a href="layouts/img/dashboard-768.jpg"><img loading="lazy" src="layouts/img/dashboard-768.jpg" alt="Dashboard at 768">768</a>
+      <a href="layouts/img/dashboard-375.jpg"><img loading="lazy" src="layouts/img/dashboard-375.jpg" alt="Dashboard at the 375 tier">375 tier</a>
+      <a href="patterns/img/select-sheet-dashboard.jpg"><img loading="lazy" src="patterns/img/select-sheet-dashboard.jpg" alt="The Everyone filter open as a select sheet">Select sheet</a>
+      <a href="components/img/dashboard-buttons-cards.png"><img loading="lazy" src="components/img/dashboard-buttons-cards.png" alt="Recommended-action rows and pipeline accordion rows">Action rows</a>
+    </div>
+  </article>
+
+  <!-- ===================================================== REPORTS -->
+  <article class="pt" id="reports">
+    <header class="pt-head">
+      <p class="pt-family">Overview</p>
+      <h2>Report builder</h2>
+      <p>Pick a report, set its filters, then generate it. The whole page is a filter bar until a report is generated.</p>
+      <p class="pt-routes">~/reports/:id?</p>
+    </header>
+    <div class="pt-frames" data-single>
+      <figure class="frame"><div class="wf-wrap"><div class="wf">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-rail"><i></i><i></i><i></i><i class="on"></i><i></i><i></i><i class="sp"></i><i></i><i></i></div>
+        <div class="wf-side"><span class="h" style="--w:50%"></span><span class="t"></span><span class="t" style="--w:75%"></span><span class="t" style="--w:80%"></span><span class="t" style="--w:45%"></span><span class="t sel" style="--w:auto"></span></div>
+        <div class="wf-main">
+          <div class="row"><span class="ctl chev hl" data-pin="1" style="--w:calc(12 * var(--s))"></span><div class="row hl" data-pin="2"><span class="ctl chev" style="--w:calc(9 * var(--s))"></span><span class="ctl chev" style="--w:calc(8 * var(--s))"></span><span class="ctl chev" style="--w:calc(7 * var(--s))"></span><span class="ctl chev" style="--w:calc(9 * var(--s))"></span></div><span class="grow"></span><span class="btn hl" data-pin="3" data-pin-at="right" style="--w:calc(8 * var(--s))"></span></div>
+          <div class="empty grow hl" data-pin="4" style="min-block-size:calc(24 * var(--s))"><span class="blk" style="--hh:3;--w:calc(3 * var(--s))"></span><span class="t" style="--w:25%"></span></div>
+        </div>
+      </div></div><figcaption>Desktop. Structure from a DOM read; no screenshot</figcaption></figure>
+    </div>
+    <div class="pt-body">
+      <section><h3>Core interactions</h3><ol class="pins">
+        <li data-n="1"><span><b>Choose report</b>: a select for the report type.</span></li>
+        <li data-n="2"><span><b>Filters</b>: All owners, All jobs, Status, Last 30 days. Same tertiary-button selects as the dashboard.</span></li>
+        <li data-n="3"><span><b>Generate</b> builds the report. Not pressed, so the output wasn't seen.</span></li>
+        <li data-n="4"><span><b>Report output</b>: not captured.</span></li>
+      </ol></section>
+      <section><h3>As-is issues</h3><ul class="issues">
+        <li>Lives in the Financial area's sidebar.</li>
+        <li>Output, empty and loading states are a gap.</li>
+      </ul></section>
+    </div>
+    <p class="no-shot">No screenshot yet: Reports was added to the audit after phase 3.</p>
+  </article>
+
+  <!-- ===================================================== DATA LIST -->
+  <article class="pt" id="list">
+    <header class="pt-head">
+      <p class="pt-family">Collections</p>
+      <h2>Data list</h2>
+      <p>The workhorse: title and toolbar, a row of filter cards that work like tabs, then a virtual-scrolling grid of rows. Rows are selected with one click and opened with two. It's the most common type in the app.</p>
+      <p class="pt-routes">~/estimates (quotes, proposals, pending) · ~/jobs → ~/projects · ~/clients · ~/leads · ~/invoices · ~/items · ~/vendors · ~/rfqs · ~/expenses · ~/vendor_orders · ~/users</p>
+    </header>
+    <div class="pt-frames">
+      <figure class="frame"><div class="wf-wrap"><div class="wf">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-rail"><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i class="sp"></i><i></i><i></i></div>
+        <div class="wf-side"><span class="h" style="--w:40%"></span><span class="t" style="--w:50%"></span><span class="t sel" style="--w:auto"></span><span class="t" style="--w:40%"></span><span class="t" style="--w:55%"></span><span class="t" style="--w:50%"></span><span class="t" style="--w:65%"></span><span class="t" style="--w:55%"></span></div>
+        <div class="wf-main">
+          <div class="row"><span class="dot sm"></span><span class="h lg" style="--w:18%"></span><span class="dot sm"></span><span class="grow"></span><span class="ctl hl" data-pin="1" style="--w:calc(14 * var(--s))"></span><span class="btn out hl" data-pin="2"></span><span class="btn hl" data-pin="3" data-pin-at="right"></span></div>
+          <div class="row hl" data-pin="4" style="align-items:stretch">
+            <div class="card" style="flex:1;background:var(--wf-strong);border-color:var(--wf-strong)"><span class="t" style="--w:60%;background:var(--wf-surface)"></span><span class="t" style="--w:40%;background:var(--wf-text)"></span></div>
+            <div class="card" style="flex:1"><span class="t" style="--w:50%;background:var(--wf-strong)"></span><span class="t" style="--w:35%"></span></div>
+            <div class="card" style="flex:1"><span class="t" style="--w:45%;background:var(--wf-strong)"></span><span class="t" style="--w:35%"></span></div>
+            <div class="card" style="flex:1"><span class="t" style="--w:65%;background:var(--wf-strong)"></span><span class="t" style="--w:30%"></span></div>
+            <div class="card fade" style="flex:.6"><span class="t" style="--w:70%;background:var(--wf-strong)"></span><span class="t" style="--w:40%"></span></div>
+          </div>
+          <div class="card flat">
+            <div class="tr head"><span class="box"></span><span class="t" style="--w:10%"></span><span class="grow"></span><span class="t" style="--w:7%"></span><span class="t" style="--w:9%"></span><span class="t" style="--w:8%"></span></div>
+            <div class="tr"><span class="box"></span><span class="dot"></span><div class="col grow"><span class="t" style="--w:25%;background:var(--wf-strong)"></span><span class="t" style="--w:15%"></span></div><span class="pill"></span><span class="t" style="--w:9%"></span><span class="t" style="--w:8%"></span></div>
+            <div class="tr sel hl" data-pin="5"><span class="box on"></span><span class="dot"></span><div class="col grow"><span class="t" style="--w:20%;background:var(--wf-strong)"></span><span class="t" style="--w:12%"></span></div><span class="pill"></span><span class="t" style="--w:9%"></span><span class="t" style="--w:8%"></span></div>
+            <div class="tr hl" data-pin="6" data-pin-at="right"><span class="box"></span><span class="dot"></span><div class="col grow"><span class="t" style="--w:30%;background:var(--wf-strong)"></span><span class="t" style="--w:18%"></span></div><span class="pill"></span><span class="t" style="--w:9%"></span><span class="t" style="--w:8%"></span></div>
+            <div class="tr"><span class="box"></span><span class="dot"></span><div class="col grow"><span class="t" style="--w:22%;background:var(--wf-strong)"></span><span class="t" style="--w:14%"></span></div><span class="pill"></span><span class="t" style="--w:9%"></span><span class="t" style="--w:8%"></span></div>
+            <div class="tr fade" style="border:0"><span class="box"></span><span class="dot"></span><div class="col grow"><span class="t" style="--w:26%;background:var(--wf-strong)"></span><span class="t" style="--w:16%"></span></div><span class="pill"></span><span class="t" style="--w:9%"></span><span class="t" style="--w:8%"></span></div>
+          </div>
+        </div>
+      </div></div><figcaption>Desktop, 1440. Main column 1080 px, 8 columns; filter cards scroll sideways</figcaption></figure>
+      <figure class="frame" data-phone><div class="wf-wrap"><div class="wf" data-phone>
+        <div class="wf-top"><i class="ic"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-main">
+          <div class="row"><span class="h lg" style="--w:45%"></span></div>
+          <div class="row"><span class="ctl grow"></span><span class="btn out"></span><span class="btn"></span></div>
+          <div class="row" style="overflow:hidden"><span class="card" style="flex:none;inline-size:45%;background:var(--wf-strong)"><span class="t" style="background:var(--wf-surface)"></span></span><span class="card" style="flex:none;inline-size:45%"><span class="t"></span></span><span class="card" style="flex:none;inline-size:30%"><span class="t"></span></span></div>
+          <div class="card flat">
+            <div class="tr"><span class="dot"></span><div class="col grow"><span class="t" style="background:var(--wf-strong)"></span><span class="pill"></span></div><span class="t" style="--w:20%"></span></div>
+            <div class="tr"><span class="dot"></span><div class="col grow"><span class="t" style="--w:50%;background:var(--wf-strong)"></span><span class="pill"></span></div><span class="t" style="--w:20%"></span></div>
+            <div class="tr"><span class="dot"></span><div class="col grow"><span class="t" style="--w:70%;background:var(--wf-strong)"></span><span class="pill"></span></div><span class="t" style="--w:20%"></span></div>
+            <div class="tr fade" style="border:0"><span class="dot"></span><div class="col grow"><span class="t" style="background:var(--wf-strong)"></span><span class="pill"></span></div><span class="t" style="--w:20%"></span></div>
+          </div>
+        </div>
+        <div class="wf-bottom"><i></i><i></i><i class="on"></i><i></i><i></i></div>
+      </div></div><figcaption>Phone, 375 tier. 58 px rows: avatar, name, status, amount</figcaption></figure>
+    </div>
+    <div class="pt-body">
+      <section><h3>Core interactions</h3><ol class="pins">
+        <li data-n="1"><span><b>Table search</b> ("Search this table…", 48 px). One of four search designs in the app.</span></li>
+        <li data-n="2"><span><b>Filters and columns</b>: an icon-only button whose only name is a tooltip. It opens a centred dialog with Filters / Columns tabs and a footer: "Reset all", "Apply · n". Opened.</span></li>
+        <li data-n="3"><span><b>Create (+)</b>, black, icon only. Not opened.</span></li>
+        <li data-n="4"><span><b>Filter cards</b> act as tabs: one is selected (blue fill with a notch) and each shows a count and a total. They scroll sideways.</span></li>
+        <li data-n="5"><span><b>Single click selects</b> a row: grey fill, checked box, and a black bulk bar replaces the column header ("1 selected", Edit, Send now, Sign &amp; book, Archive, More). Opened.</span></li>
+        <li data-n="6"><span><b>Double click opens</b> the job workspace over the list and puts <code>?job=&lt;id&gt;</code> in the URL. Opened.</span></li>
+      </ol></section>
+      <section>
+        <h3>Variants</h3><ul class="variants">
+          <li><b>With filter cards</b>: estimates, jobs, clients, leads (Fresh, Stale, Abandoned; 56 px cards).</li>
+          <li><b>Plain</b>: users and other settings lists. Search plus "Create new", no cards.</li>
+          <li><b>Catalog sheet</b>: items. Sheet / Gallery view switch, inline-editable cells and a save bar ("No changes to save"). DOM read only.</li>
+        </ul>
+        <h3 style="margin-top:var(--space-5)">As-is issues</h3><ul class="issues">
+          <li>Rows are divs: no focus, no keyboard selection, and double-click is the only way to open.</li>
+          <li>Filter cards are buttons with no tab semantics or focus style.</li>
+          <li>At 768 every column but name, status and amount disappears.</li>
+        </ul>
+      </section>
+    </div>
+    <div class="examples">
+      <a href="layouts/img/list-1440.jpg"><img loading="lazy" src="layouts/img/list-1440.jpg" alt="Jobs list at 1440">1440</a>
+      <a href="layouts/img/list-768.jpg"><img loading="lazy" src="layouts/img/list-768.jpg" alt="Jobs list at 768">768</a>
+      <a href="layouts/img/list-375.jpg"><img loading="lazy" src="layouts/img/list-375.jpg" alt="Jobs list at the 375 tier">375 tier</a>
+      <a href="components/img/filter-cards.png"><img loading="lazy" src="components/img/filter-cards.png" alt="Filter cards, one selected">Filter cards</a>
+      <a href="patterns/img/row-selected-bulk-bar.jpg"><img loading="lazy" src="patterns/img/row-selected-bulk-bar.jpg" alt="Row selected with the bulk bar">Bulk bar</a>
+      <a href="patterns/img/filter-dialog.jpg"><img loading="lazy" src="patterns/img/filter-dialog.jpg" alt="Filters and columns dialog">Filter dialog</a>
+      <a href="components/img/toolbar-search-filter-create.png"><img loading="lazy" src="components/img/toolbar-search-filter-create.png" alt="Toolbar with search, filter and create">Toolbar</a>
+    </div>
+  </article>
+
+  <!-- ===================================================== BOARD -->
+  <article class="pt" id="board">
+    <header class="pt-head">
+      <p class="pt-family">Collections</p>
+      <h2>Board</h2>
+      <p>The pipeline as a kanban. Each stage is a column with a coloured top rule, a total and a value, then stacked cards grouped by sub-status. On phones the board becomes a vertical list of stages.</p>
+      <p class="pt-routes">~/pipeline</p>
+    </header>
+    <div class="pt-frames">
+      <figure class="frame"><div class="wf-wrap"><div class="wf">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-rail"><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i class="sp"></i><i></i><i></i></div>
+        <div class="wf-side"><span class="h" style="--w:40%"></span><span class="t sel" style="--w:auto"></span><span class="t" style="--w:40%"></span><span class="t" style="--w:40%"></span><span class="t" style="--w:55%"></span><span class="t" style="--w:50%"></span><span class="t" style="--w:65%"></span></div>
+        <div class="wf-main">
+          <div class="row"><span class="dot sm"></span><span class="h lg" style="--w:14%"></span><span class="dot sm"></span><span class="grow"></span><span class="ctl" style="--w:calc(12 * var(--s))"></span><span class="ctl chev hl" data-pin="5" style="--w:calc(8 * var(--s))"></span><span class="btn out"></span><span class="btn"></span></div>
+          <div class="row hl" data-pin="1" style="align-items:start;gap:calc(1.2 * var(--s))">
+            <div class="col rule" style="flex:1;padding-top:calc(.8 * var(--s))"><span class="h" style="--w:50%"></span><span class="t" style="--w:30%"></span>
+              <div class="empty hl" data-pin="3" style="block-size:calc(18 * var(--s));background:var(--wf-block)"><span class="t" style="--w:70%"></span><span class="t" style="--w:60%"></span><span class="btn out sm" style="--w:60%"></span><span class="btn out sm" style="--w:60%"></span></div>
+              <span class="t hl" data-pin="4" style="--w:50%;align-self:center"></span></div>
+            <div class="col rule" style="flex:1;padding-top:calc(.8 * var(--s))"><span class="h" style="--w:70%"></span><span class="t" style="--w:30%"></span>
+              <div class="card" style="gap:calc(.8 * var(--s));border-color:var(--wf-strong)"><span class="t" style="--w:40%;background:var(--wf-strong)"></span>
+                <div class="card hl" data-pin="2" style="padding:calc(.8 * var(--s))"><span class="t" style="--w:80%;background:var(--wf-strong)"></span><span class="t" style="--w:40%"></span></div>
+                <div class="card" style="padding:calc(.8 * var(--s))"><span class="t" style="--w:70%;background:var(--wf-strong)"></span><span class="t" style="--w:40%"></span></div>
+                <div class="card" style="padding:calc(.8 * var(--s))"><span class="t" style="--w:75%;background:var(--wf-strong)"></span><span class="t" style="--w:40%"></span></div></div></div>
+            <div class="col rule" style="flex:1;padding-top:calc(.8 * var(--s))"><span class="h" style="--w:65%"></span><span class="t" style="--w:30%"></span><div class="empty" style="block-size:calc(18 * var(--s));background:var(--wf-block)"><span class="t" style="--w:70%"></span><span class="t" style="--w:50%"></span></div></div>
+            <div class="col rule" style="flex:1;padding-top:calc(.8 * var(--s))"><span class="h" style="--w:60%"></span><span class="t" style="--w:30%"></span>
+              <div class="card" style="gap:calc(.8 * var(--s))"><span class="t" style="--w:40%;background:var(--wf-strong)"></span><div class="card" style="padding:calc(.8 * var(--s))"><span class="t" style="--w:70%;background:var(--wf-strong)"></span><span class="t" style="--w:30%"></span></div><div class="card" style="padding:calc(.8 * var(--s))"><span class="t" style="--w:60%;background:var(--wf-strong)"></span><span class="t" style="--w:30%"></span></div></div></div>
+            <div class="col rule fade" style="flex:.6;padding-top:calc(.8 * var(--s))"><span class="h" style="--w:70%"></span><span class="t" style="--w:40%"></span><div class="card" style="padding:calc(.8 * var(--s))"><span class="t" style="--w:70%;background:var(--wf-strong)"></span><span class="t" style="--w:40%"></span></div></div>
+          </div>
+        </div>
+      </div></div><figcaption>Desktop, 1440. About six stage columns of 150 px; the rest scroll sideways</figcaption></figure>
+      <figure class="frame" data-phone><div class="wf-wrap"><div class="wf" data-phone>
+        <div class="wf-top"><i class="ic"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-main">
+          <div class="row"><span class="h lg" style="--w:40%"></span><span class="grow"></span><span class="btn"></span></div>
+          <div class="card edge"><div class="row"><div class="col grow"><span class="t" style="--w:40%;background:var(--wf-strong)"></span><span class="t" style="--w:60%"></span></div><span class="t" style="--w:6%"></span></div></div>
+          <div class="card edge"><div class="row"><div class="col grow"><span class="t" style="--w:60%;background:var(--wf-strong)"></span><span class="t" style="--w:60%"></span></div><span class="t" style="--w:6%"></span></div></div>
+          <div class="card edge"><div class="row"><div class="col grow"><span class="t" style="--w:50%;background:var(--wf-strong)"></span><span class="t" style="--w:60%"></span></div><span class="t" style="--w:6%"></span></div></div>
+          <div class="card edge fade"><div class="row"><div class="col grow"><span class="t" style="--w:45%;background:var(--wf-strong)"></span><span class="t" style="--w:60%"></span></div><span class="t" style="--w:6%"></span></div></div>
+        </div>
+        <div class="wf-bottom"><i></i><i></i><i class="on"></i><i></i><i></i></div>
+      </div></div><figcaption>Phone, 375 tier. No board: stages as cards with a coloured left edge</figcaption></figure>
+    </div>
+    <div class="pt-body">
+      <section><h3>Core interactions</h3><ol class="pins">
+        <li data-n="1"><span><b>Stage columns</b> scroll sideways: 6 visible at 1440, about 2.5 at 768.</span></li>
+        <li data-n="2"><span><b>Job cards</b> grouped under a sub-status ("Drafts", "Never sent"). Opening one wasn't tried; dragging between stages wasn't tried either (it would change a job's stage).</span></li>
+        <li data-n="3"><span><b>Empty stage</b> explains itself and offers actions ("Add lead", "Lead form"). Not opened.</span></li>
+        <li data-n="4"><span><b>"See all …"</b> at the foot of each column goes to the filtered list.</span></li>
+        <li data-n="5"><span><b>Group filter</b> ("All groups") opens the select sheet, as on the dashboard. Table search and the filter icon sit next to it.</span></li>
+      </ol></section>
+      <section><h3>As-is issues</h3><ul class="issues">
+        <li>The pipeline's section nav sits inside the main column, not in the shell's sidebar.</li>
+        <li>Stage colours are the only signal of stage order.</li>
+      </ul></section>
+    </div>
+    <div class="examples">
+      <a href="layouts/img/board-1440.jpg"><img loading="lazy" src="layouts/img/board-1440.jpg" alt="Pipeline board at 1440">1440</a>
+      <a href="layouts/img/board-768.jpg"><img loading="lazy" src="layouts/img/board-768.jpg" alt="Pipeline board at 768">768</a>
+      <a href="layouts/img/board-375.jpg"><img loading="lazy" src="layouts/img/board-375.jpg" alt="Pipeline at the 375 tier">375 tier</a>
+    </div>
+  </article>
+
+  <!-- ===================================================== TASKS -->
+  <article class="pt" id="tasks">
+    <header class="pt-head">
+      <p class="pt-family">Collections</p>
+      <h2>Task list</h2>
+      <p>Tasks grouped by date or by job, under a row of stat tiles. Each row carries inline cells for date, priority and assignee, so the list is also where tasks get edited.</p>
+      <p class="pt-routes">~/schedule · ~/my-tasks (same view) · ~/vendor/task-list</p>
+    </header>
+    <div class="pt-frames">
+      <figure class="frame"><div class="wf-wrap"><div class="wf">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-rail"><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i class="sp"></i><i></i><i></i></div>
+        <div class="wf-side"><span class="h" style="--w:40%"></span><span class="t" style="--w:50%"></span><span class="t" style="--w:40%"></span><span class="t sel" style="--w:auto"></span><span class="t" style="--w:55%"></span><span class="t" style="--w:50%"></span><span class="t" style="--w:65%"></span></div>
+        <div class="wf-main">
+          <div class="row"><span class="h lg" style="--w:10%"></span><span class="seg hl" data-pin="1" style="--sw:4"><i class="on"></i><i></i></span><span class="grow"></span><span class="ctl" style="--w:calc(11 * var(--s))"></span><span class="btn out" style="--w:calc(5 * var(--s))"></span><span class="btn out hl" data-pin="5" style="--w:calc(5 * var(--s))"></span><span class="btn" style="--w:calc(9 * var(--s))"></span></div>
+          <span class="t" style="--w:22%"></span>
+          <div class="row hl" data-pin="2" style="align-items:stretch"><div class="card" style="flex:1"><span class="t" style="--w:40%"></span><span class="h" style="--w:12%"></span></div><div class="card" style="flex:1"><span class="t" style="--w:40%"></span><span class="h" style="--w:12%"></span></div><div class="card" style="flex:1"><span class="t" style="--w:30%"></span><span class="h" style="--w:12%"></span></div><div class="card" style="flex:1"><span class="t" style="--w:40%"></span><span class="h" style="--w:18%"></span></div></div>
+          <div class="card flat">
+            <div class="tr head hl" data-pin="3"><span class="t" style="--w:10%;background:var(--wf-strong)"></span><span class="t" style="--w:4%"></span><span class="grow"></span><span class="dot sm"></span><span class="dot sm"></span></div>
+            <div class="tr"><span class="box"></span><span class="t" style="--w:14%;background:var(--wf-strong)"></span><span class="grow"></span><div class="row hl" data-pin="4"><span class="pill" style="--w:calc(4 * var(--s))"></span><span class="t" style="--w:calc(6 * var(--s))"></span><span class="dash"></span></div></div>
+            <div class="tr"><span class="box"></span><span class="t" style="--w:12%;background:var(--wf-strong)"></span><span class="t" style="--w:8%"></span><span class="grow"></span><span class="pill" style="--w:calc(4 * var(--s))"></span><span class="t" style="--w:calc(6 * var(--s))"></span><span class="dash"></span></div>
+            <div class="tr"><span class="box"></span><span class="t" style="--w:14%;background:var(--wf-strong)"></span><span class="grow"></span><span class="pill" style="--w:calc(4 * var(--s))"></span><span class="t" style="--w:calc(6 * var(--s))"></span><span class="dot"></span></div>
+            <div class="tr head"><span class="t" style="--w:12%;background:var(--wf-strong)"></span><span class="t" style="--w:4%"></span><span class="grow"></span><span class="dot sm"></span><span class="dot sm"></span></div>
+            <div class="tr fade" style="border:0"><span class="box"></span><span class="t" style="--w:18%;background:var(--wf-strong)"></span><span class="t" style="--w:8%"></span><span class="grow"></span><span class="t" style="--w:calc(4 * var(--s))"></span><span class="t" style="--w:calc(6 * var(--s))"></span><span class="dash"></span></div>
+          </div>
+        </div>
+      </div></div><figcaption>Desktop, 1440. Four stat tiles of 244 px; task rows on one line</figcaption></figure>
+      <figure class="frame" data-phone><div class="wf-wrap"><div class="wf" data-phone>
+        <div class="wf-top"><i class="ic"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-main">
+          <div class="row"><span class="h lg" style="--w:35%"></span><span class="seg" style="--sw:5"><i class="on"></i><i></i></span></div>
+          <div class="row" style="overflow:hidden"><span class="card" style="flex:none;inline-size:40%"><span class="t"></span><span class="h"></span></span><span class="card" style="flex:none;inline-size:40%"><span class="t"></span><span class="h"></span></span><span class="card" style="flex:none;inline-size:30%"><span class="t"></span></span></div>
+          <div class="card flat">
+            <div class="tr head"><span class="t" style="--w:40%;background:var(--wf-strong)"></span></div>
+            <div class="tr" style="align-items:start"><span class="box"></span><div class="col grow"><span class="t" style="--w:60%;background:var(--wf-strong)"></span><span class="t" style="--w:45%"></span></div></div>
+            <div class="tr" style="align-items:start"><span class="box"></span><div class="col grow"><span class="t" style="--w:70%;background:var(--wf-strong)"></span><span class="t" style="--w:45%"></span></div></div>
+            <div class="tr fade" style="align-items:start;border:0"><span class="box"></span><div class="col grow"><span class="t" style="--w:50%;background:var(--wf-strong)"></span><span class="t" style="--w:45%"></span></div></div>
+          </div>
+        </div>
+        <div class="wf-bottom"><i></i><i></i><i class="on"></i><i></i><i></i></div>
+      </div></div><figcaption>Phone, 375 tier. Tiles scroll sideways; rows wrap to two lines</figcaption></figure>
+    </div>
+    <div class="pt-body">
+      <section><h3>Core interactions</h3><ol class="pins">
+        <li data-n="1"><span><b>Date / Job switch</b>: a segmented control that regroups the list. Not opened.</span></li>
+        <li data-n="2"><span><b>Stat tiles</b>: Overdue, Due today, Leads, Proposals; counts only.</span></li>
+        <li data-n="3"><span><b>Collapsible groups</b> ("Overdue 0/3", "No due date 0/43") with add (+) and more (⋯) per group.</span></li>
+        <li data-n="4"><span><b>Inline cells</b>: due date chip, "Set priority", and a dashed assignee circle. Each writes on click, so none was opened.</span></li>
+        <li data-n="5"><span><b>Select</b> turns on multi-select; Filter and "Create task" sit next to it. Not opened.</span></li>
+      </ol></section>
+      <section><h3>As-is issues</h3><ul class="issues">
+        <li>At 768 task names truncate to a few letters ("New t").</li>
+        <li>Inline cells are 13 px text buttons in light grey (<code>#9e979b</code>) with no focus style.</li>
+        <li>Schedule and My tasks render the same view under two names.</li>
+      </ul></section>
+    </div>
+    <div class="examples">
+      <a href="layouts/img/tasks-1440.jpg"><img loading="lazy" src="layouts/img/tasks-1440.jpg" alt="Tasks at 1440">1440</a>
+      <a href="layouts/img/tasks-768.jpg"><img loading="lazy" src="layouts/img/tasks-768.jpg" alt="Tasks at 768">768</a>
+      <a href="layouts/img/tasks-375.jpg"><img loading="lazy" src="layouts/img/tasks-375.jpg" alt="Tasks at the 375 tier">375 tier</a>
+    </div>
+  </article>
+
+  <!-- ===================================================== FILES -->
+  <article class="pt" id="files">
+    <header class="pt-head">
+      <p class="pt-family">Collections</p>
+      <h2>Files</h2>
+      <p>A drive: a folder tree beside the folder's contents, in resizable split panes, with search, New folder and Upload in the title bar.</p>
+      <p class="pt-routes">~/files</p>
+    </header>
+    <div class="pt-frames" data-single>
+      <figure class="frame"><div class="wf-wrap"><div class="wf">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-rail"><i></i><i></i><i></i><i></i><i></i><i></i><i class="sp"></i><i class="on"></i><i></i></div>
+        <div class="wf-side"><span class="h" style="--w:40%"></span><span class="t"></span><span class="t" style="--w:50%"></span><span class="t" style="--w:65%"></span></div>
+        <div class="wf-main">
+          <div class="row"><span class="h lg" style="--w:10%"></span><span class="grow"></span><span class="ctl hl" data-pin="1" style="--w:calc(14 * var(--s))"></span><div class="row hl" data-pin="3" data-pin-at="right"><span class="btn out" style="--w:calc(8 * var(--s))"></span><span class="btn" style="--w:calc(7 * var(--s))"></span></div></div>
+          <div class="row" style="align-items:stretch;flex:1;gap:0">
+            <div class="card col" style="inline-size:28%;border-radius:calc(.8 * var(--s)) 0 0 calc(.8 * var(--s))"><div class="row"><span class="blk" style="--hh:1.4;--w:calc(1.6 * var(--s))"></span><span class="t" style="--w:70%;background:var(--wf-strong)"></span></div><div class="row" style="padding-left:calc(1.6 * var(--s))"><span class="blk" style="--hh:1.4;--w:calc(1.6 * var(--s))"></span><span class="t" style="--w:50%"></span></div><div class="row" style="padding-left:calc(1.6 * var(--s))"><span class="blk" style="--hh:1.4;--w:calc(1.6 * var(--s))"></span><span class="t" style="--w:40%"></span></div><div class="row"><span class="blk" style="--hh:1.4;--w:calc(1.6 * var(--s))"></span><span class="t" style="--w:60%"></span></div><div class="row"><span class="blk" style="--hh:1.4;--w:calc(1.6 * var(--s))"></span><span class="t" style="--w:35%"></span></div></div>
+            <span class="hl" data-pin="2" style="inline-size:calc(.8 * var(--s));background:var(--wf-line)"></span>
+            <div class="card" style="flex:1;border-radius:0 calc(.8 * var(--s)) calc(.8 * var(--s)) 0;display:grid;grid-template-columns:repeat(4,1fr);gap:calc(1.4 * var(--s));align-content:start">
+              <div class="col"><span class="blk" style="--hh:7"></span><span class="t" style="--w:70%"></span></div><div class="col"><span class="blk" style="--hh:7"></span><span class="t" style="--w:60%"></span></div><div class="col"><span class="blk" style="--hh:7"></span><span class="t" style="--w:75%"></span></div><div class="col"><span class="blk" style="--hh:7"></span><span class="t" style="--w:50%"></span></div>
+              <div class="col fade"><span class="blk" style="--hh:7"></span><span class="t" style="--w:65%"></span></div><div class="col fade"><span class="blk" style="--hh:7"></span><span class="t" style="--w:55%"></span></div>
+            </div>
+          </div>
+        </div>
+      </div></div><figcaption>Desktop. Structure from a DOM read (three splitter panels); no screenshot. The content pane's layout (grid or list) is assumed</figcaption></figure>
+    </div>
+    <div class="pt-body">
+      <section><h3>Core interactions</h3><ol class="pins">
+        <li data-n="1"><span><b>Search your drive</b>.</span></li>
+        <li data-n="2"><span><b>Split panes</b> (PrimeVue Splitter): folder tree and contents, resizable.</span></li>
+        <li data-n="3"><span><b>New folder</b> and <b>Upload</b>. Not opened.</span></li>
+      </ol></section>
+      <section><h3>As-is issues</h3><ul class="issues">
+        <li>Folder tree mixes company, imports, projects, a personal drive and archive at one level.</li>
+        <li>Needs a screenshot pass with Chrome in front.</li>
+      </ul></section>
+    </div>
+    <p class="no-shot">No screenshot yet.</p>
+  </article>
+
+  <!-- ===================================================== WORKSPACE -->
+  <article class="pt" id="workspace">
+    <header class="pt-head">
+      <p class="pt-family">Records</p>
+      <h2>Job workspace</h2>
+      <p>A whole application inside a dialog. It opens over the list it came from, with its own header, its own section nav and an editable estimate spreadsheet. It's where a job is built, priced and sent.</p>
+      <p class="pt-routes">any list + ?job=&lt;id&gt; · related record editors: ~/estimate/:id · ~/assembly/:id · ~/invoice/:id · ~/vendor/:id · ~/user/:id</p>
+    </header>
+    <div class="pt-frames" data-single>
+      <figure class="frame"><div class="wf-wrap"><div class="wf">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-rail"><i></i><i></i><i class="on"></i><i></i><i></i><i></i><i class="sp"></i><i></i><i></i></div>
+        <div class="wf-side"><span class="h" style="--w:40%"></span><span class="t"></span><span class="t" style="--w:50%"></span></div>
+        <div class="wf-main"><span class="h lg" style="--w:20%"></span><div class="blk" style="--hh:30"></div></div>
+        <div class="scrim"></div>
+        <div class="over hl" data-pin="1" style="inset:calc(2.4 * var(--s)) calc(2.4 * var(--s)); display:grid; grid-template-columns:calc(18 * var(--s)) 1fr; grid-template-rows:calc(4.4 * var(--s)) 1fr; background:var(--wf-surface); border:1px solid var(--wf-strong); border-radius:calc(1.4 * var(--s)); overflow:visible">
+          <div class="row" style="grid-column:1/-1;padding:0 calc(1.4 * var(--s));background:var(--wf-chrome);border-radius:calc(1.4 * var(--s)) calc(1.4 * var(--s)) 0 0"><span class="dot"></span><span class="t" style="--w:18%;background:var(--wf-ink)"></span><span class="pill" style="background:var(--wf-brand);border:0"></span><span class="grow"></span><span class="btn cta hl" data-pin="3" style="--w:calc(14 * var(--s));block-size:calc(2.6 * var(--s))"></span><span class="dot sm" style="background:var(--wf-ink)"></span><span class="dot sm" style="background:var(--wf-ink)"></span><span class="t hl" data-pin="6" data-pin-at="right" style="--w:calc(1.6 * var(--s));block-size:calc(1.6 * var(--s));background:var(--wf-surface)"></span></div>
+          <div class="col hl" data-pin="2" style="padding:calc(1.4 * var(--s));border-right:1px solid var(--wf-block)"><span class="t" style="--w:50%;background:var(--wf-strong)"></span><span class="t" style="--w:45%"></span><div class="row sel" style="background:var(--wf-block);border-radius:3px;padding:calc(.5 * var(--s))"><span class="t grow" style="background:var(--wf-strong)"></span><span class="dot sm" style="background:var(--wf-hl)"></span></div><span class="t" style="--w:55%"></span><span class="t" style="--w:75%"></span><div class="row"><span class="t grow"></span><span class="dot sm" style="background:var(--wf-hl)"></span></div><span class="t" style="--w:45%"></span><span class="grow"></span><span class="t" style="--w:50%"></span><span class="t" style="--w:45%"></span><span class="btn cta" style="--w:100%"></span></div>
+          <div class="col" style="padding:calc(1.6 * var(--s))">
+            <div class="row"><span class="h lg" style="--w:16%"></span><span class="grow"></span><span class="dot sm"></span><span class="dot sm"></span><span class="seg hl" data-pin="4" data-pin-at="right" style="--sw:4"><i></i><i class="on"></i><i></i></span></div>
+            <div class="col hl" data-pin="5" style="gap:0;border:1px solid var(--wf-block)">
+              <div class="tr head"><span class="t" style="--w:4%"></span><span class="t" style="--w:20%"></span><span class="grow"></span><span class="t" style="--w:6%"></span><span class="t" style="--w:6%"></span><span class="t" style="--w:6%"></span><span class="t" style="--w:6%"></span></div>
+              <div class="tr"><span class="t" style="--w:2%"></span><span class="t" style="--w:22%;background:var(--wf-strong)"></span><span class="grow"></span><span class="box"></span><span class="box"></span><span class="t" style="--w:6%"></span><span class="t" style="--w:6%"></span><span class="t" style="--w:6%"></span></div>
+              <div class="tr"><span class="t" style="--w:2%"></span><span class="t" style="--w:26%;background:var(--wf-strong)"></span><span class="grow"></span><span class="box"></span><span class="box"></span><span class="t" style="--w:6%"></span><span class="t" style="--w:6%"></span><span class="t" style="--w:6%"></span></div>
+              <div class="tr"><span class="t" style="--w:2%"></span><span class="t" style="--w:18%;background:var(--wf-strong)"></span><span class="grow"></span><span class="box"></span><span class="box"></span><span class="t" style="--w:6%"></span><span class="t" style="--w:6%"></span><span class="t" style="--w:6%"></span></div>
+              <div class="tr" style="outline:2px solid var(--wf-strong);outline-offset:-2px"><span class="t" style="--w:2%"></span><span class="grow"></span><span class="t" style="--w:6%"></span><span class="t" style="--w:6%"></span><span class="t" style="--w:6%"></span></div>
+            </div>
+            <div class="row"><span class="btn" style="--w:calc(10 * var(--s));background:var(--wf-hl)"></span><span class="grow"></span><span class="blk" style="--hh:2.4;--w:30%"></span></div>
+            <div class="row"><span class="grow"></span><span class="h lg" style="--w:12%"></span></div>
+          </div>
+        </div>
+      </div></div><figcaption>Desktop. The dialog sits inset over the list, with a 16 px radius and a dark scrim</figcaption></figure>
+    </div>
+    <div class="pt-body">
+      <section><h3>Core interactions</h3><ol class="pins">
+        <li data-n="1"><span><b>Opens over the list</b> on double click and writes <code>?job=&lt;id&gt;</code> to the URL. The app re-adds it on every route change until the dialog is closed.</span></li>
+        <li data-n="2"><span><b>Own section nav</b>: Overview; Pre-production (Estimate, Takeoff, Proposal presentation, Selections); Production; Documents; Messages; Settings. Count badges, and a yellow "Job notes" button at the foot.</span></li>
+        <li data-n="3"><span><b>Preview and send</b>: a yellow split button, the one forward step for the job. Not opened.</span></li>
+        <li data-n="4"><span><b>List / Sheet / Cards</b>: a segmented view switch for the estimate.</span></li>
+        <li data-n="5"><span><b>Live spreadsheet</b>: cells edit in place and save as you go; a cell is focused on open. Never typed into or blurred.</span></li>
+        <li data-n="6"><span><b>Close (×)</b>, top right, with no accessible name.</span></li>
+      </ol></section>
+      <section><h3>As-is issues</h3><ul class="issues">
+        <li>It's a page built as a modal: no back button, the URL trick, nested navigation.</li>
+        <li>The most local variation in the audit: 18 text colours, 38 backgrounds, 15 radii, 28 type styles.</li>
+        <li>The stand-alone record editors (invoice, assembly, vendor) weren't opened; whether they share this frame is a gap.</li>
+      </ul></section>
+    </div>
+    <div class="examples">
+      <a href="components/img/modal-job-estimate-editor.jpg"><img loading="lazy" src="components/img/modal-job-estimate-editor.jpg" alt="Job workspace with the estimate spreadsheet">Estimate sheet</a>
+    </div>
+  </article>
+
+  <!-- ===================================================== PREVIEW -->
+  <article class="pt" id="preview">
+    <header class="pt-head">
+      <p class="pt-family">Records · client-facing</p>
+      <h2>Document preview</h2>
+      <p>What the client sees: a proposal or invoice as a long centred document with a cover image, a summary card and sections. A sticky action bar carries the decision. The same layout serves the public links clients open.</p>
+      <p class="pt-routes">~/estimate/preview/:id · ~/estimate/presentation/:id · ~/invoice_presentation/:id · ~/presentation/:id · /pub/presentation/:id · /pub/invoice/:id</p>
+    </header>
+    <div class="pt-frames">
+      <figure class="frame"><div class="wf-wrap"><div class="wf" data-shell="toponly">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-main" style="align-items:center">
+          <div class="card" style="inline-size:76%;padding:0;gap:0;overflow:hidden">
+            <span class="blk" style="--hh:12;border-radius:0"></span>
+            <div class="col" style="padding:calc(2 * var(--s));position:relative">
+              <span class="h lg" style="--w:25%"></span><span class="t" style="--w:12%"></span>
+              <div class="row"><span class="dot sm"></span><span class="t" style="--w:10%"></span><span class="pill" style="background:var(--wf-hl);opacity:.5;border:0"></span></div>
+              <div class="row"><span class="dot sm"></span><span class="t" style="--w:14%"></span></div>
+              <div class="row"><span class="dot sm"></span><span class="t" style="--w:10%"></span></div>
+              <div class="col hl" data-pin="4" style="position:absolute;left:38%;top:20%;align-items:center;inline-size:24%"><span class="dot" style="inline-size:calc(5 * var(--s));block-size:calc(5 * var(--s));background:var(--wf-surface);border:1.5px solid var(--wf-line)"></span><span class="t" style="--w:100%"></span></div>
+              <span class="t" style="--w:8%;background:var(--wf-strong)"></span><span class="t" style="--w:14%"></span><span class="t" style="--w:12%"></span>
+            </div>
+          </div>
+          <div class="row hl" data-pin="1" style="position:absolute;bottom:calc(3 * var(--s));inline-size:80%;padding:calc(1.2 * var(--s)) calc(1.6 * var(--s));background:var(--wf-surface);border:1px solid var(--wf-line);border-radius:calc(1.4 * var(--s));box-shadow:0 4px 16px rgb(0 0 0 / .15)">
+            <span class="btn out" style="--w:calc(10 * var(--s))"></span><span class="grow"></span><span class="t" style="--w:14%"></span>
+            <span class="btn hl" data-pin="2" style="--w:calc(10 * var(--s));background:var(--wf-hl);opacity:.55"></span><span class="btn hl" data-pin="3" style="--w:calc(9 * var(--s));background:var(--wf-hl)"></span>
+            <div class="col" style="gap:calc(.6 * var(--s));inline-size:calc(9 * var(--s))"><span class="t" style="--w:80%"></span><span class="h" style="--w:100%"></span></div>
+          </div>
+        </div>
+      </div></div><figcaption>Desktop, 1440. Document column 1024–1088 px; action bar 1088 px</figcaption></figure>
+      <figure class="frame" data-phone><div class="wf-wrap"><div class="wf" data-phone>
+        <div class="wf-top"><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-main" style="padding:0">
+          <span class="blk" style="--hh:10;border-radius:0"></span>
+          <div class="col" style="padding:0 calc(2 * var(--s))"><span class="h lg" style="--w:60%"></span><span class="t" style="--w:30%"></span><span class="t" style="--w:45%"></span><span class="t" style="--w:40%"></span></div>
+          <div class="row hl" data-pin="5" data-pin-at="right" style="position:absolute;bottom:calc(-1 * var(--s));left:calc(1 * var(--s));right:calc(1 * var(--s));padding:calc(1 * var(--s));background:var(--wf-surface);border:1px solid var(--wf-line);border-radius:calc(1 * var(--s))"><span class="btn out" style="--w:30%"></span><span class="grow"></span><span class="btn" style="--w:30%;background:var(--wf-hl)"></span></div>
+        </div>
+        <div class="wf-bottom" style="position:relative;z-index:3"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+      </div></div><figcaption>Phone, 375 tier. The tab bar covers the action bar</figcaption></figure>
+    </div>
+    <div class="pt-body">
+      <section><h3>Core interactions</h3><ol class="pins">
+        <li data-n="1"><span><b>Sticky action bar</b>: Decline proposal, a note ("Your own copy, approving is off"), Next choice, Approve, and the estimated price.</span></li>
+        <li data-n="2"><span><b>Next choice</b> steps the client through optional upgrades ("1/1 options").</span></li>
+        <li data-n="3"><span><b>Approve</b>: the client's decision. Never pressed.</span></li>
+        <li data-n="4"><span><b>"Preparing your estimate…"</b> overlay for 10–20 s before the document renders.</span></li>
+        <li data-n="5"><span><b>On phones</b> the bottom tab bar sits on top of the action bar and hides Approve and Next choice.</span></li>
+      </ol></section>
+      <section><h3>As-is issues</h3><ul class="issues">
+        <li>At 768 the action bar text overlaps ("Decline proposal" runs into the next label).</li>
+        <li>The only place blue is used for primary actions (Approve, Next choice).</li>
+        <li>The public versions (/pub) weren't opened; they're assumed to share this layout without the shell.</li>
+      </ul></section>
+    </div>
+    <div class="examples">
+      <a href="layouts/img/preview-1440.jpg"><img loading="lazy" src="layouts/img/preview-1440.jpg" alt="Estimate preview at 1440">1440</a>
+      <a href="layouts/img/preview-768.jpg"><img loading="lazy" src="layouts/img/preview-768.jpg" alt="Estimate preview at 768">768</a>
+      <a href="layouts/img/preview-375.jpg"><img loading="lazy" src="layouts/img/preview-375.jpg" alt="Estimate preview at the 375 tier">375 tier</a>
+    </div>
+  </article>
+
+  <!-- ===================================================== MESSAGES -->
+  <article class="pt" id="messages">
+    <header class="pt-head">
+      <p class="pt-family">Communication</p>
+      <h2>Messaging</h2>
+      <p>A channel list beside the open conversation, one channel per job or contact, with a details pane at wider sizes. With no channel open, the right side is an empty state.</p>
+      <p class="pt-routes">~/messages · ~/client-messages · ~/vendor-messages · job workspace → Messages</p>
+    </header>
+    <div class="pt-frames">
+      <figure class="frame"><div class="wf-wrap"><div class="wf">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-rail"><i></i><i></i><i></i><i></i><i></i><i></i><i class="sp"></i><i class="on"></i><i></i></div>
+        <div class="wf-side"><span class="h" style="--w:40%"></span><span class="t"></span><span class="t" style="--w:50%"></span><span class="t" style="--w:65%"></span><span class="t" style="--w:45%"></span></div>
+        <div class="wf-main" style="padding:0;flex-direction:row;gap:0">
+          <div class="col hl" data-pin="1" style="inline-size:42%;padding:calc(2 * var(--s));border-right:1px solid var(--wf-line);background:var(--wf-surface)">
+            <div class="row"><span class="h lg" style="--w:40%"></span><span class="grow"></span><span class="btn cta hl" data-pin="2" data-pin-at="right"></span></div><span class="t" style="--w:45%"></span>
+            <div class="row"><span class="ctl grow"></span><span class="btn out"></span></div>
+            <div class="row line" style="padding-top:calc(.8 * var(--s))"><span class="dot"></span><div class="col grow"><span class="t" style="--w:40%;background:var(--wf-strong)"></span><span class="t" style="--w:70%"></span></div><span class="t" style="--w:10%"></span></div>
+            <div class="row line" style="padding-top:calc(.8 * var(--s))"><span class="dot"></span><div class="col grow"><span class="t" style="--w:55%;background:var(--wf-strong)"></span><span class="t" style="--w:65%"></span></div><span class="t" style="--w:10%"></span></div>
+            <div class="row line" style="padding-top:calc(.8 * var(--s))"><span class="dot"></span><div class="col grow"><span class="t" style="--w:45%;background:var(--wf-strong)"></span><span class="t" style="--w:60%"></span></div><span class="t" style="--w:10%"></span></div>
+            <div class="row line" style="padding-top:calc(.8 * var(--s))"><span class="dot"></span><div class="col grow"><span class="t" style="--w:50%;background:var(--wf-strong)"></span><span class="t" style="--w:70%"></span></div><span class="t" style="--w:10%"></span></div>
+            <div class="row line fade" style="padding-top:calc(.8 * var(--s))"><span class="dot"></span><div class="col grow"><span class="t" style="--w:35%;background:var(--wf-strong)"></span><span class="t" style="--w:60%"></span></div><span class="t" style="--w:10%"></span></div>
+          </div>
+          <div class="col grow hl" data-pin="3" style="align-items:center;justify-content:center;background:var(--wf-surface)"><span class="blk" style="--hh:3;--w:calc(3.5 * var(--s))"></span><span class="t" style="--w:25%"></span></div>
+        </div>
+      </div></div><figcaption>Desktop, 1440. Channel list about 420 px</figcaption></figure>
+      <figure class="frame" data-phone><div class="wf-wrap"><div class="wf" data-phone>
+        <div class="wf-top"><i class="ic"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-main">
+          <div class="row"><span class="h lg" style="--w:45%"></span><span class="grow"></span><span class="btn cta"></span></div>
+          <span class="ctl"></span>
+          <div class="row"><span class="dot"></span><div class="col grow"><span class="t" style="--w:60%;background:var(--wf-strong)"></span><span class="t"></span></div></div>
+          <div class="row"><span class="dot"></span><div class="col grow"><span class="t" style="--w:40%;background:var(--wf-strong)"></span><span class="t"></span></div></div>
+          <div class="row"><span class="dot"></span><div class="col grow"><span class="t" style="--w:70%;background:var(--wf-strong)"></span><span class="t"></span></div></div>
+          <div class="row fade"><span class="dot"></span><div class="col grow"><span class="t" style="--w:50%;background:var(--wf-strong)"></span><span class="t"></span></div></div>
+        </div>
+        <div class="wf-bottom"><i></i><i></i><i></i><i></i><i class="on"></i></div>
+      </div></div><figcaption>Phone, 375 tier. List only</figcaption></figure>
+    </div>
+    <div class="pt-body">
+      <section><h3>Core interactions</h3><ol class="pins">
+        <li data-n="1"><span><b>Channel list</b> with search and a filter button. Each row has an avatar, the job or contact, the last activity and a date.</span></li>
+        <li data-n="2"><span><b>New channel (+)</b>, yellow. Not opened.</span></li>
+        <li data-n="3"><span><b>Conversation pane</b>: "No channel selected" until a channel is opened. Opening one wasn't tried (it can mark messages read).</span></li>
+      </ol></section>
+      <section><h3>As-is issues</h3><ul class="issues">
+        <li>At 768 the third pane squeezes to about 56 px and its empty state wraps word by word.</li>
+        <li>On phones the page title and search scroll under the top bar.</li>
+      </ul></section>
+    </div>
+    <div class="examples">
+      <a href="layouts/img/messages-1440.jpg"><img loading="lazy" src="layouts/img/messages-1440.jpg" alt="Messages at 1440">1440</a>
+      <a href="layouts/img/messages-768.jpg"><img loading="lazy" src="layouts/img/messages-768.jpg" alt="Messages at 768">768</a>
+      <a href="layouts/img/messages-375.jpg"><img loading="lazy" src="layouts/img/messages-375.jpg" alt="Messages at the 375 tier">375 tier</a>
+    </div>
+  </article>
+
+  <!-- ===================================================== SETTINGS HUB -->
+  <article class="pt" id="settings-hub">
+    <header class="pt-head">
+      <p class="pt-family">Configuration</p>
+      <h2>Settings hub</h2>
+      <p>A two-column grid of cards. Each card holds a group of link rows that open a settings form or list. The settings sidebar repeats the same groups.</p>
+      <p class="pt-routes">~/settings · ~/settings-dashboard · ~/integrations (gallery variant)</p>
+    </header>
+    <div class="pt-frames" data-single>
+      <figure class="frame"><div class="wf-wrap"><div class="wf">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-rail"><i></i><i></i><i></i><i></i><i></i><i></i><i class="sp"></i><i></i><i class="on"></i></div>
+        <div class="wf-side hl" data-pin="1"><span class="h" style="--w:40%"></span><span class="t" style="--w:25%;opacity:.6"></span><span class="t" style="--w:60%"></span><span class="t" style="--w:60%"></span><span class="t" style="--w:55%"></span><span class="t" style="--w:25%;opacity:.6"></span><span class="t" style="--w:40%"></span><span class="t" style="--w:45%"></span><span class="t" style="--w:50%"></span><span class="t" style="--w:35%"></span></div>
+        <div class="wf-main">
+          <div class="row"><span class="dot sm"></span><span class="h lg" style="--w:12%"></span></div>
+          <div class="grid2">
+            <div class="card"><span class="h" style="--w:35%"></span><span class="t" style="--w:50%"></span>
+              <div class="row line hl" data-pin="2" style="padding-top:calc(.8 * var(--s))"><span class="blk" style="--hh:1.6;--w:calc(1.6 * var(--s))"></span><div class="col grow"><span class="t" style="--w:45%;background:var(--wf-strong)"></span><span class="t" style="--w:60%"></span></div><span class="t" style="--w:calc(.8 * var(--s))"></span></div>
+              <div class="row line" style="padding-top:calc(.8 * var(--s))"><span class="blk" style="--hh:1.6;--w:calc(1.6 * var(--s))"></span><div class="col grow"><span class="t" style="--w:50%;background:var(--wf-strong)"></span><span class="t" style="--w:55%"></span></div><span class="t" style="--w:calc(.8 * var(--s))"></span></div>
+              <div class="row line" style="padding-top:calc(.8 * var(--s))"><span class="blk" style="--hh:1.6;--w:calc(1.6 * var(--s))"></span><div class="col grow"><span class="t" style="--w:35%;background:var(--wf-strong)"></span><span class="t" style="--w:60%"></span></div><span class="t" style="--w:calc(.8 * var(--s))"></span></div>
+              <div class="row line" style="padding-top:calc(.8 * var(--s))"><span class="blk" style="--hh:1.6;--w:calc(1.6 * var(--s))"></span><div class="col grow"><span class="t" style="--w:40%;background:var(--wf-strong)"></span><span class="t" style="--w:50%"></span></div><span class="t" style="--w:calc(.8 * var(--s))"></span></div></div>
+            <div class="col">
+              <div class="card"><span class="h" style="--w:35%"></span><span class="t" style="--w:50%"></span>
+                <div class="row line" style="padding-top:calc(.8 * var(--s))"><span class="blk" style="--hh:1.6;--w:calc(1.6 * var(--s))"></span><div class="col grow"><span class="t" style="--w:35%;background:var(--wf-strong)"></span><span class="t" style="--w:55%"></span></div><span class="t" style="--w:calc(.8 * var(--s))"></span></div>
+                <div class="row line" style="padding-top:calc(.8 * var(--s))"><span class="blk" style="--hh:1.6;--w:calc(1.6 * var(--s))"></span><div class="col grow"><span class="t" style="--w:45%;background:var(--wf-strong)"></span><span class="t" style="--w:60%"></span></div><span class="t" style="--w:calc(.8 * var(--s))"></span></div></div>
+              <div class="card hl" data-pin="3"><span class="h" style="--w:30%"></span><span class="t" style="--w:50%"></span>
+                <div class="row line" style="padding-top:calc(.8 * var(--s))"><span class="blk" style="--hh:1.6;--w:calc(1.6 * var(--s))"></span><div class="col grow"><span class="t" style="--w:30%;background:var(--wf-strong)"></span><span class="t" style="--w:55%"></span></div><span class="t" style="--w:calc(.8 * var(--s))"></span></div></div>
+            </div>
+          </div>
+        </div>
+      </div></div><figcaption>Desktop, 1440. Two columns of 496 px; one column at 768</figcaption></figure>
+    </div>
+    <div class="pt-body">
+      <section><h3>Core interactions</h3><ol class="pins">
+        <li data-n="1"><span><b>Grouped sidebar</b>: General, Assets, Financial, Team, Integrations, Your settings, Import tools. The groups collapse.</span></li>
+        <li data-n="2"><span><b>Link rows</b>: icon, title, description, chevron; they open a form or list.</span></li>
+        <li data-n="3"><span><b>Integrations</b> card; the integrations page itself is a gallery of cards (AutoCost, Home Depot, Lowe's, CompanyCam, ABC Supply, Hover, QuickBooks, Calendar sync, Webhooks).</span></li>
+      </ol></section>
+      <section><h3>As-is issues</h3><ul class="issues">
+        <li>Link rows are <code>&lt;div role=button&gt;</code>, not links, and have no focus style.</li>
+        <li>Hub and sidebar list the same destinations in different orders.</li>
+      </ul></section>
+    </div>
+    <div class="examples">
+      <a href="layouts/img/settings-hub-1440.jpg"><img loading="lazy" src="layouts/img/settings-hub-1440.jpg" alt="Settings hub at 1440">1440</a>
+      <a href="layouts/img/settings-hub-768.jpg"><img loading="lazy" src="layouts/img/settings-hub-768.jpg" alt="Settings hub at 768">768</a>
+    </div>
+  </article>
+
+  <!-- ===================================================== SETTINGS FORM -->
+  <article class="pt" id="settings-form">
+    <header class="pt-head">
+      <p class="pt-family">Configuration</p>
+      <h2>Settings form</h2>
+      <p>Sections of label-left, field-right rows. A single "Save changes" in the title bar is disabled until something changes.</p>
+      <p class="pt-routes">~/company · ~/estimating_defaults · ~/estimation-settings · ~/taxes · ~/payment-settings · ~/schedule-settings · ~/presentation-themes · ~/user/:id</p>
+    </header>
+    <div class="pt-frames">
+      <figure class="frame"><div class="wf-wrap"><div class="wf">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-rail"><i></i><i></i><i></i><i></i><i></i><i></i><i class="sp"></i><i></i><i class="on"></i></div>
+        <div class="wf-side"><span class="h" style="--w:40%"></span><span class="t" style="--w:25%;opacity:.6"></span><span class="t sel" style="--w:auto"></span><span class="t" style="--w:60%"></span><span class="t" style="--w:55%"></span><span class="t" style="--w:25%;opacity:.6"></span><span class="t" style="--w:40%"></span><span class="t" style="--w:45%"></span><span class="t" style="--w:50%"></span></div>
+        <div class="wf-main">
+          <div class="row"><span class="dot sm"></span><div class="col grow"><span class="h lg" style="--w:35%"></span><span class="t" style="--w:30%"></span></div><span class="btn off hl" data-pin="1" data-pin-at="right" style="--w:calc(10 * var(--s))"></span></div>
+          <span class="h" style="--w:12%"></span><span class="btn out" style="--w:calc(10 * var(--s))"></span>
+          <span class="h" style="--w:22%"></span>
+          <div class="card" style="background:var(--wf-bg);border-color:var(--wf-block)">
+            <div class="row"><div class="col" style="inline-size:33%"><span class="t" style="--w:50%;background:var(--wf-strong)"></span><span class="t" style="--w:90%"></span></div><span class="grow"></span><span class="seg hl" data-pin="3" data-pin-at="right" style="--sw:3"><i class="on"></i><i></i></span></div>
+            <div class="row line" style="padding-top:calc(1 * var(--s))"><div class="col" style="inline-size:33%"><span class="t" style="--w:55%;background:var(--wf-strong)"></span><span class="t" style="--w:85%"></span></div><span class="grow"></span><span class="blk" style="--hh:2;--w:calc(9 * var(--s))"></span></div>
+          </div>
+          <span class="h" style="--w:15%"></span>
+          <div class="card" style="background:var(--wf-bg);border-color:var(--wf-block)">
+            <div class="row"><span class="t" style="--w:20%;background:var(--wf-strong)"></span><span class="grow"></span><span class="ctl hl" data-pin="2" style="--w:55%"></span></div>
+            <div class="row"><span class="t" style="--w:18%;background:var(--wf-strong)"></span><span class="grow"></span><span class="ctl" style="--w:55%"></span></div>
+            <div class="row"><span class="t" style="--w:16%;background:var(--wf-strong)"></span><span class="grow"></span><span class="ctl chev hl" data-pin="4" style="--w:55%"></span></div>
+          </div>
+        </div>
+      </div></div><figcaption>Desktop, 1440. Max width 1280; label one third, field two thirds</figcaption></figure>
+      <figure class="frame" data-phone><div class="wf-wrap"><div class="wf" data-phone>
+        <div class="wf-top"><i class="ic"></i><i class="sp"></i><i class="ic"></i><i class="ic"></i><i class="av"></i></div>
+        <div class="wf-main">
+          <div class="row hl" data-pin="5" style="background:var(--wf-bg);position:relative;z-index:2"><span class="h lg" style="--w:55%"></span><span class="grow"></span><span class="btn off" style="--w:25%"></span></div>
+          <span class="h" style="--w:40%;margin-top:calc(-1.6 * var(--s));opacity:.5"></span>
+          <div class="card" style="background:var(--wf-bg);border-color:var(--wf-block)">
+            <div class="row"><span class="t" style="--w:30%;background:var(--wf-strong)"></span><span class="ctl grow"></span></div>
+            <div class="row"><span class="t" style="--w:30%;background:var(--wf-strong)"></span><span class="ctl grow"></span></div>
+            <div class="row"><span class="t" style="--w:30%;background:var(--wf-strong)"></span><span class="ctl chev grow"></span></div>
+          </div>
+          <div class="card fade" style="background:var(--wf-bg);border-color:var(--wf-block)"><div class="row"><span class="t" style="--w:30%;background:var(--wf-strong)"></span><span class="ctl grow"></span></div></div>
+        </div>
+        <div class="wf-bottom"><i></i><i></i><i></i><i></i><i class="on"></i></div>
+      </div></div><figcaption>Phone, 375 tier. Label and field stay side by side</figcaption></figure>
+    </div>
+    <div class="pt-body">
+      <section><h3>Core interactions</h3><ol class="pins">
+        <li data-n="1"><span><b>Save changes</b>: one page-level save, disabled until something is edited. No autosave here, unlike the workspace.</span></li>
+        <li data-n="2"><span><b>Text fields</b> (48 px). Never typed into.</span></li>
+        <li data-n="3"><span><b>On / Off</b> as a segmented control rather than a toggle.</span></li>
+        <li data-n="4"><span><b>Selects</b> (40 px) open the bottom-right select sheet. Opened ("Company type").</span></li>
+        <li data-n="5"><span><b>On phones</b> the sticky title covers the first section heading.</span></li>
+      </ol></section>
+      <section><h3>As-is issues</h3><ul class="issues">
+        <li>48 px fields next to 40 px selects in one form.</li>
+        <li>Two fields display the literal text "null".</li>
+        <li>At 768 the sidebar stays and labels wrap to three lines.</li>
+      </ul></section>
+    </div>
+    <div class="examples">
+      <a href="layouts/img/settings-form-1440.jpg"><img loading="lazy" src="layouts/img/settings-form-1440.jpg" alt="Company settings at 1440">1440</a>
+      <a href="layouts/img/settings-form-768.jpg"><img loading="lazy" src="layouts/img/settings-form-768.jpg" alt="Company settings at 768">768</a>
+      <a href="layouts/img/settings-form-375.jpg"><img loading="lazy" src="layouts/img/settings-form-375.jpg" alt="Company settings at the 375 tier">375 tier</a>
+      <a href="patterns/img/select-sheet-company.jpg"><img loading="lazy" src="patterns/img/select-sheet-company.jpg" alt="Company type select open as a sheet">Select sheet</a>
+    </div>
+  </article>
+
+  <!-- ===================================================== MOBILE APP -->
+  <article class="pt" id="mobile">
+    <header class="pt-head">
+      <p class="pt-family">Mobile-first apps</p>
+      <h2>Field and estimator apps</h2>
+      <p>Separate phone-first apps for crews and estimators, with their own bottom nav and large touch actions. On desktop they run inside a "Bolster Field simulator" frame with a Phone / Tablet / Full width switch.</p>
+      <p class="pt-routes">/app/field/* (home, today, jobs, job details, logs, tasks, schedule, chat) · /app/estimator/* (estimates, items, options, preview, send, paywall)</p>
+    </header>
+    <div class="pt-frames">
+      <figure class="frame"><div class="wf-wrap"><div class="wf" data-shell="bare">
+        <div class="wf-main">
+          <div class="row"><span class="dot sm"></span><div class="col grow"><span class="h lg" style="--w:24%"></span><span class="t" style="--w:30%"></span></div><span class="seg hl" data-pin="1" data-pin-at="right" style="--sw:4"><i class="on"></i><i></i><i></i></span></div>
+          <div class="card col" style="align-self:center;inline-size:30%;flex:1;background:var(--wf-block);border-color:var(--wf-line)">
+            <div class="card hl" data-pin="2" style="border-color:var(--wf-strong)"><div class="row"><span class="blk" style="--hh:3;--w:calc(3 * var(--s))"></span><div class="col grow"><span class="pill" style="--w:30%;background:var(--wf-strong);border:0"></span><span class="t" style="--w:70%;background:var(--wf-strong)"></span><span class="t" style="--w:60%"></span></div></div><span class="btn hl" data-pin="3" style="--w:100%;block-size:calc(3.6 * var(--s))"></span></div>
+            <div class="row"><span class="t" style="--w:30%"></span><span class="grow"></span><span class="t" style="--w:20%;background:var(--wf-hl)"></span></div>
+            <div class="empty" style="block-size:calc(4 * var(--s));background:var(--wf-surface)"><span class="t" style="--w:60%"></span></div>
+            <div class="card"><span class="t"></span><span class="t" style="--w:70%"></span></div>
+            <span class="btn out" style="--w:100%"></span>
+          </div>
+        </div>
+      </div></div><figcaption>Desktop, inside the simulator: a 390 px phone column</figcaption></figure>
+      <figure class="frame" data-phone><div class="wf-wrap"><div class="wf" data-phone>
+        <div class="wf-top"><i class="sp"></i><i class="av"></i></div>
+        <div class="wf-main">
+          <div class="card"><div class="row"><span class="blk" style="--hh:3;--w:calc(3 * var(--s))"></span><div class="col grow"><span class="t" style="--w:60%;background:var(--wf-strong)"></span><span class="t"></span></div></div><span class="btn" style="--w:100%;block-size:calc(3.6 * var(--s))"></span></div>
+          <div class="empty" style="block-size:calc(5 * var(--s))"><span class="t"></span></div>
+          <div class="card"><span class="t"></span><span class="t" style="--w:70%"></span></div>
+          <span class="btn out" style="--w:100%"></span>
+        </div>
+        <div class="wf-bottom hl" data-pin="4" data-pin-at="bottom"><i class="on"></i><i></i><i></i><i></i></div>
+      </div></div><figcaption>Phone. Its own bottom nav (362 px), not the main app's</figcaption></figure>
+    </div>
+    <div class="pt-body">
+      <section><h3>Core interactions</h3><ol class="pins">
+        <li data-n="1"><span><b>Simulator switch</b>: Phone / Tablet / Full width, desktop only.</span></li>
+        <li data-n="2"><span><b>Today card</b>: date, "Nothing scheduled", and a link into today's jobs.</span></li>
+        <li data-n="3"><span><b>Clock in</b>: a black 56 px hero action with yellow text. Never pressed.</span></li>
+        <li data-n="4"><span><b>Own bottom nav</b> for field pages.</span></li>
+      </ol></section>
+      <section><h3>As-is issues</h3><ul class="issues">
+        <li>Leaving the field app for company pages raised a "private object" error toast (seen twice, after scripted navigation).</li>
+        <li>The estimator app wasn't opened; it's listed from the routes only.</li>
+      </ul></section>
+    </div>
+    <div class="examples">
+      <a href="layouts/img/field-1440.jpg"><img loading="lazy" src="layouts/img/field-1440.jpg" alt="Field app in the simulator at 1440">1440</a>
+      <a href="layouts/img/field-375.jpg"><img loading="lazy" src="layouts/img/field-375.jpg" alt="Field app at the 375 tier">375 tier</a>
+    </div>
+  </article>
+
+  <!-- ===================================================== OVERLAYS -->
+  <section class="pt" id="overlays">
+    <header class="pt-head">
+      <p class="pt-family">Cross-cutting</p>
+      <h2>Overlays every type borrows</h2>
+      <p>The same handful of overlays shows up across page types. Four different mechanisms do similar jobs, and only the dialogs carry dialog semantics. Details are in <a href="patterns/overlays.md">patterns/overlays.md</a> and <a href="patterns/navigation-and-feedback.md">patterns/navigation-and-feedback.md</a>.</p>
+    </header>
+    <div class="overlay-grid">
+      <figure class="frame"><div class="wf-wrap"><div class="wf" data-shell="noside">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="av"></i></div><div class="wf-rail"><i></i><i></i><i></i></div>
+        <div class="wf-main"><span class="h lg"></span><div class="blk" style="--hh:20"></div></div>
+        <div class="scrim"></div>
+        <div class="over col" style="right:0;bottom:0;inline-size:42%;block-size:80%;padding:calc(1.6 * var(--s));background:var(--wf-surface);border-radius:calc(1 * var(--s)) 0 calc(1 * var(--s)) 0">
+          <span class="t" style="--w:15%;align-self:center"></span><div class="row"><span class="t" style="--w:15%;background:var(--wf-strong)"></span><span class="ctl grow"></span><span class="btn sm"></span></div>
+          <div class="btn sm" style="--w:100%"></div><span class="t" style="--w:60%"></span><span class="t" style="--w:45%"></span><span class="t" style="--w:55%"></span></div>
+      </div></div><figcaption><b>Select sheet</b>Every select and filter picker. Bottom-right sheet, 80vh, "Create new" above the options. Escape doesn't close it. Dashboard, board, reports, settings forms.</figcaption></figure>
+
+      <figure class="frame"><div class="wf-wrap"><div class="wf">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="av"></i></div><div class="wf-rail"><i></i><i></i><i></i></div><div class="wf-side"></div>
+        <div class="wf-main"><span class="h lg"></span><div class="blk" style="--hh:20"></div></div>
+        <div class="scrim"></div>
+        <div class="over col" style="left:22%;right:22%;top:8%;bottom:8%;padding:calc(1.6 * var(--s));background:var(--wf-surface);border-radius:calc(1.2 * var(--s))">
+          <div class="row"><span class="seg" style="--sw:5"><i class="on"></i><i></i></span><span class="grow"></span><span class="t" style="--w:calc(1.4 * var(--s))"></span></div><span class="ctl"></span><span class="t" style="--w:50%"></span><span class="t" style="--w:40%"></span><span class="t" style="--w:55%"></span><span class="grow"></span>
+          <div class="row"><span class="btn out" style="--w:calc(8 * var(--s))"></span><span class="grow"></span><span class="btn" style="--w:calc(8 * var(--s))"></span></div></div>
+      </div></div><figcaption><b>Filter and columns dialog</b>Centred PrimeVue Dialog, 800 px wide, with Filters / Columns tabs and Reset all / Apply. Data lists.</figcaption></figure>
+
+      <figure class="frame"><div class="wf-wrap"><div class="wf">
+        <div class="wf-top"><i class="logo"></i><i class="co" style="outline:2px solid var(--wf-hl)"></i><i class="srch"></i><i class="sp"></i><i class="av"></i></div><div class="wf-rail"><i></i><i></i><i></i></div><div class="wf-side"></div>
+        <div class="wf-main"><span class="h lg"></span><div class="blk" style="--hh:20"></div></div>
+        <div class="over col" style="left:8%;top:calc(5 * var(--s));inline-size:22%;padding:calc(1 * var(--s));background:var(--wf-surface);border:1px solid var(--wf-strong);border-radius:calc(.6 * var(--s))"><span class="t" style="--w:80%;background:var(--wf-strong)"></span><span class="t" style="--w:70%;background:var(--wf-strong)"></span></div>
+      </div></div><figcaption><b>Menu</b>Company switcher and avatar. 190 px, anchored under the trigger; Escape returns focus. Shell.</figcaption></figure>
+
+      <figure class="frame"><div class="wf-wrap"><div class="wf">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="av"></i></div><div class="wf-rail"><i></i><i></i><i></i></div><div class="wf-side"></div>
+        <div class="wf-main" style="filter:blur(2px)"><span class="h lg"></span><div class="blk" style="--hh:20"></div></div>
+        <div class="scrim" style="opacity:.6"></div>
+        <div class="over col" style="left:20%;right:20%;top:calc(2 * var(--s));padding:calc(1.6 * var(--s));background:var(--wf-surface);border-radius:calc(1 * var(--s))"><span class="ctl"></span><div class="row"><span class="pill"></span><span class="pill"></span><span class="pill"></span><span class="pill"></span><span class="pill"></span></div><span class="t" style="--w:40%"></span></div>
+      </div></div><figcaption><b>Global search</b>Full-screen blurred layer with a top panel and type chips; Escape closes. Shell.</figcaption></figure>
+
+      <figure class="frame"><div class="wf-wrap"><div class="wf">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="av"></i></div><div class="wf-rail"><i></i><i></i><i></i></div><div class="wf-side"></div>
+        <div class="wf-main"><span class="h lg"></span>
+          <div class="card flat"><div class="tr bulk"><span class="box on" style="background:var(--wf-surface)"></span><span class="t" style="--w:12%"></span><span class="t" style="--w:8%"></span><span class="t" style="--w:14%"></span><span class="t" style="--w:12%"></span><span class="t" style="--w:8%"></span></div><div class="tr sel"><span class="box on"></span><span class="t" style="--w:30%;background:var(--wf-strong)"></span></div><div class="tr"><span class="box"></span><span class="t" style="--w:25%;background:var(--wf-strong)"></span></div><div class="tr"><span class="box"></span><span class="t" style="--w:35%;background:var(--wf-strong)"></span></div></div></div>
+      </div></div><figcaption><b>Bulk action bar</b>Black bar replaces the column header when a row is selected. Data lists; Select mode on tasks.</figcaption></figure>
+
+      <figure class="frame"><div class="wf-wrap"><div class="wf">
+        <div class="wf-top"><i class="logo"></i><i class="co"></i><i class="srch"></i><i class="sp"></i><i class="av"></i></div><div class="wf-rail"><i></i><i></i><i></i></div><div class="wf-side"></div>
+        <div class="wf-main"><span class="h lg"></span><div class="blk" style="--hh:20"></div></div>
+        <div class="over row" style="right:calc(2 * var(--s));bottom:calc(2 * var(--s));inline-size:38%;padding:calc(1.2 * var(--s));background:#de3f3f;border-radius:calc(.6 * var(--s))"><span class="blk" style="--hh:1.6;--w:calc(1.6 * var(--s));background:#fff"></span><div class="col grow"><span class="t" style="--w:90%;background:#fff"></span><span class="t" style="--w:60%;background:#fff"></span></div></div>
+      </div></div><figcaption><b>Toast</b>Bottom right, red, stayed over a minute. Only the error kind was seen.</figcaption></figure>
+    </div>
+    <div class="examples">
+      <a href="patterns/img/select-sheet-dashboard.jpg"><img loading="lazy" src="patterns/img/select-sheet-dashboard.jpg" alt="Select sheet">Select sheet</a>
+      <a href="patterns/img/filter-dialog.jpg"><img loading="lazy" src="patterns/img/filter-dialog.jpg" alt="Filter dialog">Filter dialog</a>
+      <a href="patterns/img/company-menu.png"><img loading="lazy" src="patterns/img/company-menu.png" alt="Company menu">Menu</a>
+      <a href="patterns/img/global-search.jpg"><img loading="lazy" src="patterns/img/global-search.jpg" alt="Global search">Global search</a>
+      <a href="patterns/img/row-selected-bulk-bar.jpg"><img loading="lazy" src="patterns/img/row-selected-bulk-bar.jpg" alt="Bulk bar">Bulk bar</a>
+      <a href="patterns/img/toast-error.jpg"><img loading="lazy" src="patterns/img/toast-error.jpg" alt="Error toast">Toast</a>
+    </div>
+  </section>
+
+  <!-- ===================================================== OTHER -->
+  <section class="pt" id="other">
+    <header class="pt-head">
+      <p class="pt-family">Not drawn</p>
+      <h2>Types that exist but weren't mapped</h2>
+      <p>Known from the router or seen only in passing. Each is a candidate for a follow-up pass.</p>
+    </header>
+    <div class="spec-panel">
+      <table class="spec-table">
+        <thead><tr><th>Type</th><th>Routes</th><th>What's known</th></tr></thead>
+        <tbody>
+          <tr><td>Calendar and timeline</td><td class="spec-label">~/schedule (Calendar, Timeline in the Jobs sidebar) · ~/vendor/calendar</td><td>Listed in the Jobs sidebar next to Tasks; not opened. Probably a calendar grid and a gantt.</td></tr>
+          <tr><td>Wizard and import flows</td><td class="spec-label">~/flow/:flowType · ~/import/* · ~/catalog/import</td><td>Step-by-step flows; opening one starts a flow, so not opened.</td></tr>
+          <tr><td>Stand-alone record editors</td><td class="spec-label">~/invoice/:id · ~/assembly/:id · ~/vendor/:id · ~/lead_rotation/:id</td><td>Need an ID and may autosave on focus; may share the job workspace frame.</td></tr>
+          <tr><td>Public client pages</td><td class="spec-label">/pub/company/:id · /pub/rating · /pub/lead</td><td>No app shell; client-facing.</td></tr>
+          <tr><td>Vendor portal</td><td class="spec-label">/pub/vendor/* · /pub/user/:id/* · /pub/rfq/:token</td><td>Separate audience; not opened.</td></tr>
+          <tr><td>Auth</td><td class="spec-label">/pub/login · /pub/passwordReset · /pub/onboard</td><td>Not opened (the user is signed in).</td></tr>
+          <tr><td>Simple info page</td><td class="spec-label">~/billing</td><td>Title, plan text and "Contact support"; one card.</td></tr>
+          <tr><td>Not found</td><td class="spec-label">any unknown route; also ~/appointments</td><td>"Oops! We couldn't find what you were looking for", no actions. <b>~/appointments</b> is in the router but renders this page.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+<script src="../system/specimens/specimen.js?v=d2cd6d94"></script>
+</body>
+</html>

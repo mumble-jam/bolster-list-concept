@@ -1,0 +1,696 @@
+/* Getting started concept. Semantic tokens only, so parts can move into system/components unchanged. */
+@layer concept {
+  .gs { display: grid; gap: var(--space-10); padding-block-end: var(--space-16); }
+  /* the cards here take the system's raised shadow, as Elevation draws it (your call, 27 Oct): one soft lift, no darker
+     bottom edge, top line or sheen from the card's own body. Done cards stay flat */
+  /* every card is the system's card, done ones too (29 Oct); since D148 that's its tokens: edge, sheen and shadow (2 Nov) */
+  .gs-hero.card:not([data-banner="card"]) { box-shadow: none; }
+
+  /* ---------- hero: aligned to the cards under it (research, 26 Oct: Klaviyo, Cloaked, Shopify, Pipedrive, Slite on
+     Mobbin). A page that goes on into a grid of cards starts its banner on the grid's left edge, so the eye runs down one
+     line from the title into the first card; a centred banner only works when one narrow column follows it (Google
+     Workspace, Cake). Text and the chat box on the left, as Shopify puts its assistant box under the greeting; Bolton on
+     the right, standing on the banner's bottom edge, the way Pipedrive and Slite keep their picture to one side ---------- */
+  .gs-hero { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-areas: "bolton text" "bolton ask";
+    column-gap: var(--space-8); align-items: end; padding: var(--space-6) var(--space-8) 0; overflow: hidden; position: relative; }
+  /* in a card, the banner is the system's card (.card: its surface, edge and body, Elevation: "cards draw their own
+     body"); --shadow-raised is for what barely lifts, not for a card */
+  /* he stays a vector: no mask over him and no endless breathing scale (Chrome draws a scaling or masked layer once as a
+     picture and stretches it, which is what made him soft and steppy); his cut-off is a fade in the banner's own colour */
+  .gs-hero { --_fade: var(--color-surface-default); }
+  .gs-hero:not([data-banner="card"]) { --_fade: var(--color-surface-canvas); }
+  .gs-bolton.stage[data-state="idle"] .h-all { animation: none; }
+  .gs-bolton { grid-area: bolton; align-self: end; position: relative; inline-size: 11rem; block-size: 9.5rem; overflow: hidden; }
+  .gs-bolton.stages { display: block; }
+  .gs-bolton-slot { display: block; translate: 0 100%; transition: translate .9s cubic-bezier(.22, 1.08, .36, 1); }
+  .gs-bolton.gs-in .gs-bolton-slot { translate: 0 1rem; }   /* whole pixels, so he is never drawn between them */
+  .gs-bolton-slot svg { display: block; inline-size: 11rem; block-size: auto; }
+  .gs-hero-text { grid-area: text; align-self: end; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); max-inline-size: 40rem; }
+  .gs-hero h1 { font-size: var(--text-4xl); line-height: var(--leading-2xl); text-wrap: balance; }
+  .gs-lede { color: var(--color-content-secondary); font-size: var(--text-base); line-height: var(--leading-base); text-wrap: pretty; }
+  .gs-ask-slot { grid-area: ask; align-self: start; margin-block: var(--space-5) var(--space-6); inline-size: 100%; max-inline-size: 40rem; display: grid; grid-template-columns: minmax(0, 1fr); }
+  .gs-ask-slot .bt-ask { inline-size: 100%; max-inline-size: none; text-align: start; }
+
+  /* ---------- three banners to compare (concept panel) ---------- */
+  /* pick: one order of importance. 1 the page's name (a step down from the card's 4xl, as a page title, not a poster);
+     2 the chat box, the banner's only colour; 3 Bolton, smaller, beside the words; 4 the line of why, quiet. No card, so
+     the step cards are the only cards; text, box and grid share one left edge */
+  /* more room above the title (feedback, 28 Oct) */
+  /* the hero doesn't clip: the raised chat box's shadow runs past it (fix, 29 Oct) */
+  .gs-hero:not([data-banner="card"]) { overflow: visible; }
+  .gs-hero[data-banner="lead"] { background: none; border: 0; box-shadow: none; border-radius: 0; padding: var(--space-20) 0 0;
+    column-gap: var(--space-6); border-block-end: var(--border-width-default) solid var(--color-line-card); }
+  .gs-hero[data-banner="lead"] h1 { font-size: var(--text-2xl); line-height: var(--leading-xl); }   /* the page title role, as every page's */
+  .gs-hero[data-banner="lead"] .gs-lede { font-size: var(--text-sm); line-height: var(--leading-sm); }
+  .gs-hero[data-banner="lead"] .gs-hero-text { gap: var(--space-1); }
+  .gs-hero[data-banner="lead"] .gs-ask-slot { max-inline-size: 36rem; margin-block: var(--space-4) var(--space-5); }
+  .gs-hero[data-banner="lead"] .gs-bolton { inline-size: 7.5rem; block-size: 6.75rem; }
+  .gs-hero[data-banner="lead"] .gs-bolton-slot svg { inline-size: 7.5rem; }
+  .gs-hero[data-banner="lead"] .gs-bolton.gs-in .gs-bolton-slot { translate: 0 .75rem; }
+
+  /* no card: the same parts on the page itself; Bolton stands on a hairline that runs the banner's width */
+  .gs-hero[data-banner="open"] { background: none; border: 0; box-shadow: none; border-radius: 0; padding-inline: 0; padding-block-start: var(--space-20);
+    border-block-end: var(--border-width-default) solid var(--color-line-card); }
+  /* in the box: no figure; his head inside the chat box, which grows to be the banner's one thing */
+  .gs-hero:is([data-banner="ask"], [data-banner="big"], [data-banner="dock"], [data-banner="bar"], [data-banner="pill"]) { grid-template-columns: minmax(0, 1fr); grid-template-areas: "text" "ask";
+    background: none; border: 0; box-shadow: none; border-radius: 0; padding: var(--space-20) 0 var(--space-2); }
+  .gs-hero:is([data-banner="ask"], [data-banner="big"], [data-banner="dock"], [data-banner="bar"], [data-banner="pill"]) .gs-bolton { display: none; }
+  .gs-hero:is([data-banner="ask"], [data-banner="big"], [data-banner="dock"], [data-banner="bar"], [data-banner="pill"]) .gs-ask-slot { max-inline-size: 48rem; margin-block: var(--space-5) 0; }   /* longer: the box is the banner's one thing */
+  .gs-hero:is([data-banner="ask"], [data-banner="big"], [data-banner="dock"], [data-banner="bar"], [data-banner="pill"]) .bt-ask { padding-inline-start: var(--space-2); }   /* his head 8 clear of the edge, as send is on the right (D35) */
+  .gs-ask-head { display: none; flex: none; inline-size: var(--space-8); block-size: var(--space-8); place-items: center; margin-inline-end: var(--space-1); }
+  .gs-hero:is([data-banner="ask"], [data-banner="big"], [data-banner="dock"], [data-banner="bar"], [data-banner="pill"]) .gs-ask-head { display: grid; }
+  .gs-ask-head .av svg { inline-size: 1.75rem; block-size: 1.75rem; }   /* the head drawn a touch smaller than its 32 slot: his hair is flat on top, so at full size he looks closer to the edge than the round mic does */
+  .gs-ask-head { padding: 0; border: 0; background: none; border-radius: var(--radius-full); cursor: pointer; }
+  .gs-ask-head:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+  @media (hover: hover) { .gs-ask-head:hover .av { scale: 1.08; } }
+  .gs-ask-head .av { transition: scale var(--duration-fast) var(--ease-standard); }
+  /* his suggestions: one line under the box (your call, 28 Oct), no card, as wide as the box; his head shows and hides them. Where the box is
+     too narrow for all three the line scrolls sideways (D128: a part wider than its room scrolls sideways only) */
+  .gs-suggest { display: flex; flex-wrap: nowrap; align-items: center; justify-content: safe center; gap: var(--space-2); margin-block-start: var(--space-3);
+    overflow-x: auto; scrollbar-width: none; animation: gs-suggest-in var(--duration-medium) var(--ease-out); }
+  .gs-suggest::-webkit-scrollbar { display: none; }
+  .gs-suggest[hidden] { display: none; }
+  .gs-hero:not([data-align="center"]) .gs-suggest { justify-content: flex-start; }
+  @keyframes gs-suggest-in { from { opacity: 0; translate: 0 calc(var(--space-1) * -1); } }
+  @media (prefers-reduced-motion: reduce) { .gs-suggest { animation: none; } }
+
+  /* without Bolton: only the words and the chat box, no figure and no head in the box */
+  .gs-hero[data-banner="none"] { grid-template-columns: minmax(0, 1fr); grid-template-areas: "text" "ask";
+    background: none; border: 0; box-shadow: none; border-radius: 0; padding: var(--space-20) 0 var(--space-2); }
+  .gs-hero[data-banner="none"] .gs-bolton { display: none; }
+  .gs-hero[data-banner="none"] .gs-ask-slot { max-inline-size: 48rem; margin-block: var(--space-5) 0; }
+
+  /* ---------- centred: one axis down the middle, Bolton on top, then the title, the line of why and the box ---------- */
+  .gs-hero[data-align="center"] { grid-template-columns: minmax(0, 1fr); grid-template-areas: "bolton" "text" "ask"; justify-items: center; text-align: center; padding-block-end: var(--space-6); }
+  .gs-hero[data-align="center"]:is([data-banner="ask"], [data-banner="big"], [data-banner="dock"], [data-banner="bar"], [data-banner="pill"], [data-banner="none"]) { grid-template-areas: "text" "ask"; }
+  .gs-hero[data-align="center"] .gs-bolton { align-self: auto; }
+  .gs-hero[data-align="center"] .gs-bolton::after { content: ""; position: absolute; inset: auto 0 0; block-size: 22%; pointer-events: none;
+    background: linear-gradient(to bottom, transparent, var(--_fade, var(--color-surface-canvas))); }
+  .gs-hero[data-align="center"] .gs-hero-text { justify-items: center; }
+  .gs-hero[data-align="center"] .gs-ask-slot { justify-self: stretch; margin-inline: auto; margin-block-end: 0; }
+  .gs-hero[data-align="center"] .gs-lede { text-wrap: balance; }
+  .gs-hero[data-align="center"][data-banner="open"], .gs-hero[data-align="center"][data-banner="lead"] { padding-block-end: var(--space-8); }
+
+  /* his bubble: Bolster yellow and small, beside his face on the right, its tail pointing back at him */
+  .gs-say { position: absolute; z-index: 1; inset-inline-start: calc(50% + 5rem); inset-block-start: calc(var(--space-6) + 1rem);
+    box-sizing: border-box; inline-size: max-content; max-inline-size: 21rem; min-block-size: 2.25rem; display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-2);
+    padding: var(--space-3) var(--space-4); border-radius: var(--radius-menu); text-align: start;
+    background: var(--color-action-brand); color: var(--color-content-on-brand); font-weight: var(--font-weight-medium);
+    font-size: var(--text-sm); line-height: var(--leading-sm); box-shadow: var(--shadow-raised); transform-origin: 0 60%; }
+  .gs-say::before { content: ""; position: absolute; inset-inline-start: -0.5rem; inset-block-start: 1.1rem; inline-size: 0.6rem; block-size: 0.7rem;
+    background: inherit; clip-path: polygon(100% 0, 0 30%, 100% 100%); }
+  .gs-say:empty, .gs-say:has(.gs-say-text:empty) { visibility: hidden; }
+  .gs-say[hidden] { display: none; }
+  .gs-say-text { margin: 0; min-inline-size: 0; }
+  /* the step he points you to, as a button under what he says */
+  .gs-say-act { flex: none; }
+  .gs-say-act[hidden] { display: none; }
+  /* his words fade up in turn, quickly, so the message reads as it arrives */
+  .gs-w { display: inline-block; animation: gs-word .32s cubic-bezier(.2, .7, .3, 1) both; animation-delay: calc(var(--i) * 45ms); }
+  @keyframes gs-word { from { opacity: 0; translate: 0 .25em; filter: blur(2px); } }
+  @media (prefers-reduced-motion: reduce) { .gs-w { animation: none; } }
+
+
+
+  /* ---------- sections ---------- */
+  .gs-section { display: grid; gap: var(--space-4); }
+  .gs-hero + .gs-section { margin-block-start: var(--space-6); }   /* the steps start further down (feedback, 27 Oct) */
+  .gs-section-head { display: grid; gap: var(--space-1); }
+  .gs-section-head h2 { font-size: var(--text-xl); line-height: var(--leading-lg); }
+  .gs-section-head p { color: var(--color-content-secondary); }
+
+  .gs-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr)); gap: var(--space-4); }
+  .gs-grid > li { display: grid; }
+
+  /* ---------- a step ---------- */
+  /* the system's card (.card: its surface, edge and quiet body); cards don't move, so pointing
+     at one only tints it, and its icon fills */
+  /* nested corners (D35, feedback 29 Oct): the drawing 12 in from the card's edge, the border included, its corners the
+     card's minus that gap (16 − 12 = 4, Bolster's default corner); the title, the text and the foot on the same left
+     edge. Rhythm: 16 under the drawing, 4 between the title and its text, 12 above the foot */
+  .gs-card { display: grid; grid-template-rows: auto auto 1fr auto; gap: var(--space-1); padding: calc(var(--space-3) - var(--border-width-default)); }
+  /* pointing at a step colours it the way Bolster's own Getting started does (screens, 27 Oct): the card takes a feedback
+     tone's surface and an edge in its colour, and the icon sits in a solid well of it, the icon white. The tones are the
+     system's feedback tokens: estimate info, proposal success, labor rates danger, as in Bolster; the rest spread so
+     neighbours differ */
+  .gs-card[data-tone="info"]    { --_tint: var(--color-feedback-info-surface);    --_ink: var(--color-feedback-info-content); }
+  .gs-card[data-tone="success"] { --_tint: var(--color-feedback-success-surface); --_ink: var(--color-feedback-success-content); }
+  .gs-card[data-tone="warning"] { --_tint: var(--color-feedback-warning-surface); --_ink: var(--color-feedback-warning-content); }
+  .gs-card[data-tone="danger"]  { --_tint: var(--color-feedback-danger-surface);  --_ink: var(--color-feedback-danger-solid); }
+  /* one colour per card, from the system's feedback and job-status colours (feedback, 29 Oct) */
+  .gs-card[data-tone="active"]      { --_tint: var(--color-status-active-surface);      --_ink: var(--color-status-active-content); }
+  .gs-card[data-tone="outstanding"] { --_tint: var(--color-status-outstanding-surface); --_ink: color-mix(in oklab, var(--color-status-outstanding-content) 50%, var(--color-status-outstanding-dot)); }   /* between its dot's bright orange and its text's brown: orange, and dark enough to read on its well (feedback, 29 Oct) */
+  .gs-card[data-tone="booked"]      { --_tint: var(--color-status-booked-surface);      --_ink: var(--color-status-booked-content); }
+  .gs-card[data-tone="purple"]      { --_tint: color-mix(in oklab, var(--color-avatar-4) 16%, var(--color-surface-default)); --_ink: var(--color-avatar-4); }   /* the system's purple (avatars) */
+  .gs-card[data-tone="neutral"]     { --_tint: var(--color-feedback-neutral-surface);   --_ink: var(--color-feedback-neutral-content); }
+  /* each tone's saturated colour from the system, its marks' and dots' colour, for the box when you point at the card
+     (feedback, 30 Oct: more saturated on hover) */
+  .gs-card[data-tone="info"]        { --_solid: var(--color-status-in-progress-dot); }
+  .gs-card[data-tone="success"]     { --_solid: var(--color-feedback-success-accent); }
+  .gs-card[data-tone="warning"]     { --_solid: var(--color-status-pending-dot); }
+  .gs-card[data-tone="danger"]      { --_solid: var(--color-feedback-danger-solid); }
+  .gs-card[data-tone="active"]      { --_solid: var(--color-status-active-dot); }
+  .gs-card[data-tone="outstanding"] { --_solid: var(--color-status-outstanding-dot); }
+  .gs-card[data-tone="booked"]      { --_solid: var(--color-status-booked-dot); }
+  .gs-card[data-tone="purple"]      { --_solid: var(--color-avatar-4); }
+  /* at rest the drawing's well is the card's colour, light, the drawing in its ink */
+  /* at rest the well is the card's colour: its ink mixed into the card's white, by as much as each colour needs for the
+     same step off the card, about 1.15 : 1, in light and in dark (measured, 29 Oct; a touch lighter than 1.2, your call), so no well fades out and none shouts */
+  /* warmer (feedback, 29 Oct): the colours mix into a warm white, a quarter of the page's canvas in it, not the card's
+     cool white; the grey ones are the page's own warm tint, their lines its warm ink */
+  .gs { --_warm: color-mix(in oklab, var(--color-surface-default) 75%, var(--color-surface-canvas));
+    --_warm-well: color-mix(in oklab, var(--color-surface-tint) 55%, var(--color-surface-default)); --_warm-ink: var(--color-feedback-neutral-content); }
+  /* every box at the same lightness and colourfulness, each in its own hue (feedback, 30 Oct: yellow read paler, purple
+     louder): built in OKLCH from the tone's ink, so only the hue changes from card to card */
+  .gs-card[data-tone] .gs-art-well { --_well: light-dark(oklch(from var(--_ink) 0.952 0.017 h), oklch(from var(--_ink) 0.3 0.026 h)); color: var(--_ink); }
+  .gs-card[data-tone="neutral"] .gs-art-well { --_well: var(--_warm-well); color: var(--_warm-ink); }
+  /* a hidden action's well, without colour and as light as the coloured ones (feedback, 29 Oct) */
+  .gs-card[data-hidden] .gs-art-well { --_well: var(--_warm-well); color: var(--_warm-ink); }
+  .gs-card { transition: background-color var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard); }
+  @media (hover: hover) {
+    /* completed steps get only the system's quiet hover (surface-hover), no colour */
+    .gs[data-donelook="sunken"] .gs-card[data-done]:hover { background: var(--color-surface-tint-hover); }
+    .gs-card:not([data-done], [data-hidden]):hover { background: var(--_tint, var(--color-surface-hover)); border-color: color-mix(in oklab, var(--_ink, var(--color-line-strong)) 45%, transparent); }
+  }
+  /* the whole card opens its step: the title is the button, stretched over the card; the icon (its tick) sits above it */
+  .gs-open { all: unset; cursor: pointer; }
+  .gs-open::after { content: ""; position: absolute; inset: 0; border-radius: inherit; }
+  .gs-card:has(.gs-open:focus-visible) { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+  .gs-card h3 { font-size: var(--text-base); line-height: var(--leading-base); font-family: var(--font-sans); font-weight: var(--font-weight-medium); }
+  .gs-card p { color: var(--color-content-secondary); font-size: var(--text-sm); line-height: var(--leading-sm); }
+  .gs-card-top { display: flex; align-items: flex-start; gap: var(--space-2); margin-block-end: var(--space-3); }   /* 16 under the drawing with the card's 4 */
+  .gs-card { position: relative; }
+  /* how long it takes, in the heading (feedback, 27 Oct), quieter than the title */
+  /* the time in the heading (feedback, 29 Oct) */
+  .gs-h-time { font-size: var(--text-xs); white-space: nowrap; line-height: var(--leading-xs); font-weight: var(--font-weight-regular); color: var(--color-content-tertiary); }
+  .gs-card[data-done] .gs-h-time { display: none; }
+  .gs-h-sp { word-spacing: var(--space-1); }   /* the space before the time: wider, and gone when the time wraps, so a wrapped time starts the line */
+  /* hiding a step you can do without: a quiet × in the corner, over the card's own click */
+  .gs-dismiss { position: absolute; z-index: 1; inset-block-start: var(--space-2); inset-inline-end: var(--space-2); color: var(--color-content-tertiary); }
+  .gs-card-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); margin-block-start: var(--space-2); }
+  .gs-time, .gs-lock { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-xs); color: var(--color-content-tertiary); }
+  /* done: the card sits into the page, calm. The system's sunken surface, no raised shadow or sheen (the to-do cards keep
+     the system card's body); done reads at a glance down the grid */
+  /* ---------- a done action, five ways (concept panel, "Done look", 29 Oct); it stays in its place ---------- */
+  .gs-h-check { display: none; }
+  .gs-h-done { font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-feedback-success-content); white-space: nowrap; }
+  /* "Done" is spelled out in one look only (feedback, 29 Oct); elsewhere the check says it, the time just goes */
+  .gs:not([data-donelook="word"]) .gs-h-done, .gs:not([data-donelook="word"]) .gs-card[data-done] .gs-h-sp { display: none; }
+  .gs[data-donelook="blue"] .gs-art-check { background: var(--color-action-accent); color: var(--color-content-on-accent); }
+  /* quiet (and struck, compact): the drawing without its colour, as a hidden one, the check in its corner */
+  .gs:is([data-donelook="quiet"], [data-donelook="blue"], [data-donelook="word"], [data-donelook="struck"], [data-donelook="compact"]) .gs-card[data-done] .gs-art-well { --_well: var(--_warm-well); color: color-mix(in oklab, var(--_warm-ink) 70%, var(--_warm-well)); }
+  .gs[data-donelook="struck"] .gs-card[data-done] .gs-open { text-decoration: line-through; text-decoration-thickness: 1px; text-decoration-color: var(--color-content-tertiary); color: var(--color-content-secondary); }
+  /* compact: no drawing; a check before the title, the text under it */
+  .gs[data-donelook="compact"] .gs-card[data-done] .gs-card-top { display: none; }
+  .gs[data-donelook="compact"] .gs-card[data-done] .gs-h-check { display: inline-grid; place-items: center; vertical-align: -3px; inline-size: var(--space-4); block-size: var(--space-4); margin-inline-end: var(--space-2); border-radius: var(--radius-full); background: var(--color-feedback-success-content); color: var(--color-content-on-accent); }
+  .gs[data-donelook="compact"] .gs-card[data-done] { align-self: start; padding-inline-end: var(--space-10); }
+  .gs[data-donelook="compact"] .gs-grid > li:has(> .gs-card[data-done]) { align-items: start; }
+  /* sunken: into the page, its drawing faded (the 27 Oct look) */
+  .gs[data-donelook="sunken"] .gs-card[data-done] { background: var(--color-surface-sunken); background-image: none; box-shadow: none; border-color: var(--color-line-card); }
+  .gs[data-donelook="sunken"] .gs-card[data-done] h3 { color: var(--color-content-secondary); }
+
+  .gs-icon { inline-size: 2rem; block-size: 2rem; border-radius: var(--radius-control); display: grid; place-items: center; flex: none;
+    background: var(--color-surface-tint); color: var(--color-content-secondary); transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }   /* well and icon turn together, quick and easing out: no grey icon on a half-dark well */
+
+  /* a done action's check, in its drawing's top corner (29 Oct) */
+  .gs-art-check { position: absolute; z-index: 1; inset-block-start: var(--space-2); inset-inline-start: var(--space-2); display: grid; place-items: center;
+    inline-size: var(--space-6); block-size: var(--space-6); border-radius: var(--radius-full);
+    background: var(--color-feedback-success-content); color: var(--color-content-on-accent); box-shadow: 0 0 0 2px var(--color-surface-raised);   /* a ring, so it reads on a green well */
+    padding: 0; border: 0; cursor: pointer; font: inherit; transition: scale var(--duration-fast) var(--ease-out); }
+  @media (hover: hover) { .gs-art-check:hover { scale: 1.1; } }
+  .gs-art-check:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+  @media (pointer: coarse) { .gs-art-check::after { content: ""; position: absolute; inset: 50% auto auto 50%; inline-size: var(--touch-target-min); block-size: var(--touch-target-min); translate: -50% -50%; } }
+
+  /* ---------- the drawings: what you do in the step, in Bolton's hand; what moves when you point at the card ---------- */
+  /* in a well, like the icons (feedback, 27 Oct): the line in the well's ink, shapes in the well's colour, a few in a
+     light tint of the line; pointing at the card turns the well the card's colour and the drawing white, as the icon does */
+  .gs-art-well { --_well: var(--color-surface-tint); flex: 1; display: grid; place-items: center;
+    inline-size: 100%; block-size: 11rem; border-radius: var(--radius-lg); background: var(--_well); color: var(--color-content-secondary);
+    transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out); }
+  .gs-art-well { position: relative; }
+  .gs-card-top > .gs-art-well { inline-size: auto; border-radius: calc(var(--radius-card) - var(--space-3)); }
+  /* the drawing keeps its size, with more room above and below it in a taller well, 144 high (feedback, 29 Oct) */
+  /* a little bigger (30 Oct): 24 above and below instead of 32, and 32 at the sides of a card with a × instead of 40 */
+  .gs-art { position: absolute; inset: var(--space-6) var(--space-3); inline-size: calc(100% - var(--space-6)); block-size: calc(100% - var(--space-12)); overflow: visible; }
+  .gs-card:has(.gs-dismiss) .gs-art { inset-inline: var(--space-8); inline-size: calc(100% - var(--space-16)); }   /* clear of the corner button, still centred */
+  .gs-art [fill="#FEFEFE"] { fill: var(--_well); }
+  .gs-art :is([fill="#FDFE03"], [fill="#FF8A1A"]) { fill: color-mix(in oklab, currentColor 18%, var(--_well)); }
+  .gs-art * { transition: fill var(--duration-fast) var(--ease-out); }
+  /* the ×, in the drawing's top corner */
+  .gs-card .gs-dismiss { inset-block-start: calc(var(--space-3) - var(--border-width-default) + var(--space-1)); inset-inline-end: calc(var(--space-3) - var(--border-width-default) + var(--space-1)); border-radius: var(--radius-full); color: color-mix(in oklab, var(--color-content-tertiary) 78%, transparent); }   /* quiet, but at 3 : 1 on every well, the least an icon you press may have (WCAG 1.4.11; feedback, 29 Oct); white on the card's hover */
+  /* just the cross, no disc (feedback, 28 Oct): on the well's ink, white when the well takes the card's colour */
+  /* on the card's hover the well turns its full colour and the cross turns white with the drawing, no disc; pointing at
+     the cross itself brings the disc, a light shade of the card's colour, the cross in the colour (feedback, 29 Oct) */
+  @media (hover: hover) { .gs-card:not([data-done], [data-hidden]):hover .gs-dismiss { background: none; color: var(--color-content-on-accent); }
+    .gs-card .gs-dismiss:hover, .gs-card:not([data-done], [data-hidden]):hover .gs-dismiss:hover { --_c: var(--_ink, var(--color-content-secondary)); background: color-mix(in oklab, var(--_c) 22%, var(--color-surface-default)); color: var(--_c); } }
+  .gs[data-donelook="sunken"] .gs-card[data-done] .gs-art { opacity: .55; }
+  /* pointed at, the box takes its tone's saturated colour from the system at its own colourfulness, all at one lightness, deep enough that white lines read well on each (feedback, 30 Oct: darker) */
+  @media (hover: hover) { .gs-card:not([data-done], [data-hidden]):hover .gs-art-well { --_well: light-dark(oklch(from var(--_solid, var(--_ink)) 0.45 clamp(0.14, c, 0.16) h), oklch(from var(--_solid, var(--_ink)) 0.42 clamp(0.13, c, 0.15) h)); color: var(--color-content-on-accent); } }
+  /* the story plays when you point at the card, whatever its state (to do, done, hidden). Everything rests where the
+     story ends, and moves there from its start: slow, eased, once, each part in its turn, so it reads as one smooth
+     sequence and looking away never makes it jump. What only travels (the plane, the rows, the coin) rests unseen */
+  .gs-art { --_ease: cubic-bezier(.45, 0, .2, 1); --_soft: cubic-bezier(.25, .1, .25, 1); --_spring: cubic-bezier(.34, 1.3, .64, 1); }
+  /* every moving part turns and scales about itself, not the drawing's corner (without this a part that grows or
+     pops starts out at the drawing's left edge, as a stray line) */
+  .gs-art [class*="mv-"] { transform-box: fill-box; }
+  .gs-art :is(.mv-pop, .mv-total, .mv-press, .mv-mate, .mv-new, .mv-app, .mv-card, .mv-hub) { transform-origin: center; }
+  .gs-art .mv-total { transform-origin: 0 50%; }
+  .gs-art :is(.mv-draw, .mv-type) { stroke-dasharray: 1; stroke-dashoffset: 0; }
+  .gs-art .mv-stamp { transform-origin: center; }
+  /* the drawing never takes the pointer: a part that reaches past the card (the shield as it stamps) mustn't keep the card
+     pointed at after the pointer has left it (bug, 30 Oct) */
+  .gs-art { pointer-events: none; }
+  /* the plane flies along the dashed line, nose on the line (feedback, 28 Oct) */
+  .gs-art .mv-fly { transform-box: view-box; offset-path: path("M88 60 C112 22 156 20 176 40"); offset-rotate: auto; offset-anchor: 0 0; offset-distance: 100%; }
+  /* the inquiry arcs from the form's button to the top of the pipeline's first column */
+  .gs-art .mv-msg { transform-box: view-box; offset-path: path("M56 75 C100 84 112 36 140 36"); offset-rotate: 0deg; offset-anchor: 0 0; offset-distance: 100%; }
+  .gs-art :is(.mv-fly, .mv-chip, .mv-drop, .mv-dash, .mv-coin, .mv-mail, .mv-msg) { opacity: 0; }
+  .gs-art .mv-cash { transform-origin: center; }   /* what only shows on the way (a cost not set yet, the plane) rests unseen */
+  .gs-art .mv-rate { transform-origin: center; }
+  .gs-art .mv-zig-1 { --_dy: -14px; } .gs-art .mv-zig-2 { --_dy: -8px; } .gs-art .mv-zig-3 { --_dy: -2px; }
+  .gs-art .mv-zig { transform-origin: 0 50%; }
+  .gs-art .mv-line { stroke-dasharray: 1; stroke-dashoffset: 0; }
+  @media (prefers-reduced-motion: no-preference) {
+    :is(.gs-card, .gs-hidden-row):is(:hover, .gs-playing) .gs-art {   /* .gs-playing: a story started plays to its end even when the pointer leaves (4 Nov) */
+      --_tn: color-mix(in oklab, currentColor 18%, var(--_well));
+      [class^="mv-"] { animation-fill-mode: both; }
+      /* labor rates: the pointer glides to a crew's cost per hour, presses it gently, and it lights up */
+      .mv-point { animation: gs-a-point 1.6s cubic-bezier(.33, 0, .15, 1) both; }
+      .mv-hl { animation: gs-a-hl 1.6s linear both; }
+      .mv-dash { animation: gs-a-out .25s var(--_ease) var(--t) both; }
+      .mv-rate { animation: gs-a-rate .45s var(--_spring) var(--t) both; }
+      /* the estimate: its items come in one by one, then the total */
+      .mv-in { animation: gs-a-in .7s var(--_ease) both; }
+      .mv-in-2 { animation-delay: .25s; } .mv-in-3 { animation-delay: .5s; }
+      .mv-total { animation: gs-a-fill .7s var(--_ease) .85s both; }
+      /* the proposal: it glides to your client, who signs */
+      .mv-fly { animation: gs-a-fly 1.3s var(--_ease) .85s both; }
+      .mv-pop { animation: gs-a-pop .6s var(--_spring) 2.05s both; }
+      /* your work: each row of the sheet glides over and becomes a job */
+      /* each scribbled row slides out of the sheet and straightens into a job, its box opening into the card on the way */
+      .mv-job { animation: gs-a-job 1.5s cubic-bezier(.5, 0, .15, 1) both; }
+      .mv-job .mv-open { animation: gs-a-open 1.5s cubic-bezier(.5, 0, .15, 1) both; }
+      .mv-job .mv-smooth { animation: gs-a-smooth 1.5s cubic-bezier(.5, 0, .15, 1) both; }
+      .mv-job .mv-dot { animation: gs-a-dot 1.5s ease-out both; }
+      .mv-job-2, .mv-job-2 * { animation-delay: .3s; } .mv-job-3, .mv-job-3 * { animation-delay: .6s; }
+      .mv-leave { animation: gs-a-leave 2.8s linear both; }   /* the row's scribble goes as the row leaves the sheet, and comes back softly once the jobs are in, so the sheet at rest is full */
+      .mv-leave-2 { animation-delay: .3s; } .mv-leave-3 { animation-delay: .6s; }
+      .mv-draw { animation: gs-a-draw .7s var(--_ease) both; }
+      .mv-drop { animation: gs-a-drop 1.1s var(--_ease) .6s both; }
+      .mv-glow { animation: gs-a-glow 1.2s var(--_soft) 1.2s both; }
+      /* verify: your details write in, the Verified shield stamps on, then a payment drops onto the hard hat's tile and
+         sinks into it, the tile dipping as it catches it */
+      .mv-stamp { animation: gs-a-stamp .6s cubic-bezier(.3, 1.35, .6, 1) .5s both; }
+      .mv-coin { animation: gs-a-coin 1s cubic-bezier(.45, 0, .7, .3) 1s both; }
+      .mv-bump { animation: gs-a-bump .5s var(--_ease) 1.6s both; }
+      .mv-type { animation: gs-a-draw .5s var(--_ease) var(--d, 0s) both; }
+            .mv-tap { animation: gs-a-tap 1s var(--_ease) both; }
+      .mv-press { animation: gs-a-press .35s var(--_ease) .6s both; }
+      /* the lead form (29 Oct): you add the form, and it settles into your website; a visitor's inquiry then lands
+         at the top of your leads in Bolster */
+      .mv-slot { animation: gs-a-slot .7s var(--_ease) both; }
+      .mv-slot .mv-press { animation: gs-a-press .35s var(--_ease) .85s both; }
+      .mv-shift { animation: gs-a-shift .4s var(--_ease) 1.15s both; }
+      .mv-new { animation: gs-a-pop .5s var(--_spring) 1.35s both; }
+      /* integrations: wires run out from Bolster, and each app lights up as its wire reaches it */
+      /* integrations: work goes both ways between Bolster and your books, piece after piece, the sync arrows turning
+         as long as it runs */
+      .mv-lite { animation: gs-a-lite .45s var(--_ease) var(--d, 0s) both; }
+      /* your team: you press the plus, the invitation travels along the job to each seat, and a person joins at each */
+      /* quicker (4 Nov): the invitation sets off sooner and moves faster, so the people appear sooner, each in a short pop */
+      .mv-mail { animation: gs-a-mail 1.1s cubic-bezier(.45, 0, .55, 1) .7s both; }
+      .mv-mate { animation: gs-a-pop .36s var(--_spring) var(--d, 0s) both; }
+    }
+  }
+  @keyframes gs-a-tap { from { translate: 30px 26px; opacity: 0; } 60% { translate: 0 0; opacity: 1; scale: 1; } 75% { scale: .88; } 90% { scale: 1; } }
+  @keyframes gs-a-point { 0% { translate: 34px 30px; opacity: 0; } 15% { opacity: 1; } 65% { translate: 0 0; scale: 1; } 75% { scale: .94; } 88%, 100% { scale: 1; } }
+  @keyframes gs-a-out { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes gs-a-rate { from { opacity: 0; scale: .7; } }
+  @keyframes gs-a-hl { 0%, 62% { fill: var(--_well); } 92%, 100% { fill: var(--_tn); } }
+  @keyframes gs-a-grow { 0%, 55% { scale: .4 1; } 100% { scale: 1 1; } }
+  @keyframes gs-a-in { from { translate: -10px 0; opacity: 0; } }
+  @keyframes gs-a-fill { from { scale: 0 1; } }
+  @keyframes gs-a-fly { 0% { offset-distance: 0%; opacity: 0; } 10% { opacity: 1; } 88% { opacity: 1; } 100% { offset-distance: 100%; opacity: 0; } }
+  @keyframes gs-a-pop { from { scale: .4; opacity: 0; } }
+  @keyframes gs-a-leave { 0%, 3% { opacity: 1; } 8%, 78% { opacity: 0; } 100% { opacity: 1; } }
+  @keyframes gs-a-stamp { from { scale: 1.7; opacity: 0; rotate: -8deg; } 60% { opacity: 1; } }
+  @keyframes gs-a-pay { from { opacity: .3; } }
+  /* the payment drops onto the logo and is gone as it lands, so it never sits over the hat (bug, 30 Oct) */
+  @keyframes gs-a-coin { 0% { translate: 0 -24px; opacity: 0; } 20% { opacity: 1; } 55% { translate: 0 -5px; opacity: 1; } 68%, 100% { translate: 0 1px; opacity: 0; } }
+  @keyframes gs-a-bump { 40% { translate: 0 3px; } }
+  @keyframes gs-a-cash { from { scale: .3; opacity: 0; } }
+  @keyframes gs-a-job { 0% { translate: var(--_dx) var(--_dy); } }
+  @keyframes gs-a-open { 0%, 8% { width: 76px; rx: 0px; stroke-width: 2px; stroke-opacity: 0; } 25% { stroke-opacity: 1; } }
+  @keyframes gs-a-smooth { 0%, 25% { d: var(--_z); } }
+  @keyframes gs-a-dot { 0%, 70% { opacity: 0; } }
+  @keyframes gs-a-zig { 0% { translate: 0 0; opacity: 0; } 12% { opacity: 1; } 80% { translate: 104px var(--_dy); scale: 1.1 1; opacity: 1; } 100% { translate: 110px var(--_dy); scale: 1.4 .2; opacity: 0; } }
+  @keyframes gs-a-card { from { opacity: 0; scale: .92; } }
+  @keyframes gs-a-chip { 0% { translate: 0 0; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { translate: 116px var(--_dy); opacity: 0; } }
+  @keyframes gs-a-draw { from { stroke-dashoffset: 1; } }
+  @keyframes gs-a-drop { 0% { translate: 0 -14px; opacity: 0; } 25% { translate: 0 0; opacity: 1; } 80% { translate: 0 28px; opacity: 1; } 100% { translate: 0 34px; opacity: 0; } }
+  @keyframes gs-a-glow { 0%, 100% { fill: var(--_well); } 40% { fill: var(--_tn); } }
+  @keyframes gs-a-mail { 0% { opacity: 0; scale: .5; translate: 0 0; } 10% { opacity: 1; scale: 1; translate: 0 0; } 35%, 45% { translate: -61px 0; } 60%, 68% { translate: -80px 0; } 83%, 90% { opacity: 1; scale: 1; translate: -99px 0; } 100% { opacity: 0; scale: .6; translate: -99px 0; } }
+  @keyframes gs-a-press { 50% { scale: .9; } }
+  @keyframes gs-a-msg { 0% { offset-distance: 0%; opacity: 0; } 15%, 85% { opacity: 1; } 100% { offset-distance: 100%; opacity: 0; } }
+  @keyframes gs-a-slot { from { translate: 0 -16px; opacity: 0; } 60% { opacity: 1; } }
+  @keyframes gs-a-shift { from { translate: 0 -18px; } }
+  @keyframes gs-a-lite { 0%, 30% { fill: var(--_well); } 100% { fill: var(--_tn); } }
+  @keyframes gs-a-in-l { from { translate: -26px 0; opacity: 0; } 40% { opacity: 1; } }
+  @keyframes gs-a-in-r { from { translate: 26px 0; opacity: 0; } 40% { opacity: 1; } }
+  @keyframes gs-a-click { 0%, 40% { scale: 1; } 48% { scale: 1.06; } 56%, 70% { scale: 1; } 78% { scale: 1.06; } 86%, 100% { scale: 1; } }
+  @keyframes gs-a-flow { to { stroke-dashoffset: -40; } }
+
+  /* ---------- hidden steps: one fold for all, or one each; each comes back on its own ---------- */
+  .gs-hidden { display: grid; gap: var(--space-2); margin-block-start: var(--space-2); }
+  .gs-hidden[hidden] { display: none; }
+  .gs-fold > summary { display: flex; align-items: center; gap: var(--space-2); list-style: none; cursor: pointer; inline-size: fit-content;
+    padding: var(--space-2) var(--space-3); margin-inline-start: calc(var(--space-3) * -1); border-radius: var(--radius-control);
+    font-size: var(--text-base); line-height: var(--leading-base); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
+  .gs-fold > summary::-webkit-details-marker { display: none; }
+  @media (hover: hover) { .gs-fold > summary:hover { background: var(--color-surface-hover); color: var(--color-content-primary); } }
+  .gs-fold > summary:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+  .gs-fold[open] .gs-done-chev { rotate: 180deg; }
+  .gs-fold-note { font-size: var(--text-xs); line-height: 1; padding: var(--space-1) var(--space-2); border-radius: var(--radius-full); background: var(--color-surface-tint); color: var(--color-content-tertiary); font-weight: var(--font-weight-regular); }
+  .gs-hidden-list { margin-block-start: var(--space-4); animation: gs-unfold var(--duration-medium) var(--ease-out); }
+  .gs-hidden-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-4); padding: var(--space-3) var(--space-4);
+    border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-lg); background: var(--color-surface-sunken); }
+  .gs-hidden-row .gs-art-well { inline-size: 5rem; block-size: 3.5rem; margin: 0; border-radius: var(--radius-md); }
+  .gs-hidden-row .gs-art { inset: var(--space-1); inline-size: calc(100% - var(--space-2)); block-size: calc(100% - var(--space-2)); }
+  .gs-hidden-row > div { display: grid; gap: var(--space-1); }
+  .gs-hidden-row b { font-weight: var(--font-weight-medium); font-size: var(--text-sm); }
+  .gs-hidden-row span { font-size: var(--text-sm); color: var(--color-content-secondary); }
+  .gs-hidden[data-mode="each"] .gs-hidden-row b { display: none; }   /* its fold already names it */
+  @media (prefers-reduced-motion: reduce) { .gs-hidden-list { animation: none; } }
+  @media (max-width: 767px) { .gs-hidden-row { grid-template-columns: minmax(0, 1fr) auto; } .gs-hidden-row .gs-art-well { display: none; } }
+
+  /* ---------- the guide a step opens (Bolster's, 27 Oct): in the corner, the steps one by one ---------- */
+  .gs-guide { position: fixed; z-index: var(--z-popover); inset-inline-end: var(--space-4); inset-block-end: var(--space-16);   /* above the concept pill in the corner */ inline-size: min(20rem, calc(100vw - var(--space-8)));
+    max-block-size: calc(100dvh - var(--space-16)); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden;
+    border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-card); background: var(--color-surface-raised); box-shadow: var(--shadow-overlay);
+    animation: gs-guide-in var(--duration-medium) var(--ease-out); }
+  @keyframes gs-guide-in { from { opacity: 0; translate: 0 var(--space-2); } }
+  .gs-guide-head { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-2) var(--space-3) var(--space-4); border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
+  .gs-guide-head h2 { flex: 1; min-inline-size: 0; font: var(--font-weight-medium) var(--text-sm) / var(--leading-sm) var(--font-sans); }
+  .gs-guide-av { display: grid; inline-size: var(--space-6); block-size: var(--space-6); }
+  .gs-guide-av .av svg { inline-size: 100%; block-size: 100%; }
+  .gs-guide-steps { list-style: none; margin: 0; padding: var(--space-2) 0; overflow-y: auto; }
+  .gs-guide-steps li { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-3); padding: var(--space-2) var(--space-4); }
+  .gs-guide-steps li > div { display: grid; }
+  .gs-guide-steps :is(a, b) { font-size: var(--text-sm); line-height: var(--leading-sm); font-weight: var(--font-weight-medium); color: var(--color-content-primary); }
+  .gs-guide-steps a { text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--color-line-strong); }
+  .gs-guide-steps span:not(.gs-guide-dot) { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-tertiary); }
+  .gs-guide-dot { margin-block-start: 2px; inline-size: var(--space-4); block-size: var(--space-4); border-radius: var(--radius-full); border: var(--border-width-default) solid var(--color-control-off); }
+  .gs-guide-steps li[data-current] .gs-guide-dot { border-color: var(--color-control-on); background: radial-gradient(circle, var(--color-control-on) 0 35%, transparent 40%); }
+  .gs-guide-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+    border-block-start: var(--border-width-default) solid var(--color-line-subtle); font-size: var(--text-xs); color: var(--color-content-secondary); }
+  .gs-guide[data-min] :is(.gs-guide-steps, .gs-guide-foot) { display: none; }
+  .gs-guide[data-min] .gs-guide-head { border-block-end: 0; }
+  .gs-guide-chev { display: inline-grid; transition: rotate var(--duration-fast) var(--ease-standard); }
+  .gs-guide[data-min] .gs-guide-chev { rotate: 180deg; }   /* down to fold away, up to open again */
+  .gs-guide [data-guide-min] svg { transition: rotate var(--duration-fast) var(--ease-standard); }
+  .gs-guide[data-min] [data-guide-min] svg { rotate: 180deg; }
+  /* its coach mark points at Jobs in the menu */
+  .gs-coach { position: fixed; z-index: var(--z-popover); max-inline-size: 18rem; display: grid; gap: var(--space-1); padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-menu); background: var(--color-surface-inverse); color: var(--color-content-inverse); box-shadow: var(--shadow-popover);
+    font-size: var(--text-sm); line-height: var(--leading-sm); animation: gs-guide-in var(--duration-medium) var(--ease-out); }
+  .gs-coach[hidden] { display: none; }
+  .gs-coach::before { content: ""; position: absolute; inset-inline-start: calc(var(--space-2) * -1 + 1px); inset-block-start: var(--space-5); inline-size: var(--space-2); block-size: var(--space-3);
+    background: inherit; clip-path: polygon(100% 0, 0 50%, 100% 100%); }
+  .gs-coach-step { font-size: var(--text-xs); line-height: var(--leading-xs); opacity: .7; }
+  .gs-coach b { font-weight: var(--font-weight-medium); }
+  .gs-coach p { margin: 0; }
+  @media (prefers-reduced-motion: reduce) { .gs-guide, .gs-coach { animation: none; } }
+
+  /* ---------- labor rates, the dialog the step opens ---------- */
+  .gs-rates .dialog-header .badge { margin-inline-start: auto; }
+  .gs-rates .dialog-body { display: grid; gap: var(--space-3); }
+  .gs-rates .dialog-body > p { margin: 0; }
+  .gs-rates-list { display: grid; gap: var(--space-3); margin-block-start: var(--space-1); }
+  .gs-rate { display: grid; grid-template-columns: minmax(0, 1fr) 9rem; gap: var(--space-1) var(--space-2); }
+  .gs-rate[hidden] { display: none; }
+  .gs-rate-stage { grid-column: 1 / -1; font-size: var(--text-sm); font-weight: var(--font-weight-medium); }
+
+  /* ---------- the way out ---------- */
+  /* Completed: what's done, folded at the end of the page. The summary is the toggle, its chevron turns */
+  .gs-done > summary { display: flex; align-items: center; gap: var(--space-2); inline-size: fit-content; list-style: none; cursor: pointer;
+    padding: var(--space-2) var(--space-3); margin-inline-start: calc(var(--space-3) * -1); border-radius: var(--radius-control);
+    font-size: var(--text-xl); line-height: var(--leading-lg); color: var(--color-content-primary); }
+  .gs-done > summary::-webkit-details-marker { display: none; }
+  @media (hover: hover) { .gs-done > summary:hover { background: var(--color-surface-hover); } }
+  .gs-done > summary:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+  .gs-done-count { font-size: var(--text-sm); line-height: 1; padding: var(--space-1) var(--space-2); border-radius: var(--radius-full);
+    background: var(--color-surface-tint); color: var(--color-content-secondary); font-variant-numeric: tabular-nums; }
+  /* Completed and Hidden actions in one row: the toggles sit side by side, Completed first and in ink, Hidden quieter */
+  .gs-more { display: grid; gap: var(--space-4); }
+  .gs-more[hidden], .gs-more-panel[hidden] { display: none; }
+  .gs-more-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); margin-inline-start: calc(var(--space-3) * -1); }
+  .gs-more-btn { display: inline-flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); border: 0; border-radius: var(--radius-control); background: none; cursor: pointer;
+    font: inherit; font-size: var(--text-xl); line-height: var(--leading-lg); color: var(--color-content-primary); }
+  .gs-more-btn[data-more="hidden"] { font-size: var(--text-base); color: var(--color-content-secondary); }
+  @media (hover: hover) { .gs-more-btn:hover { background: var(--color-surface-hover); color: var(--color-content-primary); } }
+  .gs-more-btn:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+  .gs-more-btn[aria-expanded="true"] .gs-done-chev { rotate: 180deg; }
+  .gs-more-panel { animation: gs-unfold var(--duration-medium) var(--ease-out); }
+  @media (prefers-reduced-motion: reduce) { .gs-more-panel { animation: none; } }
+  .gs-done-chev { display: inline-grid; color: var(--color-content-secondary); transition: rotate var(--duration-fast) var(--ease-standard); }
+  .gs-done[open] .gs-done-chev { rotate: 180deg; }   /* down to open, up to close */
+  .gs-done[open] > .gs-grid { margin-block-start: var(--space-4); animation: gs-unfold var(--duration-medium) var(--ease-out); }
+  @keyframes gs-unfold { from { opacity: 0; translate: 0 -.375rem; } }
+  @media (prefers-reduced-motion: reduce) { .gs-done-chev { transition: none; } .gs-done[open] > .gs-grid { animation: none; } }
+  .gs-finish { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: var(--space-4); padding: var(--space-4) var(--space-5);
+    border: var(--border-width-default) dashed var(--color-line-strong); border-radius: var(--radius-card); }
+  .gs-finish h2 { font-size: var(--text-base); line-height: var(--leading-base); font-family: var(--font-sans); font-weight: var(--font-weight-medium); }
+  .gs-finish p { color: var(--color-content-secondary); font-size: var(--text-sm); }
+
+  /* ---------- concept tooling (same pill as the other concepts) ---------- */
+  .concept-controls { position: fixed; inset-inline-end: var(--space-4); inset-block-end: var(--space-4); z-index: var(--z-toast);
+    inline-size: 18rem; max-inline-size: calc(100vw - var(--space-8)); border: 2px dashed var(--color-action-accent); border-radius: var(--radius-lg);
+    background: var(--color-surface-raised); box-shadow: var(--shadow-overlay); font-size: var(--text-sm); }
+  .concept-controls:not([open]) { inline-size: auto; }
+  /* taller than the window once it holds the actions list: it scrolls inside itself, its summary pinned at the top so it
+     can always be closed (fix, 29 Oct) */
+  .concept-controls[open] { max-block-size: calc(100dvh - var(--space-8)); overflow: auto; overscroll-behavior: contain; }
+  .concept-controls > summary { position: sticky; inset-block-start: 0; z-index: 1; background: var(--color-surface-raised); border-radius: var(--radius-lg) var(--radius-lg) 0 0; display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) var(--space-3); cursor: pointer; font-weight: var(--font-weight-medium); list-style: none; }
+  .concept-controls summary::-webkit-details-marker { display: none; }
+  .concept-tag { padding: 0 var(--space-2); border-radius: var(--radius-full); background: var(--color-action-accent); color: var(--color-content-on-accent); font-size: var(--text-xxs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); }
+  .concept-field { display: grid; gap: var(--space-1); }
+  .concept-label { font-size: var(--text-xs); color: var(--color-content-secondary); }
+  .gs-done-looks { display: grid; gap: var(--space-1); font-size: var(--text-sm); }
+  .gs-done-ctl { display: grid; gap: var(--space-1); font-size: var(--text-sm); }
+  .gs-done-ctl-all { display: flex; gap: var(--space-1); margin-inline-start: calc(var(--space-2) * -1); }
+  .concept-body { display: grid; gap: var(--space-3); padding: var(--space-1) var(--space-3) var(--space-3); }
+  .notes { --_w: 40rem; }
+  .notes .dialog-body { display: grid; gap: var(--space-5); font-size: var(--text-sm); }
+  .notes h3 { font-size: var(--text-base); margin-block-end: var(--space-2); }
+  .notes ul { display: grid; gap: var(--space-2); padding-inline-start: var(--space-5); margin: 0; }
+  .notes li b { font-weight: var(--font-weight-medium); }
+
+  /* ---------- narrower ---------- */
+  @media (max-width: 1023px) {
+    .gs-hero { padding: var(--space-5) var(--space-5) 0; column-gap: var(--space-4); }
+  }
+  @media (max-width: 767px) {
+    .gs-hero:is([data-banner="lead"], [data-banner="open"], [data-banner="ask"], [data-banner="big"], [data-banner="big"], [data-banner="dock"], [data-banner="bar"], [data-banner="pill"], [data-banner="none"]) { padding-block-start: var(--space-12); }
+    .gs { padding-block-end: calc(var(--space-8) + var(--shell-bottom-bar-height)); }
+    /* phones: Bolton smaller beside the title, the chat box under both, full width */
+    .gs-hero:not([data-banner="ask"], [data-banner="big"], [data-banner="dock"], [data-banner="bar"], [data-banner="pill"], [data-banner="none"], [data-align="center"]) { grid-template-areas: "bolton text" "ask ask"; }
+    .gs-hero h1 { font-size: var(--text-3xl); line-height: var(--leading-xl); }
+    .gs-bolton { inline-size: 6.5rem; block-size: 6rem; align-self: end; }
+    .gs-bolton::after { content: ""; position: absolute; inset: auto 0 0; block-size: 30%; pointer-events: none; background: linear-gradient(to bottom, transparent, var(--_fade)); }
+    .gs-bolton-slot svg { inline-size: 6.5rem; }
+    .gs-bolton.gs-in .gs-bolton-slot { translate: 0 .5rem; }
+    .gs-ask-slot { margin-block: var(--space-4) var(--space-5); }
+    .gs-finish { grid-template-columns: auto minmax(0, 1fr); }
+    .gs-finish .button { grid-column: 1 / -1; justify-self: start; }
+  }
+
+  /* ---------- the printed drawings (2 Nov): the playground's Printed style, its settings as chosen there ---------- */
+  /* a taller box, 208 (13rem), the scene filling it and centring its own stage; its grey surface clipped to the box's corners */
+  .gs[data-art="printed"] .gs-art-well { block-size: 13rem; overflow: hidden; }
+  .gs-card .gs-art.n3, .gs-card:has(.gs-dismiss) .gs-art.n3 { inset: 0; inline-size: 100%; block-size: 100%; }
+  .gs-card { --pg-ink-solid: var(--_ink, var(--color-content-secondary)); }
+  /* pressing the card presses the scene a little, as in the playground */
+  .gs-art.n3 .stage { transition: scale var(--duration-fast) var(--ease-out); }
+  .gs-card:active .gs-art.n3 .stage { scale: .96; }
+  /* with the printed drawings the card keeps its plain surface when pointed at: no tint, no coloured edge (2 Nov) */
+  @media (hover: hover) { .gs[data-art="printed"] .gs-card:not([data-done], [data-hidden]):hover { background-color: var(--color-surface-default); background-image: var(--gradient-card); border-color: var(--color-line-card); border-block-end-color: var(--color-line-card-edge); } }
+  /* a done step's scene goes grey with the rest of its card, unless the look keeps its colour */
+  .gs:not([data-donelook="colour"]) .gs-card[data-done] .gs-art.n3, .gs-card[data-hidden] .gs-art.n3 { filter: grayscale(1); opacity: .75; }
+
+  /* the ×, hidden until you point at the card (2 Nov): then it shows on a pale disc, and pointing at it brings the disc
+     up to full, the cross in full ink. Keyboard focus and touch screens show it all the time */
+  /* it comes in softly (4 Nov): a slow fade and a small grow from 90%, and goes a touch quicker */
+  .gs-card .gs-dismiss { background: color-mix(in oklab, var(--color-surface-default) 62%, transparent); color: var(--color-content-secondary);
+    transition: opacity .2s ease-in, scale .2s ease-in, background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
+  /* hidden until pointed at only on desktops; on tablets (768 to 1023, D15), phones and any touch screen it always shows */
+  @media (hover: hover) and (min-width: 1024px) {
+    .gs-card .gs-dismiss { opacity: 0; scale: .9; }
+    .gs-card:is(:hover, :focus-within) .gs-dismiss { opacity: 1; scale: 1; transition: opacity .32s cubic-bezier(.2, .8, .3, 1), scale .36s cubic-bezier(.2, .8, .3, 1), background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
+  }
+  @media (hover: hover) {
+    .gs-card .gs-dismiss:hover, .gs-card:not([data-done], [data-hidden]):hover .gs-dismiss,
+    .gs-card:not([data-done], [data-hidden]):hover .gs-dismiss:hover { background: color-mix(in oklab, var(--color-surface-default) 62%, transparent); color: var(--color-content-secondary); }
+    .gs-card .gs-dismiss:hover, .gs-card:not([data-done], [data-hidden]):hover .gs-dismiss:hover { background: var(--color-surface-default); color: var(--color-content-primary); box-shadow: var(--shadow-raised); }
+  }
+}
+
+/* ---------- the chat box, two ways (concept panel): an ink outline, or raised off the page with the system's shadow.
+ Outside the layer: the chat's own styles (bolton-chat.css) aren't layered, and these have to win over them ---------- */
+.gs-hero[data-box="outline"] .bt-ask { --bt-outline: var(--color-content-primary); border-width: var(--border-width-default); padding: calc(var(--space-2) + 1px); }
+/* raised: one soft, wide shadow, tinted with the page's warm ink rather than grey, so it reads clean (feedback, 29 Oct);
+   in dark the system's overlay shadow */
+.gs-hero[data-box="raised"] .bt-ask { --bt-outline: var(--color-line-card); border-width: var(--border-width-default); padding: calc(var(--space-2) + 1px);
+  box-shadow: 0 6px 24px light-dark(color-mix(in oklab, var(--color-content-primary) 8%, transparent), rgb(0 0 0 / .45)), 0 1px 3px light-dark(color-mix(in oklab, var(--color-content-primary) 4%, transparent), rgb(0 0 0 / .3)); }
+.gs-hero[data-box] .bt-ask { padding-inline-start: var(--space-4); }
+.gs-hero[data-box][data-banner="ask"] .bt-ask { padding-inline-start: calc(var(--space-2) + 1px); }
+
+/* the box's mic in the system's primary button colours (your call, 28 Oct): black with a yellow mic in light, yellow
+   with a black mic in dark. On this page only; the chat keeps its gold */
+.gs-hero .bt-ask .bt-ib[aria-label^="Speak"] { background: var(--color-action-primary); color: var(--color-content-on-primary); }
+
+/* tablets (768 to 1023) keep the top bar on this page (your call, 28 Oct): logo menu button, search, Bolton and your
+   avatar, as on desktop; the floating menu button is for phones only here. The shell (shared/shell.css, D88) hides the
+   top bar below 1024 on every page; this page differs until that's decided for the system */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .app-shell { grid-template-rows: var(--shell-top-bar-height) 1fr; grid-template-areas: "top" "main"; }
+  .bs-top { display: flex; }
+  .bs-menu-fab { display: none; }
+  .bs-sidebar { inset-block: var(--shell-top-bar-height) 0; }
+}
+/* his head in the box, flipped so he faces the words, with more room between him and them (feedback, 29 Oct) */
+.gs-hero .bt-ask .gs-ask-head svg { scale: -1 1; }
+.gs-hero .bt-ask .gs-ask-head + .bt-input { margin-inline-start: 0; }   /* closer to his head (4 Nov): 8 between them, the box's own gap and the field's inset */
+
+/* ---------- in a dark card (2 Nov, your sketch): the chat box is a white field set in a dark card, Bolton's head and the
+   box's buttons on the dark strip under it. The card is the chrome's dark (the top bar's), its corners the card's 16; the
+   field sits 4 in from its edges, so its corners are 12 and share a centre with the card's (D35). Outside the layer: the
+   chat's own styles aren't layered ---------- */
+.gs-hero[data-banner="dock"] .bt-ask, .gs-hero[data-banner="dock"][data-box] .bt-ask {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "in in in in" "head . mic send";
+  align-items: center; column-gap: var(--space-1); row-gap: var(--space-2);
+  padding: var(--space-1) var(--space-1) var(--space-2); border: var(--border-width-default) solid light-dark(transparent, var(--color-line-card)); border-radius: var(--radius-card);
+  background: var(--color-surface-chrome); color: var(--color-content-on-chrome);
+  box-shadow: 0 10px 30px light-dark(color-mix(in oklab, var(--color-content-primary) 14%, transparent), rgb(0 0 0 / .5)); }
+.gs-hero[data-banner="dock"] .bt-ask .bt-input { grid-area: in; box-sizing: border-box; inline-size: 100%; margin: 0; block-size: 3.25rem; padding: 0 var(--space-5);
+  border-radius: calc(var(--radius-card) - var(--space-1)); background: var(--color-surface-default); color: var(--color-content-primary);
+  font-size: var(--text-base); outline: none; box-shadow: none; }
+.gs-hero[data-banner="dock"] .bt-ask .bt-input::placeholder { color: var(--color-content-tertiary); }
+.gs-hero[data-banner="dock"] .bt-ask:has(.bt-input:focus-visible) .bt-input { box-shadow: inset 0 0 0 2px var(--color-focus-ring); }
+.gs-hero[data-banner="dock"] .gs-ask-head { grid-area: head; margin-inline-start: var(--space-2); }
+.gs-hero[data-banner="dock"] .gs-ask-head:focus-visible { outline-color: var(--color-action-brand); }
+/* on the dark strip the mic is the brand's yellow with a black mic, and send in the chrome's ink */
+.gs-hero[data-banner="dock"] .bt-ask .bt-ib[aria-label^="Speak"] { grid-area: mic; background: var(--color-action-brand); color: var(--color-content-on-brand); }
+.gs-hero[data-banner="dock"] .bt-ask .bt-send { grid-area: send; margin-inline-end: var(--space-1); color: var(--color-content-on-chrome); }
+.gs-hero[data-banner="dock"] .bt-ask .bt-send:disabled { color: var(--color-content-on-chrome-muted); background: none; }
+.gs-hero[data-banner="dock"] .bt-ask .bt-send:not(:disabled) { background: var(--color-action-brand); color: var(--color-content-on-brand); }
+
+/* ---------- in a dark bar (2 Nov, your sketch): one line. Bolton's head on the dark at the start, then the field, a white
+   pill set 4 in from the bar's top, bottom and end, holding the mic and send; the bar's end as round as the pill, so
+   they share a centre (D35), its start the card's 16 ---------- */
+.gs-hero:is([data-banner="bar"], [data-banner="pill"]) .bt-ask, .gs-hero:is([data-banner="bar"], [data-banner="pill"])[data-box] .bt-ask {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; column-gap: var(--space-1);
+  padding: var(--space-1); border: var(--border-width-default) solid light-dark(transparent, var(--color-line-card));
+  --_end: calc(1.5rem + var(--space-1) + var(--border-width-default));   /* half its height: a full-round end, without the browser shrinking the start corners to fit 9999 */
+  border-radius: var(--radius-card) var(--_end) var(--_end) var(--radius-card);
+  background: var(--color-surface-chrome); color: var(--color-content-on-chrome);
+  box-shadow: 0 10px 30px light-dark(color-mix(in oklab, var(--color-content-primary) 14%, transparent), rgb(0 0 0 / .5)); }
+/* the white pill: drawn behind the field, the mic and send, so the three sit in it */
+.gs-hero:is([data-banner="bar"], [data-banner="pill"]) .bt-ask::before { content: ""; grid-column: 2 / -1; grid-row: 1; align-self: stretch; border-radius: var(--radius-full); background: var(--color-surface-default); }
+.gs-hero:is([data-banner="bar"], [data-banner="pill"]) .bt-ask > * { grid-row: 1; }
+/* his head bigger here than in the box (your calls, 2 Nov): 36, as far from the bar's start and the pill as from its top and bottom */
+.gs-hero:is([data-banner="bar"], [data-banner="pill"]) .gs-ask-head { --_head: 2.25rem; grid-column: 1; display: grid; inline-size: var(--_head); block-size: var(--_head); margin-inline: calc((3rem - var(--_head)) / 2); }   /* in the middle of the dark (2 Nov): as far from the pill as from the bar's start (the bar's 4 in, the gap's 4) */
+.gs-hero:is([data-banner="bar"], [data-banner="pill"]) .gs-ask-head .av, .gs-hero:is([data-banner="bar"], [data-banner="pill"]) .gs-ask-head .av svg { inline-size: var(--_head) !important; block-size: var(--_head) !important; }
+.gs-hero:is([data-banner="bar"], [data-banner="pill"]) .gs-ask-head:focus-visible { outline-color: var(--color-action-brand); }
+.gs-hero:is([data-banner="bar"], [data-banner="pill"]) .bt-ask .bt-input { grid-column: 2; box-sizing: border-box; inline-size: 100%; margin: 0; block-size: 3rem; padding: 0 var(--space-2) 0 var(--space-5);
+  border: 0; border-radius: var(--radius-full); background: none; color: var(--color-content-primary); font-size: var(--text-base); outline: none; box-shadow: none; }
+.gs-hero:is([data-banner="bar"], [data-banner="pill"]) .bt-ask .bt-input::placeholder { color: var(--color-content-tertiary); }
+.gs-hero:is([data-banner="bar"], [data-banner="pill"]) .bt-ask:has(.bt-input:focus-visible)::before { box-shadow: inset 0 0 0 2px var(--color-focus-ring); }
+/* the mic, or send once something's typed, in the pill's end: 8 from its top, bottom and end alike, so the round button
+   and the round end share a centre (D35) */
+.gs-hero:is([data-banner="bar"], [data-banner="pill"]) .bt-ask :is(.bt-ib[aria-label^="Speak"], .bt-send) { grid-column: 3; margin-inline-end: var(--space-2); }
+
+/* the dark pill (2 Nov, your call): the bar with both ends round; his head sits in the round start as the mic sits in
+   the pill's end, the two sharing their ends' centres (D35) */
+.gs-hero[data-banner="pill"] .bt-ask, .gs-hero[data-banner="pill"][data-box] .bt-ask { border-radius: var(--_end); }
+
+@layer concept {
+  /* ---------- blueprint (4 Nov): the look chosen in the illustration studio. Classic blueprint paper (the blue of the
+     cards, all blue there) over a 12 px grid, a bold line every 5, at 9%; white lines at their drawn weight, shapes the
+     paper's colour (no tint); the lines draw in, no story; a wide soft light follows the pointer ---------- */
+  .gs[data-art="blueprint"] :is(.gs-card, .gs-hidden-row) .gs-art-well {
+    --_bp-base: light-dark(color-mix(in oklab, #0258a8 22%, #173f78), color-mix(in oklab, #79befd 22%, #173f78));
+    --_bp-hover: light-dark(color-mix(in oklab, #0258a8 30%, #1a4a8c), color-mix(in oklab, #79befd 30%, #1a4a8c));
+    --_bp-g1: rgb(255 255 255 / .09); --_bp-g2: rgb(255 255 255 / .18); --_bp-grid: 12px;
+    --_well: var(--_bp-base); color: #eef5ff; overflow: hidden; background-color: var(--_bp-base);
+    background-image: linear-gradient(var(--_bp-g1) 1px, transparent 1px), linear-gradient(90deg, var(--_bp-g1) 1px, transparent 1px), linear-gradient(var(--_bp-g2) 1px, transparent 1px), linear-gradient(90deg, var(--_bp-g2) 1px, transparent 1px);
+    background-size: var(--_bp-grid) var(--_bp-grid), var(--_bp-grid) var(--_bp-grid), calc(var(--_bp-grid) * 5) calc(var(--_bp-grid) * 5), calc(var(--_bp-grid) * 5) calc(var(--_bp-grid) * 5);
+    background-position: -1px -1px; transition: background-color .25s ease; }
+  /* pointed at, the paper and what's on it stay as they are, dark (4 Nov): the page's own hover colour is held off */
+  @media (hover: hover) { .gs[data-art="blueprint"] :is(.gs-card, .gs-hidden-row):hover .gs-art-well { --_well: var(--_bp-base); background-color: var(--_bp-base); color: var(--_bp-ink, #eef5ff); } }
+  .gs[data-art="blueprint"] .gs-art :is([fill="#FDFE03"], [fill="#FF8A1A"]) { fill: var(--_well); }
+  /* a done card stays on its paper, quieter: the done looks' warm well would turn its shapes white (4 Nov) */
+  .gs[data-art="blueprint"][data-donelook] .gs-card[data-done] .gs-art-well, .gs[data-art="blueprint"][data-donelook] .gs-hidden-row .gs-art-well { --_well: var(--_bp-base); color: #eef5ff; filter: saturate(.45); }
+  @media (hover: hover) { .gs[data-art="blueprint"][data-donelook] .gs-card[data-done]:hover .gs-art-well { --_well: var(--_bp-base); } }
+  .gs[data-art="blueprint"] .gs-card .gs-dismiss { color: var(--_bp-ink, #eef5ff); background: var(--_bp-disc, rgb(255 255 255 / .14)); box-shadow: none; }   /* at rest too, where it always shows (tablets, touch) */
+  @media (hover: hover) { .gs[data-art="blueprint"] .gs-card .gs-dismiss:hover { background: rgb(255 255 255 / .16); color: #fff; } }
+  .gs[data-art="blueprint"] .gs-art { z-index: 1; }   /* over the light: it falls on the paper, under the drawing (4 Nov) */
+  .gs[data-art="blueprint"] .gs-art { transition: translate .7s cubic-bezier(.34, 1.4, .64, 1), scale .7s cubic-bezier(.34, 1.4, .64, 1); }
+  @media (hover: hover) { .gs[data-art="blueprint"] .gs-card:hover .gs-art { translate: 0 -2px; } }
+  .gs[data-art="blueprint"] .gs-card:active .gs-art { scale: .98; }
+  /* the studio's light (spread 158, blur 200%), its softness drawn in the gradient's own falloff rather than a blur filter,
+     which repainted the whole box on every move (4 Nov) */
+  .gs-sheen { position: absolute; inset: 0; z-index: 0; pointer-events: none; opacity: 0; mix-blend-mode: soft-light; transition: opacity .35s ease;
+    background: radial-gradient(circle 205px at var(--mx, 50%) var(--my, 30%), rgb(255 255 255 / .82) 0, rgb(255 255 255 / .66) 45px, rgb(255 255 255 / .42) 95px, rgb(255 255 255 / .18) 145px, rgb(255 255 255 / .05) 182px, rgb(255 255 255 / 0) 205px); }
+  @media (hover: hover) { .gs-card:hover .gs-sheen { opacity: .35; } }
+  @media (prefers-reduced-motion: reduce) { .gs[data-art="blueprint"] .gs-art { transition: none; } }
+  /* the card stays plain when pointed at, as with the printed drawings: no tint, no coloured edge (4 Nov) */
+  @media (hover: hover) { .gs[data-art="blueprint"] .gs-card:not([data-done], [data-hidden]):hover { background-color: var(--color-surface-default); background-image: var(--gradient-card); border-color: var(--color-line-card); border-block-end-color: var(--color-line-card-edge); } }
+  /* the × and Show again on the paper: a faint light disc when the card is pointed at, a stronger one on the button
+     itself, the icon in the paper's line colour; the page's pale disc read too light on the dark paper (4 Nov) */
+  @media (hover: hover) {
+    .gs[data-art="blueprint"] .gs-card:hover .gs-dismiss, .gs[data-art="blueprint"] .gs-card:not([data-done], [data-hidden]):hover .gs-dismiss { background: var(--_bp-disc, rgb(255 255 255 / .14)); color: var(--_bp-ink, #eef5ff); box-shadow: none; }
+    .gs[data-art="blueprint"] .gs-card .gs-dismiss:hover, .gs[data-art="blueprint"] .gs-card:not([data-done], [data-hidden]):hover .gs-dismiss:hover { background: var(--_bp-disc-hover, rgb(255 255 255 / .26)); color: var(--_bp-ink, #fff); box-shadow: none; } }
+  /* ---------- a completed card's blueprint is beige (4 Nov): the page's own background as its paper, warm brown lines and
+     grid, so done reads as set aside; the cards still to do stay blue ---------- */
+  .gs[data-art="blueprint"][data-donelook][data-donepaper="beige"] .gs-card[data-done] {
+    --_bp-ink: light-dark(#5b4a33, #d9cfbd); --_bp-disc: light-dark(rgb(91 74 51 / .1), rgb(217 207 189 / .12)); --_bp-disc-hover: light-dark(rgb(91 74 51 / .18), rgb(217 207 189 / .22)); }
+  .gs[data-art="blueprint"][data-donelook][data-donepaper="beige"] .gs-card[data-done] .gs-art-well {
+    --_bp-base: var(--color-surface-canvas); --_bp-hover: color-mix(in oklab, var(--color-surface-canvas) 94%, #5b4a33);
+    --_bp-g1: light-dark(rgb(120 92 52 / .08), rgb(217 207 189 / .06)); --_bp-g2: light-dark(rgb(120 92 52 / .15), rgb(217 207 189 / .12));
+    --_well: var(--_bp-base); color: var(--_bp-ink); filter: none; }
+  @media (hover: hover) { .gs[data-art="blueprint"][data-donelook][data-donepaper="beige"] .gs-card[data-done]:hover .gs-art-well { --_well: var(--_bp-base); background-color: var(--_bp-base); color: var(--_bp-ink); } }
+  /* ---------- or green (4 Nov, the default): the system's success green, Matcha 800 (900 in dark), white lines and grid,
+     the done check turned white on it ---------- */
+  .gs[data-art="blueprint"][data-donelook][data-donepaper="green"] .gs-card[data-done] { --_bp-ink: #f1fbef; --_bp-disc: rgb(255 255 255 / .14); --_bp-disc-hover: rgb(255 255 255 / .26); }
+  .gs[data-art="blueprint"][data-donelook][data-donepaper="green"] .gs-card[data-done] .gs-art-well {
+    --_bp-base: light-dark(var(--color-matcha-800), var(--color-matcha-900)); --_bp-hover: var(--_bp-base);
+    --_bp-g1: rgb(255 255 255 / .09); --_bp-g2: rgb(255 255 255 / .18); --_well: var(--_bp-base); color: var(--_bp-ink); filter: none; }
+  @media (hover: hover) { .gs[data-art="blueprint"][data-donelook][data-donepaper="green"] .gs-card[data-done]:hover .gs-art-well { --_well: var(--_bp-base); background-color: var(--_bp-base); color: var(--_bp-ink); } }
+  .gs[data-art="blueprint"][data-donepaper="green"] .gs-card[data-done] .gs-art-check { background: #fff; color: var(--color-matcha-800); }
+  .gs[data-art="blueprint"] .gs-card[data-done] .gs-dismiss { color: var(--_bp-ink); }
+  .gs[data-art="blueprint"][data-donepaper="beige"] .gs-card[data-done] .gs-sheen { mix-blend-mode: overlay; }
+}
+
+/* ---------- a big box (4 Nov, after Shopify's welcome): the chat box grows into a roomy field, the prompt at its top, and
+   a foot row under it: Bolton's head on the left (his suggestions), Recents (his chat, with what you've asked), a divider,
+   attach and the mic on the right. Its corners the card's 16 plus its 8 inset, so the field and its buttons share a centre
+   (D35). Outside the layer, as the other boxes: the chat's own styles aren't layered ---------- */
+.gs-ask-rec, .gs-ask-div, .gs-ask-plus { display: none; }
+.gs-hero[data-banner="big"] .bt-ask, .gs-hero[data-banner="big"][data-box] .bt-ask {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; grid-template-areas: "in in in in" "head . plus mic";
+  align-items: center; align-content: space-between; column-gap: var(--space-1); row-gap: var(--space-5); min-block-size: 9.5rem; box-sizing: border-box;
+  padding: var(--space-5) var(--space-3) var(--space-2) var(--space-3);   /* the spare height goes between the field and its foot, the foot 8 off the edge (4 Nov) */ border-radius: calc(var(--radius-card) + var(--space-2)); }
+.gs-hero[data-banner="big"] .bt-ask .bt-input { grid-area: in; align-self: start; margin: 0; padding: 0 var(--space-2); block-size: 1.75rem; font-size: var(--text-base); line-height: var(--leading-base); }
+.gs-hero[data-banner="big"] .bt-ask .gs-ask-head { grid-area: head; }
+.gs-hero[data-banner="big"] .bt-ask .gs-ask-head + .bt-input { margin-inline-start: 0; }
+.gs-hero[data-banner="big"] .gs-ask-rec { grid-area: rec; display: inline-flex; align-items: center; gap: var(--space-2); block-size: 2.25rem; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-control); background: none; color: var(--color-content-primary); font: inherit; font-size: var(--text-sm); font-weight: var(--font-weight-medium); cursor: pointer; }
+.gs-hero[data-banner="big"] .gs-ask-div { grid-area: div; display: block; inline-size: var(--border-width-default); block-size: 1.5rem; margin-inline: var(--space-1); background: var(--color-line-default); }
+.gs-hero[data-banner="big"] .gs-ask-plus { grid-area: plus; display: inline-grid; place-items: center; }
+.gs-hero[data-banner="big"] :is(.gs-ask-plus, .gs-ask-rec) svg { inline-size: 1.125rem; block-size: 1.125rem; }
+.gs-hero[data-banner="big"] .bt-ask :is(.bt-ib, .bt-send, .gs-ask-plus) { inline-size: 2.25rem; block-size: 2.25rem; border-radius: var(--radius-full); }
+.gs-hero[data-banner="big"] .bt-ask :is(.bt-ib[aria-label^="Speak"], .bt-send) { grid-area: mic; }
+.gs-hero[data-banner="big"] .bt-ask .bt-ib[aria-label^="Speak"] { background: none; color: var(--color-content-primary); }
+.gs-hero[data-banner="big"] .gs-ask-plus { border: 0; background: none; color: var(--color-content-primary); cursor: pointer; }
+@media (hover: hover) { .gs-hero[data-banner="big"] :is(.gs-ask-rec, .gs-ask-plus, .bt-ib[aria-label^="Speak"]):hover { background: var(--color-surface-hover); } }
+.gs-hero[data-banner="big"] :is(.gs-ask-rec, .gs-ask-plus):focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+@media (max-width: 767px) { .gs-hero[data-banner="big"] .gs-ask-rec span { display: none; } .gs-hero[data-banner="big"] .gs-ask-rec { padding: 0; inline-size: 2.25rem; justify-content: center; } }

@@ -150,6 +150,8 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 .doc-content :is(p, li) > code { overflow-wrap: anywhere; }
 .doc-content li::marker { color: var(--color-content-tertiary); }
 .doc-content :not(pre) > code { color: var(--color-content-primary); padding: 0.1em 0.35em; border-radius: var(--radius-sm); background: var(--color-surface-tint); font-family: var(--font-mono); font-size: 0.85em; overflow-wrap: anywhere; }
+/* in a table, code breaks only where it must: "anywhere" lets a column shrink to a few letters and split every value */
+.doc-content .doc-table :not(pre) > code { overflow-wrap: break-word; }
 .doc-content a:not([class]) { color: var(--color-content-link); }
 .doc-content strong { font-weight: var(--font-weight-medium); }
 .doc-content .doc-small, .doc-note { font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
@@ -190,7 +192,7 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 .doc-ld { display: grid; gap: 2px; }
 .doc-ld span { display: flex; gap: var(--space-2); align-items: baseline; }
 .doc-ld b { inline-size: 2.25rem; flex: none; font-size: var(--text-xxs); font-weight: var(--font-weight-medium); color: var(--color-content-tertiary); text-transform: uppercase; letter-spacing: 0.06em; }
-.doc-ld code, .doc-tokens td > code { background: none !important; padding: 0 !important; color: var(--color-content-secondary); font-size: var(--text-xs) !important; overflow-wrap: anywhere; }
+.doc-ld code, .doc-tokens td > code { background: none !important; padding: 0 !important; color: var(--color-content-secondary); font-size: var(--text-xs) !important; overflow-wrap: break-word; }
 .doc-bar { display: block; block-size: 0.75rem; min-inline-size: 1px; border-radius: 2px; background: var(--color-action-accent); }
 .doc-bar[data-kind="size"] { background: var(--color-content-tertiary); }
 .doc-corner { display: block; inline-size: 2.5rem; block-size: 2.5rem; border: 2px solid var(--color-content-primary); border-inline-end: 0; border-block-end: 0; }
@@ -386,7 +388,8 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 .home-hero::after { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 80% at 15% 40%, var(--color-surface-default) 30%, transparent 75%); pointer-events: none; }
 .home-hero > * { position: relative; z-index: 1; }
 .home-hero h1 { font-family: var(--font-display); font-size: clamp(2.5rem, 1.4rem + 3.6vw, 4.5rem); line-height: 1; font-weight: var(--font-weight-medium); letter-spacing: -0.035em; text-wrap: balance; }
-.home-hero h1 mark { padding: 0 0.1em 0.04em; margin: 0 -0.02em; border-radius: var(--radius-sm); background: var(--color-action-brand); color: var(--color-content-on-brand); box-decoration-break: clone; }
+/* an inline-block on a short line, so the highlight stays inside its own line and never covers the descenders above */
+.home-hero h1 mark { display: inline-block; line-height: 0.86; padding: 0 0.1em; margin: 0 -0.02em; border-radius: var(--radius-sm); background: var(--color-action-brand); color: var(--color-content-on-brand); }
 .home-kicker { display: inline-flex; align-items: center; gap: var(--space-2); margin-block-end: var(--space-5); font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-content-tertiary); }
 .home-kicker .doc-mark { block-size: 1rem; }
 .home-hero .doc-lead { margin-block-start: var(--space-6); }
@@ -396,6 +399,7 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 .home-card { display: grid; gap: var(--space-3); padding: var(--space-4); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-xl); background: var(--color-surface-default); box-shadow: 0 1px 2px color-mix(in srgb, var(--color-shadow-tint) 6%, transparent), 0 12px 32px color-mix(in srgb, var(--color-shadow-tint) 10%, transparent); }
 .home-card-row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
 .home-card-row.is-split { justify-content: space-between; }
+.home-card-row.is-end { justify-content: flex-end; }
 .home-job { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; padding: var(--space-2); border-radius: var(--radius-md); }
 .home-job + .home-job { border-block-start: var(--border-width-default) solid var(--color-line-subtle); border-radius: 0; }
 .home-job b { display: block; font-size: var(--text-sm); font-weight: var(--font-weight-medium); line-height: var(--leading-sm); }

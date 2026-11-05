@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Getting started · Bolster</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="../shared/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../shared/assets/favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../system/bolster.css?v=d2cd6d94">
+<link rel="stylesheet" href="../shared/shell.css?v=d2cd6d94">
+<link rel="stylesheet" href="../bolton/embed/bolton.css?v=d2cd6d94">
+<link rel="stylesheet" href="../bolton/embed/bolton-chat.css?v=d2cd6d94">
+<link rel="stylesheet" href="getting-started.css?v=d2cd6d94">
+<link rel="stylesheet" href="art-printed.css?v=d2cd6d94">
+<script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
+addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
+<script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<div class="app-shell" data-no-section>
+  <main class="app-main">
+    <div class="app-content gs" data-width="focused">
+
+      <!-- the banner, left-aligned (Bolton on the left, then the title, why and the chat box) or centred (Bolton on top); his bubble is kept for later but hidden -->
+      <section class="card gs-hero" id="gs-hero" data-banner="big" data-align="center" aria-labelledby="page-title">
+        <div class="gs-bolton stages stage bt-follow" data-state="idle" data-outfit="vest" data-hat="off" aria-hidden="true">
+          <span class="gs-bolton-slot"></span>
+        </div>
+        <!-- his bubble, to his left at his face -->
+        <div class="gs-say" id="gs-say" hidden><p class="gs-say-text" aria-live="polite"></p><button type="button" class="button gs-say-act" id="gs-say-act" data-variant="secondary" data-size="sm" hidden></button></div>
+        <div class="gs-hero-text">
+          <h1 id="page-title">Getting started</h1>
+          <p class="gs-lede">Eight short actions to get Bolster working for you, in whatever order suits you.</p>
+        </div>
+        <div class="gs-ask-slot" id="gs-ask"></div>
+      </section>
+
+      <!-- every step, in any order: each card says what it's for -->
+      <section class="gs-section" aria-labelledby="gs-steps-title">
+        <header class="gs-section-head">
+          <h2 id="gs-steps-title">Set up Bolster</h2>
+        </header>
+        <ul class="gs-grid" id="gs-grid"></ul>
+      </section>
+
+      <!-- what's done, folded under the grid -->
+      <section class="gs-more" id="gs-more" aria-label="Completed actions" hidden>
+        <div class="gs-more-bar" id="gs-more-bar"></div>
+        <ul class="gs-grid gs-more-panel" id="gs-done-grid" hidden></ul>
+      </section>
+
+      <!-- the way out comes last, after what you have done -->
+      <section class="gs-finish" aria-labelledby="gs-finish-title">
+        <span class="gs-icon" data-tone="neutral"><i data-icon="pin" data-size="16"></i></span>
+        <div>
+          <h2 id="gs-finish-title">All set? Hide Getting started</h2>
+          <p>Choose the page Bolster opens when you sign in, and this one leaves your menu. Just for you: your team keeps theirs.</p>
+        </div>
+        <button type="button" class="button" data-variant="secondary" data-not-built>Finish setup</button>
+      </section>
+
+      <!-- what you've hidden comes last, under All set: there when you look for it (feedback, 30 Oct) -->
+      <section class="gs-more gs-more-hidden" id="gs-more-h" aria-label="Hidden actions" hidden>
+        <div class="gs-more-bar" id="gs-more-h-bar"></div>
+        <ul class="gs-grid gs-hidden-list gs-more-panel" id="gs-hidden-list" hidden></ul>
+      </section>
+    </div>
+  </main>
+</div>
+
+<!-- tooling, not design: the dashed pill the concepts share -->
+<details class="concept-controls" id="concept-controls">
+  <summary><span class="concept-tag">Concept</span>Getting started</summary>
+  <div class="concept-body">
+    <p class="text-secondary">Sample data only; nothing here talks to Bolster.</p>
+    <div class="concept-field"><span class="concept-label" id="gs-align-label">Banner alignment</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="gs-align-label" id="gs-align">
+        <label class="segmented-option"><input type="radio" name="align" value="start"> Left</label>
+        <label class="segmented-option"><input type="radio" name="align" value="center" checked> Centred</label>
+      </div></div>
+    <div class="concept-field"><span class="concept-label" id="gs-box-label">Chat box</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="gs-box-label" id="gs-box">
+        <label class="segmented-option"><input type="radio" name="box" value="outline"> Outline</label>
+        <label class="segmented-option"><input type="radio" name="box" value="raised" checked> Raised</label>
+      </div></div>
+    <div class="concept-field"><label class="concept-label" for="gs-banner">Banner</label>
+      <div class="select"><select class="input" id="gs-banner">
+        <option value="lead">Pick</option>
+        <option value="card">In a card</option>
+        <option value="open">No card</option>
+        <option value="ask">In the box</option>
+        <option value="big" selected>A big box</option>
+        <option value="dock">In a dark card</option>
+        <option value="bar">In a dark bar</option>
+        <option value="pill">In a dark pill</option>
+        <option value="none">No Bolton</option>
+      </select></div></div>
+    <div class="concept-field"><label class="concept-label" for="gs-art-style">Drawings</label>
+      <div class="select"><select class="input" id="gs-art-style">
+        <option value="blueprint" selected>Blueprint (chosen in the studio)</option>
+        <option value="printed">Printed</option>
+        <option value="line">Line drawings</option>
+      </select></div></div>
+    <div class="concept-field"><span class="concept-label" id="gs-done-paper-label">Completed drawings</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="gs-done-paper-label" id="gs-done-paper">
+        <label class="segmented-option"><input type="radio" name="donepaper" value="green" checked> Green</label>
+        <label class="segmented-option"><input type="radio" name="donepaper" value="beige"> Beige</label>
+      </div></div>
+    <div class="concept-field"><span class="concept-label" id="gs-done-look-label">Done look</span>
+      <div class="gs-done-looks" id="gs-done-look" role="radiogroup" aria-labelledby="gs-done-look-label">
+        <label class="choice"><input type="radio" class="radio" name="donelook" value="quiet" checked> Quiet: grey drawing, a green check</label>
+        <label class="choice"><input type="radio" class="radio" name="donelook" value="blue"> Quiet, a blue check</label>
+        <label class="choice"><input type="radio" class="radio" name="donelook" value="word"> Quiet, a check and "Done"</label>
+        <label class="choice"><input type="radio" class="radio" name="donelook" value="colour"> Keeps its colour, a check</label>
+        <label class="choice"><input type="radio" class="radio" name="donelook" value="sunken"> Sunk into the page, faded</label>
+        <label class="choice"><input type="radio" class="radio" name="donelook" value="struck"> Quiet, its title struck through</label>
+        <label class="choice"><input type="radio" class="radio" name="donelook" value="compact"> Compact: no drawing, a check by the title</label>
+      </div></div>
+    <div class="concept-field"><span class="concept-label" id="gs-done-place-label">Done actions</span>
+      <div class="segmented" id="gs-done-place" role="radiogroup" aria-labelledby="gs-done-place-label">
+        <label class="segmented-option"><input type="radio" name="doneplace" value="stay"> Stay in place</label>
+        <label class="segmented-option"><input type="radio" name="doneplace" value="fold" checked> Fold away</label>
+      </div></div>
+    <div class="concept-field"><span class="concept-label" id="gs-done-ctl-label">Actions done</span>
+      <div class="gs-done-ctl" id="gs-done-ctl" role="group" aria-labelledby="gs-done-ctl-label"></div>
+      <div class="gs-done-ctl-all"><button class="button" data-variant="ghost" data-size="sm" id="gs-all-done">All done</button><button class="button" data-variant="ghost" data-size="sm" id="gs-none-done">None done</button></div></div>
+    <button class="button" data-variant="secondary" data-size="sm" data-open-dialog="notes">About this concept</button>
+    <button class="button" data-variant="secondary" data-size="sm" id="gs-reset">Start over</button>
+    <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+  </div>
+</details>
+
+<dialog class="dialog notes" id="notes" aria-labelledby="notes-title">
+  <header class="dialog-header"><h2 id="notes-title">About this concept</h2>
+    <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close><i data-icon="xmark" data-size="16"></i></button></header>
+  <div class="dialog-body">
+    <section><h3>What it does</h3>
+      <ul>
+        <li><b>Bolton doesn't talk here.</b> He stands in his vest in the banner and reacts with his face: finish a step and he winks and nods, finish everything and he laughs. No bubble, no moving mouth (your call, 26 Oct); his chat box is where you talk to him.</li>
+        <li><b>The banner lines up with the cards.</b> The page goes on into a grid of cards, so the banner starts on the grid's left edge: Bolton on the left, standing on the banner's foot (your call, 26 Oct), then the title, one line of why and the chat box. The eye runs down one line from the title into the first card. The page is the focused width (D106), one column of work.</li>
+        <li><b>Left or centred</b> (Banner alignment, in this panel): every banner below comes both ways. Left-aligned, Bolton stands on the left, at the start of the line the eye reads along, and the text and box follow him; centred, he stands on top of one axis with the title, the line of why and the box under him.</li>
+        <li><b>No Bolton</b>: only the title, the line of why and the chat box, no figure and no head in the box, to see what he adds. </li>
+        <li><b>Five banners to compare</b> (Banner, in this panel). <b>Pick</b>, the one the research points to, built on one order of importance: 1, the page's name, big enough to say where you are but a step below a dashboard's title, because the cards are the page's real content; 2, the one thing to do, the chat box, which carries the banner's only colour (his gold edge); 3, Bolton, smaller, a companion beside the words and not the headline; 4, the line of why, quiet. No card around it (Klaviyo, Cloaked and Shopify start straight on the page), so the step cards are the only cards and the eye runs from the title's edge into the first one. <b>In a card</b>: the banner as a raised card, Bolton standing on its foot. <b>No card</b>: the same parts straight on the page, so the cards under it are the only cards; Bolton stands on a hairline. <b>In the box</b>: no figure at all; Bolton's head sits inside his chat box, at its start, the way an assistant's mark sits in its input, and the box grows to be the banner's one thing. Point at his head and he looks around.</li>
+        <li><b>The research (26 Oct, second pass).</b> The first pass looked at full-screen welcome screens with one action (Duolingo, Deputy, Hootsuite), which don't fit a banner followed by many cards. Setup pages that do have cards under the header on Mobbin:
+          <a href="https://mobbin.com/screens/67e5f41b-ed60-406c-b860-16c75486f27f" target="_blank" rel="noopener">Klaviyo</a> and
+          <a href="https://mobbin.com/screens/12ffda69-1432-4772-b7f2-1d299ce687e7" target="_blank" rel="noopener">Cloaked</a> (the title left, on the cards' edge, the cards right under it),
+          <a href="https://mobbin.com/screens/2483d325-15ba-4b24-a732-8b468f614960" target="_blank" rel="noopener">Shopify</a> (a greeting with the assistant's box under it, left, then the setup cards),
+          <a href="https://mobbin.com/screens/592d25c6-58b6-4ceb-b310-3d02f4f4f981" target="_blank" rel="noopener">Pipedrive</a> and
+          <a href="https://mobbin.com/screens/6747d7cc-44b3-4671-a2de-b0e60d0c8d8d" target="_blank" rel="noopener">Slite</a> (text left, the picture to one side on the right),
+          <a href="https://mobbin.com/screens/4865f17d-557e-49ba-aa98-fcde447e4096" target="_blank" rel="noopener">SchoolAI</a> (the banner holds the cards).
+          Centred headers only show up where one narrow column follows them:
+          <a href="https://mobbin.com/screens/05a829a2-525b-4a6e-911a-f4d5e2e5b9ce" target="_blank" rel="noopener">Google Workspace</a> and
+          <a href="https://mobbin.com/screens/2afb6959-1a3e-447a-9ac0-2354539c7f69" target="_blank" rel="noopener">Cake</a>, a checklist under a centred greeting.</li>
+        <li><b>A colour per step, as Bolster does it.</b> Point at a step and it takes a feedback tone, the way Bolster's own Getting started does (your screens, 27 Oct): the tone's surface on the card, an edge in its colour, and the icon white in a solid well of it. Estimate is info, proposal success and labor rates danger, as in Bolster; the other steps spread over the same tones so neighbours differ.</li>
+        <li><b>What a step opens.</b> As in Bolster (your screens, 27 Oct): click a step and it opens what does it. Labor rates open a dialog right here: AutoCost's defaults for your area, each crew renamable and repriced; saving ticks the step. Steps done elsewhere in Bolster open a guide in the corner, the steps one by one with a count, and a coach mark at Jobs in the menu (Step 1 of N); the guide's first step opens the Pipeline. The other steps aren't drawn yet: send what Bolster opens for them.</li>
+        <li><b>Card shadows.</b> The cards here take the system's raised shadow, as Elevation draws it: one soft lift, without the card body's darker bottom edge and top line (your call, 27 Oct). The system's cards draw that body, so if this holds it's a change for the system's card, with a D-entry.</li>
+        <li><b>Done cards sit into the page.</b> A done step drops the card's lift: the system's sunken surface, no shadow, a quiet darker hover and no colour (your call, 27 Oct), so done reads at a glance down the grid. The to-do cards keep the system card's body and shadow.</li>
+        <li><b>His suggestions in the box.</b> Press Bolton's head in the chat box and the chat's own "Try asking" questions show under it, no card, as wide as the box; press his head again to hide them. Picking one, or sending from the box, opens the chat with it already in the chat's box while he waves; it goes once he has settled (no chat on the page itself, your call, 27 Oct).</li>
+        <li><b>No ticks on the cards</b> (your call, 27 Oct). A step is done when you've done it (saving labor rates ticks that one); done steps fold into Completed, and each has an undo in its corner ("Not done yet") that puts it back on the list. Start over, in this panel, puts the sample account back.</li>
+        <li><b>A drawing per step that tells what happens</b> (your pick, 28 Oct, over the screen pictures, which read as wireframes). Left to right: labor rates, a crew's hourly cost being set; the estimate filling in item by item to a total; the proposal gliding to your client, who signs; spreadsheet rows becoming jobs; your details checked, then a payment landing; a sent form landing in the pipeline; your apps kept in step with Bolster; an invitation going out and your crew joining. At rest it shows how it ends; point at the card (to do, done or hidden) and it plays once, slow and eased, each part in turn. Drawn like the icons, in one line colour. The time is in the heading.</li>
+        <li><b>Actions you can skip can be hidden</b> (feedback, 27 Oct): integrations and your team have a × in the corner. Hidden actions fold away under the grid and each comes back on its own with Show again. Two ways to fold them (Hidden actions, in this panel): one fold for all, or one fold each. On the page they're actions, not steps (your call, 29 Oct): there's no order to follow.</li>
+        <li><b>Completed, then All set, then Hidden actions</b> (feedback, 30 Oct: not two folds one after the other). Completed folds under the grid; All set is the way out; Hidden actions sit last and quiet, under All set, there for whoever looks for them. Hiding an action shows the system's toast with Undo, for when it was a slip. All set comes last.</li>
+        <li><b>The chat box, two ways</b> (Chat box, in this panel): an ink outline, or raised off the page with the system's popover shadow. No ring while you type in it; the mic stays gold, on the dark chat too.</li>
+        <li><b>The guide gets out of the way.</b> Going where it points (its first step, or Jobs in the menu) puts the guide and its coach mark away; a click anywhere else puts the coach mark away.</li>
+        <li><b>Any order.</b> Every step can be done whenever it suits you, so they sit side by side with no numbers or arrows. Bolton still suggests one to start with; the proposal waits for an estimate, because it's sent from one.</li>
+        <li><b>Finishing is its own thing.</b> "Complete onboarding and hide Getting started" isn't a setup step: it's the way out, at the bottom.</li>
+      </ul></section>
+    <section><h3>Open questions</h3>
+      <ul>
+        <li>Should "Send your first proposal" stay locked until there's an estimate, or open the estimate flow instead?</li>
+        <li>Does Bolton do any step for you here (draft the first estimate from a sentence), or only point the way?</li>
+      </ul></section>
+  </div>
+</dialog>
+
+<!-- labor rates, as Bolster opens it from the step: AutoCost defaults for the area, each crew renamable and repriced -->
+<dialog class="dialog gs-rates" id="gs-rates" aria-labelledby="gs-rates-title" data-size="md">
+  <header class="dialog-header"><h2 id="gs-rates-title">Set your labor rates</h2><span class="badge" data-tone="neutral">Priced to your area · 90210</span>
+    <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-tip="Close" data-close><i data-icon="xmark" data-size="16"></i></button></header>
+  <div class="dialog-body">
+    <p>These are AutoCost defaults for your area. Rename any crew and set the hourly cost (including your burden) you actually pay; anything you leave untouched keeps the default.</p>
+    <p class="text-secondary">Need a crew that isn't listed? Finish this, then come back and we'll show you how to add one.</p>
+    <input class="input gs-rates-filter" id="gs-rates-filter" type="search" placeholder="Filter by stage or crew" aria-label="Filter by stage or crew">
+    <div class="gs-rates-list" id="gs-rates-list"></div>
+  </div>
+  <footer class="dialog-footer"><button class="button" data-variant="secondary" data-close>Cancel</button><button class="button" data-variant="primary" id="gs-rates-save">Save labor rates</button></footer>
+</dialog>
+
+<div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
+<script src="../shared/icons.js?v=d2cd6d94"></script>
+<script src="../shared/shell.js?v=d2cd6d94"></script>
+<script src="../system/components/tooltip.js?v=d2cd6d94"></script>
+<script src="../system/specimens/specimen.js?v=d2cd6d94"></script>
+<script src="art.js?v=d2cd6d94"></script>
+<script src="art-printed.js?v=d2cd6d94"></script>
+<script src="getting-started.js?v=d2cd6d94"></script>
+<script src="../bolton/embed/bolton-chat.js?v=d2cd6d94"></script>
+</body>
+</html>

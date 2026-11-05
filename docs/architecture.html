@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../system/bolster.css?v=9515367c">
-<link rel="stylesheet" href="assets/site.css?v=9515367c">
+<link rel="stylesheet" href="../system/bolster.css?v=d2cd6d94">
+<link rel="stylesheet" href="assets/site.css?v=d2cd6d94">
 <script>try{const t=localStorage.getItem("bds-theme");if(t&&t!=="auto")document.documentElement.dataset.theme=t}catch{}</script>
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
@@ -81,7 +81,7 @@ body { background: var(--color-surface-canvas); }
   <tbody>
     <tr><th scope="row"><code>audit/</code></th><td>As-is: Bolster's live product, measured</td><td>The page inventory, extracted values with counts (<code>tokens.json</code>), the drift report, one file per component, layout and pattern found, the gaps, the board (<code>audit/index.html</code>), and the scripts to measure it again.</td></tr>
     <tr><th scope="row"><code>system/</code></th><td>To-be: the design system</td><td><code>tokens.css</code>, <code>base.css</code>, <code>utilities.css</code>, <code>components/</code>, <code>patterns/</code>, the models (<code>model/</code>), the page recipes (<code>recipes/</code>), one specimen per component (<code>specimens/</code>, each shown live on its page here) and <code>inventory.json</code>, the list of what exists and what's missing.</td></tr>
-    <tr><th scope="row"><code>concepts/</code></th><td>Experiments: whole pages, one page type at a time</td><td>The list, the to-do, the calendar, the pipeline and the timeline, with made-up sample data; <code>shared/</code> holds the Bolster app shell and the icon subset. The <span class="doc-unpublished">hub</span> links them.</td></tr>
+    <tr><th scope="row"><code>concepts/</code></th><td>Experiments: whole pages, one page type at a time</td><td>The list, the to-do, the calendar, the pipeline and the timeline, with made-up sample data; <code>shared/</code> holds the Bolster app shell and the icon subset.</td></tr>
     <tr><th scope="row"><code>pages/</code></th><td>Pages built for real</td><td>Each page's intent (<code>list/&lt;nav&gt;.intent.json</code>), the description the builder writes from it, the survey (<code>survey.html</code>) and the corrections log.</td></tr>
     <tr><th scope="row"><code>docs/</code></th><td>Decisions and contracts</td><td><code>decisions.md</code> (D-entries: every token or component decision and why), <code>interactions.md</code> (I-entries: how things behave), and the research behind them.</td></tr>
     <tr><th scope="row"><code>site/</code></th><td>This documentation</td><td>Written in <code>site/src/</code>. <code>scripts/build-site.mjs</code> builds it and reads the tokens, decisions, contracts and inventory from where the system keeps them, so the site can't fall behind the system.</td></tr>
@@ -186,7 +186,7 @@ npm run pages</code></pre></div>
 <ul>
   <li><strong>What was measured:</strong> the stack (Vue 3, PrimeVue unstyled, Tailwind 3, Font Awesome 6), the page inventory from the app's router, the computed styles of every visible element on 26 views, and Bolster's 33 app stylesheets parsed offline.</li>
   <li><strong>What it found</strong> (<code>audit/drift.md</code>): the rendered interface is more consistent than its stylesheets, with the drift in a few places. Examples: seven greys for text plus pure black, 83 type styles where the system has 11 roles, and 22 z-index values up to 2147483647. The component census (<code>audit/components/</code>) adds what each component looked like: 364 PrimeVue buttons in 8 severities, heavily overridden locally, none with a visible focus state.</li>
-  <li><strong>How to read it:</strong> the <span class="doc-unpublished">as-is board</span> and the <span class="doc-unpublished">page types</span> show it at a glance. The scripts in <code>audit/scripts/</code> measure it again.</li>
+  <li><strong>How to read it:</strong> the <span class="doc-unpublished">as-is board</span> and the <a href="../audit/page-types.html">page types</a> show it at a glance. The scripts in <code>audit/scripts/</code> measure it again.</li>
 </ul>
 <h3 id="from-the-audit-to-the-system">From the audit to the system</h3>
 <div class="doc-table-wrap"><table class="doc-table">
@@ -219,9 +219,9 @@ npm run pages</code></pre></div>
   <ul class="doc-search-results" id="doc-search-results" role="listbox" aria-label="Results"></ul>
 </dialog>
 <script>window.DOC_ROOT=""</script>
-<script src="../shared/icons.js?v=9515367c"></script>
-<script src="../system/components/tooltip.js?v=9515367c"></script>
-<script src="assets/search-index.js?v=9515367c"></script>
-<script src="assets/site.js?v=9515367c"></script>
+<script src="../shared/icons.js?v=d2cd6d94"></script>
+<script src="../system/components/tooltip.js?v=d2cd6d94"></script>
+<script src="assets/search-index.js?v=d2cd6d94"></script>
+<script src="assets/site.js?v=d2cd6d94"></script>
 </body>
 </html>

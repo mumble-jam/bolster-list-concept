@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../system/bolster.css?v=9515367c">
-<link rel="stylesheet" href="assets/site.css?v=9515367c">
+<link rel="stylesheet" href="../system/bolster.css?v=d2cd6d94">
+<link rel="stylesheet" href="assets/site.css?v=d2cd6d94">
 <script>try{const t=localStorage.getItem("bds-theme");if(t&&t!=="auto")document.documentElement.dataset.theme=t}catch{}</script>
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
@@ -63,7 +63,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
 <h3 id="specimens-and-concepts">Specimens and concepts</h3>
 <ul>
   <li><strong>Specimens</strong> (<code>system/specimens/</code>) are the components' workbenches: every variant and state working on the system's own CSS, in light and dark. This site is the one documentation (D133): each component's page shows its specimen live under “Every variant and state”, and the <a href="resources/backlog.html#drafts">backlog's drafts</a> list the parts built in a concept that are waiting for the product designer's approval.</li>
-  <li><strong>The <span class="doc-unpublished">concepts</span></strong> (<code>concepts/index.html</code>) are whole pages, one page type at a time, built from the system with made-up sample data inside a Bolster-style app shell. Each one's “About this concept” dialog says what it settles and what's still open. Nothing in a concept talks to Bolster.</li>
+  <li><strong>The concepts</strong> (<code>concepts/</code>) are whole pages, one page type at a time, built from the system with made-up sample data inside a Bolster-style app shell. Each one's “About this concept” dialog says what it settles and what's still open. Nothing in a concept talks to Bolster. Start with the job list: <a href="https://mumble-jam.github.io/bolster-list-concept/">published</a>, or <a href="../index.html"><code>concepts/data-list/index.html</code></a> locally.</li>
 </ul>
 
 <h3 id="decisions-and-what-counts-as-the-spec">Decisions, and what counts as the spec</h3>
@@ -92,7 +92,7 @@ import "bolster-ds/system/tokens.css";
 import "bolster-ds/system/base.css";
 import "bolster-ds/system/components/button.css";
 import "bolster-ds/system/components/badge.css";</code></pre></div>
-<p>Without a bundler, link the same file: <code>&lt;link rel="stylesheet" href="…/system/bolster.css?v=9515367c"&gt;</code>. Every file declares the layer order before anything else, so the order holds whatever order the files arrive in:</p>
+<p>Without a bundler, link the same file: <code>&lt;link rel="stylesheet" href="…/system/bolster.css?v=d2cd6d94"&gt;</code>. Every file declares the layer order before anything else, so the order holds whatever order the files arrive in:</p>
 <div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>@layer tokens, base, components, utilities;</code></pre></div>
 
 <h3 id="markup">Markup</h3>
@@ -136,7 +136,7 @@ import "bolster-ds/system/components/badge.css";</code></pre></div>
   <li>Icons in the page are Regular. The app shell's chrome draws Light copies under <code>l-&lt;name&gt;</code>. A page never picks the weight.</li>
   <li>Which icon means what is decided in <code>system/model/icons.json</code>, one icon per meaning.</li>
 </ul>
-<div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>&lt;script src="concepts/shared/icons.js?v=9515367c"&gt;&lt;/script&gt;
+<div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>&lt;script src="concepts/shared/icons.js?v=d2cd6d94"&gt;&lt;/script&gt;
 &lt;script&gt;
   const ic = (name, size = 16, o) =&gt; window.BolsterIcons(name, size, o);
   refresh.innerHTML = ic("refresh-cw", 16);
@@ -144,7 +144,7 @@ import "bolster-ds/system/components/badge.css";</code></pre></div>
 
 <h3 id="tooltips">Tooltips</h3>
 <p>Every icon without a label has a tooltip. Put <code>data-tip</code> on the icon or its control, and load <code>system/components/tooltip.js</code> once per page. It draws a single tooltip in the top layer, so no card or table clips it. The tooltip appears after a short pause under a mouse and at once on keyboard focus. The element keeps its own name in <code>aria-label</code>, and screen readers don't read the tooltip. Touch screens have no hover, so never put the only copy of something important in a tooltip.</p>
-<div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>&lt;script src="…/system/components/tooltip.js?v=9515367c"&gt;&lt;/script&gt;
+<div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>&lt;script src="…/system/components/tooltip.js?v=d2cd6d94"&gt;&lt;/script&gt;
 
 &lt;button class="button" data-variant="ghost" data-icon-only aria-label="Refresh" data-tip="Refresh"&gt;…svg…&lt;/button&gt;
 &lt;span data-tip="Labor and materials"&gt;…svg…&lt;/span&gt;</code></pre></div>
@@ -163,7 +163,7 @@ import "bolster-ds/system/bolster.css";
 npm run serve        # http://localhost:4178</code></pre></div>
 <ul>
   <li><a href="http://localhost:4178/site/index.html">localhost:4178/site/</a>: this site. After changing its sources, the tokens, the decisions or the inventory, rebuild it with <code>node scripts/build-site.mjs</code>.</li>
-  <li><a href="http://localhost:4178/concepts/index.html">localhost:4178/concepts/</a>: the concepts hub.</li>
+  <li><a href="http://localhost:4178/concepts/data-list/index.html">localhost:4178/concepts/data-list/index.html</a>: the job list concept.</li>
 </ul>
 <p>Before a change lands, the checks run: <code>npm run contrast</code> after any token change, then <code>npm run pages</code>, <code>npm run test:visual</code> and <code>npm run test:a11y</code>, plus the three browser checks for corners, icons and tooltips. What each one does, and when to run it, is in <a href="resources/contributing.html#the-checks">Contributing: the checks</a>.</p>
 <h2 id="decisions-and-contracts">Decisions and contracts</h2><ul class="doc-refs" role="list"><li><a class="doc-ref-card" href="resources/decisions.html#d1"><span class="doc-ref-id">D1</span><span class="doc-ref-title">Token structure follows the prototype</span><span class="badge" data-tone="success">Decided</span></a></li><li><a class="doc-ref-card" href="resources/decisions.html#d14"><span class="doc-ref-id">D14</span><span class="doc-ref-title">Dark theme</span><span class="badge" data-tone="warning">Proposed</span></a></li><li><a class="doc-ref-card" href="resources/decisions.html#d19"><span class="doc-ref-id">D19</span><span class="doc-ref-title">No Tailwind default palette</span><span class="badge" data-tone="success">Decided</span></a></li><li><a class="doc-ref-card" href="resources/decisions.html#d20"><span class="doc-ref-id">D20</span><span class="doc-ref-title">Delivery: plain CSS, layered, low specificity</span><span class="badge" data-tone="success">Decided</span></a></li><li><a class="doc-ref-card" href="resources/decisions.html#d23"><span class="doc-ref-id">D23</span><span class="doc-ref-title">Icons: Font Awesome 6 Pro</span><span class="badge" data-tone="success">Decided</span></a></li><li><a class="doc-ref-card" href="resources/decisions.html#d52"><span class="doc-ref-id">D52</span><span class="doc-ref-title">Every icon without a label has a tooltip</span><span class="badge" data-tone="success">Decided</span></a></li><li><a class="doc-ref-card" href="resources/decisions.html#d84"><span class="doc-ref-id">D84</span><span class="doc-ref-title">Icons in the page are Regular; the app shell's are Light</span><span class="badge" data-tone="success">Decided</span></a></li></ul>
@@ -179,9 +179,9 @@ npm run serve        # http://localhost:4178</code></pre></div>
   <ul class="doc-search-results" id="doc-search-results" role="listbox" aria-label="Results"></ul>
 </dialog>
 <script>window.DOC_ROOT=""</script>
-<script src="../shared/icons.js?v=9515367c"></script>
-<script src="../system/components/tooltip.js?v=9515367c"></script>
-<script src="assets/search-index.js?v=9515367c"></script>
-<script src="assets/site.js?v=9515367c"></script>
+<script src="../shared/icons.js?v=d2cd6d94"></script>
+<script src="../system/components/tooltip.js?v=d2cd6d94"></script>
+<script src="assets/search-index.js?v=d2cd6d94"></script>
+<script src="assets/site.js?v=d2cd6d94"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 // The intent lens's record of the parts every concept page shares (the shell, the system's components): for each, how
 // intentional it is and where that came from. A page adds its own in its intent.js (window.BolsterIntent.page); the
 // lens (lens.js) matches the page's first, then these. Levels, as the components inventory has them
-// (concepts/data-list/components.html): yours (you decided how it looks or behaves), steered (you asked for it or set
+// (once in concepts/data-list/components.html, retired 5 Nov): yours (you decided how it looks or behaves), steered (you asked for it or set
 // the direction; the details are mine), mine (never discussed: made up from the system, best practice or Bolster's
 // habits), bolster (kept as Bolster's live product has it, not redesigned). Status is the system's (inventory.json).
 window.BolsterIntent = window.BolsterIntent || {};

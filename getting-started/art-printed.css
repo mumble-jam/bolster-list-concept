@@ -1,0 +1,223 @@
+/* Getting started's printed drawings (2 Nov): the playground's Printed style. The story plays when the card gets is-on
+   (getting-started.js, on pointing at it). Drawn in its own neutrals and the card's colour (--pg-ink-solid). */
+/* prodlabel · Product, price label: real printed things on a quiet grey surface, close up. White paper, a band in the
+   card's ink, big black type, small print (barcode marks, small caps), real paper shadows. Each story is one physical
+   action: peeled on and pressed, ticked, sealed, slid in, stamped, dropped, stuck on, clipped on. */
+
+.n3.prodlabel{--ink:var(--pg-ink-solid);--band:color-mix(in oklab,var(--ink) 92%,#000);--ink-dk:color-mix(in oklab,var(--ink) 72%,#000);
+  --kraft:#d2b388;--kraft-2:#c29f70;--paper-sh:0 1px 1px rgb(0 0 0 / .08),0 8px 16px -6px rgb(0 0 0 / .25);
+  background:linear-gradient(180deg,#f3f2ef,#e6e4df);overflow:hidden;font-family:Inter,ui-sans-serif,system-ui,sans-serif;
+  font-feature-settings:"tnum" 1;transition:background-color .3s;contain:paint}
+.n3.prodlabel::before{content:"";position:absolute;inset:0;background:rgb(0 0 0 / .035);opacity:0;transition:opacity .3s ease;pointer-events:none}
+.gs-card:hover .n3.prodlabel::before{opacity:1}
+.n3.prodlabel .stage{position:absolute;left:50%;top:50%;width:285px;height:176px;margin:-88px 0 0 -142.5px;transition:translate .35s cubic-bezier(.2,.8,.3,1)}
+.gs-card:hover .n3.prodlabel .stage{translate:0 -1px}
+.n3.prodlabel .stage *{position:absolute;margin:0;box-sizing:border-box;font-style:normal}
+.n3.prodlabel .stage :is(b,p,em,.pl-mark) > :is(span,small){position:static}
+.n3.prodlabel .stage svg{inset:0;width:100%;height:100%;overflow:visible}
+
+/* shared print parts */
+.n3.prodlabel .pl-pp{background:#fff;box-shadow:var(--paper-sh);overflow:hidden}
+.n3.prodlabel .pl-band{left:0;top:0;right:0;height:24px;background:var(--band)}
+.n3.prodlabel .pl-band span{left:10px;top:5px;font-size:11px;line-height:14px;font-weight:800;letter-spacing:.08em;color:#fff;text-transform:uppercase;white-space:nowrap}
+.n3.prodlabel .stage .pl-band em{right:10px;top:6px;font-size:10px;line-height:12px;font-style:normal;font-weight:600;color:rgb(255 255 255 / .82)}
+.n3.prodlabel .pl-bars{height:14px;background:repeating-linear-gradient(90deg,#111 0 1.5px,transparent 1.5px 3px,#111 3px 4px,transparent 4px 6.5px)}
+.n3.prodlabel .stage b{color:#111;font-weight:800;letter-spacing:-.04em;white-space:nowrap}
+.n3.prodlabel .stage b small{font-size:13px;font-weight:700;letter-spacing:0}
+.n3.prodlabel .stage em{font-style:normal;font-size:10px;line-height:12px;font-weight:600;color:#777;white-space:nowrap}
+
+/* ---------- rates · a price label peeled on and pressed onto a box ---------- */
+.n3.prodlabel.k-rates .pl-box{left:44px;top:58px;width:200px;height:110px;border-radius:6px;background:linear-gradient(180deg,#d8b98e,#c7a274);box-shadow:inset 0 2px 0 rgb(255 255 255 / .25),0 -2px 0 #e6cba3}
+.n3.prodlabel.k-rates .pl-tape{left:126px;top:58px;width:36px;height:110px;background:rgb(255 255 255 / .18);border-inline:1px solid rgb(255 255 255 / .2)}
+.n3.prodlabel.k-rates .pl-label{left:70px;top:38px;width:148px;height:92px;border-radius:8px;rotate:-4deg;transform-origin:0 0}
+.n3.prodlabel.k-rates .pl-label b{left:10px;top:30px;font-size:30px;line-height:34px}
+.n3.prodlabel.k-rates .pl-label .pl-bars{left:10px;bottom:9px;width:70px}
+.n3.prodlabel.k-rates .pl-label em{right:10px;bottom:10px}
+.n3.prodlabel.k-rates .pl-curl{right:0;bottom:0;width:22px;height:22px;background:linear-gradient(135deg,transparent 50%,#e9e7e2 50%,#fff);box-shadow:-2px -2px 3px rgb(0 0 0 / .1)}
+.gs-card.is-on .n3.prodlabel.k-rates .pl-box{animation:prodlabel-up .6s cubic-bezier(.2,.8,.3,1.1) both}
+.gs-card.is-on .n3.prodlabel.k-rates .pl-tape{animation:prodlabel-up .6s cubic-bezier(.2,.8,.3,1.1) both}
+.gs-card.is-on .n3.prodlabel.k-rates .pl-label{animation:prodlabel-peel 1.1s cubic-bezier(.3,.9,.3,1) .2s both}
+.gs-card.is-on .n3.prodlabel.k-rates .pl-curl{animation:prodlabel-curl 1.1s ease .2s both}
+
+/* ---------- estimate · a printed estimate sheet; a pen ticks each line, the total comes up ---------- */
+.n3.prodlabel.k-estimate .pl-sheet{left:60px;top:12px;width:166px;height:152px;border-radius:3px;rotate:-2deg}
+.n3.prodlabel.k-estimate .pl-band{height:22px}
+.n3.prodlabel.k-estimate .pl-band span{top:4px}
+.n3.prodlabel.k-estimate .pl-band em{top:5px}
+.n3.prodlabel.k-estimate .pl-ttl{left:12px;top:29px;font-size:13px;line-height:16px;letter-spacing:-.01em}
+.n3.prodlabel.k-estimate .pl-r{left:12px;right:12px;height:16px;padding-left:18px;display:flex;justify-content:space-between;font-size:11px;line-height:16px;font-weight:500;color:#333}
+.n3.prodlabel.k-estimate .pl-r1{top:50px}.n3.prodlabel.k-estimate .pl-r2{top:66px}.n3.prodlabel.k-estimate .pl-r3{top:82px}
+.n3.prodlabel.k-estimate .pl-r::before{content:"";position:absolute;left:0;top:3px;width:10px;height:10px;border:1.2px solid #b9b9b9;border-radius:2px;box-sizing:border-box}
+.n3.prodlabel.k-estimate .pl-tk{left:-1px;top:0;width:13px;height:13px;color:var(--ink)}
+.n3.prodlabel.k-estimate .pl-rule{left:12px;right:12px;top:104px;height:0;border-top:1px dashed #d4d4d4}
+.n3.prodlabel.k-estimate .pl-tl{left:12px;top:111px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#777}
+.n3.prodlabel.k-estimate .pl-tot{right:12px;top:106px;font-size:26px;line-height:30px;color:var(--ink)}
+.n3.prodlabel.k-estimate .pl-bars{left:12px;bottom:10px;width:50px;height:10px}
+.n3.prodlabel.k-estimate .pl-pen{left:228px;top:56px;width:8px;height:96px;rotate:30deg;transform-origin:50% 100%;border-radius:4px 4px 0 0;
+  background:linear-gradient(180deg,transparent 85%,#c9c9c9 85%,#8d8d8d),linear-gradient(90deg,#4a4a4a,#151515 55%,#000);
+  clip-path:polygon(0 0,100% 0,100% 85%,58% 100%,42% 100%,0 85%);filter:drop-shadow(5px 4px 3px rgb(0 0 0 / .25))}
+.n3.prodlabel.k-estimate .pl-pen::before{content:"";position:absolute;left:0;top:10px;width:8px;height:2px;background:color-mix(in oklab,var(--ink) 80%,#fff)}
+.gs-card.is-on .n3.prodlabel.k-estimate .pl-sheet{animation:prodlabel-up .6s cubic-bezier(.2,.8,.3,1.1) both}
+.gs-card.is-on .n3.prodlabel.k-estimate .pl-pen{animation:prodlabel-pen 2.1s cubic-bezier(.45,0,.3,1) .35s both}
+.gs-card.is-on .n3.prodlabel.k-estimate .pl-tk{animation:prodlabel-wipe .16s linear both}
+.gs-card.is-on .n3.prodlabel.k-estimate .pl-r1 .pl-tk{animation-delay:.76s}
+.gs-card.is-on .n3.prodlabel.k-estimate .pl-r2 .pl-tk{animation-delay:1.22s}
+.gs-card.is-on .n3.prodlabel.k-estimate .pl-r3 .pl-tk{animation-delay:1.68s}
+.gs-card.is-on .n3.prodlabel.k-estimate .pl-tot{animation:prodlabel-pop .5s cubic-bezier(.3,1.5,.5,1) 1.75s both;transform-origin:100% 60%}
+
+/* ---------- proposal · the proposal slides into an envelope, the flap folds, a seal is pressed on ---------- */
+.n3.prodlabel.k-proposal .pl-env{left:52px;top:36px;width:180px;height:118px;rotate:-3deg;filter:drop-shadow(0 1px 1px rgb(0 0 0 / .08)) drop-shadow(0 8px 10px rgb(0 0 0 / .16))}
+.n3.prodlabel.k-proposal .pl-in{inset:0;border-radius:4px;background:linear-gradient(180deg,#dcd9d3,#e9e7e2)}
+.n3.prodlabel.k-proposal .pl-letter{left:12px;top:8px;width:156px;height:104px;border-radius:2px;box-shadow:0 1px 2px rgb(0 0 0 / .12);z-index:2}
+.n3.prodlabel.k-proposal .pl-letter b{left:10px;top:30px;font-size:18px;line-height:22px;letter-spacing:-.02em}
+.n3.prodlabel.k-proposal .pl-letter em{left:10px;top:54px}
+.n3.prodlabel.k-proposal .pl-pocket{inset:0;border-radius:4px;background:linear-gradient(180deg,#fbfaf8,#efede9);clip-path:polygon(0 0,50% 60%,100% 0,100% 100%,0 100%);z-index:3}
+.n3.prodlabel.k-proposal .pl-flapw{left:0;top:0;width:180px;height:72px;filter:drop-shadow(0 2px 1.5px rgb(0 0 0 / .14));transform-origin:50% 0;z-index:4}
+.n3.prodlabel.k-proposal .pl-flap{inset:0;background:linear-gradient(180deg,#f7f6f3,#e9e6e1);clip-path:polygon(0 0,100% 0,54% 96%,50% 100%,46% 96%)}
+.n3.prodlabel.k-proposal .pl-seal{z-index:5;left:69px;top:51px;width:42px;height:42px;border-radius:50%;padding:10px;color:#fff;
+  background:radial-gradient(circle at 35% 30%,color-mix(in oklab,var(--band) 82%,#fff),var(--band) 60%);box-shadow:inset 0 0 0 2.5px rgb(255 255 255 / .28),0 1px 1px rgb(0 0 0 / .2),0 3px 6px -2px rgb(0 0 0 / .3)}
+.n3.prodlabel.k-proposal .pl-seal svg{position:static}
+.n3.prodlabel.k-proposal .pl-addr{z-index:5;left:12px;top:84px;width:76px;height:26px;border-radius:2px;border-left:3px solid var(--band);box-shadow:0 1px 1px rgb(0 0 0 / .1)}
+.n3.prodlabel.k-proposal .pl-addr em{left:6px;top:1px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.n3.prodlabel.k-proposal .pl-addr b{left:6px;top:10px;font-size:12px;line-height:15px;letter-spacing:-.01em}
+.gs-card.is-on .n3.prodlabel.k-proposal .pl-env{animation:prodlabel-up .6s cubic-bezier(.2,.8,.3,1.1) both}
+.gs-card.is-on .n3.prodlabel.k-proposal .pl-letter{animation:prodlabel-slidein 1.25s cubic-bezier(.5,0,.3,1) .1s both}
+.gs-card.is-on .n3.prodlabel.k-proposal .pl-flapw{animation:prodlabel-flap .55s cubic-bezier(.4,0,.2,1) 1.2s both}
+.gs-card.is-on .n3.prodlabel.k-proposal .pl-seal{animation:prodlabel-press .55s cubic-bezier(.3,.9,.3,1) 1.8s both}
+.gs-card.is-on .n3.prodlabel.k-proposal .pl-addr{animation:prodlabel-fade .4s ease .2s both}
+
+/* ---------- migrate · job folders slide into a box, its label is pressed on ---------- */
+.n3.prodlabel.k-migrate .pl-bk{left:52px;top:70px;width:182px;height:90px;border-radius:5px 5px 0 0;background:linear-gradient(180deg,#b9955f,#c7a274)}
+.n3.prodlabel.k-migrate .pl-f{width:150px;height:78px;border-radius:2px 6px 0 0;background:var(--fc);box-shadow:0 -1px 0 rgb(255 255 255 / .6) inset,0 -2px 4px rgb(0 0 0 / .1)}
+.n3.prodlabel.k-migrate .pl-f::before{content:"";position:absolute;top:-14px;left:var(--tx);width:60px;height:16px;border-radius:5px 5px 0 0;background:var(--fc)}
+.n3.prodlabel.k-migrate .pl-f span{position:absolute;top:-12px;left:calc(var(--tx) + 8px);font-size:10px;line-height:12px;font-weight:700;color:var(--ink-dk);white-space:nowrap}
+.n3.prodlabel.k-migrate .pl-f1{left:66px;top:56px;--tx:84px;--fc:color-mix(in oklab,var(--ink) 30%,#fff)}
+.n3.prodlabel.k-migrate .pl-f2{left:70px;top:68px;--tx:44px;--fc:color-mix(in oklab,var(--ink) 20%,#fff)}
+.n3.prodlabel.k-migrate .pl-f3{left:64px;top:80px;--tx:6px;--fc:color-mix(in oklab,var(--ink) 11%,#fff)}
+.n3.prodlabel.k-migrate .pl-fr{left:44px;top:96px;width:198px;height:72px;border-radius:5px 5px 0 0;background:linear-gradient(180deg,#d8b98e,#c7a274);box-shadow:inset 0 2px 0 rgb(255 255 255 / .25),0 -3px 6px -2px rgb(0 0 0 / .2)}
+.n3.prodlabel.k-migrate .pl-label{left:72px;top:102px;width:142px;height:56px;border-radius:6px;rotate:-2deg}
+.n3.prodlabel.k-migrate .pl-band{height:19px}
+.n3.prodlabel.k-migrate .pl-band span{top:3px}
+.n3.prodlabel.k-migrate .pl-label b{left:10px;top:20px;font-size:24px;line-height:30px}
+.n3.prodlabel.k-migrate .pl-label .pl-bars{right:10px;top:27px;width:40px;height:10px}
+.n3.prodlabel.k-migrate .pl-label em{right:10px;top:40px}
+.gs-card.is-on .n3.prodlabel.k-migrate :is(.pl-bk,.pl-fr){animation:prodlabel-up .6s cubic-bezier(.2,.8,.3,1.1) both}
+.gs-card.is-on .n3.prodlabel.k-migrate .pl-f{animation:prodlabel-drop .65s cubic-bezier(.4,0,.3,1.25) both}
+.gs-card.is-on .n3.prodlabel.k-migrate .pl-f1{animation-delay:.35s}
+.gs-card.is-on .n3.prodlabel.k-migrate .pl-f2{animation-delay:.6s}
+.gs-card.is-on .n3.prodlabel.k-migrate .pl-f3{animation-delay:.85s}
+.gs-card.is-on .n3.prodlabel.k-migrate .pl-label{animation:prodlabel-peel2 .95s cubic-bezier(.3,.9,.3,1) 1.25s both}
+
+/* ---------- verify · a business card, a rubber stamp comes down: Verified ---------- */
+.n3.prodlabel.k-verify .pl-card{left:44px;top:30px;width:196px;height:112px;border-radius:8px;rotate:-3deg}
+.n3.prodlabel.k-verify .pl-card b{left:12px;top:32px;font-size:17px;line-height:22px;letter-spacing:-.03em}
+.n3.prodlabel.k-verify .pl-card p{left:12px;font-size:11px;line-height:14px;font-weight:500;color:#555;white-space:nowrap}
+.n3.prodlabel.k-verify .pl-a1{top:58px}.n3.prodlabel.k-verify .pl-a2{top:74px}
+.n3.prodlabel.k-verify .pl-card .pl-bars{left:12px;bottom:10px;width:56px;height:10px}
+.n3.prodlabel.k-verify .pl-mark{left:140px;top:96px;height:28px;padding:0 8px 0 6px;display:flex;align-items:center;gap:4px;rotate:-11deg;border:2.5px solid var(--ink);border-radius:6px;
+  outline:1px solid var(--ink);outline-offset:2px;color:var(--ink);font-size:12px;font-weight:900;letter-spacing:.06em;text-transform:uppercase;mix-blend-mode:multiply;opacity:.92;
+  -webkit-mask:repeating-linear-gradient(118deg,#000 0 5px,rgb(0 0 0 / .72) 5px 6px,#000 6px 9px,rgb(0 0 0 / .85) 9px 10px);mask:repeating-linear-gradient(118deg,#000 0 5px,rgb(0 0 0 / .72) 5px 6px,#000 6px 9px,rgb(0 0 0 / .85) 9px 10px)}
+.n3.prodlabel.k-verify .pl-mark svg{position:relative;inset:auto;width:13px;height:13px;flex:none}
+.n3.prodlabel.k-verify .pl-tool{left:144px;top:18px;width:92px;height:92px;opacity:0;rotate:-11deg;transform-origin:50% 100%}
+.n3.prodlabel.k-verify .pl-knob{left:28px;top:0;width:36px;height:56px;border-radius:18px 18px 6px 6px;background:linear-gradient(90deg,#5a4a3e,#2c221b 60%,#1b1410);box-shadow:inset 3px 0 2px rgb(255 255 255 / .15)}
+.n3.prodlabel.k-verify .pl-base{left:0;bottom:0;width:92px;height:38px;border-radius:6px;background:linear-gradient(180deg,#2d2d2f 0 78%,var(--ink-dk) 78%);box-shadow:inset 0 1px 0 rgb(255 255 255 / .15),0 10px 14px -6px rgb(0 0 0 / .4)}
+.gs-card.is-on .n3.prodlabel.k-verify .pl-card{animation:prodlabel-up .6s cubic-bezier(.2,.8,.3,1.1) both}
+.gs-card.is-on .n3.prodlabel.k-verify .pl-tool{animation:prodlabel-stamp 1.35s cubic-bezier(.4,0,.3,1) .45s both}
+.gs-card.is-on .n3.prodlabel.k-verify .pl-mark{animation:prodlabel-ink .5s cubic-bezier(.2,.8,.3,1) 1.03s both}
+
+/* ---------- leadform · an enquiry card drops into the in-tray, the name fills in ---------- */
+.n3.prodlabel.k-leadform .pl-tray{left:40px;top:96px;width:206px;height:60px;border-radius:6px 6px 2px 2px;background:linear-gradient(180deg,#bfbfc1,#d6d6d8)}
+.n3.prodlabel.k-leadform .pl-card{left:68px;top:26px;width:150px;height:104px;border-radius:4px;rotate:3deg}
+.n3.prodlabel.k-leadform .pl-card b{left:10px;top:29px;font-size:22px;line-height:26px;letter-spacing:-.03em;min-height:26px}
+.n3.prodlabel.k-leadform .pl-card em{left:10px;top:58px;font-size:11px;line-height:14px;font-weight:500;color:#666}
+.n3.prodlabel.k-leadform .pl-card .pl-bars{left:10px;top:78px;width:56px;height:10px}
+.n3.prodlabel.k-leadform .pl-lip{left:32px;top:116px;width:222px;height:44px;border-radius:4px 4px 8px 8px;background:linear-gradient(180deg,#3b3b3e,#1f1f21);box-shadow:inset 0 1px 0 rgb(255 255 255 / .16),0 12px 16px -10px rgb(0 0 0 / .5)}
+.n3.prodlabel.k-leadform .pl-lip span{left:16px;top:15px;font-size:11px;line-height:14px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:rgb(255 255 255 / .86)}
+.n3.prodlabel.k-leadform .pl-new{right:14px;top:12px;height:20px;padding:0 9px;border-radius:10px;background:var(--band);color:#fff;font-size:11px;line-height:20px;font-weight:700;font-style:normal;box-shadow:inset 0 0 0 1px rgb(255 255 255 / .22)}
+.gs-card.is-on .n3.prodlabel.k-leadform :is(.pl-tray,.pl-lip){animation:prodlabel-up .6s cubic-bezier(.2,.8,.3,1.1) both}
+.gs-card.is-on .n3.prodlabel.k-leadform .pl-card{animation:prodlabel-fall .8s cubic-bezier(.5,0,.4,1) .35s both}
+.gs-card.is-on .n3.prodlabel.k-leadform .pl-new{animation:prodlabel-pop .5s cubic-bezier(.3,1.6,.5,1) 1.85s both}
+
+/* ---------- integrations · three sticker tiles pressed onto a laptop lid ---------- */
+.n3.prodlabel.k-integrations .pl-lid{left:38px;top:20px;width:210px;height:140px;border-radius:12px;background:linear-gradient(160deg,#ececed,#d3d4d6 60%,#c8c9cb);
+  box-shadow:inset 0 1px 0 rgb(255 255 255 / .9),inset 0 -6px 0 rgb(0 0 0 / .05),0 1px 1px rgb(0 0 0 / .1),0 14px 22px -12px rgb(0 0 0 / .35)}
+.n3.prodlabel.k-integrations .pl-mk{left:93px;top:56px;width:24px;height:28px;color:rgb(0 0 0 / .1);filter:drop-shadow(0 1px 0 rgb(255 255 255 / .8))}
+.n3.prodlabel.k-integrations .pl-st{width:56px;height:56px;border-radius:15px;border:3px solid #fff;background:var(--sc);color:#fff;display:grid;place-items:center;
+  box-shadow:0 1px 1px rgb(0 0 0 / .14),0 5px 9px -4px rgb(0 0 0 / .32)}
+.n3.prodlabel.k-integrations .pl-st b{position:static;color:inherit;font-size:28px;line-height:1;letter-spacing:-.02em}
+.n3.prodlabel.k-integrations .pl-s1{left:60px;top:36px;rotate:-9deg;--sc:var(--band)}
+.n3.prodlabel.k-integrations .pl-s2{left:174px;top:56px;rotate:7deg;--sc:#fff;border-color:#fff;color:#111;overflow:hidden;box-shadow:0 0 0 1px rgb(0 0 0 / .06),0 1px 1px rgb(0 0 0 / .14),0 5px 9px -4px rgb(0 0 0 / .32)}
+.n3.prodlabel.k-integrations .pl-s2 .pl-cb{left:0;top:0;right:0;height:14px;background:var(--band)}
+.n3.prodlabel.k-integrations .pl-s2 b{padding-top:12px;font-size:22px}
+.n3.prodlabel.k-integrations .pl-s3{left:84px;top:96px;rotate:5deg;--sc:var(--ink-dk)}
+.n3.prodlabel.k-integrations .pl-s3 svg{position:static;width:30px;height:30px}
+.gs-card.is-on .n3.prodlabel.k-integrations .pl-lid{animation:prodlabel-up .6s cubic-bezier(.2,.8,.3,1.1) both}
+.gs-card.is-on .n3.prodlabel.k-integrations .pl-st{animation:prodlabel-stick .75s cubic-bezier(.3,.9,.3,1) both}
+.gs-card.is-on .n3.prodlabel.k-integrations .pl-s1{animation-delay:.4s}
+.gs-card.is-on .n3.prodlabel.k-integrations .pl-s2{animation-delay:.8s}
+.gs-card.is-on .n3.prodlabel.k-integrations .pl-s3{animation-delay:1.2s}
+
+/* ---------- team · name badges clipped on, Mike's swings in last ---------- */
+.n3.prodlabel.k-team .pl-sb{transform-origin:50% 0}
+.n3.prodlabel.k-team .pl-strap{left:50%;top:-30px;width:10px;height:44px;margin-left:-5px;background:linear-gradient(90deg,var(--ink-dk),var(--band) 40%,var(--ink-dk))}
+.n3.prodlabel.k-team .pl-clip{left:50%;top:10px;width:16px;height:14px;margin-left:-8px;border-radius:3px;background:linear-gradient(90deg,#9a9a9c,#e4e4e6 45%,#9a9a9c);box-shadow:0 1px 1px rgb(0 0 0 / .25)}
+.n3.prodlabel.k-team .pl-clip::after{content:"";position:absolute;left:4px;top:4px;width:8px;height:3px;border-radius:2px;background:rgb(0 0 0 / .35)}
+.n3.prodlabel.k-team .pl-bd{left:0;top:20px;right:0;bottom:0;border-radius:7px}
+.n3.prodlabel.k-team .pl-b1{left:32px;top:22px;width:72px;height:104px;rotate:-6deg}
+.n3.prodlabel.k-team .pl-b2{left:180px;top:26px;width:72px;height:104px;rotate:6deg}
+.n3.prodlabel.k-team :is(.pl-b1,.pl-b2) .pl-band{height:22px}
+.n3.prodlabel.k-team :is(.pl-b1,.pl-b2) .pl-band span{top:4px;left:8px}
+.n3.prodlabel.k-team :is(.pl-b1,.pl-b2) b{left:8px;top:30px;font-size:24px;line-height:28px;color:#333}
+.n3.prodlabel.k-team .pl-b2 b{left:auto;right:8px}
+.n3.prodlabel.k-team .pl-b2 .pl-band span{left:auto;right:8px}
+.n3.prodlabel.k-team .pl-mb{left:87px;top:16px;width:112px;height:142px}
+.n3.prodlabel.k-team .pl-mb .pl-band{height:26px}
+.n3.prodlabel.k-team .pl-mb .pl-band span{top:6px;font-size:12px}
+.n3.prodlabel.k-team .pl-mb b{left:10px;top:30px;font-size:34px;line-height:40px}
+.n3.prodlabel.k-team .pl-mb em{left:9px;top:72px;font-size:10px;line-height:13px;font-weight:500;color:#555;letter-spacing:-.01em}
+.n3.prodlabel.k-team .pl-mb .pl-bars{left:10px;bottom:10px;width:46px;height:12px}
+.n3.prodlabel.k-team .pl-mb small{right:10px;bottom:10px;font-size:10px;line-height:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#777}
+.gs-card.is-on .n3.prodlabel.k-team .pl-b1{animation:prodlabel-sway1 1s cubic-bezier(.3,.9,.3,1) both}
+.gs-card.is-on .n3.prodlabel.k-team .pl-b2{animation:prodlabel-sway2 1s cubic-bezier(.3,.9,.3,1) .12s both}
+.gs-card.is-on .n3.prodlabel.k-team .pl-mb{animation:prodlabel-swing 1.5s linear .35s both}
+
+/* ---------- motion ---------- */
+@keyframes prodlabel-up{from{translate:0 22px;opacity:0}}
+@keyframes prodlabel-fade{from{opacity:0}}
+@keyframes prodlabel-peel{0%{translate:40px -70px;rotate:16deg;scale:1.15;opacity:0;box-shadow:0 30px 30px -10px rgb(0 0 0 / .25)}40%{opacity:1}75%{translate:0 0;rotate:-4deg;scale:1}85%{scale:.97}100%{scale:1}}
+@keyframes prodlabel-peel2{0%{translate:36px -64px;rotate:14deg;scale:1.15;opacity:0;box-shadow:0 30px 30px -10px rgb(0 0 0 / .25)}40%{opacity:1}75%{translate:0 0;rotate:-2deg;scale:1}85%{scale:.97}100%{scale:1}}
+@keyframes prodlabel-curl{0%,70%{width:44px;height:44px}100%{width:22px;height:22px}}
+@keyframes prodlabel-pen{
+  0%{translate:50px 40px;opacity:0}
+  12%{translate:-158px -84px;opacity:1}
+  18%{translate:-155px -78px}
+  25%{translate:-148px -90px}
+  34%{translate:-158px -68px}
+  40%{translate:-155px -62px}
+  47%{translate:-148px -74px}
+  56%{translate:-158px -52px}
+  62%{translate:-155px -46px}
+  69%{translate:-148px -58px}
+  100%{translate:0 0;opacity:1}}
+@keyframes prodlabel-wipe{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@keyframes prodlabel-pop{0%{scale:.6;opacity:0}100%{scale:1;opacity:1}}
+@keyframes prodlabel-slidein{0%{translate:0 -78px;opacity:0}15%{opacity:1}55%{translate:0 -78px}100%{translate:0 0}}
+@keyframes prodlabel-flap{from{transform:perspective(320px) rotateX(178deg);z-index:1}to{transform:perspective(320px) rotateX(0);z-index:4}}
+@keyframes prodlabel-press{0%{scale:1.7;translate:6px -16px;opacity:0;rotate:-30deg}55%{scale:.92;translate:0 0;opacity:1;rotate:0deg}78%{scale:1.04}100%{scale:1}}
+@keyframes prodlabel-drop{0%{translate:0 -140px;opacity:0}20%{opacity:1}100%{translate:0 0;opacity:1}}
+@keyframes prodlabel-stamp{0%{translate:24px -90px;opacity:0}28%{translate:0 -26px;opacity:1}42%{translate:0 2px;scale:1 .94}50%{translate:0 0;scale:1}66%{translate:0 -12px;opacity:1}100%{translate:30px -110px;opacity:0}}
+@keyframes prodlabel-ink{0%{opacity:0;scale:1.12}30%{opacity:.95}100%{opacity:.92;scale:1}}
+@keyframes prodlabel-fall{0%{translate:-10px -150px;rotate:-14deg;opacity:0}15%{opacity:1}70%{translate:0 6px;rotate:4deg}85%{translate:0 -3px;rotate:2.5deg}100%{translate:0 0;rotate:3deg;opacity:1}}
+@keyframes prodlabel-stick{0%{translate:30px -50px;scale:1.25;opacity:0;box-shadow:0 26px 26px -10px rgb(0 0 0 / .3)}40%{opacity:1}72%{translate:0 0;scale:1}84%{scale:.95}100%{scale:1}}
+@keyframes prodlabel-sway1{0%{rotate:-26deg;translate:0 -30px;opacity:0}40%{opacity:1}65%{rotate:2deg;translate:0 0}82%{rotate:-8deg}100%{rotate:-6deg}}
+@keyframes prodlabel-sway2{0%{rotate:26deg;translate:0 -30px;opacity:0}40%{opacity:1}65%{rotate:-2deg;translate:0 0}82%{rotate:8deg}100%{rotate:6deg}}
+@keyframes prodlabel-swing{
+  0%{translate:0 -170px;rotate:0deg;animation-timing-function:cubic-bezier(.5,0,.6,1.3)}
+  30%{translate:0 0;rotate:0deg;animation-timing-function:ease-out}
+  45%{rotate:9deg;animation-timing-function:ease-in-out}
+  62%{rotate:-6deg;animation-timing-function:ease-in-out}
+  78%{rotate:3deg;animation-timing-function:ease-in-out}
+  90%{rotate:-1deg;animation-timing-function:ease-out}
+  100%{translate:0 0;rotate:0deg}}
+
+@media (prefers-reduced-motion:reduce){.n3.prodlabel *,.n3.prodlabel *::before,.n3.prodlabel *::after{animation:none !important;transition:none !important}}
