@@ -7,8 +7,8 @@
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../bolster.css?v=513c6d9e">
-<link rel="stylesheet" href="specimen.css?v=513c6d9e">
+<link rel="stylesheet" href="../bolster.css?v=54a8ac90">
+<link rel="stylesheet" href="specimen.css?v=54a8ac90">
 <style>.spec-panel .pop { box-shadow: var(--shadow-popover); } .cal-states { display: flex; flex-wrap: wrap; gap: var(--space-8); align-items: flex-start; }</style>
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
@@ -26,7 +26,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
   <section class="spec-section">
     <h2>The date range picker</h2>
     <p>Ten presets in a rail, short spans to long, All time first; they apply at once and close. Custom is everything else: From and To take typing, two months take clicks, and the span waits for Apply. A span that matches a preset is that preset. Days after today are off for a date that can only be in the past, and the foot says which date it filters by.</p>
-    <div class="spec-panel" data-surface="canvas" style="overflow-x:auto"><div class="pop" style="position:static;inset:auto;display:block" role="dialog" aria-label="Filter by created"><div class="date-range">
+    <div class="spec-panel" data-surface="canvas" style="overflow-x:auto"><div class="pop" style="position:static;translate:none;inset:auto;display:block;inline-size:max-content;max-inline-size:none" role="dialog" aria-label="Filter by created"><div class="date-range">
       <div class="date-range-presets" role="group" aria-label="Presets"><button type="button" class="menu-item" aria-pressed="false">All time</button><button type="button" class="menu-item" aria-pressed="false">Today</button><button type="button" class="menu-item" aria-pressed="false">Yesterday</button><button type="button" class="menu-item" aria-pressed="false">Last 7 days</button><button type="button" class="menu-item" aria-pressed="false">Last 30 days</button><button type="button" class="menu-item" aria-pressed="false">This month</button><button type="button" class="menu-item" aria-pressed="false">Last month</button><button type="button" class="menu-item" aria-pressed="false">This quarter</button><button type="button" class="menu-item" aria-pressed="false">Year to date</button><button type="button" class="menu-item" aria-pressed="false">Last 12 months</button><button type="button" class="menu-item" aria-pressed="true">Custom</button></div>
       <div class="date-range-main">
         <div class="date-range-fields"><div class="field" data-size="sm"><label class="field-label" for="s-from">From</label><input class="input" id="s-from" value="Sep 8, 2026" placeholder="Any" autocomplete="off"></div><span class="date-range-dash" aria-hidden="true">–</span><div class="field" data-size="sm"><label class="field-label" for="s-to">To</label><input class="input" id="s-to" value="Oct 3, 2026" placeholder="Today" autocomplete="off"></div></div>
@@ -83,7 +83,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
     </ul>
   </section>
 </main>
-<script src="../../shared/icons.js?v=513c6d9e"></script>
-<script src="specimen.js?v=513c6d9e"></script>
+<script src="../../shared/icons.js?v=54a8ac90"></script>
+<script src="specimen.js?v=54a8ac90"></script>
 </body>
 </html>

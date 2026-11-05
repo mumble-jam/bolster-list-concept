@@ -23,11 +23,12 @@
   :where(.card[data-elevation="flat"]) { border-color: transparent; }
   :where(.card-header) {
     display: flex;
+    flex-wrap: wrap; /* too narrow for the title beside its action, the action drops below it instead of over it */
     align-items: flex-start;
     gap: var(--space-3);
     padding: var(--space-4) var(--space-5) var(--space-3);
   }
-  :where(.card-header) :where(h2, h3) { flex: 1; min-inline-size: 0; font-size: var(--text-lg); line-height: var(--leading-lg); }
+  :where(.card-header) :where(h2, h3) { flex: 1 1 10rem; min-inline-size: 0; font-size: var(--text-lg); line-height: var(--leading-lg); }
   :where(.card-body) { padding: 0 var(--space-5) var(--space-5); }
   :where(.card-body[data-flush]) { padding: 0; }
 

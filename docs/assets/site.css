@@ -144,7 +144,7 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 .doc-content h4 { margin-block-start: var(--space-6); font-family: var(--font-sans); font-size: var(--text-base); font-weight: var(--font-weight-medium); }
 .doc-content p, .doc-content li { text-wrap: pretty; }
 .doc-content > p, .doc-content > ul:not([role="list"]), .doc-content > ol:not([role="list"]) { max-inline-size: var(--doc-prose); }
-.doc-content ul:not([role="list"]), .doc-content ol { padding-inline-start: 1.25rem; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
+.doc-content :is(ul, ol):not([role="list"]) { padding-inline-start: 1.25rem; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
 /* a code block or a long token in a list item scrolls or wraps inside it, never widening the page */
 .doc-content li { min-inline-size: 0; }
 .doc-content :is(p, li) > code { overflow-wrap: anywhere; }
@@ -174,7 +174,8 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 .doc-table { inline-size: 100%; border-collapse: collapse; font-size: var(--text-sm); line-height: var(--leading-sm); }
 .doc-table th, .doc-table td { padding: var(--space-3) var(--space-4); text-align: start; vertical-align: top; border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
 .doc-table thead th { position: sticky; inset-block-start: 0; background: var(--color-surface-default); font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-tertiary); white-space: nowrap; }
-.doc-table tbody th { font-weight: var(--font-weight-medium); white-space: nowrap; color: var(--color-content-secondary); }
+/* a row's label wraps like any cell: kept on one line, a long one pushed the last column out of sight */
+.doc-table tbody th { font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
 .doc-table tr:last-child > * { border-block-end: 0; }
 .doc-table code { font-size: 0.8125rem; }
 .doc-table td > ul { margin: 0; padding-inline-start: 1rem; }
@@ -220,7 +221,7 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 .doc-ex[data-ex-surface="canvas"] .doc-ex-stage { background-color: var(--color-surface-canvas); background-image: linear-gradient(var(--doc-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--doc-grid-line) 1px, transparent 1px); background-size: 16px 16px; background-position: -1px -1px; }
 .doc-ex[data-ex-surface="chrome"] .doc-ex-stage { background: var(--color-surface-chrome); color: var(--color-content-on-chrome); color-scheme: dark; }
 .doc-ex-stage[data-layout="stack"] { display: grid; justify-items: start; align-content: start; gap: var(--space-4); }
-.doc-ex-stage[data-layout="center"] { display: grid; place-items: center; }
+.doc-ex-stage[data-layout="center"] { display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; }
 .doc-ex-stage[data-layout="grid"] { display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr)); align-items: start; }
 .doc-ex-stage[data-layout="block"] { display: block; }
 .doc-ex-label { padding: var(--space-2) var(--space-4); border-block-start: var(--border-width-default) solid var(--color-line-subtle); font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-tertiary); }
@@ -260,6 +261,8 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 .doc-anatomy li::before { content: counter(part); }
 .doc-anatomy li::before, .doc-pin { display: inline-grid; place-items: center; inline-size: 1.5rem; block-size: 1.5rem; border-radius: var(--radius-full); background: var(--color-content-primary); color: var(--color-content-inverse); font-size: var(--text-xs); font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; }
 .doc-pin { position: absolute; z-index: 2; translate: -50% -50%; box-shadow: 0 0 0 2px var(--color-surface-canvas); }
+/* room around the drawing for its pins, which sit up to 1.75rem outside the part they name (at every width) */
+.doc-anatomy .doc-ex-stage { padding: var(--space-10); }
 .doc-anatomy b { font-weight: var(--font-weight-medium); }
 
 /* references, inventory cards */
@@ -276,7 +279,7 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 .doc-entity:hover { border-color: var(--color-line-strong); box-shadow: var(--shadow-raised); translate: 0 -1px; }
 .doc-entity > :not(.doc-card-preview) { padding-inline: var(--space-2); }
 .doc-entity:not(:has(.doc-card-preview)) { padding-block-start: var(--space-4); }
-.doc-card-preview { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-2); min-block-size: 6.5rem; padding: var(--space-4); border-radius: var(--radius-md); background-color: var(--color-surface-canvas); background-image: linear-gradient(var(--doc-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--doc-grid-line) 1px, transparent 1px); background-size: 16px 16px; pointer-events: none; overflow: hidden; margin-block-end: var(--space-1); }
+.doc-card-preview { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: var(--space-2); min-block-size: 6.5rem; padding: var(--space-4); border-radius: calc(var(--radius-xl) - var(--space-2) - var(--border-width-default)); /* shares the card's corner centre (D35) */ background-color: var(--color-surface-canvas); background-image: linear-gradient(var(--doc-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--doc-grid-line) 1px, transparent 1px); background-size: 16px 16px; pointer-events: none; overflow: hidden; margin-block-end: var(--space-1); }
 .doc-entity[data-doc-status="missing"] .doc-card-preview { background-image: none; border: 1.5px dashed var(--color-line-default); background-color: transparent; }
 .doc-entity-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); }
 .doc-entity-name { font-weight: var(--font-weight-medium); font-size: var(--text-base); }
@@ -321,7 +324,8 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 .doc-filter { display: flex; align-items: center; gap: var(--space-2); flex: 1 1 16rem; block-size: var(--control-height-sm); padding-inline: var(--space-3); border: var(--border-width-default) solid var(--color-line-input); border-radius: var(--radius-md); background: var(--color-surface-default); color: var(--color-content-tertiary); }
 .doc-filter:focus-within { border-color: var(--color-line-focus); box-shadow: inset 0 0 0 1px var(--color-line-focus); }
 .doc-filter input { flex: 1; min-inline-size: 0; border: 0; outline: 0; background: none; font-size: var(--text-sm); color: var(--color-content-primary); }
-.doc-log { display: grid; gap: var(--space-3); margin-block-start: var(--space-6) !important; }
+/* one column as wide as the page: an entry's wide table or code scrolls inside it, never widens the log */
+.doc-log { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-3); margin-block-start: var(--space-6) !important; }
 .doc-entry { padding: var(--space-5) var(--space-6); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-xl); background: var(--color-surface-default); scroll-margin-block-start: var(--space-20); }
 .doc-entry:target { border-color: var(--color-action-accent); box-shadow: 0 0 0 1px var(--color-action-accent); }
 .doc-entry-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2) var(--space-3); }
@@ -369,7 +373,10 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 }
 @media (min-width: 1024px) { .doc-scrim { display: none; } }
 @media (max-width: 639px) {
-  .doc-ex-stage { padding: var(--space-5); }
+  /* an example drawn wider than a phone (a desktop toolbar, the date range picker) scrolls sideways in its frame, not cut off */
+  .doc-ex-stage { padding: var(--space-5); overflow-x: auto; }
+  /* a token table scrolls sideways on a phone; its notes keep a readable measure instead of a word per line */
+  .doc-tokens td.doc-note:not(:empty) { min-inline-size: 14rem; }
   .doc-anatomy { grid-template-columns: minmax(0, 1fr); }
   .doc-ramp { grid-template-columns: minmax(0, 1fr); gap: var(--space-2); }
   .doc-ramp-steps { grid-auto-flow: row; grid-template-columns: repeat(5, minmax(0, 1fr)); }
@@ -455,7 +462,9 @@ body.doc { margin: 0; min-block-size: 100dvh; background: var(--color-surface-ca
 .home-layers li:not(:last-child)::after { content: ""; position: absolute; inset-block-start: 50%; inset-inline-end: -0.5rem; z-index: 1; inline-size: 1rem; block-size: 1rem; translate: 0 -50%; rotate: 45deg; border: solid var(--color-line-card); border-width: 1px 1px 0 0; background: var(--color-surface-default); }
 .home-layers b { font-family: var(--font-display); font-size: var(--text-lg); font-weight: var(--font-weight-medium); }
 .home-layers small { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-tertiary); }
-.home-layers code { font-size: var(--text-xxs) !important; }
+/* each layer's file sits at the card's foot, so the five line up whatever their text */
+.home-layers li { grid-template-rows: auto auto 1fr auto; }
+.home-layers code { align-self: end; font-size: var(--text-xxs) !important; }
 .home-layers span { font-size: var(--text-sm); line-height: var(--leading-sm); color: inherit; opacity: 0.85; }
 
 @media (max-width: 1100px) {
@@ -508,7 +517,7 @@ tr[data-state="hover"] { background: var(--color-surface-hover); }
 
 /* ============ the backlog ============ */
 .bl-tools { justify-content: space-between; }
-.bl-tools .segmented { max-inline-size: 100%; overflow-x: auto; }
+.bl-tools .segmented, .doc-log-tools .segmented { max-inline-size: 100%; overflow-x: auto; }
 .bl-check { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); }
 .bl-group { margin-block-start: var(--space-12) !important; }
 .bl-group > h2 { display: flex; align-items: center; gap: var(--space-3); margin-block-start: 0 !important; }

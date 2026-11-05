@@ -10,8 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="../../system/bolster.css?v=513c6d9e">
-<link rel="stylesheet" href="../assets/site.css?v=513c6d9e">
+<link rel="stylesheet" href="../../system/bolster.css?v=54a8ac90">
+<link rel="stylesheet" href="../assets/site.css?v=54a8ac90">
 <script>try{const t=localStorage.getItem("bds-theme");if(t&&t!=="auto")document.documentElement.dataset.theme=t}catch{}</script>
 <script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
 addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
@@ -152,7 +152,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
 <p>One window for every area that has pages of its own: Settings, a job, and the next ones (D144). The screen less 16px all round, with 16px corners; a dark header 48 tall, its buttons 8 in from the top and the end so Close's corner shares the window's (D35), its quiet buttons and its badges in the chrome's colours; the area's navigation down the left, the app's sidebar items 16rem wide; the page beside it, built as the app's page area builds it, and the window's one scroller. On phones it fills the screen. A job's window is what a row opens when the thing has a window of its own (<a href="../patterns/opening-records.html">Opening records</a>).</p>
 <figure class="doc-ex" data-ex-surface="canvas">
 <div class="doc-ex-stage" data-layout="block" data-surface="canvas">
-<div class="dialog" data-variant="workspace" open role="dialog" aria-labelledby="dlg-work-t" style="position:static;margin:0;max-inline-size:100%;inline-size:100%;block-size:20rem">
+<div class="dialog" data-variant="workspace" open role="dialog" aria-labelledby="dlg-work-t" style="position:static;margin:0;max-inline-size:none;inline-size:100%;min-inline-size:40rem;block-size:20rem">
   <header class="dialog-header"><span class="avatar" data-color="2" data-size="sm" aria-hidden="true">IF</span><h2 id='dlg-work-t'>Ingrid Ferreira · Roof and kitchen refresh</h2>
     <span class="badge" data-status="pending" data-mark="quarter">Pending</span>
     <button type="button" class="button" data-variant="brand" data-size="sm">Preview and send</button>
@@ -166,7 +166,7 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
   </div>
 </div>
 </div>
-<details class="doc-ex-code"><summary>Code</summary><div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>&lt;<span class="tk-tag">div</span> <span class="tk-attr">class</span>=<span class="tk-str">&quot;dialog&quot;</span> <span class="tk-attr">data-variant</span>=<span class="tk-str">&quot;workspace&quot;</span> open <span class="tk-attr">role</span>=<span class="tk-str">&quot;dialog&quot;</span> <span class="tk-attr">aria-labelledby</span>=<span class="tk-str">&quot;dlg-work-t&quot;</span> <span class="tk-attr">style</span>=<span class="tk-str">&quot;position:static;margin:0;max-inline-size:100%;inline-size:100%;block-size:20rem&quot;</span>&gt;
+<details class="doc-ex-code"><summary>Code</summary><div class="doc-code-wrap"><button type="button" class="doc-copy" data-copy>Copy</button><pre class="doc-code" tabindex="0"><code>&lt;<span class="tk-tag">div</span> <span class="tk-attr">class</span>=<span class="tk-str">&quot;dialog&quot;</span> <span class="tk-attr">data-variant</span>=<span class="tk-str">&quot;workspace&quot;</span> open <span class="tk-attr">role</span>=<span class="tk-str">&quot;dialog&quot;</span> <span class="tk-attr">aria-labelledby</span>=<span class="tk-str">&quot;dlg-work-t&quot;</span> <span class="tk-attr">style</span>=<span class="tk-str">&quot;position:static;margin:0;max-inline-size:none;inline-size:100%;min-inline-size:40rem;block-size:20rem&quot;</span>&gt;
   &lt;<span class="tk-tag">header</span> <span class="tk-attr">class</span>=<span class="tk-str">&quot;dialog-header&quot;</span>&gt;&lt;<span class="tk-tag">span</span> <span class="tk-attr">class</span>=<span class="tk-str">&quot;avatar&quot;</span> <span class="tk-attr">data-color</span>=<span class="tk-str">&quot;2&quot;</span> <span class="tk-attr">data-size</span>=<span class="tk-str">&quot;sm&quot;</span> <span class="tk-attr">aria-hidden</span>=<span class="tk-str">&quot;true&quot;</span>&gt;IF&lt;/<span class="tk-tag">span</span>&gt;&lt;<span class="tk-tag">h2</span> id='dlg-work-t'&gt;Ingrid Ferreira · Roof and kitchen refresh&lt;/<span class="tk-tag">h2</span>&gt;
     &lt;<span class="tk-tag">span</span> <span class="tk-attr">class</span>=<span class="tk-str">&quot;badge&quot;</span> <span class="tk-attr">data-status</span>=<span class="tk-str">&quot;pending&quot;</span> <span class="tk-attr">data-mark</span>=<span class="tk-str">&quot;quarter&quot;</span>&gt;Pending&lt;/<span class="tk-tag">span</span>&gt;
     &lt;<span class="tk-tag">button</span> <span class="tk-attr">type</span>=<span class="tk-str">&quot;button&quot;</span> <span class="tk-attr">class</span>=<span class="tk-str">&quot;button&quot;</span> <span class="tk-attr">data-variant</span>=<span class="tk-str">&quot;brand&quot;</span> <span class="tk-attr">data-size</span>=<span class="tk-str">&quot;sm&quot;</span>&gt;Preview and send&lt;/<span class="tk-tag">button</span>&gt;
@@ -271,9 +271,9 @@ addEventListener("hashchange", () => window.top === window && window.goatcounter
   <ul class="doc-search-results" id="doc-search-results" role="listbox" aria-label="Results"></ul>
 </dialog>
 <script>window.DOC_ROOT="../"</script>
-<script src="../../shared/icons.js?v=513c6d9e"></script>
-<script src="../../system/components/tooltip.js?v=513c6d9e"></script>
-<script src="../assets/search-index.js?v=513c6d9e"></script>
-<script src="../assets/site.js?v=513c6d9e"></script>
+<script src="../../shared/icons.js?v=54a8ac90"></script>
+<script src="../../system/components/tooltip.js?v=54a8ac90"></script>
+<script src="../assets/search-index.js?v=54a8ac90"></script>
+<script src="../assets/site.js?v=54a8ac90"></script>
 </body>
 </html>

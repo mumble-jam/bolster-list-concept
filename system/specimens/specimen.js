@@ -146,7 +146,7 @@ document.addEventListener("click", (e) => {
   t.className = "toast";
   t.dataset.tone = tone;
   t.setAttribute("role", tone === "danger" ? "alert" : "status");
-  t.innerHTML = `<span class="toast-message"></span><button class="toast-close" aria-label="Dismiss">×</button>`;
+  t.innerHTML = `<span class="toast-message"></span><button class="toast-close" aria-label="Dismiss" data-tip="Dismiss">×</button>`;
   t.querySelector(".toast-message").textContent = b.dataset.message;
   t.querySelector(".toast-close").onclick = () => t.remove();
   region.append(t);
