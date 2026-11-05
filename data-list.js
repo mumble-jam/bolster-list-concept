@@ -1200,8 +1200,8 @@
     // D69: a thing with its own full-screen window opens there, which the concept doesn't build; Quick look
     // (the row's ··· menu) still opens the record beside the list
     // A job's window is the estimate concept (round 2): in the repo, Open job goes there, every job showing its one sample
-    // estimate; it isn't published yet, so on Pages it still says so
-    if (fullWindow() && !quick && cfg.id === "jobs" && location.pathname.includes("/concepts/")) { location.href = "../estimate/index.html?from=jobs"; return; }
+    // estimate; on Pages it opens the published copy (publish-concept.mjs rewrites this line)
+    if (fullWindow() && !quick && cfg.id === "jobs") { location.href = "estimate/?from=jobs"; return; }
     if (fullWindow() && !quick) { toast(`${openLabel(id)}: its own full-screen window, not part of this concept. Quick look is in the row's ··· menu.`); return; }
     hostPop(); // out of the sheet before its contents are redrawn
     if (pop.matches(":popover-open")) pop.hidePopover();

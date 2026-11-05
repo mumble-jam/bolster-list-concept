@@ -386,7 +386,6 @@
   .cal-pick > svg { position: absolute; inset-inline-end: var(--space-2); color: var(--color-content-tertiary); pointer-events: none; }
   .cal-pick-time select { padding-inline-end: var(--space-2); font-variant-numeric: tabular-nums; }
   .cal-pick-time > svg { display: none; }
-  .cal-pick-empty select { color: var(--color-content-tertiary); }
   /* the date opens the browser's own picker, which sits on the button */
   .cal-pick-date .cal-date-input { position: absolute; inset: 0; opacity: 0; pointer-events: none; inline-size: 100%; }
   .cal-when-to, .cal-when-len { color: var(--color-content-tertiary); font-size: var(--text-sm); padding-inline: var(--space-0-5); }
@@ -411,15 +410,15 @@
   .cal-new-owner b { font-weight: var(--font-weight-medium); }
   .cal-new-owner span { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
   /* guests: chips on the line, the input after them, no box */
-  .cal-guests { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); flex: 1; min-block-size: 2rem; margin-inline-start: calc(-1 * var(--space-2)); padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); }
-  @media (hover: hover) { .cal-guests:hover { background: var(--color-surface-hover); } }
-  .cal-guests:focus-within { background: var(--color-surface-sunken); box-shadow: inset 0 calc(-1 * var(--border-width-strong)) 0 var(--color-action-accent); }
-  .cal-guest { display: inline-flex; align-items: center; gap: var(--space-1); block-size: 1.5rem; padding-inline: var(--space-2) 2px; border-radius: var(--radius-full); background: var(--color-surface-default); box-shadow: inset 0 0 0 var(--border-width-default) var(--color-line-default); font-size: var(--text-sm); }
-  .cal-guest button { display: inline-grid; place-items: center; inline-size: 1.25rem; block-size: 1.25rem; padding: 0; border: 0; border-radius: var(--radius-full); background: none; color: var(--color-content-secondary); cursor: pointer; }
-  @media (hover: hover) { .cal-guest button:hover { background: var(--color-surface-hover); color: var(--color-content-primary); } }
-  .cal-guest-input::-webkit-calendar-picker-indicator { display: none !important; }
-  .cal-guest-input { flex: 1 1 8rem; min-inline-size: 0; block-size: 1.5rem; padding: 0; border: 0; background: none; color: inherit; font: inherit; font-size: var(--text-sm); outline: none; }
-  .cal-guest-input::placeholder { color: var(--color-content-tertiary); }
+  /* the customer and the guests are the system's combobox (D138, I26), reading as text as the other rows do: no edge,
+     a soft fill on hover, the sunken fill and the accent underline while typing */
+  .cal-combo { --_px: var(--space-2); flex: 1; min-inline-size: 0; }
+  .cal-combo > .cal-txt-input { padding-inline-end: calc(var(--space-2) + 1.25rem); }
+  .cal-combo[data-multiple] { --_border: transparent; --_h: 2rem; border-radius: var(--radius-sm); background: none; }
+  @media (hover: hover) { .cal-combo[data-multiple]:hover:not(:focus-within) { --_border: transparent; background: var(--color-surface-hover); } }
+  .cal-combo[data-multiple]:focus-within { --_border: transparent; background: var(--color-surface-sunken); box-shadow: inset 0 calc(-1 * var(--border-width-strong)) 0 var(--color-action-accent); }
+  .cal-combo[data-multiple] > .input { font-size: var(--text-sm); }
+  .cal-combo[data-multiple] > .input::placeholder { color: var(--color-content-tertiary); }
   /* a sales appointment's times: the week's days, then the picked day's free half hours */
   .cal-row-times .cal-row-body { display: grid; gap: var(--space-2); padding-block-start: var(--space-1); }
   .cal-row-times .cal-row-body > :first-child { margin-inline-start: 0; }

@@ -266,7 +266,7 @@
      dialog.css's; this is only its page slot (D89), where a built page fills it as the app's page area does ---------- */
   .bs-settings-page[data-frame] { display: flex; overflow: hidden; }
   .bs-settings-frame { flex: 1; inline-size: 100%; block-size: 100%; border: 0; display: block; background: var(--color-surface-canvas); }
-  /* the loading screen (D90): its cover is here, so it's up before its drawings arrive (loaders.css, lazily); over
+  /* the loading screen (D90): its cover is here, so it's up before its drawings arrive (system/components/loaders.css, lazily); over
      everything, the floating menu button included */
   .bs-loader { position: fixed; inset: 0; z-index: calc(var(--z-modal) + 2); display: grid; place-items: center; background: var(--color-surface-canvas); transition: opacity var(--duration-medium) var(--ease-out); }
   .bs-loader[hidden] { display: none; }
@@ -275,7 +275,7 @@
   .bs-loader-line.bs-wrap { white-space: normal; }
   /* while a line types, its caret is what's working: the dots wait for it */
   .bs-typing + .dash-loader-dots { visibility: hidden; }
-  /* the line's ways in (loader.js, concept controls): a ticker's two lines in one slot, clipped above and below;
+  /* the line's ways in (system/components/loader.js, concept controls): a ticker's two lines in one slot, clipped above and below;
      the typed line's caret; the decoded line's unsettled letters, quieter; letter by letter */
   .bs-roll { display: inline-grid; overflow-y: clip; padding-block: 0.15em; margin-block: -0.15em; vertical-align: bottom; }
   .bs-roll > span { grid-area: 1 / 1; }
@@ -545,4 +545,12 @@
   .notes ol, .notes ul { display: grid; gap: var(--space-2); padding-inline-start: var(--space-5); margin: 0; }
   .notes li b { font-weight: var(--font-weight-medium); }
   @media (max-width: 767px) { body[data-selecting] .concept-controls { display: none; } }
+}
+
+/* a page with no section items (Getting started, the dashboard): no section sidebar, the page takes its column */
+@layer concept {
+  @media (min-width: 1024px) {
+    .app-shell[data-no-section] { grid-template-columns: var(--_rail-column) 0 minmax(0, 1fr); }
+    .app-shell[data-no-section] .sidebar { display: none; }
+  }
 }

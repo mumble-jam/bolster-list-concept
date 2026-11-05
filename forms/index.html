@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolster forms concept</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="../shared/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../shared/assets/favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../system/bolster.css?v=3291c5ca">
+<link rel="stylesheet" href="../shared/shell.css?v=3291c5ca">
+<link rel="stylesheet" href="forms.css?v=3291c5ca">
+<script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
+addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
+<script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<!-- the app's page (D146): the shell's menu and bars around it, the page header, the content, the canvas grid behind -->
+<div class="app-shell">
+  <main class="app-main">
+    <header class="page-header">
+      <div class="page-title"><h1 id="page-title">New job</h1><span id="page-badge"></span></div>
+    </header>
+    <div class="app-content fx-page">
+      <div class="fx-stage" id="stage" aria-live="polite"></div>
+    </div>
+  </main>
+</div>
+
+<dialog class="dialog" data-size="sm" id="new-customer" aria-labelledby="nc-t">
+  <form method="dialog" style="display:contents">
+    <header class="dialog-header"><h2 id="nc-t">New customer</h2></header>
+    <div class="dialog-body"><div class="form" data-density="compact">
+      <div class="field"><label class="field-label" for="nc-name">Name</label><input class="input" id="nc-name" name="name" required></div>
+      <div class="field"><label class="field-label" for="nc-phone">Mobile phone <span class="field-optional">(optional)</span></label><input class="input" id="nc-phone" name="phone" type="tel" data-format="phone" autocomplete="tel"></div>
+      <div class="field"><label class="field-label" for="nc-email">Email <span class="field-optional">(optional)</span></label><input class="input" id="nc-email" name="email" type="email" data-format="email" autocomplete="email"></div>
+    </div></div>
+    <footer class="dialog-footer"><button class="button" data-variant="ghost" value="cancel" formnovalidate>Cancel</button><button class="button" value="save">Save customer</button></footer>
+  </form>
+</dialog>
+
+<dialog class="dialog notes" id="notes" aria-labelledby="notes-title">
+  <header class="dialog-header"><h2 id="notes-title">About this concept</h2>
+    <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close data-tip="Close"><i data-icon="xmark" data-size="16"></i></button></header>
+  <div class="dialog-body">
+    <section>
+      <h3>What it is</h3>
+      <p class="text-secondary">The forms research's three directions (docs/forms-research.md, “Forms · research” in Figma), each built for real on two of Bolster's forms, so they can be compared by using them: a new job (Bolster's Assign job to customer, then the job's Settings: address, roles, details, payments) and a progress invoice for one job. Your ask, 29 Oct. Everything works; nothing talks to Bolster.</p>
+      <p class="text-secondary"><b>Picked: C</b> (your call, 29 Oct, D140), with A's rules for every field that remains. C now follows its draft rules (docs/forms-c-research.md, 06), for review here before any of them goes into the system: the record read with labels beside values, its head and next step, its source beside it linked both ways, what came from the source said once and only the exceptions marked, empty values saying what they're needed for, values that belong together edited as one, nothing red on arrival, a summary before each step with every suggestion settled on its own, a reason for a strong warning, the invoice kept as the document with the team's note on it, and nothing read lost on leaving.</p>
+    </section>
+    <section>
+      <h3>The three</h3>
+      <ol>
+        <li><b>A · A form done well.</b> A page of fields, everything asked at once, one Save (D134, the system today).</li>
+        <li><b>B · The record is the form.</b> A create asks only what the thing can't exist without; then the record is a page you read, each value changing where it is; its state decides how a change saves.</li>
+        <li><b>C · Forms that fill themselves.</b> B, starting from what you already have (a voicemail, an enquiry, the job's progress), every value marked with where it came from.</li>
+      </ol>
+    </section>
+    <section>
+      <h3>Built from the system</h3>
+      <p class="text-secondary">The app's page (D146): the shell's menu and bars, its page header (a screen's title and badge move up into it), its content, the canvas grid behind; which form and which direction are Concept controls, with what each direction means. form.js (checking, the summary, the leave dialog), field.js (formats), combobox.js, address-field.js, the dialog and the badges. New here, and drafts if a direction is picked: a value that changes in place, the marks for where a value came from, the invoice as a document with its states.</p>
+    </section>
+    <section>
+      <h3>Open questions</h3>
+      <ul>
+        <li>In B, does a value change on Enter alone, or does every one show Save (as here)?</li>
+        <li>In C, which sources first: calls, website enquiries, photos, supplier quotes?</li>
+        <li>Is a sent invoice changed and resent (as here), or frozen with “Reopen for changes”?</li>
+      </ul>
+    </section>
+  </div>
+</dialog>
+
+<!-- what you're looking at is the concept's choice, not the page's: which form, which direction, and what it means -->
+<details class="concept-controls" id="concept-controls" data-more-entry="Concept controls" data-more-icon="sliders">
+  <summary><span class="concept-tag">Concept</span> Controls</summary>
+  <div class="concept-body">
+    <div class="cc-field"><span class="cc-label" id="cc-subject-l">Form</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="cc-subject-l" data-size="sm">
+        <label class="segmented-option"><input type="radio" name="fx-subject" value="job" checked> New job</label>
+        <label class="segmented-option"><input type="radio" name="fx-subject" value="invoice"> Invoice</label>
+      </div></div>
+    <div class="cc-field"><span class="cc-label" id="cc-dir-l">Direction</span>
+      <div class="segmented" role="radiogroup" aria-labelledby="cc-dir-l" data-size="sm">
+        <label class="segmented-option"><input type="radio" name="fx-dir" value="a" checked> A</label>
+        <label class="segmented-option"><input type="radio" name="fx-dir" value="b"> B</label>
+        <label class="segmented-option"><input type="radio" name="fx-dir" value="c"> C</label>
+      </div></div>
+    <div class="fx-note" id="note" aria-label="What this direction means"></div>
+    <button class="button" data-variant="secondary" data-size="sm" data-open-dialog="notes">About this concept</button>
+    <div class="cluster" style="justify-content:space-between">
+      <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+    </div>
+  </div>
+</details>
+<div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
+
+<script src="../shared/icons.js?v=3291c5ca"></script>
+<script src="../shared/shell.js?v=3291c5ca"></script>
+<script src="../system/specimens/specimen.js?v=3291c5ca"></script>
+<script src="../system/components/field.js?v=3291c5ca"></script>
+<script src="../system/components/form.js?v=3291c5ca"></script>
+<script src="../system/components/combobox.js?v=3291c5ca"></script>
+<script src="../system/components/address-field.js?v=3291c5ca"></script>
+<script src="../system/specimens/samples.js?v=3291c5ca"></script>
+<script src="../system/components/loading.js?v=3291c5ca"></script>
+<script src="forms.js?v=3291c5ca"></script>
+<script src="c.js?v=3291c5ca"></script>
+</body>
+</html>

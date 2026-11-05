@@ -377,7 +377,7 @@
     pop.setAttribute("role", "dialog");
     pop.setAttribute("aria-label", label || kind);
     pop.innerHTML = fill();
-    BolsterShell.hydrateIcons(pop);
+    wire(pop);
     pop.showPopover();
     from?.setAttribute("aria-expanded", "true");
     place();
@@ -594,7 +594,9 @@
   const pick = (name, id, label, options, cls = "") => `<span class="cal-pick ${cls}"><label class="visually-hidden" for="${id}">${label}</label><select class="cal-txt" id="${id}" name="${name}">${options}</select>${ic("chevron-down", 12, { optical: true })}</span>`;
   const row = (icon, inner, cls = "") => `<div class="cal-row${cls ? ` ${cls}` : ""}"><span class="cal-row-icon" aria-hidden="true">${icon}</span><div class="cal-row-body">${inner}</div></div>`;
   const iconOf = (k) => ic(k, 16, { optical: true });
-  const customerPick = (id) => pick("client", id, "Customer", `<option value="">Choose customer</option>${CUSTOMERS.map((c) => opt(c.name, c.name, nv.client)).join("")}<option value="+new">Create new customer…</option>`, `cal-pick-lead${nv.client ? "" : " cal-pick-empty"}`);
+  // the customer: the system's combobox (D138, I26), typed to find one of many, "Add new customer" last; it reads as
+  // text here, as the dialog's other rows do
+  const customerPick = (id) => `<label class="visually-hidden" for="${id}">Customer</label><div class="combobox cal-combo"><input class="cal-txt cal-txt-input" id="${id}" name="client" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="${id}-list" autocomplete="off" placeholder="Choose customer" value="${esc(nv.client)}"><div class="combobox-list" id="${id}-list" role="listbox" popover="manual"></div></div>`;
   const withPick = (id) => pick("with", id, "Appointment with", [OWNERS.find((p) => p.me), ...OWNERS.filter((p) => !p.me)].map((p) => opt(p.id, p.me ? `${p.name} (you)` : p.name, nv.with)).join(""));
   const typePick = (id) => pick("apptType", id, "Appointment type", APPT_TYPES.map(([t, m]) => opt(t, `${t} · ${m} min`, nv.apptType)).join(""));
   const lenText = (d) => (d < 60 ? `${d} min` : `${+(d / 60).toFixed(2)} ${d === 60 ? "hr" : "hrs"}`);
@@ -632,6 +634,42 @@
   }
   // the whole dialog: Bolster's fields, the same rows
   const dlgNew = $("#new-event");
+  // the pickers' lists: customers (with their address), and for guests the team as well; an email address is added
+  // as a guest of its own
+  const CUST_OPTS = CUSTOMERS.map((c) => ({ id: `c:${c.name}`, label: c.name, detail: c.address || "" }));
+  const GUEST_OPTS = [...OWNERS.filter((p) => !p.me).map((p) => ({ id: `p:${p.id}`, label: p.name, detail: "Your team" })), ...CUST_OPTS];
+  const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+  const guestOf = (id) => GUEST_OPTS.find((o) => o.id === id)?.label ?? id.replace(/^e:/, "");
+  // what's painted gets its icons, and its pickers their behaviour
+  function wire(root) {
+    BolsterShell.hydrateIcons(root);
+    const c = root.querySelector('input[name="client"][role="combobox"]');
+    if (c) BolsterCombobox.attach(c, {
+      options: CUST_OPTS, noun: ["customer", "customers"], value: CUST_OPTS.find((o) => o.label === nv.client) || null,
+      add: async () => { toast("Concept only: Create new customer isn't wired up."); return null; },
+      // a customer brings their address and the draft's name: the form is drawn again, focus on what comes next
+      onPick: () => {
+        render();
+        if (root === pop) { pop.innerHTML = quickHtml(); wire(pop); popFor.from = draftEl(); beside(popFor.from); $("[name=from]", pop)?.focus(); }
+        else { dlgNew.innerHTML = fullHtml(); wire(dlgNew); $("[name=apptType]", dlgNew)?.focus(); }
+      },
+    });
+    const g = root.querySelector("#f-guest");
+    if (g) BolsterCombobox.attach(g, {
+      options: GUEST_OPTS, noun: ["guest", "guests"],
+      value: nv.guests.map((n) => GUEST_OPTS.find((o) => o.label === n) || { id: `e:${n}`, label: n }),
+      add: async (text) => {
+        if (EMAIL.test(text)) { showError(g.form, ""); return { id: `e:${text}`, label: text }; }
+        showError(g.form, "Select a customer or enter a valid email address.");
+        return null;
+      },
+    });
+    if (g) {
+      // with guests in, the box asks for another
+      const ph = () => { g.placeholder = root.querySelector('input[name="guests"]').value ? "Add another" : "Add customers or email addresses"; };
+      g.addEventListener("change", ph); ph();
+    }
+  }
   // a sales appointment's times: the week's days as a strip, the picked day's free half hours (busy ones too with
   // Book anyway, struck)
   function timesHtml() {
@@ -658,8 +696,7 @@
     const ev = nv.kind === "event", c = CUSTOMERS.find((x) => x.name === nv.client);
     if (!ev && c && !nv.address) nv.address = c.address;
     const me = OWNERS.find((p) => p.me);
-    const guests = `<div class="cal-guests">${nv.guests.map((g, i) => `<span class="cal-guest">${esc(g)}<button type="button" data-guest-remove="${i}" aria-label="${esc(`Remove ${g}`)}" data-tip="Remove">${ic("xmark", 12, { optical: true })}</button></span>`).join("")}<label class="visually-hidden" for="f-guest">Guests</label><input class="cal-guest-input" id="f-guest" list="f-guest-list" placeholder="${nv.guests.length ? "Add another" : "Add customers or email addresses"}" autocomplete="off" enterkeyhint="done"></div>
-      <datalist id="f-guest-list">${[...OWNERS.filter((p) => !p.me).map((p) => p.name), ...CUSTOMERS.map((x) => x.name)].map((n) => `<option value="${esc(n)}">`).join("")}</datalist>`;
+    const guests = `<label class="visually-hidden" for="f-guest">Guests</label><div class="combobox cal-combo" data-multiple><input class="input" id="f-guest" role="combobox" aria-expanded="false" aria-autocomplete="list" aria-controls="f-guest-list" autocomplete="off" placeholder="Add customers or email addresses"><input type="hidden" name="guests"><div class="combobox-list" id="f-guest-list" role="listbox" popover="manual"></div></div>`;
     return `<form class="cal-new-full" data-new="full" novalidate><header class="dialog-header"><h2 id="new-event-title">${editing ? "Edit" : "New"} ${ev ? "event" : "sales appointment"}</h2><button type="button" class="button" data-variant="ghost" data-icon-only data-close-new aria-label="Close" data-tip="Close">${ic("xmark", 16, { optical: true })}</button></header>
       <div class="dialog-body">${editing ? "" : row("", kindTabs(), "cal-row-tabs")}
       ${ev ? `${row("", titleInput(), "cal-row-title")}
@@ -684,7 +721,7 @@
     saved = false;
     syncDraft(); render();
     dlgNew.innerHTML = fullHtml();
-    BolsterShell.hydrateIcons(dlgNew);
+    wire(dlgNew);
     dlgNew.showModal();
     $(nv.kind === "event" ? "[name=title]" : "[name=client]", dlgNew)?.focus();
   }
@@ -699,7 +736,7 @@
       location: sales ? "" : it.place || "", notes: it.notes || "", guests: [...(it.guests || [])], client: it.client || "", apptType: APPT_TYPES.some(([t]) => t === type) ? type : APPT_TYPES[0][0],
       with: it.who[0] || "hm", address: sales ? it.place || "" : "", anyway: true };
     dlgNew.innerHTML = fullHtml();
-    BolsterShell.hydrateIcons(dlgNew);
+    wire(dlgNew);
     dlgNew.showModal();
     $(sales ? "[name=client]" : "[name=title]", dlgNew)?.focus();
   }
@@ -730,10 +767,8 @@
     } else if (v.slot) nv.from = +v.slot;
     nv.allDay = !!v.allDay && nv.kind === "event";
     for (const k of ["location", "notes", "apptType", "with", "address"]) if (k in v) nv[k] = v[k];
-    if ("client" in v) {
-      if (v.client === "+new") { toast("Concept only: Create new customer isn't wired up."); }
-      else { if (v.client !== nv.client) nv.address = CUSTOMERS.find((x) => x.name === v.client)?.address || ""; nv.client = v.client; }
-    }
+    if ("client" in v) { if (v.client !== nv.client) nv.address = CUSTOMERS.find((x) => x.name === v.client)?.address || ""; nv.client = v.client; }
+    if ("guests" in v) nv.guests = v.guests ? v.guests.split(",").map(guestOf) : [];
     nv.anyway = !!v.anyway;
     syncDraft();
   }
@@ -821,22 +856,8 @@
     // swap the button under the pointer
     if (e.target.matches("input[type=text], input:not([type]), input[type=search], textarea")) return;
     render();
-    if (form.dataset.new === "quick") { pop.innerHTML = quickHtml(); BolsterShell.hydrateIcons(pop); popFor.from = draftEl(); beside(popFor.from); $(`[name="${e.target.name}"]`, pop)?.focus(); }
-    else { const keep = e.target.name; dlgNew.innerHTML = fullHtml(); BolsterShell.hydrateIcons(dlgNew); $(`[name="${keep}"]${e.target.type === "radio" ? ":checked" : ""}`, dlgNew)?.focus(); }
-  });
-  document.addEventListener("keydown", (e) => {
-    const inp = e.target.closest?.(".cal-guest-input");
-    if (!inp) return;
-    const v = inp.value.trim();
-    if (e.key === "Enter") {
-      e.preventDefault();
-      if (!v) return;
-      const known = [...OWNERS.map((p) => p.name), ...CUSTOMERS.map((x) => x.name)].find((n) => n.toLowerCase() === v.toLowerCase());
-      if (!known && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)) return showError(dlgNew.querySelector("form"), "Select a customer or enter a valid email address.");
-      read(dlgNew.querySelector("form")); nv.guests.push(known || v);
-    } else if (e.key === "Backspace" && !v && nv.guests.length) { read(dlgNew.querySelector("form")); nv.guests.pop(); }
-    else return;
-    dlgNew.innerHTML = fullHtml(); BolsterShell.hydrateIcons(dlgNew); $(".cal-guest-input", dlgNew).focus();
+    if (form.dataset.new === "quick") { pop.innerHTML = quickHtml(); wire(pop); popFor.from = draftEl(); beside(popFor.from); $(`[name="${e.target.name}"]`, pop)?.focus(); }
+    else { const keep = e.target.name; dlgNew.innerHTML = fullHtml(); wire(dlgNew); $(`[name="${keep}"]${e.target.type === "radio" ? ":checked" : ""}`, dlgNew)?.focus(); }
   });
   document.addEventListener("submit", (e) => {
     const form = e.target.closest("[data-new]");
@@ -855,15 +876,13 @@
       if (sd) nv.date = sd.dataset.slotDay;
       else { const d = add(nv.date, 7 * +sw.dataset.slotWeek); nv.date = d < T ? T : d; }
       syncDraft(); render();
-      dlgNew.innerHTML = fullHtml(); BolsterShell.hydrateIcons(dlgNew);
+      dlgNew.innerHTML = fullHtml(); wire(dlgNew);
       (sd ? $(`[data-slot-day="${nv.date}"]`, dlgNew) : $(`[data-slot-week="${sw.dataset.slotWeek}"]`, dlgNew))?.focus();
       return;
     }
     const ed = e.target.closest("[data-edit]"), del = e.target.closest("[data-delete]");
     if (ed) return openEdit(byId(ed.dataset.edit));
     if (del) return removeItem(byId(del.dataset.delete));
-    const rm = e.target.closest("[data-guest-remove]");
-    if (rm) { read(dlgNew.querySelector("form")); nv.guests.splice(+rm.dataset.guestRemove, 1); dlgNew.innerHTML = fullHtml(); BolsterShell.hydrateIcons(dlgNew); $(".cal-guest-input", dlgNew).focus(); }
   });
 
   // ---------- events ----------

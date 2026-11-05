@@ -1,0 +1,300 @@
+/* Forms, three ways: one page that shows a new job and an invoice in each forms direction (A, B, C), working.
+   Semantic tokens only, so a part can move into system/ unchanged. */
+
+/* ---------- the page: the app's (D146), the shell around it; the screen in its content ---------- */
+.fx-stage { min-inline-size: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+/* what a direction means, in Concept controls beside the switches, not on the page */
+.fx-note { display: grid; gap: var(--space-3); font-size: var(--text-sm); line-height: var(--leading-sm); }
+.fx-note h2 { margin: 0; font-size: var(--text-base); line-height: var(--leading-base); }
+.fx-note h3 { margin: 0 0 var(--space-1); font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-section); font-weight: var(--font-weight-medium); }
+.fx-note ul { margin: 0; padding-inline-start: 1.1rem; display: grid; gap: var(--space-1); }
+.fx-note p { margin: 0; color: var(--color-content-secondary); }
+
+/* a screen: a page of the app, drawn on the canvas */
+.fx-screen { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-5); padding: var(--space-6); border-radius: var(--radius-xl); border: var(--border-width-default) solid var(--color-line-card); background: var(--color-surface-default); min-inline-size: 0; }
+@media (max-width: 639px) { .fx-screen { padding: var(--space-4); } }
+.fx-head { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+/* a screen's title and badge are the page header's (forms.js lifts them); its line stays here, as the lede */
+.fx-head > :is(h2, .badge) { display: none; }
+.fx-head .fx-sub { flex-basis: 100%; margin: 0; color: var(--color-content-secondary); font-size: var(--text-sm); }
+.fx-steps { display: flex; gap: var(--space-2); flex-wrap: wrap; font-size: var(--text-xs); color: var(--color-content-tertiary); }
+.fx-steps b { color: var(--color-content-primary); font-weight: var(--font-weight-medium); }
+.fx-done { display: grid; gap: var(--space-2); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--color-feedback-success-surface); color: var(--color-feedback-success-content); font-size: var(--text-sm); }
+.fx-done p { margin: 0; }
+.fx-hint { margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-tertiary); }
+
+/* a dialog drawn in place, over a dimmed page (a create in B) */
+.fx-scrim { display: grid; place-items: center; min-block-size: 26rem; padding: var(--space-6); border-radius: var(--radius-xl); background: var(--color-surface-scrim); }
+.fx-scrim .dialog { position: static; margin: 0; inline-size: 100%; max-inline-size: 28rem; box-shadow: var(--shadow-raised); }
+
+/* ---------- B: the record, read like a page; a value turns into its field where it is ---------- */
+.rec { display: grid; gap: var(--space-6); }
+.rec-section { display: grid; gap: var(--space-1); }
+.rec-section > h3 { margin: 0 0 var(--space-1); font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-section); }
+.rec-row { display: grid; grid-template-columns: 11rem minmax(0, 1fr); align-items: start; gap: var(--space-1) var(--space-4); min-block-size: var(--control-height-md); padding-block: var(--space-1); border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
+@media (max-width: 639px) { .rec-row { grid-template-columns: minmax(0, 1fr); } }
+.rec-label { padding-block-start: var(--space-2); font-size: var(--text-sm); color: var(--color-content-secondary); }
+.rec-value {
+  justify-self: start; display: inline-flex; align-items: center; gap: var(--space-2); max-inline-size: 100%;
+  min-block-size: var(--control-height-sm); margin-block-start: calc((var(--control-height-md) - var(--control-height-sm)) / 2 - var(--space-1));
+  padding: 0 var(--space-2); margin-inline-start: calc(var(--space-2) * -1);
+  border: 0; border-radius: var(--radius-sm); background: none; color: var(--color-content-primary);
+  font: inherit; font-size: var(--text-sm); text-align: start; cursor: pointer;
+}
+.rec-value > svg { inline-size: 0.875rem; block-size: 0.875rem; color: var(--color-content-tertiary); opacity: 0; flex: none; }
+@media (hover: hover) { .rec-value:hover { background: var(--color-surface-hover); } .rec-value:hover > svg { opacity: 1; } }
+.rec-value:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 0; }
+.rec-value:focus-visible > svg { opacity: 1; }
+.rec-value[data-empty] { color: var(--color-content-primary); }
+.rec-value[data-empty] > svg { opacity: 1; color: var(--color-content-link); }
+.rec-value[disabled] { cursor: default; }
+.rec-value[disabled]:hover { background: none; }
+.rec-why { font-size: var(--text-xs); color: var(--color-content-tertiary); }
+.rec-edit { display: grid; gap: var(--space-2); padding-block: var(--space-1); }
+.rec-edit-actions { display: flex; gap: var(--space-2); align-items: center; }
+.rec-saved { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-xs); color: var(--color-feedback-success-content); }
+.rec-saved > svg { inline-size: 0.75rem; block-size: 0.75rem; }
+.rec-changed { font-size: var(--text-xs); color: var(--color-status-pending-content); background: var(--color-status-pending-surface); border-radius: var(--radius-sm); padding: 0 var(--space-1); }
+.rec-was { font-size: var(--text-xs); color: var(--color-content-tertiary); text-decoration: line-through; }
+
+/* what the next steps will need (asking less) */
+.fx-needs { display: grid; gap: var(--space-1); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--color-surface-tint); font-size: var(--text-sm); }
+.fx-needs h3 { margin: 0; font-size: var(--text-xs); font-weight: var(--font-weight-medium); color: var(--color-content-section); }
+.fx-needs ul { margin: 0; padding-inline-start: 1.1rem; display: grid; gap: var(--space-0-5); color: var(--color-content-secondary); }
+
+/* ---------- C: where a value came from ---------- */
+.src { display: inline-flex; align-items: center; gap: var(--space-1); padding: 0 var(--space-1); border: 0; border-radius: var(--radius-sm); font: inherit; font-size: var(--text-xs); line-height: 1.25rem; white-space: nowrap; cursor: default; }
+.src > svg { inline-size: 0.75rem; block-size: 0.75rem; }
+.src[data-kind="source"] { background: var(--color-feedback-info-surface); color: var(--color-feedback-info-content); cursor: pointer; }
+.src[data-kind="suggested"] { background: var(--color-status-pending-surface); color: var(--color-status-pending-content); }
+.src[data-kind="default"] { background: var(--color-feedback-neutral-surface); color: var(--color-feedback-neutral-content); }
+.src[data-kind="typed"] { background: none; color: var(--color-content-tertiary); padding-inline: 0; }
+button.src:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
+.rec-marks { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
+.fx-legend { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); font-size: var(--text-xs); color: var(--color-content-secondary); }
+.fx-legend span { display: inline-flex; gap: var(--space-1); align-items: center; }
+
+/* the sources: pick one to start from */
+.fx-sources { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); gap: var(--space-3); }
+.fx-source { display: grid; gap: var(--space-1); align-content: start; padding: var(--space-4); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-lg); background: var(--color-surface-default); color: inherit; font: inherit; text-align: start; cursor: pointer; }
+.fx-source b { display: flex; gap: var(--space-2); align-items: center; font-size: var(--text-sm); font-weight: var(--font-weight-medium); }
+.fx-source span { font-size: var(--text-xs); color: var(--color-content-secondary); }
+@media (hover: hover) { .fx-source:hover { background: var(--color-surface-hover); } }
+.fx-source:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+.fx-reading { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-6); color: var(--color-content-secondary); font-size: var(--text-sm); }
+
+/* the call, as Bolster heard it: the parts it used are marked, and a value's mark points at its part */
+.fx-transcript { display: grid; gap: var(--space-2); padding: var(--space-4); border-radius: var(--radius-lg); background: var(--color-surface-tint); font-size: var(--text-sm); line-height: var(--leading-base); }
+.fx-transcript h3 { margin: 0; font-size: var(--text-xs); font-weight: var(--font-weight-medium); color: var(--color-content-section); }
+.fx-transcript p { margin: 0; }
+.fx-transcript mark { background: var(--color-feedback-info-surface); color: inherit; border-radius: 2px; padding-inline: 1px; transition: box-shadow var(--duration-fast) var(--ease-standard); }
+.fx-transcript mark[data-on] { box-shadow: 0 0 0 2px var(--color-focus-ring); }
+.fx-split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 18rem); gap: var(--space-6); align-items: start; }
+@media (max-width: 1279px) { .fx-split { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- the invoice: a document, as the client sees it ---------- */
+.inv { display: grid; gap: var(--space-5); padding: var(--space-8); border: var(--border-width-default) solid var(--color-line-card); border-radius: var(--radius-lg); background: var(--color-surface-raised); }
+@media (max-width: 639px) { .inv { padding: var(--space-4); } }
+.inv-top { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--space-4); }
+.inv-top h3 { margin: 0; font-size: var(--text-xl); line-height: var(--leading-lg); }
+.inv-meta { display: grid; grid-template-columns: auto auto; gap: 0 var(--space-4); align-content: start; font-size: var(--text-sm); }
+.inv-meta dt { color: var(--color-content-secondary); padding-block: var(--space-1); }
+.inv-meta dd { margin: 0; }
+.inv-meta dd .rec-value { margin-block-start: 0; }
+.inv-to { font-size: var(--text-sm); line-height: var(--leading-sm); }
+.inv-to b { font-weight: var(--font-weight-medium); }
+.inv-lines { inline-size: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+.inv-lines th { padding: var(--space-2); border-block-end: var(--border-width-default) solid var(--color-line-default); color: var(--color-content-secondary); font-weight: var(--font-weight-medium); text-align: start; }
+.inv-lines td { padding: var(--space-1) var(--space-2); border-block-end: var(--border-width-default) solid var(--color-line-subtle); vertical-align: top; }
+.inv-lines .num { text-align: end; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.inv-lines td .rec-value { margin: 0; }
+.inv-lines td.num .rec-value { margin-inline-start: auto; margin-inline-end: calc(var(--space-2) * -1); }
+.inv-line-detail { display: block; font-size: var(--text-xs); color: var(--color-content-tertiary); }
+.inv-totals { display: grid; grid-template-columns: auto auto; justify-content: end; gap: var(--space-1) var(--space-8); font-size: var(--text-sm); font-variant-numeric: tabular-nums; }
+.inv-totals dt { color: var(--color-content-secondary); }
+.inv-totals dd { margin: 0; text-align: end; }
+.inv-totals .inv-due { font-size: var(--text-lg); font-weight: var(--font-weight-medium); color: var(--color-content-primary); }
+.inv-add { justify-self: start; }
+.inv-state { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); font-size: var(--text-sm); }
+.inv-state[data-tone="draft"] { background: var(--color-surface-tint); }
+.inv-state[data-tone="sent"] { background: var(--color-status-pending-surface); color: var(--color-status-pending-content); }
+.inv-state[data-tone="paid"] { background: var(--color-feedback-success-surface); color: var(--color-feedback-success-content); }
+.inv-state p { margin: 0; flex: 1 1 16rem; }
+.inv-left { display: grid; gap: var(--space-2); padding: var(--space-4); border-radius: var(--radius-lg); border: var(--border-width-default) dashed var(--color-line-strong); font-size: var(--text-sm); }
+.inv-left h3 { margin: 0; font-size: var(--text-xs); font-weight: var(--font-weight-medium); color: var(--color-content-section); }
+.inv-left-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2); }
+.inv-left-row span { color: var(--color-content-secondary); }
+
+/* A's line items: a table of fields */
+.lines-form { inline-size: 100%; border-collapse: collapse; }
+.lines-form th { padding: 0 var(--space-1) var(--space-1); font-size: var(--text-sm); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); text-align: start; }
+.lines-form td { padding: var(--space-1); vertical-align: top; }
+.lines-form .num { text-align: end; }
+.lines-form td.amt { padding-block-start: calc(var(--space-1) + var(--space-2)); font-size: var(--text-sm); font-variant-numeric: tabular-nums; text-align: end; white-space: nowrap; }
+.lines-wrap { min-inline-size: 0; }
+/* phones: each line a small group of its fields, labelled */
+@media (max-width: 639px) {
+  .lines-form, .lines-form tbody, .lines-form td { display: block; }
+  .lines-form thead { display: none; }
+  .lines-form tr { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-2); padding-block: var(--space-3); border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
+  .lines-form td { padding: 0; }
+  .lines-form td:first-child { grid-column: 1 / -1; }
+  .lines-form td[data-label]::before { content: attr(data-label); display: block; margin-block-end: var(--space-1); font-size: var(--text-sm); color: var(--color-content-secondary); }
+  .lines-form td.amt { padding-block-start: 0; text-align: start; }
+}
+
+/* ---------- the shared bar of changes on a sent invoice (B and C) ---------- */
+.fx-changes { position: sticky; inset-block-end: var(--space-4); z-index: var(--z-sticky); display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--color-surface-inverse); color: var(--color-content-inverse); box-shadow: var(--shadow-raised); font-size: var(--text-sm); }
+.fx-changes p { margin: 0; flex: 1 1 12rem; }
+/* on the raised invoice the quietest text is the secondary one (tertiary falls short in dark there) */
+.inv .fx-hint, .inv .inv-line-detail { color: var(--color-content-secondary); }
+
+/* ================= direction C with its rules (c.js; the C-rules, docs/forms-c-research.md, 06) ================= */
+/* the record's head (C-head): its name and status, where it came from, its key facts, the next step */
+.crec-screen { gap: var(--space-6); }
+.crec-head { display: grid; gap: var(--space-3); padding-block-end: var(--space-5); border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
+.crec-title { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.crec-title h2 { margin: 0; font-size: var(--text-xl); line-height: var(--leading-lg); }
+.crec-title h2:focus { outline: none; }
+.crec-sub { display: flex; align-items: center; gap: var(--space-2); margin: 0; font-size: var(--text-sm); color: var(--color-content-secondary); }
+.crec-sub > svg { inline-size: 0.875rem; block-size: 0.875rem; flex: none; }
+.crec-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr)); gap: var(--space-3) var(--space-4); margin: 0; }
+.crec-facts > div { display: grid; gap: var(--space-0-5); min-inline-size: 0; }
+.crec-facts dt { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+.crec-facts dd { margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); overflow-wrap: anywhere; }
+.crec-big { font-size: var(--text-lg); line-height: var(--leading-lg); font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; }
+.crec-next { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.crec-asclient { margin-inline-start: auto; font-size: var(--text-sm); }
+
+/* the page (C-page): the record at the reading width, its source in a rail beside; under 1280 the rail comes first,
+   folded; the summary sits under the head, where the step's button is */
+.crec-page { display: grid; grid-template-columns: minmax(0, var(--content-max-width-reading)) minmax(18rem, 24rem); gap: var(--space-8); align-items: start; justify-content: space-between; }
+.crec-main { display: grid; gap: var(--space-6); min-inline-size: 0; }
+.crec-rail { position: sticky; inset-block-start: calc(var(--space-16) + var(--space-2)); display: grid; gap: var(--space-2); }
+.crec-rail > summary { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-xs); font-weight: var(--font-weight-medium); color: var(--color-content-section); cursor: pointer; list-style: none; }
+.crec-rail > summary::-webkit-details-marker { display: none; }
+.crec-rail > summary > svg { inline-size: 0.875rem; block-size: 0.875rem; }
+@media (min-width: 1280px) { .crec-rail > summary { pointer-events: none; } }
+@media (max-width: 1279px) {
+  .crec-page { grid-template-columns: minmax(0, 1fr); }
+  .crec-rail { position: static; order: -1; padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); background: var(--color-surface-tint); }
+  .crec-rail > .fx-transcript { padding: 0; background: none; }
+  .crec-rail > summary::after { content: "Show"; margin-inline-start: auto; color: var(--color-content-link); font-weight: var(--font-weight-regular); }
+  .crec-rail[open] > summary::after { content: "Hide"; }
+}
+
+/* a record you read (C-read) is the system's record (record.css, D154): its rows, labels, values, marks, chips and the
+   check before a step. Here only the page's own: a section's spacing in the editor, the cell that turns into a value's
+   editor, the warning under a value */
+.crec-section { display: grid; gap: 0; padding-block: var(--space-5); }
+.crec-section + .crec-section { border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
+.crec-cell { display: grid; gap: var(--space-0-5); min-inline-size: 0; }
+.detail-row[data-ring], .inv-line[data-ring] > td, .civ-line[data-ring] { background: var(--color-feedback-info-surface); }
+.crec-more { justify-self: start; margin-block-start: var(--space-2); font-size: var(--text-sm); }
+.crec-warn { display: flex; align-items: flex-start; gap: var(--space-2); margin: 0 0 var(--space-1); font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-primary); }
+.crec-warn > svg { inline-size: 0.875rem; block-size: 0.875rem; margin-block-start: 0.2em; flex: none; color: var(--color-feedback-warning-accent); }
+.crec-warn[data-tone="info"] > svg { color: var(--color-content-link); }
+/* a mark that only points at its words (the record's own source, said once in its head: C-scope) */
+.src[data-compact] { inline-size: var(--space-5); block-size: var(--space-5); justify-content: center; padding: 0; }
+.crail-item[data-on], .crec-rail mark[data-on] { box-shadow: 0 0 0 2px var(--color-focus-ring); border-radius: var(--radius-xs); }
+.crec-rail mark { cursor: pointer; }
+.crec-rail mark:focus-visible, .crail-item:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
+.crail-list { margin: 0 0 var(--space-3); padding: 0; list-style: none; display: grid; gap: var(--space-1); }
+.crail-item { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 var(--space-3); padding: var(--space-1) var(--space-1); }
+.crail-item > span:last-child { color: var(--color-content-secondary); font-size: var(--text-xs); }
+
+/* the summary before a step (C-summary): what to fix, then what to check, each settled on its own */
+
+/* the invoice in C (C-document): the amount due at the top, the team's own note on the page, tinted and said */
+.inv-cell { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-2); }
+.inv-meta .crec-big { padding-block: var(--space-1); }
+.inv-line[data-editing] .inv-cell { display: block; }
+.inv-foot { display: grid; gap: var(--space-1); }
+.inv-internal { display: grid; gap: var(--space-1); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--color-status-pending-surface); }
+.inv-internal-tag { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--text-xs); color: var(--color-status-pending-content); font-weight: var(--font-weight-medium); }
+.inv-internal-tag > svg { inline-size: 0.75rem; block-size: 0.75rem; }
+.inv-activity ol { margin: 0; padding: 0; list-style: none; display: grid; gap: var(--space-1); }
+.inv-activity li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 var(--space-3); padding-block: var(--space-1); border-block-end: var(--border-width-default) solid var(--color-line-subtle); font-size: var(--text-sm); }
+/* see it as the client does: no marks, no pencils, nothing that's only the team's */
+.as-client .inv .rec-value > svg, .as-client .inv .rec-value[data-empty] { display: none; }
+.as-client .inv .rec-value { pointer-events: none; }
+/* on the raised invoice and the tinted source, the quietest words are the secondary ones (tertiary falls short in dark) */
+.inv .src[data-kind="typed"], .fx-transcript .fx-hint { color: var(--color-content-secondary); }
+
+/* ---------- C · the invoice in one editor (your call, 4 Nov): the details beside the invoice as Vera gets it ----------
+   One card, two halves sharing its top edge: on the left what you check and change, read as a record; on the right,
+   on the page's tint, the invoice and nothing that isn't Vera's, held in view as the details scroll. Narrow (the card
+   under 56rem), the halves take turns: Details and Preview */
+.civ { container-type: inline-size; gap: 0; padding: 0; }
+.civ-switch { display: none; }
+.civ-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 34rem); }
+.civ-details { display: grid; align-content: start; min-inline-size: 0; padding: var(--space-6) var(--space-6) var(--space-2); }
+.civ-preview { min-inline-size: 0; padding: var(--space-6); border-inline-start: var(--border-width-default) solid var(--color-line-subtle); border-start-end-radius: calc(var(--radius-xl) - var(--border-width-default)); border-end-end-radius: calc(var(--radius-xl) - var(--border-width-default)); background: var(--color-surface-canvas); }
+.civ-preview-sticky { position: sticky; inset-block-start: var(--space-6); display: grid; gap: var(--space-3); }
+.civ-preview-label { display: flex; align-items: center; gap: var(--space-2); margin: 0; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+.civ-preview-label > svg { flex: none; inline-size: auto; block-size: 0.875rem; }
+@container (max-width: 56rem) {
+  .civ-switch { display: inline-flex; justify-self: start; margin: var(--space-4) var(--space-6) 0; }
+  .civ-body { grid-template-columns: minmax(0, 1fr); }
+  .civ[data-pane="details"] .civ-preview, .civ[data-pane="preview"] .civ-details { display: none; }
+  .civ-preview { margin-block-start: var(--space-4); border-inline-start: 0; border-block-start: var(--border-width-default) solid var(--color-line-subtle); border-start-end-radius: 0; border-end-start-radius: calc(var(--radius-xl) - var(--border-width-default)); }
+  .civ-details { padding-block-start: var(--space-4); }
+}
+@media (max-width: 639px) {
+  .civ-switch { margin-inline: var(--space-4); }
+  .civ-details { padding-inline: var(--space-4); }
+  .civ-preview { padding: var(--space-4); }
+}
+
+/* the head: what's due, large, with its due date and who; the next step at its end; where it stands under it */
+.civ-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: var(--space-3) var(--space-4); padding-block: var(--space-4) var(--space-5); border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
+.civ-due { display: grid; gap: var(--space-0-5); min-inline-size: 0; }
+.civ-due-label { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+.civ-due-figure { font-family: var(--font-display); font-size: var(--text-3xl); line-height: 1.2; font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; }
+.civ-due-sub { font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
+.civ-state { display: flex; align-items: flex-start; gap: var(--space-2); margin: var(--space-4) 0 0; padding: var(--space-3); border-radius: var(--radius-md); font-size: var(--text-sm); line-height: var(--leading-sm); }
+.civ-state > svg { flex: none; margin-block-start: 3px; }
+.civ-state[data-tone="sent"] { background: var(--color-status-pending-surface); color: var(--color-status-pending-content); }
+.civ-state[data-tone="paid"] { background: var(--color-feedback-success-surface); color: var(--color-feedback-success-content); }
+.civ-details > .detail-check, .civ-details > .fx-done { margin-block-start: var(--space-4); }
+.civ-details > .fx-head { padding-block-end: var(--space-1); }
+
+/* the lines: the description, its amount at the row's end (every amount and the total on one right edge, the pencil
+   before the figure), the source on the line under it */
+.civ-line { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-3); align-items: baseline; padding-block: var(--space-0-5); }
+.civ-line > :is(.civ-line-marks, .civ-line-warn) { grid-column: 1; }
+.civ-line[data-editing] > .civ-cell { grid-column: 1 / -1; }
+.civ-cell { min-inline-size: 0; }
+.civ-amt { justify-self: end; font-variant-numeric: tabular-nums; }
+/* an amount's pencil before it, so every amount ends on the total's edge */
+.civ-amt .detail-value { justify-items: end; margin-inline: 0 calc(var(--space-1) * -1); padding-inline: var(--space-6) var(--space-1); }
+.civ-amt .detail-pencil { inset-inline: var(--space-1) auto; }
+.civ-total { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); margin-block-start: var(--space-2); padding-block-start: var(--space-3); border-block-start: var(--border-width-default) solid var(--color-line-subtle); font-size: var(--text-sm); font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; }
+.civ-none { margin: 0; font-size: var(--text-sm); color: var(--color-content-secondary); }
+/* what Bolster left out, each with why; Add anyway in one place on every row that has it */
+.civ-left { display: grid; margin-block-start: var(--space-5); }
+.civ-left h4, .civ-from-body h4 { margin: 0 0 var(--space-1); font-size: var(--text-xs); line-height: var(--leading-xs); font-weight: var(--font-weight-medium); color: var(--color-content-secondary); }
+.civ-left-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: var(--space-3); align-items: center; padding-block: var(--space-1); }
+.civ-left-name { font-size: var(--text-sm); line-height: var(--leading-sm); }
+.civ-left-why { grid-column: 1; font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+.civ-left-row > .button { grid-column: 2; grid-row: 1 / span 2; }
+/* the evidence, a step away: the schedule and the change orders the lines came from */
+.civ-from { margin-block-start: var(--space-4); }
+.civ-from > summary { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: var(--color-content-link); cursor: pointer; list-style: none; }
+.civ-from > summary::-webkit-details-marker { display: none; }
+.civ-from > summary > svg { flex: none; inline-size: auto; block-size: 0.875rem; }
+.civ-from-body { display: grid; gap: var(--space-2); padding-block-start: var(--space-3); }
+.civ-from-body .crail-list { margin: 0; }
+.civ-from-body .button { justify-self: start; }
+.civ-activity ol { margin: 0; padding: 0; list-style: none; display: grid; }
+.civ-activity li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 var(--space-3); padding-block: var(--space-1); font-size: var(--text-sm); line-height: var(--leading-sm); }
+.civ-activity li > span:last-child { font-size: var(--text-xs); color: var(--color-content-secondary); }
+
+/* the invoice as Vera gets it */
+.civ-paper .inv-to { display: grid; gap: var(--space-0-5); }
+.civ-paper .inv-meta-due { font-size: var(--text-lg); line-height: var(--leading-lg); font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; }
+.civ-paper .inv-lines td { padding-block: var(--space-2); }
+.inv-message { margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); }
+/* the paper's labels on their values' baselines, the figure too */
+.civ-paper .inv-meta { align-items: baseline; row-gap: var(--space-1); }
+.civ-paper .inv-meta dt { padding-block: 0; }

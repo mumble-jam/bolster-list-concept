@@ -1,0 +1,351 @@
+/* Estimate concept, round 2: what isn't the system. The window is dialog.css's workspace, the page is
+   list-page.css with the table, cards, record and floating bar from components/; this holds the job's bar and
+   navigation, the tree in the table, and the record's rows and editors (the C rules, still drafts). Semantic
+   tokens only, so parts can move into system/ unchanged. */
+
+@layer concept {
+  /* ---------- the job's window ---------- */
+  /* concept tooling sits over the job's navigation, clear of the page's totals */
+  .job-window .concept-controls { inset-inline: var(--space-4) auto; }
+  /* the title is as wide as its words (the header's h2 fills the bar otherwise), so the status follows it */
+  .job-title { flex: 0 1 auto; display: flex; align-items: baseline; gap: var(--space-2); min-inline-size: 0; margin: 0; font-size: var(--text-base); line-height: var(--leading-base); font-weight: var(--font-weight-regular); }
+  .job-customer { color: var(--color-content-on-chrome-muted); white-space: nowrap; }
+  .job-sep { color: var(--color-content-on-chrome-muted); }
+  .job-name { font-weight: var(--font-weight-medium); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-inline-size: 0; }
+  .job-bar-gap { flex: 1; }
+  .job-saved { display: inline-flex; align-items: center; gap: var(--space-1-5, 6px); block-size: var(--control-height-sm); padding: 0 var(--space-2); border: 0; border-radius: var(--radius-sm); background: none; color: var(--color-content-on-chrome-muted); font: inherit; font-size: var(--text-xs); cursor: pointer; white-space: nowrap; }
+  @media (hover: hover) { .job-saved:hover { background: var(--color-surface-chrome-hover); color: var(--color-content-on-chrome); } }
+  .job-saved:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+
+
+  /* the page is the window's one scroller (D128 inside the window: it floats over the app) */
+  /* the page is the workspace's (dialog.css); a line scrolled to clears the sticky toolbar */
+  .job-page { scroll-padding-block-start: 7rem; }
+  /* the page header and the content are the app's (D146); the page keeps only room under its last row for the floating bar */
+  .est.list-page { --page-top: 0px; --list-head-top: 0px; padding-block-end: var(--space-16); }
+  .est-head .page-title { align-items: baseline; gap: var(--space-3); }
+  .est-meta { font-size: var(--text-sm); color: var(--color-content-secondary); white-space: nowrap; }
+  .est-head .button svg { color: var(--color-content-secondary); }
+  /* Measurements, an icon in the table's toolbar: how many are left to take sits on its corner */
+  .est-dims-button { position: relative; overflow: visible; }
+  .est-corner-count.badge { position: absolute; inset-block-start: calc(-1 * var(--space-1)); inset-inline-end: calc(-1 * var(--space-1)); min-inline-size: 1rem; block-size: 1rem; padding: 0 var(--space-1); font-size: var(--text-xxs); line-height: 1rem; justify-content: center; box-shadow: 0 0 0 2px var(--color-surface-default); pointer-events: none; }
+
+  @media (max-width: 767px) {
+    .job-customer, .job-sep, .job-window .avatar, .job-status { display: none; }
+    /* icons alone on phones; their words stay their names */
+    :is(.job-saved, .job-bar #send) span { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+    .est-table td[data-m="over"] { text-align: start; }
+    .est.list-page { padding-block-end: var(--space-24, 6rem); }
+    /* the insight card leads on phones, as the system's row has it (summary-cards.css): the margin first, in its own column */
+    .slice-row > .est-money { order: -1; }
+    .est-head .page-title { flex-wrap: wrap; row-gap: 0; }
+  }
+
+  /* ---------- the cards: what's left, then the money ---------- */
+  .est-slice .slice-label svg { color: var(--color-content-secondary); }
+  .est-slice[data-done] { opacity: 0.7; }
+  .est-slice[data-done] .slice-value { color: var(--color-content-secondary); font-size: var(--text-base); display: inline-flex; align-items: center; gap: var(--space-1); }
+  .pop:has(> .pop-note) { inline-size: 16rem; }
+  /* the split of a cost: materials, labor, subcontracted, side by side */
+  .est-bar { display: flex; inline-size: 100%; min-inline-size: 4rem; block-size: 0.375rem; border-radius: var(--radius-full); overflow: hidden; background: var(--color-surface-sunken); gap: 1px; }
+  .est-bar[data-size="lg"] { block-size: 0.5rem; }
+  .est-bar > span { inline-size: var(--w); }
+  [data-part="m"] { --_part: var(--color-status-pending-dot); }
+  [data-part="l"] { --_part: var(--color-action-accent); }
+  [data-part="s"] { --_part: var(--color-status-booked-dot); }
+  :is(.est-bar, .split-bar) > span[data-part] { background: var(--_part); }
+  .tip-key > [data-part] { --_dot: var(--_part); }
+  .est-split-list dt { display: inline-flex; align-items: center; gap: var(--space-1); }
+  /* the margin's bar is thin: its hover reaches 8 above and below it, without moving it */
+  .est-bar-hit { padding-block: var(--space-2); margin-block: calc(-1 * var(--space-2)); cursor: default; }
+
+  /* ---------- the table card: its bar and header stick to the window's page ---------- */
+  .est-panel { overflow: visible; }
+  .est-toolbar.list-toolbar { position: sticky; inset-block-start: 0; z-index: 4; translate: none; border-start-start-radius: inherit; border-start-end-radius: inherit; background: var(--color-surface-default); }
+  .est-wrap.table-wrap { overflow: visible; mask-image: none; }
+  .est-table thead { translate: none !important; }
+  .est-table th { position: sticky !important; inset-block-start: var(--_toolbar-h, 2.9375rem) !important; z-index: 3; animation: none !important; transform: none !important; }
+  .est-table td[data-primary] { position: static !important; }
+  .est-table :is(th, td)[data-primary] { inline-size: 100%; inset-inline-start: auto !important; }
+  .est-table th.data-table-select { inset-inline-start: auto !important; }
+  .est-table th[data-numeric], .est-table td[data-numeric] { white-space: nowrap; }
+  .est-table td.est-cost { color: var(--color-content-secondary); }
+  .est-table td.est-price { font-weight: var(--font-weight-medium); }
+  .est-table td.est-margin, .est-table td.est-qty { color: var(--color-content-secondary); }
+  .est-table td.est-out { color: var(--color-content-tertiary); font-size: var(--text-xs); }
+  .est-table tbody td { block-size: auto; padding-block: var(--space-2); }
+  .est-table tbody tr[data-assembly] td { background: color-mix(in srgb, var(--color-surface-group) 55%, transparent); }
+  .est-table tbody tr[data-assembly]:hover td { background: var(--color-surface-hover); }
+  .est-table tbody tr[data-assembly] .est-name { font-weight: var(--font-weight-medium); }
+  .est-table tbody tr[data-assembly] td.est-price { font-weight: var(--font-weight-medium); }
+  .est-table tbody tr[data-assembly][data-selected] td, .est-table tbody tr[data-assembly][data-open] td { background: none; }
+  .est-table tbody tr[data-open] td { background: var(--color-surface-current); }
+  .est-table tbody tr[data-selected] td { background: var(--color-surface-selected); }
+  .est-table .row-actions { inline-size: var(--space-10); padding-inline: var(--space-1) var(--space-2); }
+  .est-table .row-actions .button { opacity: 0; }
+  .est-table tr:is(:hover, :focus-within, [data-open]) .row-actions .button, .est-table .row-actions .button[aria-expanded="true"] { opacity: 1; }
+  @media (hover: none) { .est-table .row-actions .button { opacity: 1; } }
+
+  /* the tree: what's in an assembly steps in 20 a level; the fold sits before the kind */
+  /* the slot, and the fold before it, centre on the name and its line under it together, not on the name alone */
+  .est-cell { display: flex; align-items: center; gap: var(--space-2); padding-inline-start: calc(var(--lvl, 0) * 1.25rem); min-inline-size: 0; }
+  .est-fold, .est-fold-gap { flex: none; inline-size: 1.25rem; block-size: 1.5rem; }
+  .est-fold { display: inline-grid; place-items: center; padding: 0; border: 0; border-radius: var(--radius-xs); background: none; color: var(--color-content-secondary); cursor: pointer; position: relative; z-index: 1; }
+  .est-fold svg { transition: rotate var(--duration-fast) var(--ease-standard); }
+  .est-fold[aria-expanded="false"] svg { rotate: -90deg; }
+  @media (hover: hover) { .est-fold:hover { background: var(--color-surface-hover); color: var(--color-content-primary); } }
+  .est-fold:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
+  .est-kind { flex: none; display: inline-grid; place-items: center; inline-size: 1.5rem; block-size: 1.5rem; border-radius: var(--radius-sm); background: var(--color-surface-tint); color: var(--color-content-secondary); }
+  .est-kind[data-kind="assembly"] { background: var(--color-surface-chrome); color: var(--color-content-on-chrome); }
+  .est-kind[data-kind="sel-customer"] { background: var(--color-feedback-info-surface, var(--color-surface-tint)); color: var(--color-feedback-info-content, var(--color-content-link)); }
+  .est-kind[data-kind="sel-you"] { background: var(--color-surface-selected); color: var(--color-content-link); }
+  .est-kind[data-kind="fee"] { background: var(--color-surface-tint); }
+  .est-kind[data-kind="new"] { background: none; color: var(--color-content-link); }
+  /* the name's slot: the line's photo (D55), over its kind on the kind's tint while it loads or where there's none */
+  /* 32, no taller than the name and its line, so a photo doesn't make the row taller */
+  .est-thumb { --_size: var(--control-height-sm); border-radius: var(--radius-sm); margin-inline-end: var(--space-1); color: var(--color-content-secondary); }
+  .est-thumb[data-kind="assembly"] { background: var(--color-surface-chrome); color: var(--color-content-on-chrome); }
+  .est-thumb[data-kind="sel-customer"] { background: var(--color-feedback-info-surface, var(--color-surface-tint)); color: var(--color-feedback-info-content, var(--color-content-link)); }
+  .est-thumb[data-kind="sel-you"] { background: var(--color-surface-selected); color: var(--color-content-link); }
+  .est-text { min-inline-size: 0; flex: 1; display: grid; gap: 1px; padding-block: 1px; }
+  .est-qty-flags { display: none; }
+  .est-line { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-1) var(--space-2); min-inline-size: 0; }
+  .est-name { overflow-wrap: anywhere; }
+  .est-sub { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .est-path { color: var(--color-content-tertiary); }
+  .est-tag.badge { font-size: var(--text-xxs); padding-inline: var(--space-1); }
+  .est-muted { color: var(--color-content-secondary); }
+  .est-todo { color: var(--color-content-link); }
+  .est-err { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--color-feedback-danger-content); }
+  /* a quantity still to set: in the link colour, where the quantity goes (nothing red until Send) */
+  .est-set { position: relative; z-index: 1; padding: 0; border: 0; background: none; color: var(--color-content-link); font: inherit; font-weight: var(--font-weight-medium); cursor: pointer; border-radius: var(--radius-xs); }
+  @media (hover: hover) { .est-set:hover { text-decoration: underline; text-underline-offset: 3px; } }
+  .est-set:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+  .est-f { display: inline-flex; vertical-align: -1px; margin-inline-end: var(--space-1); color: var(--color-content-tertiary); position: relative; z-index: 1; }
+  .est-part { display: inline-flex; align-items: center; gap: 3px; margin-inline-end: var(--space-2); font-size: var(--text-xs); color: var(--color-content-secondary); white-space: nowrap; }
+  .est-part svg { color: var(--_part); }
+  .est-split { min-inline-size: 9rem; }
+  .est-group { display: flex; justify-content: space-between; gap: var(--space-3); font-size: var(--text-sm); }
+  .est-group-sum { color: var(--color-content-secondary); white-space: nowrap; }
+  .est-group-sum b, .est-group b { color: var(--color-content-primary); font-weight: var(--font-weight-medium); }
+
+  /* the add row: a quiet button that becomes the field */
+  .est-add-row td { border-block-end-color: var(--color-line-subtle); block-size: auto; padding-block: var(--space-1); }
+  /* Add to …: a circled plus in the thumbnails' column, the words where the names start, in the link colour */
+  .est-add { display: inline-flex; align-items: center; gap: var(--space-2); min-block-size: var(--control-height-sm); padding: 0 var(--space-2) 0 0; border: 0; border-radius: var(--radius-sm); background: none; color: var(--color-content-link); font: inherit; font-size: var(--text-sm); font-weight: var(--font-weight-medium); cursor: pointer; }
+  .est-add-mark { display: inline-grid; place-items: center; inline-size: var(--control-height-sm); margin-inline-end: var(--space-1); }
+  @media (hover: hover) { .est-add:hover { background: var(--color-surface-hover); } }
+  .est-add:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
+  /* the add row's mark takes the slot's column, so what's typed starts where the names do */
+  .est-add-row .est-kind { inline-size: var(--control-height-sm); margin-inline-end: var(--space-1); }
+  .est-add-input.input { flex: 1; max-inline-size: 26rem; }
+  .est-add-hint { font-size: var(--text-xs); color: var(--color-content-tertiary); white-space: nowrap; }
+  .pop .menu-item[data-active] { background: var(--color-surface-hover); box-shadow: inset 0 0 0 var(--focus-ring-width) var(--color-focus-ring); }
+  .est-mi-label { flex: 1; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
+  .est-mi-hint { font-size: var(--text-xs); color: var(--color-content-tertiary); }
+  .pop[data-wide], .pop:has(.est-add-pop) { inline-size: 24rem; }
+
+  /* the foot: one line at every width, never a second. As it narrows it lets go of what's said elsewhere, the total last:
+     cost and profit first (the totals popover and the margin card have them), then the count of lines, then the price */
+  .est-foot.list-foot { position: sticky; inset-block-end: 0; z-index: 3; flex-wrap: nowrap; container-type: inline-size; background: var(--color-surface-default); border-end-start-radius: inherit; border-end-end-radius: inherit; }
+  .est-foot .list-foot-range { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .est-totals { display: flex; align-items: center; gap: var(--space-5); margin-inline-start: auto; font-variant-numeric: tabular-nums; }
+  .est-fig { white-space: nowrap; }
+  .est-totals b { color: var(--color-content-primary); font-weight: var(--font-weight-medium); }
+  .est-totals .button b { margin-inline-start: var(--space-1); }
+  @container (max-width: 52rem) { .est-fig:is([data-fig="cost"], [data-fig="profit"]) { display: none; } }
+  @container (max-width: 34rem) { .est-foot .list-foot-range { display: none; } }
+  @container (max-width: 24rem) { .est-fig[data-fig="price"] { display: none; } }
+  .est-tot dl { display: grid; gap: var(--space-1); margin: 0; padding: var(--space-1) var(--space-2) 0; font-size: var(--text-sm); }
+  .est-tot-row { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); min-block-size: var(--space-6); font-variant-numeric: tabular-nums; }
+  .est-tot-row dt { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--color-content-secondary); }
+  .est-tot-row dt svg { color: var(--color-content-tertiary); }
+  .est-tot-row dd { margin: 0; }
+  .est-tot-row[data-rule] { border-block-start: var(--border-width-default) solid var(--color-line-subtle); padding-block-start: var(--space-1); }
+  .est-tot-row[data-rule] dt { color: var(--color-content-primary); }
+  .est-tot-row .input-group { inline-size: 8rem; }
+  .est-tot-help { margin: var(--space-2) var(--space-2) var(--space-1); font-size: var(--text-xs); }
+  .est-pop-form { display: grid; gap: var(--space-3); padding: var(--space-3); }
+  .est-history { gap: 0; }
+  .est-hist-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-1) var(--space-3); padding: var(--space-2); border-block-end: var(--border-width-default) solid var(--color-line-subtle); font-size: var(--text-sm); }
+  .est-hist-row .button { grid-column: 1 / -1; justify-self: start; }
+  .est-hist-row:last-child { border: 0; }
+  .est-hist-none { padding: var(--space-2); font-size: var(--text-sm); }
+  .pop:has(.est-history) { inline-size: 22rem; }
+
+  .est-skeleton { display: grid; padding: var(--space-2) 0; }
+  .est-skeleton-row { display: flex; align-items: center; gap: var(--space-4); block-size: 3.25rem; padding: 0 var(--space-4) 0 calc(var(--space-3) + var(--lvl) * 1.25rem); border-block-end: var(--border-width-default) solid var(--color-line-subtle); }
+
+  /* ---------- the record: one for every kind of line ---------- */
+  .est-record.detail.card { --_top: var(--space-4); inset-block-start: var(--space-4); max-block-size: calc(100dvh - var(--space-8) - 3.5rem - var(--space-8)); }
+  .list-split[data-open] { --_record-w: 26rem; }
+  @media (min-width: 1280px) and (max-width: 1439px) { .list-split[data-open] { --_record-w: 24rem; } .list-split[data-open] .est-table :is(th, td).est-cost { display: none; } }
+  .list-split[data-open] .est-table tr:not(.est-add-row, .group-row, .est-none) > :is(th, td):not(.data-table-select, [data-primary], [data-numeric], .row-actions) { display: none; }
+  .list-split[data-open] .est-table :is(.est-add-row, .group-row, .est-none) > td { display: table-cell; }
+  .est-hero { gap: var(--space-2); }
+  .est-hero-kind { display: flex; align-items: center; gap: var(--space-2); margin: 0; font-size: var(--text-xs); color: var(--color-content-secondary); }
+  .est-crumbs { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1); font-size: var(--text-xs); color: var(--color-content-tertiary); }
+  .est-crumbs .link-button { font-size: var(--text-xs); }
+  .est-hero-name { position: relative; display: inline-flex; align-items: baseline; gap: var(--space-2); max-inline-size: 100%; padding: 0; border: 0; background: none; color: var(--color-content-primary); font-family: var(--font-display); font-size: var(--text-xl); line-height: var(--leading-lg); font-weight: var(--font-weight-medium); text-align: start; cursor: text; border-radius: var(--radius-xs); overflow-wrap: anywhere; }
+  .est-hero-name:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+  .est-name-edit { justify-self: stretch; display: grid; gap: var(--space-2); }
+  .est-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); justify-self: stretch; margin: var(--space-2) 0 0; }
+  .est-facts > div { display: grid; gap: 2px; min-inline-size: 0; }
+  .est-facts dt { font-size: var(--text-xs); line-height: var(--leading-xs); color: var(--color-content-secondary); }
+  .est-facts dd { margin: 0; font-size: var(--text-sm); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  .est-facts [data-strong] dd { font-weight: var(--font-weight-medium); }
+  .est-need { display: flex; align-items: flex-start; gap: var(--space-2); justify-self: stretch; margin-block-start: var(--space-2); padding: var(--space-3); border-radius: var(--radius-md); background: var(--color-surface-tint); font-size: var(--text-sm); }
+  .est-need > svg { flex: none; margin-block-start: 3px; color: var(--color-content-secondary); }
+  .est-need p { flex: 1; margin: 0; }
+  .est-need b { font-weight: var(--font-weight-medium); }
+  .est-need .button { flex: none; }
+
+  .est-code { margin-inline-start: var(--space-1); padding: 0 var(--space-1); border-radius: var(--radius-xs); background: var(--color-surface-tint); font-family: var(--font-mono); font-size: var(--text-xxs); color: var(--color-content-secondary); }
+  .est-hero-name .detail-pencil { position: static; align-self: center; }
+  .est-hero-name:is(:hover, :focus-visible) .detail-pencil { opacity: 1; }
+  .est-more { justify-self: start; margin-block-start: var(--space-2); display: inline-flex; align-items: center; gap: var(--space-1); }
+  .est-form-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+  .est-choice { display: grid; gap: var(--space-2); margin: 0; padding: 0; border: 0; }
+  .est-choice .choice-hint { display: block; font-size: var(--text-xs); color: var(--color-content-secondary); }
+  .est-mono { font-family: var(--font-mono); font-size: var(--text-sm); }
+  .est-formula-out { margin: 0; font-size: var(--text-sm); }
+  .est-formula-out b { font-weight: var(--font-weight-medium); }
+  .est-dim-chips { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+  .est-dim-chip { display: inline-flex; align-items: center; gap: var(--space-1); padding: 2px var(--space-2); border: var(--border-width-default) solid var(--color-line-default); border-radius: var(--radius-full); background: var(--color-surface-default); color: var(--color-content-primary); font: inherit; font-size: var(--text-xs); cursor: pointer; }
+  .est-dim-chip code { font-family: var(--font-mono); color: var(--color-content-secondary); }
+  .est-dim-chip[data-missing] { border-style: dashed; }
+  @media (hover: hover) { .est-dim-chip:hover { border-color: var(--color-line-strong); } }
+  .est-dim-chip:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 1px; }
+  .est-part-row { display: grid; grid-template-columns: minmax(0, 1fr) 9rem; align-items: center; gap: var(--space-3); }
+  .est-part-switch { display: inline-flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); cursor: pointer; }
+  .est-part-switch > span { display: inline-flex; align-items: center; gap: var(--space-2); }
+  .est-part-row:not([data-on]) .input-group { opacity: 0.55; }
+  .est-cost-sum { margin: 0; font-size: var(--text-sm); font-weight: var(--font-weight-medium); font-variant-numeric: tabular-nums; }
+
+  /* a selection's options: one picked, each with what it does to the price */
+  .est-opts { display: grid; gap: var(--space-1); margin: 0; padding: 0; border: 0; }
+  .est-opts > legend { margin-block-end: var(--space-2); padding: 0; }
+  .est-opt { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-2) var(--space-3); border: var(--border-width-default) solid var(--color-line-subtle); border-radius: var(--radius-md); cursor: pointer; font-size: var(--text-sm); }
+  .est-opt[data-current] { border-color: var(--color-line-strong); background: var(--color-surface-tint); }
+  @media (hover: hover) { .est-opt:hover { border-color: var(--color-line-strong); } }
+  .est-opt .radio { margin-block-start: 2px; }
+  .est-opt-text { flex: 1; min-inline-size: 0; display: grid; gap: 2px; }
+  .est-opt-name { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); }
+  .est-opt-meta { font-size: var(--text-xs); color: var(--color-content-secondary); font-variant-numeric: tabular-nums; }
+  .est-delta { flex: none; font-size: var(--text-xs); font-variant-numeric: tabular-nums; color: var(--color-content-secondary); white-space: nowrap; }
+  .est-traits { display: grid; gap: var(--space-2); margin-block-end: var(--space-3); }
+  .est-trait { display: grid; gap: var(--space-1); margin: 0; padding: 0; border: 0; }
+  .est-trait legend { padding: 0; margin-block-end: var(--space-1); font-size: var(--text-xs); color: var(--color-content-secondary); }
+  .est-trait .segmented { flex-wrap: wrap; }
+
+  .est-split-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-2) var(--space-4); margin: var(--space-3) 0; font-size: var(--text-sm); }
+  .est-split-list > div { display: flex; justify-content: space-between; gap: var(--space-2); }
+  .est-split-list dt { color: var(--color-content-secondary); }
+  .est-split-list dt svg { color: var(--_part, var(--color-content-tertiary)); }
+  .est-split-list dd { margin: 0; font-variant-numeric: tabular-nums; }
+  .est-children { display: grid; gap: var(--space-1); margin: 0; padding: var(--space-2) 0 0; list-style: none; border-block-start: var(--border-width-default) solid var(--color-line-subtle); font-size: var(--text-sm); }
+  .est-children li { display: flex; justify-content: space-between; gap: var(--space-3); }
+  .est-children .link-button { text-align: start; }
+  .est-children .est-muted { white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+  /* a link that does something here, wherever this page uses one outside the record (the record's are record.css's:
+     the page is an .app-content since D146, so without the :not() this reached into the record) */
+  :is(.est-send, .list-chips, .app-content) .link-button:where(:not(.detail *)) { display: inline; padding: 0; border: 0; background: none; color: var(--color-content-link); font: inherit; text-align: start; cursor: pointer; border-radius: var(--radius-xs); }
+  @media (hover: hover) { :is(.est-send, .list-chips, .app-content) .link-button:where(:not(.detail *)):hover { text-decoration: underline; text-underline-offset: 3px; } }
+  :is(.est-send, .list-chips, .app-content) .link-button:where(:not(.detail *)):focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+
+  /* ---------- Send: the summary before it goes ---------- */
+  .est-send { --_w: 34rem; }
+  .est-send .dialog-body { display: grid; gap: var(--space-4); }
+  .est-sum { display: grid; gap: var(--space-2); padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--color-surface-tint); font-size: var(--text-sm); }
+  .est-sum.form-summary { background: var(--color-feedback-danger-surface); }
+  .est-sum h3 { display: flex; align-items: center; gap: var(--space-2); margin: 0; font-size: var(--text-sm); font-weight: var(--font-weight-medium); }
+  .est-sum h3 svg { flex: none; }
+  .est-sum p { margin: 0; }
+  .est-sum ul { display: grid; gap: var(--space-1); margin: 0; padding-inline-start: var(--space-5); }
+  .est-sum:focus { outline: none; }
+  .est-sum:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: 2px; }
+  .est-send-facts { display: grid; gap: var(--space-1); margin: 0; font-size: var(--text-sm); }
+  .est-send-facts > div { display: flex; justify-content: space-between; gap: var(--space-3); }
+  .est-send-facts dt { color: var(--color-content-secondary); }
+  .est-send-facts dd { margin: 0; text-align: end; }
+
+  /* ---------- phones: the tree as items; the record a sheet ---------- */
+  @media (max-width: 767px) {
+    /* a line reads as its name and price, its quantity under the name (no overline: a quantity isn't a date) */
+    .est-table tbody tr { padding-inline-start: calc(var(--space-4) + var(--lvl, 0) * 0.75rem); }
+    /* the thumbnail is a column down the left beside the whole item, as the list's are on phones (D55), so the
+       quantity sits right under the name's line; an assembly's fold before it */
+    .est-table tbody tr[data-id] { grid-template-columns: var(--_pick-w) auto auto minmax(0, 1fr) auto; grid-template-areas: "sel fold thumb title trail" "sel fold thumb over over"; align-items: start; row-gap: 0; padding-block: var(--space-3); }
+    /* a line is its name, the line under it and its quantity, nothing more: its marks (Optional, AutoCost) end the
+       quantity's line instead of taking one of their own, an item's description waits in its record, and a fee's
+       quantity (none) isn't a line at all; a line without one (an assembly, a fee) centres on its photo */
+    .est-table tbody tr[data-id] .est-line > .badge, .est-table tbody tr[data-id] .est-sub[data-desc] { display: none; }
+    .est-qty-flags { display: inline-flex; gap: var(--space-1); margin-inline-start: var(--space-2); vertical-align: middle; }
+    .est-table tbody tr[data-kind="fee"] td[data-m="over"] { display: none; }
+    .est-table tbody tr:is([data-assembly], [data-kind="fee"]) .est-text { grid-row: 1 / span 2; align-self: center; }
+    .est-table tbody tr[data-id] :is(td[data-m="title"], td[data-m="title"] .est-cell) { display: contents; }
+    .est-table tbody tr[data-id] .est-fold { grid-area: fold; align-self: center; margin-inline-end: var(--space-1); }
+    .est-table tbody tr[data-id] .est-thumb { --_size: var(--control-height-md); border-radius: var(--radius-md); grid-area: thumb; align-self: center; margin-inline-end: var(--space-3); }
+    .est-table tbody tr[data-id] .est-text { grid-area: title; min-inline-size: 0; }
+    .est-table tbody tr[data-id] > td { padding-block: 0; block-size: auto; }
+    .est-table tbody tr[data-id] td[data-m="trail"] { padding-block-start: 2px; }
+    .est-table tbody tr[data-id] td[data-m="over"] { white-space: normal; }
+    .est-table tbody tr[data-assembly] td[data-m="over"] { display: none; }
+    .est-table tbody tr[data-assembly] { background: color-mix(in srgb, var(--color-surface-group) 55%, transparent); }
+    .est-table td[data-m="title"] .est-cell { padding-inline-start: 0; }
+    .est-table td[data-m="title"] .data-table-link { font-size: var(--text-sm); }
+    .est-table td[data-m="trail"] { font-size: var(--text-sm); }
+    .est-fold-gap { display: none; }
+    .est-add-row { display: block; padding: var(--space-1) var(--space-3) var(--space-1) var(--space-4); }
+    .est-add-row td { display: block !important; padding: 0 !important; border: 0 !important; }
+    .est-add-row td.data-table-select { display: none !important; }
+    .est-add-row .est-cell { padding-inline-start: calc(var(--lvl, 0) * 0.75rem); }
+    .est-add-mark { inline-size: var(--control-height-md); margin-inline-end: calc(var(--space-3) - var(--space-2)); }
+    .est-add-hint { display: none; }
+    .est-foot.list-foot { position: static; }
+    .est-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .est-form-row { grid-template-columns: minmax(0, 1fr); }
+    .est-table th { position: static !important; }
+  }
+
+  /* ---------- the comfortable record (trying out: Concept controls → Record) ----------
+     For readers who need it bigger and plainer. The head answers first: what the customer pays, large, then your cost
+     and profit, in a tinted block that reads as one summary; a step up for every text in the record (values 16, labels
+     14, notes 14, section titles 16), labels and icons in the secondary ink, rows at least 40 tall to tap, the pencils
+     always shown, the rare values' chips solid instead of dashed. The record widens to make the room. */
+  :root[data-record="comfortable"] .list-split[data-open] { --_record-w: 30rem; }
+  @media (min-width: 1280px) and (max-width: 1439px) { :root[data-record="comfortable"] .list-split[data-open] { --_record-w: 28rem; } }
+  :root[data-record="comfortable"] .dialog.peek { --_w: 30rem; }
+  .est-sum { display: grid; gap: var(--space-3); justify-self: stretch; margin-block-start: var(--space-2); padding: var(--space-4); border-radius: var(--radius-md); background: var(--color-surface-tint); font-variant-numeric: tabular-nums; }
+  /* in a sheet the surface is raised, and in dark the tint is the raised surface's own colour: there the block (and the
+     need) sit on the page's surface instead, a step darker. A system gap: no tint is set for raised surfaces in dark */
+  .dialog :is(.est-sum, .est-need) { background: light-dark(var(--color-surface-tint), var(--color-surface-default)); }
+  .est-sum-pays { display: grid; gap: var(--space-1); margin: 0; }
+  .est-sum-label, .est-sum-parts dt { font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
+  .est-sum-big { font-family: var(--font-display); font-size: var(--text-4xl); line-height: 1.15; font-weight: var(--font-weight-bold); color: var(--color-content-primary); }
+  /* your cost and profit as a summary list: the label, its figure at the end; bold at 20, large text, so the profit's
+     green holds on the tint */
+  .est-sum-parts { display: grid; gap: var(--space-2); margin: 0; padding-block-start: var(--space-3); border-block-start: var(--border-width-default) solid var(--color-line-subtle); }
+  .est-sum-parts > div { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-1) var(--space-3); min-inline-size: 0; }
+  .est-sum-parts dd { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: flex-end; gap: var(--space-2); margin: 0 0 0 auto; font-size: var(--text-xl); line-height: var(--leading-lg); font-weight: var(--font-weight-bold); }
+  .est-sum [data-tone="profit"] { color: var(--color-feedback-success-content); }
+  .est-sum [data-tone="loss"] { color: var(--color-feedback-danger-content); }
+  .est-sum-pct { white-space: nowrap; }
+  .est-sum-pct::before { content: "· "; }
+  .est-sum-none { color: var(--color-content-secondary); }
+  .est-sum-note { margin: 0; font-size: var(--text-sm); line-height: var(--leading-sm); color: var(--color-content-secondary); }
+  :root[data-record="comfortable"] :is(.est-record, .dialog.peek) {
+    .est-hero-kind { font-size: var(--text-sm); }
+    .est-need { font-size: var(--text-base); line-height: var(--leading-base); }
+    .detail-section-title { margin-block-end: var(--space-3); font-size: var(--text-base); line-height: var(--leading-base); }
+    .detail-row { grid-template-columns: minmax(8rem, 38%) minmax(0, 1fr); font-size: var(--text-base); line-height: var(--leading-base); }
+    .detail-label { padding-block: var(--space-2); font-size: var(--text-sm); line-height: var(--leading-sm); }
+    .detail-label > svg { inline-size: var(--space-5); block-size: 1rem; margin-block-start: calc((1lh - 1rem) / 2); color: var(--color-content-secondary); }
+    .detail-value { min-block-size: 2.5rem; align-content: center; padding-block: var(--space-2); }
+    .detail-pencil { inset-block-start: 50%; translate: 0 -50%; opacity: 1; }
+    .detail-value-sub, .detail-row-note { font-size: var(--text-sm); line-height: var(--leading-sm); }
+    .detail-reveal .chip { block-size: var(--control-height-md); border-style: solid; border-color: var(--color-line-strong); background: var(--color-surface-default); color: var(--color-content-primary); }
+    .detail-reveal .chip-main { font-size: var(--text-base); }
+  }
+}

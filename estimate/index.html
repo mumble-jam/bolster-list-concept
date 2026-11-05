@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bolster estimate concept</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="../shared/assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../shared/assets/favicon.png" type="image/png">
+<link rel="apple-touch-icon" href="../shared/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="../system/bolster.css?v=3291c5ca">
+<link rel="stylesheet" href="../shared/shell.css?v=3291c5ca">
+<link rel="stylesheet" href="../data-list.css?v=3291c5ca">
+<link rel="stylesheet" href="estimate.css?v=3291c5ca">
+<script>window.goatcounter = { no_onload: window.top !== window, path() { let f = new URLSearchParams(location.search).get("from"); try { if (f) sessionStorage.setItem("bc-from", f); else f = sessionStorage.getItem("bc-from"); } catch {} return location.pathname + location.hash.split("?")[0] + (f ? `?from=${encodeURIComponent(f)}` : ""); } };
+addEventListener("hashchange", () => window.top === window && window.goatcounter.count?.({ path: window.goatcounter.path() }));</script>
+<script data-goatcounter="https://mumblejam.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+<!-- the app behind the job's window: the jobs list it was opened from -->
+<div class="app-shell">
+  <main class="app-main">
+    <header class="page-header"><div class="page-title"><h1>Jobs</h1></div></header>
+    <div class="app-content"><p class="text-secondary">The jobs list. <a href="../index.html#jobs">Open it</a>, or open the job again: <button type="button" class="link-button" data-open-job>Kitchen and roof refresh</button>.</p></div>
+  </main>
+</div>
+
+<!-- the job's window (D88's workspace, as Settings is): the job's bar, its navigation, its pages -->
+<dialog class="dialog job-window" data-variant="workspace" id="job" aria-labelledby="job-title">
+  <header class="dialog-header job-bar">
+    <span class="avatar" data-color="4" aria-hidden="true">MR</span>
+    <h2 id="job-title" class="job-title"><span class="job-customer">Marco Ruiz</span><span class="job-sep" aria-hidden="true">·</span><span class="job-name">Kitchen and roof refresh</span></h2>
+    <span class="badge job-status" id="job-status" data-status="draft">Draft</span>
+    <span class="job-bar-gap"></span>
+    <button type="button" class="job-saved" id="job-saved" aria-haspopup="dialog" aria-expanded="false" data-tip="Changes to this estimate"><i data-icon="clock" data-size="14"></i><span id="job-saved-text">Saved</span></button>
+    <button type="button" class="button" data-variant="brand" data-size="sm" id="send"><i data-icon="send" data-size="14"></i><span>Send estimate</span></button>
+    <button type="button" class="button job-bar-icon" data-variant="ghost" data-size="sm" data-icon-only id="job-more" aria-label="More for this job" aria-haspopup="menu" aria-expanded="false" data-tip="More"><i data-icon="ellipsis" data-size="16"></i></button>
+    <button type="button" class="button job-bar-icon" data-variant="ghost" data-size="sm" data-icon-only id="job-close" aria-label="Close the job" data-tip="Close the job"><i data-icon="xmark" data-size="16"></i></button>
+  </header>
+  <div class="dialog-body">
+    <nav class="sidebar workspace-nav" id="job-nav" aria-label="Job"></nav>
+    <div class="workspace-page app-main job-page" id="job-page">
+      <header class="page-header est-head">
+        <div class="page-title"><button type="button" class="button page-tool" data-variant="ghost" data-size="sm" data-icon-only id="job-fold"></button><h1 id="est-title">Estimate</h1><span class="est-meta" id="est-meta"></span></div>
+        <div class="page-header-actions">
+          <button type="button" class="button" data-variant="ghost" data-size="sm" data-hide-phone id="preview"><i data-icon="eye" data-size="14"></i><span>Preview proposal</span></button>
+        </div>
+      </header>
+      <div class="app-content list-page est" id="est" data-width="wide">
+
+        <!-- what's left before it can go: each card filters the estimate to its lines -->
+        <section class="slices" aria-label="What's left">
+          <div class="slice-row" id="slices" role="group" aria-label="Filter by what's left"></div>
+        </section>
+
+        <div class="list-split" id="list-split">
+          <section class="card list-panel est-panel" aria-labelledby="est-title">
+            <div class="list-toolbar est-toolbar" role="search" aria-label="Search and filter the estimate">
+              <div class="list-bar">
+                <button type="button" class="button add-filter" data-variant="secondary" data-size="sm" id="add-filter" aria-haspopup="menu" aria-expanded="false" data-tip="Add filter"><i data-icon="filter" data-size="16"></i><span>Add filter</span></button>
+                <label class="list-search"><i data-icon="search" data-size="16"></i><input type="search" id="search" aria-label="Search the estimate" placeholder="Search lines" enterkeyhint="search" autocomplete="off"></label>
+                <span class="list-bar-sep" aria-hidden="true"></span>
+                <button type="button" class="button est-dims-button" data-variant="ghost" data-size="sm" data-icon-only id="open-dims" aria-label="Measurements" data-tip="Measurements"><i data-icon="ruler-combined" data-size="16"></i><span class="badge est-corner-count" data-count id="dims-count" aria-hidden="true" hidden></span></button>
+                <button type="button" class="button" data-variant="ghost" data-size="sm" data-icon-only id="view-options" aria-label="Display settings" aria-haspopup="menu" aria-expanded="false" data-tip="Display settings"><i data-icon="display-settings" data-size="16"></i></button>
+              </div>
+              <div class="list-chips" id="list-chips" hidden>
+                <p class="result-count" id="result-count" aria-live="polite"></p>
+                <div class="filters" id="filters"></div>
+              </div>
+            </div>
+            <div class="table-wrap est-wrap" id="est-wrap"></div>
+            <footer class="list-foot est-foot" id="est-foot"></footer>
+          </section>
+          <section class="card detail est-record" id="detail" aria-labelledby="detail-title" hidden></section>
+        </div>
+
+        <div class="floating-bar" id="bulk-bar" role="toolbar" aria-label="Bulk actions" hidden></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="concept-controls" id="concept-controls" data-more-entry="Concept controls" data-more-icon="sliders">
+    <summary><span class="concept-tag">Concept</span> Controls</summary>
+    <div class="concept-body">
+      <div class="cc-field"><span class="cc-label" id="cc-net-l">Network</span>
+        <div class="segmented" role="radiogroup" aria-labelledby="cc-net-l">
+          <label class="segmented-option"><input type="radio" name="cc-net" value="0" checked> Instant</label>
+          <label class="segmented-option"><input type="radio" name="cc-net" value="1500"> 1.5 s</label>
+          <label class="segmented-option"><input type="radio" name="cc-net" value="fail"> Fails</label>
+        </div>
+        <p class="cc-help">How long opening the estimate and its lines takes (D142). Nothing shows under 300 ms.</p></div>
+      <div class="cc-field"><span class="cc-label" id="cc-record-l">Record</span>
+        <div class="segmented" role="radiogroup" aria-labelledby="cc-record-l">
+          <label class="segmented-option"><input type="radio" name="cc-record" value="standard" checked> Standard</label>
+          <label class="segmented-option"><input type="radio" name="cc-record" value="comfortable"> Comfortable</label>
+        </div>
+        <p class="cc-help">Comfortable, for readers who need it bigger and plainer: what the customer pays first, then your cost and profit; larger type, darker labels, the pencils always shown, plainer words. Trying out.</p></div>
+      <button type="button" class="button" data-variant="secondary" data-size="sm" id="cc-reset">Start the estimate again</button>
+      <button class="button" data-variant="secondary" data-size="sm" data-open-dialog="notes">About this concept</button>
+      <a class="button" data-variant="secondary" data-size="sm" href="../docs/page-types/estimate.html">The estimate in the documentation</a>
+      <div class="cluster" style="justify-content:space-between">
+        <button class="button" data-variant="ghost" data-size="sm" data-theme-toggle>Theme: auto</button>
+      </div>
+    </div>
+  </details>
+  <div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
+</dialog>
+
+<!-- one shared popover for menus, filters, the totals and the add field's suggestions -->
+<div class="pop" id="pop" popover></div>
+
+<!-- the record as a sheet, under 1280 -->
+<dialog class="dialog peek detail est-record" id="peek" aria-labelledby="detail-title"></dialog>
+
+<dialog class="dialog confirm" id="confirm" aria-labelledby="confirm-title">
+  <header class="dialog-header"><h2 id="confirm-title"></h2></header>
+  <div class="dialog-body"><p class="text-secondary" id="confirm-text"></p></div>
+  <footer class="dialog-footer"><button class="button" data-variant="secondary" data-close id="confirm-keep">Cancel</button><button class="button" data-variant="danger" id="confirm-go"></button></footer>
+</dialog>
+
+<!-- Send: the summary before the step (C-gate, C-summary) -->
+<dialog class="dialog est-send" id="send-dialog" aria-labelledby="send-title">
+  <header class="dialog-header"><h2 id="send-title">Send the estimate</h2>
+    <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close data-tip="Close"><i data-icon="xmark" data-size="16"></i></button></header>
+  <div class="dialog-body" id="send-body"></div>
+  <footer class="dialog-footer" id="send-foot"></footer>
+</dialog>
+
+<dialog class="dialog notes" id="notes" aria-labelledby="notes-title">
+  <header class="dialog-header"><h2 id="notes-title">About this concept</h2>
+    <button class="button" data-variant="ghost" data-icon-only aria-label="Close" data-close data-tip="Close"><i data-icon="xmark" data-size="16"></i></button></header>
+  <div class="dialog-body">
+    <section>
+      <h3>What it is</h3>
+      <p class="text-secondary">The job's window with its estimate as a list page: the system's table, toolbar, summary cards, record and floating bar, stretched to hold a tree of assemblies, cost items, selections and a fee. Every line, whatever its kind, opens in one record beside the list, its form opening up a step at a time. Round 2, 29 Oct, from Bolster's estimate and the estimation prototype (docs/research/estimate/).</p>
+    </section>
+    <section>
+      <h3>What it fixes</h3>
+      <ul>
+        <li>Bolster edits one line in two editors that disagree (a side panel in List, a dialog in Sheet and Cards: other labels, other order, other values). Here there's one record, everywhere.</li>
+        <li>The list has no sort, filter, grouping or totals by trade, and search doesn't mark what it found. Here it's a list page: filters and chips, search that keeps a match's assemblies and marks the words, grouping by stage or cost type with subtotals, and the job's totals at its foot.</li>
+        <li>One yellow button means Save, Send or Resend, all on ⌘S. Here every change saves as it's made (the bar says so, with the history and Undo), and Send is only Send.</li>
+        <li>"Finish your estimate" counted what's open in a bar at the foot. Here it's the summary cards: each one filters the estimate to its lines.</li>
+      </ul>
+    </section>
+    <section>
+      <h3>Principles</h3>
+      <ol>
+        <li><b>The job's window</b> is the system's workspace, the one Settings uses (D144): the job's bar (the customer and the job, its status, whether it's saved, Send), the job's own navigation, then the page. The button before the page's title folds the navigation away; on phones the list and the page take turns. Close or Escape goes back to the jobs list. Only Estimate and Measurements are built.</li>
+        <li><b>The tree is the table's.</b> An assembly is a row with its own totals and a chevron; what's in it steps in 20 at a time. Display settings can fold the whole tree to its assemblies; search unfolds what it finds. A line's photo sits before its name.</li>
+        <li><b>What's left is the cards.</b> Quantities to set, your choices to make, lines with no cost. Each card filters to its lines and keeps their assemblies around them; the last card is the money: cost split into labor, materials and subcontracted, and the margin.</li>
+        <li><b>Rows say what they need, quietly.</b> A line without a quantity says “Set qty” in the link colour where its quantity goes; one of your choices still open says “Choose”; an optional line left out says “Not included” where its price would be. Nothing is red until you try to send.</li>
+        <li><b>One record for every kind of line.</b> Its head says what it is, where it sits, its quantity, cost, margin and price, and the one thing it still needs. Then sections by the job they serve (Quantity, Pricing, For the customer, Production, Catalog), each showing only what's set; what's rarely set waits at the section's foot as a chip naming it (“+ Tax”), which opens that one value.</li>
+        <li><b>Read, then edit in place (C-edit).</b> A value turns into its field where it is; Enter or leaving it saves, Escape puts it back. Values that belong together edit as one small form under their row (C-together): labor, materials and subcontracted; how it's bought; the formula and its measurements.</li>
+        <li><b>The deep end is a step further.</b> The formula, the purchase rounding, the options' traits and the fee's base are each one row that opens; nobody meets them on the way to setting a quantity.</li>
+        <li><b>Saved as you go.</b> Every change saves at once; the bar says “Saving…”, then “Saved”, and its history lists each change with Undo on the latest. Structural changes (delete, move, bulk) also offer Undo in a toast.</li>
+        <li><b>Send checks first (C-gate).</b> It lists what to fix (quantities and your choices: those lines would price at nothing) and what's for the customer, each a link to its line. With nothing to fix it sends.</li>
+        <li><b>Bulk actions show only when the ticked lines qualify:</b> set margin, stage or who it's assigned to, make optional or include, move into an assembly, combine as an assembly, duplicate, delete.</li>
+        <li><b>Adding is typing.</b> The Add row at the foot of each assembly is a field: the catalog's matches show as you type, Enter creates a cost item with that name and keeps the field for the next one; More adds an assembly, a selection or a fee.</li>
+        <li><b>A comfortable record, to compare</b> (trying out: Concept controls → Record). For readers who need it bigger and plainer. The head answers first: what the customer pays, at 36, then your cost and profit as a summary list at 20 bold, the profit in green and its share of the price; at most one note says what's unusual, from a closed list (optional, rounded up to whole pieces, a minimum spend, tax, sold at cost, different margins, Marco picking an option, a fee following the project). A figure is a sum, a range (a customer's choice, or an assembly with one inside), a dash when the line can't be priced yet (the need under it says why) or a loss in red with a minus. Every text a step up (values 16, labels and notes 14), labels and icons in the secondary ink, rows 40 tall, the pencils always shown, the rare values' chips solid, plainer words (“You add 43% to your cost”, “Let the customer change the quantity”); the record 480 wide.</li>
+      </ol>
+    </section>
+    <section>
+      <h3>Open questions</h3>
+      <ul>
+        <li>A booked job's estimate: changed in place (and the change becomes a change order), or locked behind “Start a change order”?</li>
+        <li>Margin or markup as the number people set? Bolster stores margin and shows both; this shows margin and the markup beside it.</li>
+        <li>Sheet and Cards: still needed once the list can group, filter and edit in its record? Not built here.</li>
+        <li>The catalog and AutoCost: what a price “kept up to date” means once it's in an estimate someone has already seen.</li>
+        <li>The comfortable record: for everyone, or a choice (a text size people pick, across the product)? Its summary leaves the head's four figures for three; does anyone miss the quantity and margin up there?</li>
+      </ul>
+    </section>
+  </div>
+</dialog>
+
+<div class="toast-region" aria-live="polite" aria-relevant="additions"></div>
+<script src="../shared/icons.js?v=3291c5ca"></script>
+<script src="../shared/shell.js?v=3291c5ca"></script>
+<script src="../system/specimens/specimen.js?v=3291c5ca"></script>
+<script src="../system/components/loading.js?v=3291c5ca"></script>
+<script src="../system/components/field.js?v=3291c5ca"></script>
+<script src="data.js?v=3291c5ca"></script>
+<script src="estimate.js?v=3291c5ca"></script>
+</body>
+</html>

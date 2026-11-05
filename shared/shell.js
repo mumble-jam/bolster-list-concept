@@ -97,10 +97,11 @@ window.BolsterShell = (() => {
   let shell;
 
   const href = (id) => opts.links[id] || "#";
-  const linkAttrs = (id) => (opts.links[id] ? `href="${opts.links[id]}"` : `href="#" data-not-built="${id}"`);
+  // a link to another published page leaves the frame it is shown in
+  const linkAttrs = (id) => (opts.links[id] ? `href="${opts.links[id]}"${/^https?:/.test(opts.links[id]) ? ' target="_top"' : ""}` : `href="#" data-not-built="${id}"`);
   const sectionHref = (s) => {
-    const built = itemsOf(s).find((x) => opts.links[x.id]);
-    return built ? `href="${href(built.id)}"` : `href="#" data-not-built="${s.id}"`;
+    const built = opts.links[s.id] ? s : itemsOf(s).find((x) => opts.links[x.id]);   // a section that is a page itself, or its first built page
+    return built ? `href="${href(built.id)}"${/^https?:/.test(href(built.id)) ? ' target="_top"' : ""}` : `href="#" data-not-built="${s.id}"`;
   };
 
   // the top bar's menus open on the page's light surface, so their icons are the page's Regular, not the chrome's
@@ -662,15 +663,17 @@ window.BolsterShell = (() => {
     },
   };
 
-  // The loading screen (D90): Anna's drawings, one at random, with a line from its trade (loader.js). It plays on
-  // the first page of a session, and from the concept controls; its files (her drawings, their animations, the
-  // lines) load only then, so a page without it stays light. The cover goes up at once, so the page never flashes.
+  // The loading screen (D90): Anna's drawings, one at random, with a line from its trade (the system's loader.js).
+  // It plays on the first page of a session, and from the concept controls; its files (system/components: her
+  // drawings, their animations, the lines) load only then, so a page without it stays light. The cover goes up at
+  // once, so the page never flashes.
   const SHARED = new URL("./", document.currentScript.src).href;
+  const LOADER = new URL("../system/components/", document.currentScript.src).href;
   const LOADED_KEY = "bolster-concepts:loaded";
   let loaderFiles;
   const fetchLoader = () => loaderFiles ||= new Promise((res, rej) => {
-    document.head.append(Object.assign(document.createElement("link"), { rel: "stylesheet", href: `${SHARED}loaders.css` }));
-    const add = (f) => new Promise((ok, no) => document.head.append(Object.assign(document.createElement("script"), { src: `${SHARED}${f}`, onload: ok, onerror: no })));
+    document.head.append(Object.assign(document.createElement("link"), { rel: "stylesheet", href: `${LOADER}loaders.css` }));
+    const add = (f) => new Promise((ok, no) => document.head.append(Object.assign(document.createElement("script"), { src: `${LOADER}${f}`, onload: ok, onerror: no })));
     Promise.all([add("tape.js"), add("loader.js")]).then(res, rej);
   });
   function loading({ slow = false } = {}) {
@@ -686,8 +689,11 @@ window.BolsterShell = (() => {
       .catch(() => { L.hidden = true; done(); });
   }
 
+  // links every page has, so a page passes only its own: Getting started, the homepage (every concept sits one folder
+  // under concepts/, beside it)
+  const SHARED_LINKS = {};
   function mount(o) {
-    opts = { ...opts, ...o };
+    opts = { ...opts, ...o, links: { ...SHARED_LINKS, ...o.links } };
     shell = document.querySelector(".app-shell");
     if (EMBED) return mountEmbedded();
     shell.insertAdjacentHTML("afterbegin", `${topBar()}${rail()}<nav class="sidebar bs-sidebar" aria-label="Main"></nav>`);
