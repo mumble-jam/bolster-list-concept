@@ -54,6 +54,10 @@
   .detail-actions { display: flex; gap: var(--space-2); justify-self: stretch; min-inline-size: 0; margin-block-start: var(--space-5); }
   .detail-actions .button { flex: 1 1 auto; gap: var(--space-2); min-inline-size: max-content; padding-inline: var(--space-3); white-space: nowrap; }
   .detail-actions .button[hidden] { display: none; }
+  /* once it's down to the lead action and More (nothing left to fold into More), a record too narrow for both
+     (a docs frame, a phone under about 300 wide) puts More on the next line rather than past the edge; with
+     three showing it stays one line, so a page can still see they don't fit and fold the second into More */
+  .detail-actions:not(:has(> .button:not([hidden]) ~ .button:not([hidden]) ~ .button:not([hidden]))) { flex-wrap: wrap; }
   /* a record with nothing to do in its state (paid, cancelled) has no action row at all */
   .detail-actions:not(:has(> :not([hidden]))) { display: none; }
   .detail-actions .button svg { flex: none; }
