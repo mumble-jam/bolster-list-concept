@@ -140,7 +140,7 @@
     inline-size: var(--workspace-nav-width, 16rem); block-size: auto; min-block-size: 0; /* a long list scrolls in it */
     overflow-y: auto; padding: var(--space-3) var(--space-2);
     translate: none; box-shadow: none;
-    transition: margin-inline-start 280ms cubic-bezier(0.2, 0.8, 0, 1), visibility 0s;
+    transition: margin-inline-start var(--duration-panel) var(--ease-emphasized), visibility 0s;
   }
   :where(.workspace-nav) :where(button.sidebar-item) { inline-size: 100%; border: 0; background: none; font-family: inherit; text-align: start; cursor: pointer; }
   @media (hover: hover) { :where(.workspace-nav) :where(.sidebar-item:hover) { background: var(--color-surface-sidebar-hover); } }
@@ -153,7 +153,7 @@
   /* folded: it slides out beside the page, which takes its room */
   .dialog[data-variant="workspace"][data-nav-hidden] .workspace-nav {
     margin-inline-start: calc(-1 * var(--workspace-nav-width, 16rem)); visibility: hidden;
-    transition: margin-inline-start 280ms cubic-bezier(0.2, 0.8, 0, 1), visibility 0s linear 280ms;
+    transition: margin-inline-start var(--duration-panel) var(--ease-emphasized), visibility 0s linear var(--duration-panel);
   }
   @media (prefers-reduced-motion: reduce) { .workspace-nav { transition: none !important; } }
   /* the page: the app's page area in miniature (.workspace-page.app-main, D146): its page header and content are the

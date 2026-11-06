@@ -521,11 +521,11 @@
      up to full, the cross in full ink. Keyboard focus and touch screens show it all the time */
   /* it comes in softly (4 Nov): a slow fade and a small grow from 90%, and goes a touch quicker */
   .gs-card .gs-dismiss { background: color-mix(in oklab, var(--color-surface-default) 62%, transparent); color: var(--color-content-secondary);
-    transition: opacity .2s ease-in, scale .2s ease-in, background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
+    transition: opacity var(--duration-conceal) var(--ease-in), scale var(--duration-conceal) var(--ease-in), background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
   /* hidden until pointed at only on desktops; on tablets (768 to 1023, D15), phones and any touch screen it always shows */
   @media (hover: hover) and (min-width: 1024px) {
     .gs-card .gs-dismiss { opacity: 0; scale: .9; }
-    .gs-card:is(:hover, :focus-within) .gs-dismiss { opacity: 1; scale: 1; transition: opacity .32s cubic-bezier(.2, .8, .3, 1), scale .36s cubic-bezier(.2, .8, .3, 1), background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
+    .gs-card:is(:hover, :focus-within) .gs-dismiss { opacity: 1; scale: 1; transition: opacity var(--duration-reveal) var(--ease-reveal), scale var(--duration-reveal-grow) var(--ease-reveal), background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out); }
   }
   @media (hover: hover) {
     .gs-card .gs-dismiss:hover, .gs-card:not([data-done], [data-hidden]):hover .gs-dismiss,

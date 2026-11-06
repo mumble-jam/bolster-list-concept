@@ -35,16 +35,16 @@
      The rail and sidebar take the top bar's place while it's away. Focus is never left under a bar. */
   /* the page header scrolls away here, so it needn't cover the page: the canvas grid shows behind it (D81) */
   .page-header { position: relative; inset-block-start: auto; background: transparent; }
-  .top-bar, .list-toolbar { transition: translate 300ms var(--ease-out); }
+  .top-bar, .list-toolbar { transition: translate var(--duration-chrome) var(--ease-out); }
   /* (the rail keeps its own width and shadow animations; the tablet sidebar keeps its slide) */
-  .rail { transition: inline-size var(--duration-medium) var(--ease-out), box-shadow var(--duration-medium) var(--ease-out), inset-block-start 300ms var(--ease-out), block-size 300ms var(--ease-out); }
-  @media (min-width: 1024px) { .sidebar { transition: inset-block-start 300ms var(--ease-out), block-size 300ms var(--ease-out); } }
+  .rail { transition: inline-size var(--duration-medium) var(--ease-out), box-shadow var(--duration-medium) var(--ease-out), inset-block-start var(--duration-chrome) var(--ease-out), block-size var(--duration-chrome) var(--ease-out); }
+  @media (min-width: 1024px) { .sidebar { transition: inset-block-start var(--duration-chrome) var(--ease-out), block-size var(--duration-chrome) var(--ease-out); } }
   :root[data-chrome-hidden] .top-bar { translate: 0 -100%; }
   :root[data-chrome-hidden] .list-toolbar { translate: 0 calc(-100% - var(--list-toolbar-top, 0px)); }
   /* phones: the tab bar goes with them, down out of the way (as YouTube does), and comes back with them;
      Create, floating above it, moves down into its place */
   @media (max-width: 767px) {
-    .bottom-bar { transition: translate 300ms var(--ease-out); }
+    .bottom-bar { transition: translate var(--duration-chrome) var(--ease-out); }
     :root[data-chrome-hidden] .bottom-bar { translate: 0 100%; }
     :root[data-chrome-hidden] .button[data-float] { inset-block-end: calc(var(--space-4) + env(safe-area-inset-bottom)); }
   }
@@ -54,7 +54,7 @@
     :root[data-chrome-hidden] :is(.app-shell[data-rail-pinned] > .rail, .sidebar:not(.workspace-nav)) { inset-block-start: 0; block-size: 100dvh; }
     /* trying out: with the rail collapsed, the logo stays above it while the rest of the top bar
        slides away, so the left column reads as one dark strip (pinned, the rail still rises) */
-    .bs-logo { background: var(--color-surface-chrome); transition: translate 300ms var(--ease-out), border-color 300ms var(--ease-out); }
+    .bs-logo { background: var(--color-surface-chrome); transition: translate var(--duration-chrome) var(--ease-out), border-color var(--duration-chrome) var(--ease-out); }
     :root[data-chrome-hidden] .app-shell:not([data-rail-pinned]) .bs-logo {
       translate: 0 var(--shell-top-bar-height);
       border-inline-end-color: transparent;
@@ -69,7 +69,7 @@
      the page itself (the board) and in the timeline with one at the window's foot (.page-hscroll, D141), so a mouse always has it in reach: drawn by hand, so it shows on a Mac too, where
      scrollbars hide; on the canvas, so nothing shows through it */
   @property --page-top { syntax: "<length>"; inherits: true; initial-value: 0px; }
-  .list-page { --page-top: var(--list-head-top, 0px); transition: --page-top 300ms var(--ease-out); }
+  .list-page { --page-top: var(--list-head-top, 0px); transition: --page-top var(--duration-chrome) var(--ease-out); }
   :root[data-chrome-hidden] .list-page { --page-top: 0px; }
   .page-hscroll { position: sticky; inset-block-end: 0; z-index: var(--z-raised); overflow-x: auto; overflow-y: hidden; padding-block: var(--space-1); background: var(--color-surface-canvas); }
   .page-hscroll[hidden] { display: none; }
@@ -113,14 +113,14 @@
   @media (max-width: 767px) {
     /* .button too: as strong as the tactile button's own transitions, which it extends */
     .button[data-float] {
-      --_morph: 300ms var(--ease-out);
+      --_morph: var(--duration-chrome) var(--ease-out);
       position: fixed; z-index: var(--z-sticky);
       inset-inline-end: var(--space-4); inset-block-end: calc(var(--shell-bottom-bar-height) + var(--space-4));
       display: inline-grid; grid-template-columns: 1.5rem 1fr; align-items: center; column-gap: var(--space-2);
       block-size: 3.5rem; padding-inline: var(--space-4) var(--space-5); /* 56 in both states: only the width moves */
       border-radius: var(--radius-lg); font-size: var(--text-base);
       filter: var(--drop-shadow-float);
-      transition: --_sa 150ms, --_sk 150ms, --_pa 150ms, --_da 150ms, translate 150ms, background-color var(--duration-fast), border-color var(--duration-fast), color var(--duration-fast),
+      transition: --_sa var(--duration-release), --_sk var(--duration-release), --_pa var(--duration-release), --_da var(--duration-release), translate var(--duration-release), background-color var(--duration-fast), border-color var(--duration-fast), color var(--duration-fast),
         grid-template-columns var(--_morph), column-gap var(--_morph), padding var(--_morph), inset-block-end var(--_morph);
     }
     [data-float]::before { content: "+"; text-align: center; font-size: 1.375rem; line-height: 1; font-weight: var(--font-weight-regular); transition: scale var(--_morph); }
@@ -130,11 +130,11 @@
     [data-float] .float-label {
       min-inline-size: 0; overflow: hidden; white-space: nowrap;
       -webkit-mask-image: linear-gradient(to left, transparent, #000 var(--_fade)); mask-image: linear-gradient(to left, transparent, #000 var(--_fade));
-      transition: --_fade 120ms linear 260ms;
+      transition: --_fade var(--duration-label-fade) linear var(--delay-label-fade);
     }
     :root[data-chrome-hidden] [data-float] { grid-template-columns: 1.5rem 0fr; column-gap: 0; padding-inline: calc(var(--space-4) - var(--border-width-default)); } /* 56 square */
     :root[data-chrome-hidden] [data-float]::before { scale: 1.27; }
-    :root[data-chrome-hidden] [data-float] .float-label { --_fade: 1rem; transition: --_fade 60ms linear; }
+    :root[data-chrome-hidden] [data-float] .float-label { --_fade: 1rem; transition: --_fade var(--duration-label-cut) linear; }
     :root:has(.floating-bar:not([hidden])) [data-float] { display: none; }
     /* room after the last row, so the floating button never sits on it */
     .app-content.list-page { padding-block-end: calc(var(--space-4) + 4.5rem); }
@@ -163,7 +163,7 @@
       background: var(--color-surface-chrome); color: var(--color-content-on-chrome);
       border-block-end: var(--border-width-default) solid var(--color-line-chrome);
       translate: 0 -100%; visibility: hidden;
-      transition: translate 300ms var(--ease-out), visibility 0s linear 300ms;
+      transition: translate var(--duration-chrome) var(--ease-out), visibility 0s linear var(--duration-chrome);
     }
     :root[data-head-out]:not([data-chrome-hidden]) body[data-selecting] .select-bar:not([hidden]) { translate: none; visibility: visible; transition-delay: 0s; }
     .select-bar-count {

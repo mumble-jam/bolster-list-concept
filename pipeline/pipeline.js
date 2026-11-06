@@ -686,7 +686,7 @@
     if (slot.parentElement !== parent || slot.nextElementSibling !== before) {
       slot.style.setProperty("--_h", `${drag.h}px`);
       parent.insertBefore(slot, before);
-      if (!calm.matches) slot.animate({ blockSize: ["0px", `${drag.h}px`], opacity: [0, 1] }, { duration: 160, easing: "cubic-bezier(0, 0, 0.2, 1)" });
+      if (!calm.matches) slot.animate({ blockSize: ["0px", `${drag.h}px`], opacity: [0, 1] }, { duration: BolsterShell.motion("--duration-make-room"), easing: BolsterShell.motion("--ease-out") });
     }
     return folded;
   }

@@ -595,7 +595,7 @@
       const was = el.getAttribute("aria-expanded") === "true";
       render(); const nb = $(`[data-fold="${CSS.escape(k)}"]`); nb?.focus({ focusVisible: byKey });
       // drawn again, it turns from where it was (render replaces it, so its own transition can't run)
-      nb?.querySelector("svg")?.animate([{ rotate: was ? "0deg" : "-90deg" }, { rotate: was ? "-90deg" : "0deg" }], { duration: 120, easing: "cubic-bezier(0, 0, 0.2, 1)" });
+      nb?.querySelector("svg")?.animate([{ rotate: was ? "0deg" : "-90deg" }, { rotate: was ? "-90deg" : "0deg" }], { duration: BolsterShell.motion("--duration-fast"), easing: BolsterShell.motion("--ease-out") });
       return;
     }
     if ((el = q("[data-unlink]"))) { pop.hidePopover(); return unlink(byId(el.dataset.unlink)); }

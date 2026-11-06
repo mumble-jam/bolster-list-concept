@@ -43,7 +43,7 @@
   }
   .bs-pin > svg { inline-size: 1rem; block-size: 1rem; }
   @media (hover: hover) { .bs-pin:hover { background: var(--color-surface-chrome-hover); color: var(--color-content-on-chrome); } }
-  .bs-pin:active { background: color-mix(in oklab, var(--color-content-on-chrome) 13%, transparent); transition-duration: 30ms; }
+  .bs-pin:active { background: color-mix(in oklab, var(--color-content-on-chrome) 13%, transparent); transition-duration: var(--duration-press); }
   .bs-pin:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
 
   /* company switcher: 32 tall, 14px medium, 6px gap */
@@ -203,7 +203,7 @@
     }
     .bs-navpop-link > svg { flex: none; inline-size: 1.25rem; block-size: 1rem; color: var(--_ink-3); transition: color var(--duration-fast) var(--ease-out); }
     @media (hover: hover) { .bs-navpop-link:not([aria-current="page"]):hover { background: var(--_hover); color: var(--_ink); } .bs-navpop-link:hover > svg { color: var(--_ink); } }
-    .bs-navpop-link:active:not([aria-current="page"]) { background: var(--_pill); transition-duration: 30ms; }
+    .bs-navpop-link:active:not([aria-current="page"]) { background: var(--_pill); transition-duration: var(--duration-press); }
     .bs-navpop-link:focus-visible { outline: var(--focus-ring-width) solid var(--color-focus-ring); outline-offset: -2px; }
     .bs-navpop-link[aria-current="page"] { background: var(--_pill); box-shadow: inset 0 1px 0 var(--_pill-edge), inset 0 0 0 1px var(--_pill-edge); color: var(--_ink); font-weight: var(--font-weight-medium); }
     .bs-navpop-link[aria-current="page"] > svg { color: var(--_ink); }
@@ -231,7 +231,7 @@
     .bs-sidebar .sidebar-item[aria-current="page"] { background: var(--_pill); box-shadow: inset 0 1px 0 var(--_pill-edge), inset 0 0 0 1px var(--_pill-edge); color: var(--_ink); font-weight: var(--font-weight-medium); }
     .bs-sidebar .sidebar-item[aria-current="page"] > svg { color: var(--_ink); }
     @media (hover: hover) { .bs-sidebar .sidebar-item:not([aria-current="page"]):hover { background: var(--_hover); color: var(--_ink); } .bs-sidebar .sidebar-item:hover > svg { color: var(--_ink); } }
-    .bs-sidebar .sidebar-item:active:not([aria-current="page"]) { background: var(--_pill); transition-duration: 30ms; }
+    .bs-sidebar .sidebar-item:active:not([aria-current="page"]) { background: var(--_pill); transition-duration: var(--duration-press); }
     .bs-sidebar :is(.bs-sep, .sidebar-title) { border-color: var(--color-line-chrome); }
   }
   /* between a section's groups of pages, a hairline as faint as the menu can carry, from where their icons start
@@ -243,14 +243,14 @@
   @media (prefers-reduced-motion: no-preference) {
     @keyframes bs-in { from { opacity: 0; translate: 0 -3px; } }
     /* a section's pages fade and settle in one after another as it opens, as Shopify's do */
-    .bs-acc[data-anim][open] .bs-sub { animation: var(--acc-pages-anim, bs-in) var(--acc-pages-dur, 280ms) var(--acc-pages-ease, cubic-bezier(0.2, 0.8, 0, 1)) calc(var(--i, 0) * var(--acc-stagger, 18ms) + var(--acc-lead, 30ms)) both; }
+    .bs-acc[data-anim][open] .bs-sub { animation: var(--acc-pages-anim, bs-in) var(--acc-pages-dur, var(--duration-menu-section)) var(--acc-pages-ease, var(--ease-emphasized)) calc(var(--i, 0) * var(--acc-stagger, var(--stagger-menu-section)) + var(--acc-lead, var(--delay-menu-section))) both; }
     /* the folded rail's popup comes out of the rail, not down from above, near at once (your call, 23 Oct) */
-    .bs-navpop { transition: opacity 70ms var(--ease-out), transform 90ms cubic-bezier(0.2, 0.8, 0, 1), display 70ms allow-discrete, overlay 70ms allow-discrete; }
+    .bs-navpop { transition: opacity var(--duration-navpop-fade) var(--ease-out), transform var(--duration-navpop) var(--ease-emphasized), display var(--duration-navpop-fade) allow-discrete, overlay var(--duration-navpop-fade) allow-discrete; }
     @starting-style { .bs-navpop:popover-open { opacity: 0; transform: translateX(-4px); } }
     /* the floating button turns from ☰ to ✕ and back */
-    .bs-menu-fab > svg { transition: opacity 160ms var(--ease-out), rotate 220ms cubic-bezier(0.2, 0.8, 0, 1), scale 220ms cubic-bezier(0.2, 0.8, 0, 1); }
+    .bs-menu-fab > svg { transition: opacity var(--duration-icon-swap-fade) var(--ease-out), rotate var(--duration-icon-swap) var(--ease-emphasized), scale var(--duration-icon-swap) var(--ease-emphasized); }
     .bs-menu-fab:active { scale: 0.96; }
-    .bs-menu-fab { transition: scale 120ms var(--ease-out); }
+    .bs-menu-fab { transition: scale var(--duration-fast) var(--ease-out); }
   }
   .bs-menu-fab { display: none; }
   /* what the top bar holds joins the menu on phones (search, Bolton, your account) */
@@ -340,15 +340,15 @@
     /* the folded rail widens over the page as you point at it, and the logo's cell with it, over the top bar, so the
        mark has room to grow into the wordmark (D91); both at the menu's ease-out, 420ms, the logo's own pace. The menu
        playground (concepts/menu-playground) tunes these through --menu-*; unset, they're the values here */
-    .app-shell[data-sidebar-hidden] .rail { transition-duration: var(--menu-close-dur, 80ms); transition-timing-function: var(--menu-close-ease, var(--menu-ease, cubic-bezier(0.2, 0.8, 0, 1))); }
-    .app-shell[data-sidebar-hidden] .rail[data-expanded] { transition-duration: var(--menu-open-dur, 420ms); transition-timing-function: var(--menu-ease, cubic-bezier(0.2, 0.8, 0, 1)); }
+    .app-shell[data-sidebar-hidden] .rail { transition-duration: var(--menu-close-dur, var(--duration-menu-close)); transition-timing-function: var(--menu-close-ease, var(--menu-ease, var(--ease-emphasized))); }
+    .app-shell[data-sidebar-hidden] .rail[data-expanded] { transition-duration: var(--menu-open-dur, var(--duration-menu-open)); transition-timing-function: var(--menu-ease, var(--ease-emphasized)); }
     /* the cell at the menu's pace as it opens and folds, at the top bar's as the bar scrolls away (the audit: at the
        menu's 80, the logo dipped 37 and crept back as the bar went) */
     .app-shell[data-sidebar-hidden] .bs-logo {
-      --_d: var(--menu-close-dur, 80ms); --_e: var(--menu-close-ease, var(--menu-ease, cubic-bezier(0.2, 0.8, 0, 1)));
-      z-index: 1; transition: inline-size var(--_d) var(--_e), margin var(--_d) var(--_e), translate 300ms var(--ease-out), border-color 300ms var(--ease-out);
+      --_d: var(--menu-close-dur, var(--duration-menu-close)); --_e: var(--menu-close-ease, var(--menu-ease, var(--ease-emphasized)));
+      z-index: 1; transition: inline-size var(--_d) var(--_e), margin var(--_d) var(--_e), translate var(--duration-chrome) var(--ease-out), border-color var(--duration-chrome) var(--ease-out);
     }
-    .app-shell[data-sidebar-hidden]:has(> .rail[data-expanded]) .bs-logo { --_d: var(--menu-open-dur, 420ms); --_e: var(--menu-ease, cubic-bezier(0.2, 0.8, 0, 1)); }
+    .app-shell[data-sidebar-hidden]:has(> .rail[data-expanded]) .bs-logo { --_d: var(--menu-open-dur, var(--duration-menu-open)); --_e: var(--menu-ease, var(--ease-emphasized)); }
     /* the rail under the menu over the page keeps its shadow to itself: the menu's is the one (the audit: two, and
        the rail's out past the edge from the first frame) */
     .app-shell[data-menu-over] > .rail { box-shadow: none; }
@@ -366,27 +366,27 @@
     .app-shell[data-sidebar-hidden] .sidebar {
       display: flex; position: fixed; inset-block: var(--shell-top-bar-height) 0; inset-inline-start: 0; z-index: calc(var(--z-popover) + 1);
       block-size: auto; visibility: hidden; --bs-edge: var(--shell-rail-width); --bs-room: 0px; clip-path: inset(0 calc(100% - var(--bs-edge) - var(--bs-room)) 0 0);
-      --_d: var(--menu-close-dur, 80ms); --_e: var(--menu-close-ease, var(--menu-ease, cubic-bezier(0.2, 0.8, 0, 1)));
+      --_d: var(--menu-close-dur, var(--duration-menu-close)); --_e: var(--menu-close-ease, var(--menu-ease, var(--ease-emphasized)));
       transition: --bs-edge var(--_d) var(--_e), --bs-room 0s, translate var(--_d) var(--_e), box-shadow var(--_d) var(--_e), visibility 0s linear var(--_d);
     }
     /* open, the edge goes as far as the menu's own and no further, so it moves as the logo's cell above it, landing with
        it (your note, 22 Oct: the logo's came out slower once the edge went further, past it); the room for the shadow
        past it opens in the last 40%, when the edge is all but there, and shuts at once as it folds */
-    .app-shell[data-sidebar-hidden][data-menu-over] .sidebar { --_d: var(--menu-open-dur, 420ms); --_e: var(--menu-ease, cubic-bezier(0.2, 0.8, 0, 1)); visibility: visible; --bs-edge: 100%; --bs-room: 2rem; box-shadow: var(--menu-over-shadow, var(--shadow-raised)); transition-delay: 0s; }
+    .app-shell[data-sidebar-hidden][data-menu-over] .sidebar { --_d: var(--menu-open-dur, var(--duration-menu-open)); --_e: var(--menu-ease, var(--ease-emphasized)); visibility: visible; --bs-edge: 100%; --bs-room: 2rem; box-shadow: var(--menu-over-shadow, var(--shadow-raised)); transition-delay: 0s; }
     .app-shell[data-sidebar-hidden][data-menu-over] .sidebar { transition: --bs-edge var(--_d) var(--_e), --bs-room calc(var(--_d) * 0.4) linear calc(var(--_d) * 0.6), translate var(--_d) var(--_e), box-shadow var(--_d) var(--_e), visibility 0s; }
     .app-shell[data-sidebar-hidden] .sidebar { --_fade: var(--menu-edge-fade, 3rem); }
     /* the labels and pages fade in after the edge, from 5% into its opening, over 60% of it, and out first as it folds
        (your values, 22 Oct, from the playground; before, they faded at the edge, and before that its first frame showed
        their first letters, inside the rail's 60): the first frame is the rail's icons alone */
     .app-shell[data-sidebar-hidden] .sidebar :is(.sidebar-item > span, .bs-acc-body, .sidebar-title, .bs-rail-more, .bs-acc-more) {
-      opacity: 0; transition: opacity calc(var(--menu-close-dur, 80ms) * 0.4) ease-out;
+      opacity: 0; transition: opacity calc(var(--menu-close-dur, var(--duration-menu-close)) * 0.4) var(--ease-out-soft);
     }
     .app-shell[data-sidebar-hidden][data-menu-over] .sidebar :is(.sidebar-item > span, .bs-acc-body, .sidebar-title, .bs-rail-more, .bs-acc-more) {
-      opacity: 1; transition: opacity calc(var(--menu-open-dur, 420ms) * 0.6) var(--menu-ease, cubic-bezier(0.2, 0.8, 0, 1)) calc(var(--menu-open-dur, 420ms) * var(--menu-label-lag, 0.05));
+      opacity: 1; transition: opacity calc(var(--menu-open-dur, var(--duration-menu-open)) * 0.6) var(--menu-ease, var(--ease-emphasized)) calc(var(--menu-open-dur, var(--duration-menu-open)) * var(--menu-label-lag, 0.05));
     }
     /* and the rule over its foot, which the rail hasn't */
-    .app-shell[data-sidebar-hidden] .bs-nav-bottom { border-block-start-color: transparent; transition: border-color calc(var(--menu-close-dur, 80ms) * 0.4) ease-out; }
-    .app-shell[data-sidebar-hidden][data-menu-over] .bs-nav-bottom { border-block-start-color: var(--color-line-chrome); transition: border-color calc(var(--menu-open-dur, 420ms) * 0.6) var(--menu-ease, cubic-bezier(0.2, 0.8, 0, 1)) calc(var(--menu-open-dur, 420ms) * var(--menu-label-lag, 0.05)); }
+    .app-shell[data-sidebar-hidden] .bs-nav-bottom { border-block-start-color: transparent; transition: border-color calc(var(--menu-close-dur, var(--duration-menu-close)) * 0.4) var(--ease-out-soft); }
+    .app-shell[data-sidebar-hidden][data-menu-over] .bs-nav-bottom { border-block-start-color: var(--color-line-chrome); transition: border-color calc(var(--menu-open-dur, var(--duration-menu-open)) * 0.6) var(--menu-ease, var(--ease-emphasized)) calc(var(--menu-open-dur, var(--duration-menu-open)) * var(--menu-label-lag, 0.05)); }
     @media (prefers-reduced-motion: reduce) { .app-shell[data-sidebar-hidden] .sidebar { transition: none; } }
     /* a section with pages says so in the open rail (the keyboard's way in): a chevron at the row's end */
     .bs-rail-more { display: inline-flex; margin-inline: auto var(--space-3); color: var(--color-content-on-chrome-muted); opacity: 0;
@@ -442,11 +442,11 @@
        one line ("Leads and customers" wrapped at 256, your call, 22 Oct), the page pushed aside by as much */
     .app-shell { --_aside: calc(3.5rem + var(--space-4) * 2); --_menu-w: min(calc(100vw - var(--_aside)), 17rem); overflow-x: clip; }
     @media (max-width: 767px) { .app-shell { --_menu-w: calc(100vw - var(--_aside)); } }
-    .bs-sidebar { inline-size: var(--_menu-w); box-shadow: none; transition: translate 320ms cubic-bezier(0.2, 0.8, 0, 1); }
+    .bs-sidebar { inline-size: var(--_menu-w); box-shadow: none; transition: translate var(--duration-drawer) var(--ease-emphasized); }
     /* shut, just its own width off the screen (there's no rail to clear here), so it and the page move as one */
     .bs-sidebar:not([data-open]) { translate: -100% 0; }
-    .app-main { transition: translate 320ms cubic-bezier(0.2, 0.8, 0, 1), opacity 320ms var(--ease-out); }
-    .bs-menu-fab { transition: translate 320ms cubic-bezier(0.2, 0.8, 0, 1), scale 120ms var(--ease-out); }
+    .app-main { transition: translate var(--duration-drawer) var(--ease-emphasized), opacity var(--duration-drawer) var(--ease-out); }
+    .bs-menu-fab { transition: translate var(--duration-drawer) var(--ease-emphasized), scale var(--duration-fast) var(--ease-out); }
     .app-shell:has(> .bs-sidebar[data-open]) > .app-main { translate: var(--_menu-w) 0; opacity: 0.55; pointer-events: none; }
     .app-shell:has(> .bs-sidebar[data-open]) > .bs-menu-fab { translate: var(--_menu-w) 0; }
     @media (prefers-reduced-motion: reduce) { .bs-sidebar, .app-main, .bs-menu-fab { transition: none; } }

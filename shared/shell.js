@@ -176,8 +176,8 @@ window.BolsterShell = (() => {
       if (held || open() === !!to) return;
       to = open() ? 1 : 0; cancelAnimationFrame(raf);
       if (matchMedia("(prefers-reduced-motion: reduce)").matches) { e = to; return draw(e); }
-      const curve = bezier(to ? tuned("--menu-ease", "") : tuned("--menu-close-ease", "") || tuned("--menu-ease", ""));
-      const e0 = e, t0 = performance.now(), D = (to ? tuned("--menu-open-dur", 420) : tuned("--menu-close-dur", 80)) * Math.max(0.35, Math.abs(to - e0));
+      const curve = bezier(to ? tuned("--menu-ease", "") || tuned("--ease-emphasized", "") : tuned("--menu-close-ease", "") || tuned("--menu-ease", "") || tuned("--ease-emphasized", ""));
+      const e0 = e, t0 = performance.now(), D = (to ? tuned("--menu-open-dur", tuned("--duration-menu-open", 420)) : tuned("--menu-close-dur", tuned("--duration-menu-close", 80))) * Math.max(0.35, Math.abs(to - e0));
       const tick = (now) => { const k = D ? clamp((now - t0) / D) : 1; e = e0 + (to - e0) * ease(curve, k); draw(e); if (k < 1) raf = requestAnimationFrame(tick); };
       raf = requestAnimationFrame(tick);
     };
@@ -189,7 +189,7 @@ window.BolsterShell = (() => {
     // the menu playground's player holds the logo and draws it at a moment of its own: k from 0 to 1 of the opening
     // or the closing, on that one's curve; let go, it settles where the menu is
     logo.hold = (on) => { held = on; cancelAnimationFrame(raf); if (!on) { e = to = open() ? 1 : 0; draw(e); } };
-    logo.at = (k, opening) => { const curve = bezier(opening ? tuned("--menu-ease", "") : tuned("--menu-close-ease", "") || tuned("--menu-ease", "")); e = opening ? ease(curve, clamp(k)) : 1 - ease(curve, clamp(k)); draw(e); };
+    logo.at = (k, opening) => { const curve = bezier(opening ? tuned("--menu-ease", "") || tuned("--ease-emphasized", "") : tuned("--menu-close-ease", "") || tuned("--menu-ease", "") || tuned("--ease-emphasized", "")); e = opening ? ease(curve, clamp(k)) : 1 - ease(curve, clamp(k)); draw(e); };
   }
   const logo = { hold() {}, at() {} };
 
@@ -265,13 +265,13 @@ window.BolsterShell = (() => {
     const ours = (el) => rail.contains(el) || cell?.contains(el) || (shell.hasAttribute("data-menu-over") && side?.contains(el));
     // a short pause before it opens, so a pointer passing across doesn't flash it; it closes at once (your values, 22 Oct;
     // the playground's --menu-open-delay and --menu-close-delay)
-    rail.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") expand(true, tuned("--menu-open-delay", 150), true); });
+    rail.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse") expand(true, tuned("--menu-open-delay", tuned("--delay-menu-open", 150)), true); });
     rail.addEventListener("pointerleave", (e) => { if (!ours(e.relatedTarget)) expand(false, tuned("--menu-close-delay", 0)); });
     side?.addEventListener("pointerenter", () => { if (shell.hasAttribute("data-menu-over")) clearTimeout(timer); });
     side?.addEventListener("pointerleave", (e) => { if (shell.hasAttribute("data-menu-over") && !ours(e.relatedTarget)) expand(false, tuned("--menu-close-delay", 0)); });
     rail.addEventListener("focusin", () => { if (rail.querySelector(":focus-visible")) expand(true); });
     rail.addEventListener("focusout", (e) => { if (!ours(e.relatedTarget)) expand(false); });
-    cell?.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" && hidden()) expand(true, tuned("--menu-open-delay", 150), true); });
+    cell?.addEventListener("pointerenter", (e) => { if (e.pointerType === "mouse" && hidden()) expand(true, tuned("--menu-open-delay", tuned("--delay-menu-open", 150)), true); });
     cell?.addEventListener("pointerleave", (e) => { if (hidden() && !ours(e.relatedTarget)) expand(false, tuned("--menu-close-delay", 0)); });
     cell?.addEventListener("focusin", () => { if (hidden() && cell.querySelector(":focus-visible")) expand(true); });
     cell?.addEventListener("focusout", (e) => { if (hidden() && !ours(e.relatedTarget)) expand(false); });
@@ -392,8 +392,8 @@ window.BolsterShell = (() => {
       const kf = (b, sq) => ({ transform: `translate(${b.x}px, ${b.y}px)`, width: `${b.w}px`, height: `${b.h}px`, backgroundColor: "var(--bs-pill)", boxShadow: "inset 0 1px 0 var(--bs-pill-edge), inset 0 0 0 1px var(--bs-pill-edge)" }); // one pill, two shapes
       blob.getAnimations().forEach((x) => x.cancel());
       side.setAttribute("data-morph", ""); blob.hidden = false;
-      const dur = opening ? tuned("--menu-pill-dur", 420) : tuned("--menu-close-dur", 80);
-      const ease = opening ? tuned("--menu-pill-ease", "") || tuned("--menu-ease", "cubic-bezier(0.2, 0.8, 0, 1)") : tuned("--menu-close-ease", "") || tuned("--menu-ease", "cubic-bezier(0.2, 0.8, 0, 1)");
+      const dur = opening ? tuned("--menu-pill-dur", tuned("--duration-menu-open", 420)) : tuned("--menu-close-dur", tuned("--duration-menu-close", 80));
+      const ease = opening ? tuned("--menu-pill-ease", "") || tuned("--menu-ease", tuned("--ease-emphasized", "cubic-bezier(0.2, 0.8, 0, 1)")) : tuned("--menu-close-ease", "") || tuned("--menu-ease", tuned("--ease-emphasized", "cubic-bezier(0.2, 0.8, 0, 1)"));
       const from = now ? { ...kf(now, !opening) } : kf(opening ? square : pill, opening), to = kf(opening ? pill : square, !opening);
       const anim = blob.animate([from, to], { duration: matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : dur, easing: ease, fill: "forwards" });
       // handed over in one frame, the real one without its fade (your note: a frame of neither, then its fade, blinked)
@@ -539,7 +539,7 @@ window.BolsterShell = (() => {
       { opacity: 0, translate: `0 ${root.getPropertyValue("--space-2")}`, blockSize: "0px", paddingBlock: "0px", marginBlockStart: `${-gap}px` },
     ];
     t.style.overflow = "clip";
-    t.animate(keys, { duration: 200, easing: root.getPropertyValue("--ease-out") || "ease-out", fill: "forwards" }).finished.then(() => t.remove(), () => t.remove());
+    t.animate(keys, { duration: tuned("--duration-resize", 200), easing: root.getPropertyValue("--ease-out") || "ease-out", fill: "forwards" }).finished.then(() => t.remove(), () => t.remove());
   }
   document.addEventListener("close", (e) => { const region = document.querySelector(".toast-region"); if (region && e.target.contains?.(region)) document.body.append(region); }, true);
 
@@ -954,8 +954,8 @@ window.BolsterShell = (() => {
       const ease = getComputedStyle(document.documentElement).getPropertyValue("--ease-out") || "ease-out";
       pop.style.overflow = "hidden";
       const done = () => (pop.style.overflow = "");
-      pop.animate([{ blockSize: `${from}px` }, { blockSize: `${to}px` }], { duration: 200, easing: ease }).finished.then(done, done);
-      $(".pop-body")?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: ease });
+      pop.animate([{ blockSize: `${from}px` }, { blockSize: `${to}px` }], { duration: tuned("--duration-resize", 200), easing: ease }).finished.then(done, done);
+      $(".pop-body")?.animate([{ opacity: 0 }, { opacity: 1 }], { duration: tuned("--duration-resize-fade", 150), easing: ease });
     }
     function open(name, { focus = false } = {}) {
       const el = menuOf(name);
@@ -1051,5 +1051,5 @@ window.BolsterShell = (() => {
   }
   Object.assign(filterChips, { chip, clearAll, menu: filterMenu });
 
-  return { mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling, week, canvas, workspace, closeSettings, loading, logo, searchButton, nestedMenus, filterChips };
+  return { motion: (name) => tuned(name), mount, setCurrent, label, hydrateIcons, toast, placePopover, icon, scrolling, week, canvas, workspace, closeSettings, loading, logo, searchButton, nestedMenus, filterChips };
 })();

@@ -288,9 +288,9 @@
     position: fixed; inset-inline: 0; inset-block-start: var(--list-toolbar-top, 0px); z-index: 3;
     gap: 0; padding: env(safe-area-inset-top, 0px) var(--space-2) 0; border: 0; border-block-end: var(--border-width-default) solid var(--color-line-card); border-radius: 0;
     box-shadow: var(--shadow-raised); translate: 0 calc(-100% - 4px); visibility: hidden;
-    transition: translate var(--duration-medium) cubic-bezier(0.2, 0.8, 0, 1), visibility 0s linear var(--duration-medium);
+    transition: translate var(--duration-medium) var(--ease-emphasized), visibility 0s linear var(--duration-medium);
   }
-  .cal-strip[data-header][data-shown] { translate: none; visibility: visible; transition: translate var(--duration-medium) cubic-bezier(0.2, 0.8, 0, 1), visibility 0s; }
+  .cal-strip[data-header][data-shown] { translate: none; visibility: visible; transition: translate var(--duration-medium) var(--ease-emphasized), visibility 0s; }
   @media (prefers-reduced-motion: reduce) { .cal-strip[data-header] { transition: none; } }
   .cal-strip[data-header] button { grid-template: "l n" auto ". d" 4px / auto auto; align-items: center; justify-content: center; gap: 2px var(--space-1); padding: var(--space-1-5, 6px) 0 var(--space-1); }
   .cal-strip[data-header] small { grid-area: l; }

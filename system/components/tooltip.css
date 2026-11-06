@@ -43,7 +43,7 @@
 
   /* 150ms delay before showing on hover; instant on keyboard focus; hides immediately */
   @media (hover: hover) {
-    :where(.tooltip-anchor:hover) > :where(.tooltip) { opacity: 1; visibility: visible; transition-delay: 150ms, 0s; }
+    :where(.tooltip-anchor:hover) > :where(.tooltip) { opacity: 1; visibility: visible; transition-delay: var(--delay-tooltip), 0s; }
   }
   :where(.tooltip-anchor:has(:focus-visible)) > :where(.tooltip) { opacity: 1; visibility: visible; transition-delay: 0s; }
 

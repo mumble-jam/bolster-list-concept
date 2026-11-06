@@ -589,7 +589,7 @@
       const was = st.completedOpen; st.completedOpen = !was; render({ keepFresh: true });
       const nb = $("[data-fold]"); nb?.focus({ preventScroll: true });
       // drawn again, it turns from where it was (render replaces it, so its own transition can't run)
-      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) nb?.querySelector("svg")?.animate([{ transform: `rotate(${was ? 0 : -90}deg)` }, { transform: `rotate(${was ? -90 : 0}deg)` }], { duration: 120, easing: "cubic-bezier(0, 0, 0.2, 1)" });
+      if (!matchMedia("(prefers-reduced-motion: reduce)").matches) nb?.querySelector("svg")?.animate([{ transform: `rotate(${was ? 0 : -90}deg)` }, { transform: `rotate(${was ? -90 : 0}deg)` }], { duration: BolsterShell.motion("--duration-fast"), easing: BolsterShell.motion("--ease-out") });
       return;
     }
     if (q("#select-mode")) return setSelecting(!st.selecting);

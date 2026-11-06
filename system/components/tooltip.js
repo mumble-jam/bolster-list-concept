@@ -65,7 +65,7 @@
     if (el === on) return;
     if (!el) return hide();
     clearTimeout(timer);
-    timer = setTimeout(() => show(el), on ? 0 : 300);
+    timer = setTimeout(() => show(el), on ? 0 : parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--delay-tip")) || 300);
   });
   document.addEventListener("pointerout", (e) => { if (e.pointerType === "mouse" && target(e) && !target(e).contains(e.relatedTarget)) hide(); });
   document.addEventListener("focusin", (e) => { const el = target(e); if (el && el.matches(":focus-visible")) show(el); });

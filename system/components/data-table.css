@@ -116,7 +116,7 @@
       --_stick: var(--list-head-top, 0px);
       position: relative; z-index: 3;
       translate: 0 clamp(0px, calc(var(--_stick) - var(--_table-top, 0px)), var(--_room, 0px));
-      transition: --_stick 300ms var(--ease-out);
+      transition: --_stick var(--duration-chrome) var(--ease-out);
     }
     :root[data-chrome-hidden] .list-panel .data-table thead { --_stick: 0px; }
     /* where the browser can, it moves the header itself, on the scroll (a scroll-driven animation tied
@@ -245,7 +245,7 @@
       padding: var(--space-3) var(--space-4);
       border-block-end: var(--border-width-default) solid var(--color-line-subtle);
       -webkit-touch-callout: none; -webkit-user-select: none; user-select: none;
-      transition: --_pick-w 200ms var(--ease-out);
+      transition: --_pick-w var(--duration-resize) var(--ease-out);
     }
     .list-page[data-selecting] .data-table tbody tr { --_pick-w: 2.25rem; }
     .data-table tbody td { display: none; block-size: auto; padding: 0; border: 0; }

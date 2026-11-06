@@ -509,6 +509,62 @@
     --duration-medium: 240ms;
     --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
     --ease-out: cubic-bezier(0, 0, 0.2, 1);
+
+    /* ---------- Motion: the parts' own timings (D157) ----------
+       What the components and the shell timed by hand, named for what moves, at the values they already had
+       (6 Nov): nothing moves differently. D124's proposed set stays in the motion lab. A character's or a
+       drawing's own motion (Bolton, Getting started's art, the loading screen's drawings) keeps its timings
+       in its file, as a drawing keeps its paths. */
+    /* a press lands at once, and eases back on release: buttons, cards, the floating button, the menu's links */
+    --duration-press: 30ms;
+    --duration-release: 150ms;
+    /* the bars, the menu and the record panel moving as the page scrolls (D128, I23) */
+    --duration-chrome: 300ms;
+    /* the folded menu opening over the page as you point at it, after a short wait, and folding away */
+    --delay-menu-open: 150ms;
+    --duration-menu-open: 420ms;
+    --duration-menu-close: 80ms;
+    /* a menu section's pages settling in one after another as it opens (D88) */
+    --duration-menu-section: 280ms;
+    --delay-menu-section: 30ms;
+    --stagger-menu-section: 18ms;
+    /* the folded rail's popup, out of the rail near at once, and its fade */
+    --duration-navpop: 90ms;
+    --duration-navpop-fade: 70ms;
+    /* phones: the menu sliding in from the side, and its button turning from ☰ to ✕ */
+    --duration-drawer: 320ms;
+    --duration-icon-swap: 220ms;
+    --duration-icon-swap-fade: 160ms;
+    /* the dialog's side panel sliding across */
+    --duration-panel: 280ms;
+    /* a part taking its new size: a popover's height, the column picker's width, a toast closing its gap;
+       what's inside fades in as it does */
+    --duration-resize: 200ms;
+    --duration-resize-fade: 150ms;
+    /* the pipeline: a column opening a slot under the card you carry */
+    --duration-make-room: 160ms;
+    /* the floating button's label: its soft edge comes on as it shrinks, quickly, and goes once it's open again */
+    --duration-label-cut: 60ms;
+    --duration-label-fade: 120ms;
+    --delay-label-fade: 260ms;
+    /* a control shown when you point at its card (Getting started's ×): it comes in softly, and goes quicker */
+    --duration-reveal: 320ms;
+    --duration-reveal-grow: 360ms;
+    --duration-conceal: 200ms;
+    /* how long a pointer rests before a tooltip shows: the CSS-only tooltip (I4), and the data-tip ones tooltip.js
+       draws (D52). Two waits, still to be made one */
+    --delay-tooltip: 150ms;
+    --delay-tip: 300ms;
+    /* loops: a busy button's spinner, a skeleton's shimmer */
+    --duration-spin: 800ms;
+    --duration-shimmer: 1400ms;
+    /* curves: emphasized for what slides a long way (panels, the menu, the drawer, a strip coming down), quick to
+       start and long to settle; reveal for what fades in softly; ease-in for what goes; soft ease-out (the
+       browser's ease-out) for the menu's labels fading as it folds */
+    --ease-emphasized: cubic-bezier(0.2, 0.8, 0, 1);
+    --ease-reveal: cubic-bezier(0.2, 0.8, 0.3, 1);
+    --ease-in: cubic-bezier(0.42, 0, 1, 1);
+    --ease-out-soft: cubic-bezier(0, 0, 0.58, 1);
     --drag-scale: 1.02; /* what's picked up grows by this, from its raised shadow to the drag one (D151) */
 
     color-scheme: light dark;

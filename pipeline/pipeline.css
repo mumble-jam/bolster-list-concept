@@ -104,7 +104,7 @@
     .pl-col-head {
       --_stick: var(--list-head-top, 0px);
       translate: 0 clamp(0px, calc(var(--_stick) - var(--_col-top, 0px)), var(--_room, 0px));
-      transition: --_stick 300ms var(--ease-out);
+      transition: --_stick var(--duration-chrome) var(--ease-out);
       will-change: translate;
     }
     :root[data-chrome-hidden] .pl-col-head { --_stick: 0px; }

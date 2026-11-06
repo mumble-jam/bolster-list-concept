@@ -17,7 +17,7 @@
     position: sticky; inset-block-start: var(--_top);
     display: flex; flex-direction: column; max-block-size: calc(100dvh - var(--_top) - var(--space-4));
     padding: 0; border-color: var(--color-line-card); overflow: hidden;
-    transition: inset-block-start 300ms var(--ease-out), max-block-size 300ms var(--ease-out);
+    transition: inset-block-start var(--duration-chrome) var(--ease-out), max-block-size var(--duration-chrome) var(--ease-out);
   }
   :root[data-chrome-hidden] .detail.card { --_top: var(--space-4); }
   .detail[hidden] { display: none; }

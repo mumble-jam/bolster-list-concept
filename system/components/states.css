@@ -34,7 +34,7 @@
   /* a slow load says so in words, over the skeleton, which stays */
   .loading-note { display: flex; align-items: center; gap: var(--space-2); margin: 0; padding: var(--space-3) var(--space-4); font-size: var(--text-sm); color: var(--color-content-secondary); }
   @media (prefers-reduced-motion: no-preference) {
-    .skeleton { background: linear-gradient(90deg, var(--color-surface-tint) 0%, var(--color-surface-tint-hover) 50%, var(--color-surface-tint) 100%) 0 0 / 200% 100%; animation: shimmer 1.4s linear infinite; }
+    .skeleton { background: linear-gradient(90deg, var(--color-surface-tint) 0%, var(--color-surface-tint-hover) 50%, var(--color-surface-tint) 100%) 0 0 / 200% 100%; animation: shimmer var(--duration-shimmer) linear infinite; }
     @keyframes shimmer { to { background-position: -200% 0; } }
   }
 }

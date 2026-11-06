@@ -89,12 +89,12 @@
   @media (hover: hover) { :root:not([data-cards="flat"]) .card:not([data-elevation="flat"]):has(.card-link):hover { box-shadow: var(--shadow-card-hover); } }
   :root:not([data-cards="flat"]) button.slice {
     transition-property: box-shadow, translate, border-color, background-color;
-    transition-duration: 150ms; transition-timing-function: var(--ease-out);
+    transition-duration: var(--duration-release); transition-timing-function: var(--ease-out);
   }
   /* the lift and shadow say "hover", so the edge doesn't change */
   @media (hover: hover) { :root:not([data-cards="flat"]) button.slice:hover { translate: 0 calc(var(--card-lift) * -1); box-shadow: var(--shadow-card-hover); border-color: var(--color-line-card); border-block-end-color: var(--color-line-card-edge); } }
   :root:not([data-cards="flat"]) button.slice[aria-pressed="true"] { translate: none; box-shadow: var(--shadow-card-selected); border-color: var(--color-action-accent); }
-  :root:not([data-cards="flat"]) button.slice:active { translate: 0 var(--card-sink); box-shadow: var(--shadow-card-pressed); transition-duration: 30ms; }
+  :root:not([data-cards="flat"]) button.slice:active { translate: 0 var(--card-sink); box-shadow: var(--shadow-card-pressed); transition-duration: var(--duration-press); }
   @media (prefers-reduced-motion: reduce) { :root:not([data-cards="flat"]) .slice { translate: none !important; } }
   /* the row scrolls sideways, so it clips; room for the shadow below and the lift above, given back by the margin */
   :root:not([data-cards="flat"]) .slice-row {
